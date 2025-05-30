@@ -5,12 +5,15 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>刘家炫的博客</title>
+    <title>Hello World - 刘家炫的博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    
+    <meta name="description" content="欢迎来到我的博客网站
+
+
+"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -18,16 +21,22 @@
     
     
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="刘家炫的博客"/>
-    
+    <meta name="twitter:title" content="Hello World - 刘家炫的博客"/>
+    <meta name="twitter:description" content="欢迎来到我的博客网站
+
+
+"/>
     
     
     
     
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
-    <meta property="og:title" content="刘家炫的博客"/>
-    
+    <meta property="og:title" content="Hello World - 刘家炫的博客"/>
+    <meta property="og:description" content="欢迎来到我的博客网站
+
+
+"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -40,53 +49,89 @@
 <body class="loading">
     <span id="config-title" style="display:none">刘家炫的博客</span>
     <div id="loader"></div>
-    <div id="single" class="page">
-    <div id="top">
-        <a class="iconfont icon-left image-icon" href="javascript:history.back()"></a>
-    </div>
-    <div class="section">
-        <div class="article">
-            <div class="main">
-                <div class="content">
-                
-                    <div class="category-container">
-  <h2>分类</h2>
-  <div class="category-list">
-    
-      <div class="category-item">
-        <!-- 关键修改：确保使用 category.path 生成链接 -->
-        <a href="/categories/%E6%8A%80%E6%9C%AF/" class="category-link">
-          技术
-          <span class="category-count">(2)</span>
-        </a>
-      </div>
-    
-      <div class="category-item">
-        <!-- 关键修改：确保使用 category.path 生成链接 -->
-        <a href="/categories/%E6%8A%80%E6%9C%AF/%E7%A7%91%E6%8A%80/%E6%96%87%E5%AD%A6/" class="category-link">
-          文学
-          <span class="category-count">(1)</span>
-        </a>
-      </div>
-    
-      <div class="category-item">
-        <!-- 关键修改：确保使用 category.path 生成链接 -->
-        <a href="/categories/%E6%8A%80%E6%9C%AF/%E7%A7%91%E6%8A%80/" class="category-link">
-          科技
-          <span class="category-count">(1)</span>
-        </a>
-      </div>
-    
-  </div>
-</div>
-
-                
-                </div>
+    <div id="single">
+    <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://example.com"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Hello World</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
             </div>
+            <div id="qr"></div>
         </div>
     </div>
+    <div class="scrollbar"></div>
 </div>
 
+    <div class="section">
+        <div class="article">
+    <div class='main'>
+        <h1 class="title">Hello World</h1>
+        <div class="stuff">
+            <span>五月 29, 2025</span>
+            
+
+        </div>
+        <div class="content markdown">
+            <p>欢迎来到我的博客网站</p>
+<!-- ## Quick Start
+
+### Create a new post -->
+
+<!-- ``` bash
+$ hexo new "My New Post"
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">More info: [Writing](https://hexo.io/docs/writing.html)</span><br><span class="line"></span><br><span class="line">### Run server</span><br><span class="line"></span><br><span class="line">``` bash</span><br><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a> –&gt;</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="http://link.hhtjim.com/163/425570952.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="http://link.hhtjim.com/163/425570952.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="false"
+        data-ae="false"
+        data-ci=""
+        data-cs=""
+        data-r=""
+        data-o=""
+        data-a=""
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+</div>
 </body>
 
 
