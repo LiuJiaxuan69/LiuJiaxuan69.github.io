@@ -179,7 +179,7 @@
     </p>
 </div>
 
-<div id="container">
+  <div id="container" class="gradient">
     
 <div id="screen">
     <div id="mark">
@@ -212,13 +212,13 @@
     
 </div>
 
-    <div id="primary">
+      <div id="primary">
         
 <div class="post">
     <a href="/2025/05/29/test/" title="test">
         <img src="/img/welcome.jpg" class="cover" width="680" height="440">
     </a>
-    <div class="else">
+    <div class="else" style="word-break: break-all;">
         <p>五月 29, 2025</p>
         <h3><a href="/2025/05/29/test/" title="test" class="posttitle">test</a></h3>
         <p>12312312312312312312312312312312312312312312312312312312312312312312312312312...</p>
@@ -226,12 +226,74 @@
 </div>
 
 
-    </div>
-    
-</div>
-<div id="preview"></div>
+      </div>
+      
+  </div>
+  <div id="preview"></div>
+  
 
 
+      <!DOCTYPE html>
+<html>
+<head>
+<style>
+  .gradient {
+    position: relative;
+    background: linear-gradient(-45deg,
+      rgba(255, 182, 193, 0.5),
+      rgba(255, 105, 180, 0.5),
+      rgba(173, 216, 230, 0.5),
+      rgba(100, 149, 237, 0.5)
+    );
+    background-size: 400% 400%;
+    animation: gradientBG 7s ease infinite alternate;
+    overflow: hidden;
+  }
+
+  /* 粒子光点样式 */
+  .gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%), 
+      rgba(255, 255, 255, 0.25) 0%, 
+      transparent 25%
+    );
+    transition: background 0.3s ease-out;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    70% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+</head>
+<body>
+  <div class="gradient"></div>
+
+  <script>
+    // 全局监听鼠标位置（即使在浏览器外）
+    document.addEventListener('mousemove', (e) => {
+      document.documentElement.style.setProperty('--x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--y', `${e.clientY}px`);
+    });
+
+    // 鼠标离开视窗时复位到中心
+    document.addEventListener('mouseleave', () => {
+      document.documentElement.style.setProperty('--x', '50%');
+      document.documentElement.style.setProperty('--y', '50%');
+    });
+
+    // 初始化居中
+    document.documentElement.style.setProperty('--x', '50%');
+    document.documentElement.style.setProperty('--y', '50%');
+  </script>
+</body>
+</html>
 
 </body>
 

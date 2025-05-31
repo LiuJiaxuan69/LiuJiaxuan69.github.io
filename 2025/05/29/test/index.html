@@ -131,7 +131,7 @@
 
     <div id="loader"></div>
     <div id="single">
-  <!-- 独立的全屏背景层（不受任何内容限制） -->
+  <!-- 全屏背景层 -->
   <div id="custom-bg" 
        style="position: fixed;
               top: 0;
@@ -140,11 +140,10 @@
               height: 100vh;
               background-image: url('/img/welcome.jpg');
               background-size: cover;
-              background-position: center;
-              ">
+              background-position: center;">
   </div>
 
-  <!-- 内容区（正常布局） -->
+  <!-- 内容区 -->
   <div id="top" style="display: block;">
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="http://LiuJiaxuan69.github.io"></a>
@@ -162,7 +161,7 @@
 </div>
 
   <div class="section">
-    <div class="article">
+    <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
     <div class='main' style="background-color: rgb(185, 207, 214, 0.5);">
         <h1 class="title">test</h1>
         <div class="stuff">
@@ -174,22 +173,18 @@
             <p>123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="/img/welcome.jpg"></p>
+<p><img src="/img/welcome.jpg" alt="没有意义"></p>
 <p>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123<br>123</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
-            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
                 <source type="audio/mpeg" src="">
             </audio>
             
                 <ul id="audio-list" style="display:none">
                     
                         
-                            <li title="0" data-url="http://link.hhtjim.com/163/425570952.mp3"></li>
-                        
-                    
-                        
-                            <li title="1" data-url="http://link.hhtjim.com/163/425570952.mp3"></li>
+                            <li title="0" data-url="https://m801.music.126.net/20250531211509/421dc333d79611f24bd9db908300e16e/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28481823539/66e4/c113/124b/23b51f3a6196545aca6e49040442b639.mp3?vuutv=EhGdePLtuZ6FxlUwXXOyZ9lAx9OwdikNctu/mMoAQ4nXqxjiI+uiuI+oZ75WIUpl4yQd8HHMX+WJgcQ5eOvChQ9+mi4QTDHAb8fnE7W8hIU="></li>
                         
                     
                 </ul>
@@ -215,7 +210,158 @@
 
 
   </div>
+
+  <!-- 增强版返回顶部按钮 -->
+  <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+    <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+    </svg>
+    <span class="back-to-top-text">TOP</span>
+  </button>
 </div>
+
+<style>
+  /* 基础样式重置 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  /* 按钮核心样式 */
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* 显示状态 */
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* 悬停效果 */
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 点击效果 */
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  /* 图标样式 */
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  /* 文字标签 */
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  /* 悬停时显示文字 */
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* 响应式调整 */
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+    
+    // 滚动检测
+    window.addEventListener('scroll', function() {
+      if (isScrolling) return;
+      
+      isScrolling = true;
+      requestAnimationFrame(function() {
+        const shouldShow = window.pageYOffset > scrollThreshold;
+        backToTopBtn.classList.toggle('visible', shouldShow);
+        isScrolling = false;
+      });
+    });
+    
+    // 平滑滚动
+    backToTopBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // 点击动画
+      this.classList.add('clicked');
+      setTimeout(() => this.classList.remove('clicked'), 300);
+      
+      // 平滑滚动
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+    
+    // 触摸设备优化
+    backToTopBtn.addEventListener('touchstart', function() {
+      this.classList.add('touching');
+    });
+    
+    backToTopBtn.addEventListener('touchend', function() {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
 
 </body>
 
