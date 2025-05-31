@@ -35,10 +35,100 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
 <meta name="generator" content="Hexo 7.3.0"></head>
 
 <body class="loading">
     <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+
+    // 1. 获取存储的 navbar 上次状态（默认 false）
+    const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+    // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+    const shouldShowNavbar = !is_home();
+    console.log(shouldShowNavbar);
+
+    // 3. 处理四种状态变化
+    if (!wasNavbarVisible && shouldShowNavbar) {
+        // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+        navbar.classList.remove('animate__fadeOutUp');
+        navbar.classList.add('animate__fadeInDown');
+        localStorage.setItem('navbarVisible', 'true');
+    } else if (wasNavbarVisible && !shouldShowNavbar) {
+        // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+        navbar.classList.remove('animate__fadeInDown');
+        navbar.classList.add('animate__fadeOutUp');
+        localStorage.setItem('navbarVisible', 'false');
+    } else if (wasNavbarVisible && shouldShowNavbar) {
+        // 状态 3：从有到有 → 保持显示（无动画）
+        navbar.classList.remove('animate__fadeOutUp');
+        navbar.classList.add('animate__fadeInDown', 'no-transition');
+        setTimeout(() => navbar.classList.remove('no-transition'), 10);
+    } else {
+        // 状态 4：从无到无 → 保持隐藏（无动画）
+        navbar.classList.remove('animate__fadeInDown');
+        navbar.classList.add('animate__fadeOutUp', 'no-transition');
+        setTimeout(() => navbar.classList.remove('no-transition'), 10);
+    }
+
+    // 4. 滚动控制（仅在需要 navbar 的页面生效）
+    if (shouldShowNavbar) {
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY) {
+                // 向下滚动 → 隐藏
+                navbar.classList.remove('animate__fadeInDown');
+                navbar.classList.add('animate__fadeOutUp');
+                localStorage.setItem('navbarVisible', 'false');
+            } else {
+                // 向上滚动 → 显示
+                navbar.classList.remove('animate__fadeOutUp');
+                navbar.classList.add('animate__fadeInDown');
+                localStorage.setItem('navbarVisible', 'true');
+            }
+            lastScrollY = window.scrollY;
+        });
+    }
+});
+
+</script>
+
+
     <div id="loader"></div>
     <!-- <div class="nav">
     <ul id="menu-menu" class="menu">
@@ -114,8 +204,7 @@
     <div id="post0">
         <p>五月 29, 2025</p>
         <h2><a href="/2025/05/29/test/" title="test" class="posttitle">test</a></h2>
-        <p class="summary">123123123
-</p>
+        <p class="summary">123123123123123123123123123123123123123123123123123123123...</p>
     </div>
     
 </div>
@@ -130,13 +219,18 @@
 
  -->
  
+<!-- 移除原先的 #top 和文章列表，改为分类目录结构 -->
+<div class="category-container" style="padding-top: 120px">
+  <!-- 分类标题 -->
+  <h2 class="category-title">🗂️ 分类：文学</h2>
 
-<div class="category-posts">
-  <h1 class="category-header">🗂️ 分类：文学</h1>
-  <div class="post-list">
+  <!-- 分类文章列表（卡片式布局） -->
+  <div class="category-post-list">
     
-      <article class="post-item">
-        <h2><a href="/2025/05/29/test/">test</a></h2>
+      <article class="category-post-item">
+        <h3>
+          <a href="/2025/05/29/test/">test</a>
+        </h3>
         <div class="post-meta">
           <time>2025-05-29</time>
           
