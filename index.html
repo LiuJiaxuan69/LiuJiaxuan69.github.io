@@ -201,8 +201,9 @@
     
     <div id="post0">
         <p>六月 01, 2025</p>
-        <h2><a href="/2025/06/01/test2/" title="test2" class="posttitle">test2</a></h2>
-        <p class="summary"></p>
+        <h2><a href="/2025/06/01/test3/" title="test3" class="posttitle">test3</a></h2>
+        <p class="summary">hello, this is just a test
+</p>
     </div>
     
 </div>
@@ -211,10 +212,29 @@
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/06/01/test2/" 
+       title="test2"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>六月 01, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/06/01/test2/" title="test2" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">test2</a></h3>
+        
+        <p></p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/05/29/Hello-World/" 
        title="Hello World"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
