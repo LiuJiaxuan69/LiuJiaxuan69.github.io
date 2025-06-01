@@ -188,37 +188,43 @@
 
   <div id="container" class="gradient">
     
-<div id="screen">
-    <div id="mark">
-        <div class="layer" data-depth="0.4">
-            <img src="/img/welcome.jpg" id="cover" crossorigin="anonymous" width="1920" height="1080">
+    <div id="screen">
+        <div id="mark">
+            <div class="layer" data-depth="0.4">
+                <img src="/img/welcome.jpg" id="cover" crossorigin="anonymous" width="1920" height="1080">
+            </div>
         </div>
-    </div>
-    <div id="vibrant">
-        <svg viewbox="0 0 2880 1620" height="100%" preserveaspectratio="xMaxYMax slice">
-            <polygon opacity="0.7" points="2000,1620 0,1620 0,0 600,0 "/>
-        </svg>
-        <div></div>
-    </div>
-    <div id="header">
-        <div>
-            <a href="/" style="position: relative; display: inline-block; padding: 1; font-size: 40px; color:white; font-family: 'Youyuan';">刘家炫的博客</a>
-			
-            <div class="iconfont icon-menu switchmenu"></div>
+        <div id="vibrant">
+            <svg viewbox="0 0 2880 1620" height="100%" preserveaspectratio="xMaxYMax slice">
+                <polygon opacity="0.7" points="2000,1620 0,1620 0,0 600,0 " />
+            </svg>
+            <div></div>
         </div>
-    </div>
-    
-    <div id="post0">
-        <p>五月 29, 2025</p>
-        <h2><a href="/2025/05/29/Hello-World/" title="Hello World" class="posttitle">Hello World</a></h2>
-        <p class="summary">欢迎来到我的博客网站
+        <div id="header">
+            <div>
+                <a href="/"
+                    style="position: relative; display: inline-block; padding: 1; font-size: 40px; color:white; font-family: 'Youyuan';">刘家炫的博客</a>
+                
+                        <div class="iconfont icon-menu switchmenu"></div>
+            </div>
+        </div>
+        
+            <div id="post0">
+                <p>五月 29, 2025</p>
+                <h2>
+                    <a href="2025/05/29/Hello-World/" class="posttitle"
+                        onclick="window.location.href = this.href; return false;">
+                        Hello World
+                    </a>
+                </h2>
+
+                <p class="summary">欢迎来到我的博客网站
 
 
 </p>
+            </div>
+            
     </div>
-    
-</div>
-
       <div id="primary">
         
 <div class="post">
@@ -226,7 +232,7 @@
     <a href="/2025/05/29/test/" 
        title="test"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
