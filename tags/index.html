@@ -76,57 +76,66 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         console.log(localStorage.getItem('navbarVisible'))
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
 
-    // 1. 获取存储的 navbar 上次状态（默认 false）
-    const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
-    // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
-    const shouldShowNavbar = !is_home();
-    console.log(shouldShowNavbar);
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
 
-    // 3. 处理四种状态变化
-    if (!wasNavbarVisible && shouldShowNavbar) {
-        // 状态 1：从无到有 → 显示 + 动画 + 更新状态
-        navbar.classList.remove('animate__fadeOutUp');
-        navbar.classList.add('animate__fadeInDown');
-        localStorage.setItem('navbarVisible', 'true');
-    } else if (wasNavbarVisible && !shouldShowNavbar) {
-        // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
-        navbar.classList.remove('animate__fadeInDown');
-        navbar.classList.add('animate__fadeOutUp');
-        localStorage.setItem('navbarVisible', 'false');
-    } else if (wasNavbarVisible && shouldShowNavbar) {
-        // 状态 3：从有到有 → 保持显示（无动画）
-        navbar.classList.remove('animate__fadeOutUp');
-        navbar.classList.add('animate__fadeInDown', 'no-transition');
-        setTimeout(() => navbar.classList.remove('no-transition'), 10);
-    } else {
-        // 状态 4：从无到无 → 保持隐藏（无动画）
-        navbar.classList.remove('animate__fadeInDown');
-        navbar.classList.add('animate__fadeOutUp', 'no-transition');
-        setTimeout(() => navbar.classList.remove('no-transition'), 10);
-    }
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
 
-    // 4. 滚动控制（仅在需要 navbar 的页面生效）
-    if (shouldShowNavbar) {
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > lastScrollY) {
-                // 向下滚动 → 隐藏
-                navbar.classList.remove('animate__fadeInDown');
-                navbar.classList.add('animate__fadeOutUp');
-                localStorage.setItem('navbarVisible', 'false');
-            } else {
-                // 向上滚动 → 显示
-                navbar.classList.remove('animate__fadeOutUp');
-                navbar.classList.add('animate__fadeInDown');
-                localStorage.setItem('navbarVisible', 'true');
-            }
-            lastScrollY = window.scrollY;
-        });
-    }
-});
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
 
 </script>
 
@@ -296,18 +305,6 @@
       <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #333;">🔥 热门TOP5</h3>
       <div class="rank-list">
         
-          <a href="/tags/Linux/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">Linux</span>
-            <span class="rank-bar" style="--width: 1"></span>
-            <span class="rank-count" style="color: #666;">1篇</span>
-          </a>
-        
-          <a href="/tags/C/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">C++</span>
-            <span class="rank-bar" style="--width: 1"></span>
-            <span class="rank-count" style="color: #666;">1篇</span>
-          </a>
-        
           <a href="/tags/Hexo/" class="rank-item">
             <span class="rank-name" style="font-weight: 600;">Hexo</span>
             <span class="rank-bar" style="--width: 1"></span>
@@ -316,6 +313,18 @@
         
           <a href="/tags/%E6%95%99%E7%A8%8B/" class="rank-item">
             <span class="rank-name" style="font-weight: 600;">教程</span>
+            <span class="rank-bar" style="--width: 1"></span>
+            <span class="rank-count" style="color: #666;">1篇</span>
+          </a>
+        
+          <a href="/tags/Linux/" class="rank-item">
+            <span class="rank-name" style="font-weight: 600;">Linux</span>
+            <span class="rank-bar" style="--width: 1"></span>
+            <span class="rank-count" style="color: #666;">1篇</span>
+          </a>
+        
+          <a href="/tags/C/" class="rank-item">
+            <span class="rank-name" style="font-weight: 600;">C++</span>
             <span class="rank-bar" style="--width: 1"></span>
             <span class="rank-count" style="color: #666;">1篇</span>
           </a>

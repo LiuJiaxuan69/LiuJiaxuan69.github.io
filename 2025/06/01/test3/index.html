@@ -79,57 +79,66 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         console.log(localStorage.getItem('navbarVisible'))
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
 
-    // 1. 获取存储的 navbar 上次状态（默认 false）
-    const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
-    // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
-    const shouldShowNavbar = !is_home();
-    console.log(shouldShowNavbar);
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
 
-    // 3. 处理四种状态变化
-    if (!wasNavbarVisible && shouldShowNavbar) {
-        // 状态 1：从无到有 → 显示 + 动画 + 更新状态
-        navbar.classList.remove('animate__fadeOutUp');
-        navbar.classList.add('animate__fadeInDown');
-        localStorage.setItem('navbarVisible', 'true');
-    } else if (wasNavbarVisible && !shouldShowNavbar) {
-        // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
-        navbar.classList.remove('animate__fadeInDown');
-        navbar.classList.add('animate__fadeOutUp');
-        localStorage.setItem('navbarVisible', 'false');
-    } else if (wasNavbarVisible && shouldShowNavbar) {
-        // 状态 3：从有到有 → 保持显示（无动画）
-        navbar.classList.remove('animate__fadeOutUp');
-        navbar.classList.add('animate__fadeInDown', 'no-transition');
-        setTimeout(() => navbar.classList.remove('no-transition'), 10);
-    } else {
-        // 状态 4：从无到无 → 保持隐藏（无动画）
-        navbar.classList.remove('animate__fadeInDown');
-        navbar.classList.add('animate__fadeOutUp', 'no-transition');
-        setTimeout(() => navbar.classList.remove('no-transition'), 10);
-    }
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
 
-    // 4. 滚动控制（仅在需要 navbar 的页面生效）
-    if (shouldShowNavbar) {
-        let lastScrollY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > lastScrollY) {
-                // 向下滚动 → 隐藏
-                navbar.classList.remove('animate__fadeInDown');
-                navbar.classList.add('animate__fadeOutUp');
-                localStorage.setItem('navbarVisible', 'false');
-            } else {
-                // 向上滚动 → 显示
-                navbar.classList.remove('animate__fadeOutUp');
-                navbar.classList.add('animate__fadeInDown');
-                localStorage.setItem('navbarVisible', 'true');
-            }
-            lastScrollY = window.scrollY;
-        });
-    }
-});
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
 
 </script>
 
@@ -395,6 +404,8 @@
         starColors: [
           'rgba(255, 255, 255, {alpha})',  // 纯白
           'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
         ]
       };
 
@@ -632,6 +643,102 @@
     border-color: #444 !important;
     /* 边框色 */
   }
+
+/* ===== 基础样式（亮色模式） ===== */
+.gt-container {
+  --gt-primary-color: #10D07A; /* 主色调（绿色） */
+  --gt-bg-color: none;
+  --gt-text-color: #333333;
+  --gt-border-color: none;
+  --gt-card-bg: #f9f9f9;
+  --gt-input-bg: #ffffff;
+  --gt-hover-color: #25cdd0; /* 悬停色（蓝绿色） */
+}
+
+.gt-container {
+  background-color: var(--gt-bg-color);
+  color: var(--gt-text-color);
+  border: 1px solid var(--gt-border-color);
+}
+
+.gt-avatar {
+    border-radius: 50% !important;
+}
+
+.gt-ico-text, .gt-btn-text {
+  color: var(--gt-text-color);
+}
+
+.gt-container .gt-btn-login,
+ .gt-container .gt-btn-public {
+  background-color: var(--gt-primary-color);
+  border-color: var(--gt-primary-color);
+  color: white !important;
+  border-radius: 10px;
+}
+
+.gt-container .gt-comment .gt-comment-content {
+  background-color: rgb(255,255,255,0.3);
+  margin-left: 20px; /* 缩进区分 */
+}
+
+.gt-container .gt-btn-preview{
+  border-radius: 10px;
+  border: none;
+  background-color: aqua;
+}
+
+.gt-container .gt-comment-content{
+  border-radius: 10px;
+}
+
+.gt-container .gt-btn-public:hover {
+  background-color: var(--gt-hover-color);
+}
+
+.gt-container a,
+.gt-container .gt-comment-username,
+.gt-container .gt-svg svg {
+  color: var(--gt-primary-color);
+  fill: var(--gt-primary-color);
+}
+
+.gt-container .gt-header-textarea{
+  border-radius: 10px;
+}
+
+.gt-container .gt-popup .gt-action.is--active:before {
+  background: var(--gt-primary-color);
+}
+
+/* ===== 暗黑模式覆盖 ===== */
+.dark-mode .gt-container {
+  --gt-bg-color: none; /* 深灰背景 */
+  --gt-text-color: #e0e0e0; /* 浅灰文字 */
+  --gt-border-color: none; /* 深色边框 */
+  --gt-card-bg: none; /* 评论卡片背景 */
+  --gt-input-bg: #2d2d2d; /* 输入框背景 */
+}
+
+.dark-mode .gt-container .gt-comment-content {
+  background: none;
+}
+
+.dark-mode .gt-container .gt-comment .gt-comment-content {
+  background-color: rgb(255,255,255,0.1);
+  margin-left: 20px; /* 缩进区分 */
+}
+
+.dark-mode .gt-header-textarea,
+.dark-mode .gt-comment-admin .gt-comment-content {
+  background-color: var(--gt-input-bg);
+  color: var(--gt-text-color);
+}
+
+/* 暗黑模式下的链接悬停效果 */
+.dark-mode .gt-container a:hover {
+  opacity: 0.8;
+}
 
   .dark-mode #post-content {
     color: var(--text-color);
