@@ -644,101 +644,122 @@
     /* 边框色 */
   }
 
-/* ===== 基础样式（亮色模式） ===== */
-.gt-container {
-  --gt-primary-color: #10D07A; /* 主色调（绿色） */
-  --gt-bg-color: none;
-  --gt-text-color: #333333;
-  --gt-border-color: none;
-  --gt-card-bg: #f9f9f9;
-  --gt-input-bg: #ffffff;
-  --gt-hover-color: #25cdd0; /* 悬停色（蓝绿色） */
-}
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
 
-.gt-container {
-  background-color: var(--gt-bg-color);
-  color: var(--gt-text-color);
-  border: 1px solid var(--gt-border-color);
-}
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
 
-.gt-avatar {
+  .gt-avatar {
     border-radius: 50% !important;
-}
+  }
 
-.gt-ico-text, .gt-btn-text {
-  color: var(--gt-text-color);
-}
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
 
-.gt-container .gt-btn-login,
- .gt-container .gt-btn-public {
-  background-color: var(--gt-primary-color);
-  border-color: var(--gt-primary-color);
-  color: white !important;
-  border-radius: 10px;
-}
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
 
-.gt-container .gt-comment .gt-comment-content {
-  background-color: rgb(255,255,255,0.3);
-  margin-left: 20px; /* 缩进区分 */
-}
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
 
-.gt-container .gt-btn-preview{
-  border-radius: 10px;
-  border: none;
-  background-color: aqua;
-}
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
 
-.gt-container .gt-comment-content{
-  border-radius: 10px;
-}
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
 
-.gt-container .gt-btn-public:hover {
-  background-color: var(--gt-hover-color);
-}
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
 
-.gt-container a,
-.gt-container .gt-comment-username,
-.gt-container .gt-svg svg {
-  color: var(--gt-primary-color);
-  fill: var(--gt-primary-color);
-}
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
 
-.gt-container .gt-header-textarea{
-  border-radius: 10px;
-}
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
 
-.gt-container .gt-popup .gt-action.is--active:before {
-  background: var(--gt-primary-color);
-}
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
 
-/* ===== 暗黑模式覆盖 ===== */
-.dark-mode .gt-container {
-  --gt-bg-color: none; /* 深灰背景 */
-  --gt-text-color: #e0e0e0; /* 浅灰文字 */
-  --gt-border-color: none; /* 深色边框 */
-  --gt-card-bg: none; /* 评论卡片背景 */
-  --gt-input-bg: #2d2d2d; /* 输入框背景 */
-}
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
 
-.dark-mode .gt-container .gt-comment-content {
-  background: none;
-}
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
 
-.dark-mode .gt-container .gt-comment .gt-comment-content {
-  background-color: rgb(255,255,255,0.1);
-  margin-left: 20px; /* 缩进区分 */
-}
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
 
-.dark-mode .gt-header-textarea,
-.dark-mode .gt-comment-admin .gt-comment-content {
-  background-color: var(--gt-input-bg);
-  color: var(--gt-text-color);
-}
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
 
-/* 暗黑模式下的链接悬停效果 */
-.dark-mode .gt-container a:hover {
-  opacity: 0.8;
-}
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
 
   .dark-mode #post-content {
     color: var(--text-color);
