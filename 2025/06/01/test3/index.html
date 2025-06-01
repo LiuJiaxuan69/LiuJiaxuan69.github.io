@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="hello, this is just a test
+    <meta name="description" content="hello, this is just a testthank you for inviting my blog, have a good day
 "> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
@@ -22,7 +22,7 @@
     
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:title" content="test3 - 刘家炫的博客"/>
-    <meta name="twitter:description" content="hello, this is just a test
+    <meta name="twitter:description" content="hello, this is just a testthank you for inviting my blog, have a good day
 "/>
     
     
@@ -31,7 +31,7 @@
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
     <meta property="og:title" content="test3 - 刘家炫的博客"/>
-    <meta property="og:description" content="hello, this is just a test
+    <meta property="og:description" content="hello, this is just a testthank you for inviting my blog, have a good day
 "/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
@@ -189,7 +189,7 @@
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <p>hello, this is just a test</p>
+            <p>hello, this is just a test<br>thank you for inviting my blog, have a good day</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
@@ -348,6 +348,17 @@
     const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.jpg', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
       , '/img/bg8.png', '/img/bg9.jpg', '/img/bg10.jpg'
     ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
     let bgInterval = null;
     let universeCanvas = null;
     let animationId = null;
@@ -614,11 +625,14 @@
   }
 
   /* 新增：黑白模式样式 */
-.dark-mode, 
-.dark-mode *:not(button):not(input):not(textarea):not(a) {
-  color: #e0e0e0 !important; /* 浅色文字 */
-  border-color: #444 !important; /* 边框色 */
-}
+  .dark-mode,
+  .dark-mode *:not(button):not(input):not(textarea):not(a) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
   .dark-mode #post-content {
     color: var(--text-color);
   }

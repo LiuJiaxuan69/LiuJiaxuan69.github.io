@@ -351,6 +351,17 @@
     const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.jpg', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
       , '/img/bg8.png', '/img/bg9.jpg', '/img/bg10.jpg'
     ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
     let bgInterval = null;
     let universeCanvas = null;
     let animationId = null;
@@ -617,11 +628,14 @@
   }
 
   /* 新增：黑白模式样式 */
-.dark-mode, 
-.dark-mode *:not(button):not(input):not(textarea):not(a) {
-  color: #e0e0e0 !important; /* 浅色文字 */
-  border-color: #444 !important; /* 边框色 */
-}
+  .dark-mode,
+  .dark-mode *:not(button):not(input):not(textarea):not(a) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
   .dark-mode #post-content {
     color: var(--text-color);
   }
