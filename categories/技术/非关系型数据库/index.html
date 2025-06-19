@@ -210,18 +210,68 @@
         </div>
         
             <div id="post0">
-                <p>六月 16, 2025</p>
+                <p>六月 19, 2025</p>
                 <h2>
-                    <a href="/2025/06/16/redis_command_line_user_guide/" title="Redis 命令行使用指南" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 命令行使用指南</a>
+                    <a href="/2025/06/19/redis_single_thread_model_discussion/" title="关于 Redis 单线程模型的探讨" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">关于 Redis 单线程模型的探讨</a>
                 </h2>
-                <p class="summary">Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
-12345678set key value...</p>
+                <p class="summary">
+众所周知，Redis 底层使用的是单线程结构，Redis 底层之所以选择这种结构肯定是有原因的，其中最重要的就莫...</p>
             </div>
             
 
     </div>
       <div id="primary">
         
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/06/17/commonly_used_data_types_in_redis/" 
+       title="Redis 常见数据类型"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg8.png" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>六月 17, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/06/17/commonly_used_data_types_in_redis/" title="Redis 常见数据类型" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 常见数据类型</a></h3>
+        
+        <p>Redis 中五种最常用的数据类型
+
+
+数据类型
+内部编码
+编码说明
+
+
+
+String
+raw
+动态字符串，存储大于 44 字节的长文本（Redis 7...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/06/16/redis_command_line_user_guide/" 
+       title="Redis 命令行使用指南"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>六月 16, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/06/16/redis_command_line_user_guide/" title="Redis 命令行使用指南" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 命令行使用指南</a></h3>
+        
+        <p>Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
+12345678set key value（设置键值对）example:127.0...</p>
+    </div>
+</div>
+
+
       </div>
       
   </div>
@@ -302,6 +352,48 @@
     
       <article class="category-post-item">
         <h3>
+          <a href="/2025/06/19/redis_single_thread_model_discussion/">关于 Redis 单线程模型的探讨</a>
+        </h3>
+        <div class="post-meta">
+          <time>2025-06-19</time>
+          
+            <span>·</span>
+            
+              <a href="/tags/Redis/" class="tag">#Redis</a>
+            
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
+            
+              <a href="/tags/%E5%BA%95%E5%B1%82/" class="tag">#底层</a>
+            
+              <a href="/tags/%E6%80%A7%E8%83%BD/" class="tag">#性能</a>
+            
+          
+        </div>
+      </article>
+    
+      <article class="category-post-item">
+        <h3>
+          <a href="/2025/06/17/commonly_used_data_types_in_redis/">Redis 常见数据类型</a>
+        </h3>
+        <div class="post-meta">
+          <time>2025-06-17</time>
+          
+            <span>·</span>
+            
+              <a href="/tags/Redis/" class="tag">#Redis</a>
+            
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
+            
+              <a href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" class="tag">#键值对</a>
+            
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="tag">#数据结构</a>
+            
+          
+        </div>
+      </article>
+    
+      <article class="category-post-item">
+        <h3>
           <a href="/2025/06/16/redis_command_line_user_guide/">Redis 命令行使用指南</a>
         </h3>
         <div class="post-meta">
@@ -312,8 +404,6 @@
               <a href="/tags/Redis/" class="tag">#Redis</a>
             
               <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
-            
-              <a href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" class="tag">#键值对</a>
             
               <a href="/tags/%E5%91%BD%E4%BB%A4%E6%8C%87%E5%AF%BC/" class="tag">#命令指导</a>
             

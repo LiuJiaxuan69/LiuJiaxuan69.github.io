@@ -5,13 +5,28 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>test3 - 刘家炫的博客</title>
+    <title>Redis 常见数据类型 - 刘家炫的博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="hello, this is just a testthank you for visiting my blog, have a good day
-"> 
+    <meta name="description" content="Redis 中五种最常用的数据类型
+
+
+数据类型
+内部编码
+编码说明
+
+
+
+String
+raw
+动态字符串，存储大于 44 字节的长文本（Redis 7.0+ 阈值）
+
+
+
+int
+整数类型，存储,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -21,18 +36,48 @@
     
     
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="test3 - 刘家炫的博客"/>
-    <meta name="twitter:description" content="hello, this is just a testthank you for visiting my blog, have a good day
-"/>
+    <meta name="twitter:title" content="Redis 常见数据类型 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="Redis 中五种最常用的数据类型
+
+
+数据类型
+内部编码
+编码说明
+
+
+
+String
+raw
+动态字符串，存储大于 44 字节的长文本（Redis 7.0+ 阈值）
+
+
+
+int
+整数类型，存储,"/>
     
     
     
     
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
-    <meta property="og:title" content="test3 - 刘家炫的博客"/>
-    <meta property="og:description" content="hello, this is just a testthank you for visiting my blog, have a good day
-"/>
+    <meta property="og:title" content="Redis 常见数据类型 - 刘家炫的博客"/>
+    <meta property="og:description" content="Redis 中五种最常用的数据类型
+
+
+数据类型
+内部编码
+编码说明
+
+
+
+String
+raw
+动态字符串，存储大于 44 字节的长文本（Redis 7.0+ 阈值）
+
+
+
+int
+整数类型，存储,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -160,7 +205,7 @@
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
-    <h3 class="subtitle">test3</h3>
+    <h3 class="subtitle">Redis 常见数据类型</h3>
     <div class="social">
         <div>
             <div class="share">
@@ -189,16 +234,117 @@
     border-radius: 12px; /* 可选圆角 */
     position: relative; /* 确保堆叠上下文 */
     z-index: 1;">
-        <h1 class="title">test3</h1>
+        <h1 class="title">Redis 常见数据类型</h1>
         <div class="stuff">
-            <span>六月 01, 2025</span>
+            <span>六月 17, 2025</span>
             
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" rel="tag">键值对</a></li></ul>
+
 
         </div>
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <p>hello, this is just a test<br>thank you for visiting my blog, have a good day</p>
+            <h2 id="Redis-中五种最常用的数据类型"><a href="#Redis-中五种最常用的数据类型" class="headerlink" title="Redis 中五种最常用的数据类型"></a>Redis 中五种最常用的数据类型</h2><table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>内部编码</th>
+<th>编码说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>String</strong></td>
+<td><code>raw</code></td>
+<td>动态字符串，存储大于 44 字节的长文本（Redis 7.0+ 阈值）</td>
+</tr>
+<tr>
+<td></td>
+<td><code>int</code></td>
+<td>整数类型，存储 64 位有符号整数（如 <code>SET key 123</code>）</td>
+</tr>
+<tr>
+<td></td>
+<td><code>embstr</code></td>
+<td>嵌入式字符串，存储 ≤44 字节的短文本（内存连续，减少碎片）</td>
+</tr>
+<tr>
+<td><strong>List</strong></td>
+<td><code>ziplist</code></td>
+<td>压缩列表（Redis 7.0 前），连续内存存储，适合小列表</td>
+</tr>
+<tr>
+<td></td>
+<td><code>linkedlist</code></td>
+<td>双向链表（Redis 7.0 前），支持快速头尾操作</td>
+</tr>
+<tr>
+<td></td>
+<td><code>quicklist</code></td>
+<td>快速列表（Redis 4.0+ 默认），由多个 ziplist 组成的双向链表</td>
+</tr>
+<tr>
+<td><strong>Hash</strong></td>
+<td><code>ziplist</code></td>
+<td>压缩列表存储，适用于字段数 ≤ <code>hash-max-ziplist-entries</code> 且值长度 ≤ <code>hash-max-ziplist-value</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>hashtable</code></td>
+<td>哈希表，支持 O(1) 复杂度的字段访问</td>
+</tr>
+<tr>
+<td><strong>Set</strong></td>
+<td><code>intset</code></td>
+<td>整数集合，当元素均为整数且数量 ≤ <code>set-max-intset-entries</code> 时使用</td>
+</tr>
+<tr>
+<td></td>
+<td><code>hashtable</code></td>
+<td>哈希表（值为 NULL 的哈希表），存储非整数或大集合</td>
+</tr>
+<tr>
+<td><strong>ZSet</strong></td>
+<td><code>ziplist</code></td>
+<td>压缩列表存储，按分值排序，元素数 ≤ <code>zset-max-ziplist-entries</code> 且值长度 ≤ <code>zset-max-ziplist-value</code></td>
+</tr>
+<tr>
+<td></td>
+<td><code>skiplist</code> + <code>hashtable</code></td>
+<td>跳表（排序） + 哈希表（快速查找），支持 O(logN) 范围查询和 O(1) 单元素访问</td>
+</tr>
+</tbody></table>
+<p>下面就来一一介绍这五种常见常用的数据类型</p>
+<h2 id="String"><a href="#String" class="headerlink" title="String"></a>String</h2><h3 id="类型简介"><a href="#类型简介" class="headerlink" title="类型简介"></a>类型简介</h3><p>不同于 C++ 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h3 id="相关指令"><a href="#相关指令" class="headerlink" title="相关指令"></a>相关指令</h3><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; lpush k2 <span class="number">11</span> <span class="number">22</span> <span class="number">33</span></span><br><span class="line">(integer) <span class="number">3</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">get <span class="title">k2</span></span></span><br><span class="line"><span class="function"><span class="params">(error)</span> WRONGTYPE Operation against a key holding the wrong kind of value</span></span><br></pre></td></tr></table></figure>
+
+<p>当然，除此之外，还有一些专门针对 String 类型的便捷指令：</p>
+<p>1、setex 指令</p>
+<p>用法：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setex key seconds value</span><br></pre></td></tr></table></figure>
+
+<p>该指令其实可以直接通过 set 指令直接实现，但通过 setex 实现会更加简洁便利，下面是两个代码的对比：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; set key1 <span class="number">123</span> ex <span class="number">5</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; setex key1 <span class="number">5</span> <span class="number">123</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 setex 命令可以避免写 ex 来表示附加过期时间设置，而且这种命令看起来非常直白，一看就能知道这个命令的用法是什么</p>
+<p>2、psetex 指令</p>
+<p>与之对应的就是 psetex，没错，相信你看到这个命令就已经知道这个命令是用来干什么的了，这不就多了一个 p 嘛，那这个指令肯定就是以 ms 为单位来设置过期时间的了</p>
+<p>3、setnx 指令</p>
+<p>该指令是用来设置不存在的键值对的，存在的键值是无法修改的，用法如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value</span><br></pre></td></tr></table></figure>
+
+<p>具体例子如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">setnx key1 <span class="title">value1</span></span></span><br><span class="line"><span class="function"><span class="params">(integer)</span> 1</span></span><br><span class="line"><span class="function">127.0.0.1:<span class="number">6379</span>&gt; setnx key1 value1</span></span><br><span class="line"><span class="function">(integer) <span class="number">0</span></span></span><br></pre></td></tr></table></figure>
+
+<p>4、incr 及 incrby 指令</p>
+<p>String 类型若存放一个64位以内的整数，这个数就会在底层被以 int 类型存储，而这时就可以通过 incr 指令来对某个数进行加一操作了，同样的，通过incrby就可以给一个数<br>加上一个特定的值，当然也可以是一个负数，同时，它们两者可以对一个不存在的键值对进行操作，会将这个值设定为0，语法如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">incr key</span><br><span class="line">incrby key increment</span><br></pre></td></tr></table></figure>
+
+<p>下面是使用举例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置一个已经存在的 key 值 key1</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; set key1 <span class="number">1</span></span><br><span class="line">OK</span><br><span class="line"><span class="comment">//让 key1 自增 </span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">incr <span class="title">key1</span></span></span><br><span class="line"><span class="function"><span class="params">(integer)</span> 2</span></span><br><span class="line"><span class="function"><span class="comment">//让不存在的 key2 自增</span></span></span><br><span class="line"><span class="function">127.0.0.1:<span class="number">6379</span>&gt; incr key2</span></span><br><span class="line"><span class="function">(integer) <span class="number">1</span></span></span><br><span class="line"><span class="function">//对存在的 key1 加<span class="number">10</span></span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key1 <span class="number">10</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">12</span></span></span><br><span class="line"><span class="function">//对不存在的 key3 加<span class="number">20</span></span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key3 <span class="number">20</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">20</span></span></span><br><span class="line"><span class="function">//对 key3 加<span class="number">-10</span>（减<span class="number">10</span>）</span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key3 <span class="number">-10</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">10</span></span></span><br></pre></td></tr></table></figure>
+
+<p>未完待续</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
