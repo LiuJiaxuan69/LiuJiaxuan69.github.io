@@ -443,13 +443,6 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 
 
 /* 分类文章卡片 */
-/* 分类容器 */
-.category-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 20px;
-  position: relative;
-}
 
 /* 顶部留白区域 */
 .category-header-space {
