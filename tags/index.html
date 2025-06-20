@@ -217,28 +217,44 @@
     }
     
     .rank-item {
-      display: flex;
-      align-items: center;
-      padding: 0.8rem 1.2rem;
-      background: rgba(0,0,0,0.03);
-      border-radius: 6px;
-      transition: transform 0.3s;
-    }
+  display: flex;
+  align-items: center;
+  gap: 0.8rem; /* 控制元素间距 */
+  padding: 0.8rem 1.2rem;
+  background: rgba(0,0,0,0.03);
+  border-radius: 6px;
+  transition: transform 0.3s;
+}
+
+.rank-name {
+  flex: 0 0 120px; /* 固定宽度，不伸缩 */
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-bar {
+  flex-grow: 1; /* 占据剩余空间 */
+  height: 8px;
+  background: linear-gradient(90deg, #4ECDC4, #45B7D1);
+  border-radius: 4px;
+  transform-origin: left;
+  transform: scaleX(var(--width));
+}
+
+.rank-count {
+  flex: 0 0 60px; /* 固定计数宽度 */
+  text-align: right;
+  color: #666;
+}
+
     
     .rank-item:hover {
       transform: translateX(5px);
     }
     
-    .rank-bar {
-      flex-grow: 1;
-      height: 8px;
-      background: linear-gradient(90deg, #4ECDC4, #45B7D1);
-      margin: 0 1.2rem;
-      border-radius: 4px;
-      transform-origin: left;
-      transform: scaleX(var(--width));
-    }
-    
+
     /* 移动端适配 */
     @media (max-width: 768px) {
       .tag-list {
@@ -331,42 +347,44 @@
     </div>
 
     <!-- 热门标签排行 -->
-    <div class="tag-hot-rank">
-      <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #333;">🔥 热门TOP5</h3>
-      <div class="rank-list">
-        
-          <a href="/tags/Redis/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">Redis</span>
-            <span class="rank-bar" style="--width: 3"></span>
-            <span class="rank-count" style="color: #666;">3篇</span>
-          </a>
-        
-          <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">数据库</span>
-            <span class="rank-bar" style="--width: 3"></span>
-            <span class="rank-count" style="color: #666;">3篇</span>
-          </a>
-        
-          <a href="/tags/Hexo/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">Hexo</span>
-            <span class="rank-bar" style="--width: 1"></span>
-            <span class="rank-count" style="color: #666;">1篇</span>
-          </a>
-        
-          <a href="/tags/%E6%95%99%E7%A8%8B/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">教程</span>
-            <span class="rank-bar" style="--width: 1"></span>
-            <span class="rank-count" style="color: #666;">1篇</span>
-          </a>
-        
-          <a href="/tags/%E5%91%BD%E4%BB%A4%E6%8C%87%E5%AF%BC/" class="rank-item">
-            <span class="rank-name" style="font-weight: 600;">命令指导</span>
-            <span class="rank-bar" style="--width: 1"></span>
-            <span class="rank-count" style="color: #666;">1篇</span>
-          </a>
-        
-      </div>
-    </div>
+    <!-- 热门标签排行 -->
+<div class="tag-hot-rank">
+  <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: #333;">🔥 热门TOP5</h3>
+  <div class="rank-list">
+    
+      <a href="/tags/Redis/" class="rank-item">
+        <span class="rank-name" style="font-weight: 600;">Redis</span>
+        <span class="rank-bar" style="--width: 1"></span>
+        <span class="rank-count" style="color: #666;">3篇</span>
+      </a>
+    
+      <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="rank-item">
+        <span class="rank-name" style="font-weight: 600;">数据库</span>
+        <span class="rank-bar" style="--width: 1"></span>
+        <span class="rank-count" style="color: #666;">3篇</span>
+      </a>
+    
+      <a href="/tags/Hexo/" class="rank-item">
+        <span class="rank-name" style="font-weight: 600;">Hexo</span>
+        <span class="rank-bar" style="--width: 0.3333333333333333"></span>
+        <span class="rank-count" style="color: #666;">1篇</span>
+      </a>
+    
+      <a href="/tags/%E6%95%99%E7%A8%8B/" class="rank-item">
+        <span class="rank-name" style="font-weight: 600;">教程</span>
+        <span class="rank-bar" style="--width: 0.3333333333333333"></span>
+        <span class="rank-count" style="color: #666;">1篇</span>
+      </a>
+    
+      <a href="/tags/%E5%BA%95%E5%B1%82/" class="rank-item">
+        <span class="rank-name" style="font-weight: 600;">底层</span>
+        <span class="rank-bar" style="--width: 0.3333333333333333"></span>
+        <span class="rank-count" style="color: #666;">1篇</span>
+      </a>
+    
+  </div>
+</div>
+
   </div>
 </body>
 </html>
