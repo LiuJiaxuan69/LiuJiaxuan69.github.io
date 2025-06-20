@@ -446,7 +446,7 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 
 /* 顶部留白区域 */
 .category-header-space {
-  height: 80px;
+  height: 10vw;
 }
 
 /* 分类标题装饰 */
