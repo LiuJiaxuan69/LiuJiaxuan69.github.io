@@ -647,12 +647,15 @@
   }
 
   /* 新增：黑白模式样式 */
-  .dark-mode,
-  .dark-mode *:not(button):not(input):not(textarea):not(a) {
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a) {
     color: #e0e0e0 !important;
     /* 浅色文字 */
     border-color: #444 !important;
     /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
   }
 
   /* ===== 基础样式（亮色模式） ===== */

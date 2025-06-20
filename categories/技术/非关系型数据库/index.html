@@ -141,279 +141,185 @@
 
 
     <div id="loader"></div>
-    <!-- <div class="nav">
-    <ul id="menu-menu" class="menu">
-        
-        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
-            <a href="//" title="首页" target="_blank" rel="noopener">首页</a>
-        </li>
-        
-        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
-            <a href="/categories/" title="分类" target="_blank" rel="noopener">分类</a>
-        </li>
-        
-        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
-            <a href="/tags/" title="标签" target="_blank" rel="noopener">标签</a>
-        </li>
-        
-        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
-            <a href="/archives/" title="归档" target="_blank" rel="noopener">归档</a>
-        </li>
-        
-    </ul>
-	<span class="target"></span>
-	<center>
-	<div class="hitokoto">
-		<span class="typed" id="hitokoto" data-st="true"></span>
-	</div>
-	</center>
-	
-	<p class="footerlinks">
-		<a href="#" class="iconfont icon-null"></a>
-		
-            <a href="https://github.com/liujiaxuan69" title="github" class="iconfont icon-github" target="_blank" rel="noopener"> </a>
-        
-            <a href="mailto:1928099560@qq.com" title="email" class="iconfont icon-email" target="_blank" rel="noopener"> </a>
-        
-		<a href="#" class="iconfont icon-null"></a>
-	</p>
-	
-    <p id="copyright">
-        &copy; 2025 Jiaxuan Liu.
-        <span> | </span>Powered by <a href="https://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a>
-        <span> | </span>Theme <a href="https://github.com/Fechin/hexo-theme-diaspora" title="Diaspora" target="_blank" rel="noopener">Diaspora</a> by Fechin
-		
-    </p>
-</div>
+    <!-- 分类页面模板 -->
+<div class="category-container">
+  <!-- 顶部留白区域 -->
+  <div class="category-header-space"></div>
 
-  <div id="container" class="gradient">
-    
-    <div id="screen">
-        <div id="mark">
-            <div class="layer" data-depth="0.4">
-                <img src="/img/welcome.jpg" id="cover" crossorigin="anonymous" width="1920" height="1080">
-            </div>
-        </div>
-        <div id="vibrant">
-            <svg viewbox="0 0 2880 1620" height="100%" preserveaspectratio="xMaxYMax slice">
-                <polygon opacity="0.7" points="2000,1620 0,1620 0,0 600,0 " />
-            </svg>
-            <div></div>
-        </div>
-        <div id="header">
-            <div>
-                <a href="/"
-                    style="position: relative; display: inline-block; padding: 1; font-size: 40px; color:white; font-family: 'Youyuan';">刘家炫的博客</a>
-                
-                        <div class="iconfont icon-menu switchmenu"></div>
-            </div>
-        </div>
-        
-            <div id="post0">
-                <p>六月 19, 2025</p>
-                <h2>
-                    <a href="/2025/06/19/redis_single_thread_model_discussion/" title="关于 Redis 单线程模型的探讨" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">关于 Redis 单线程模型的探讨</a>
-                </h2>
-                <p class="summary">
-众所周知，Redis 底层使用的是单线程结构，Redis 底层之所以选择这种结构肯定是有原因的，其中最重要的就莫...</p>
-            </div>
-            
+  <!-- 分类标题（带装饰性图标） -->
+  <div class="category-title-wrapper">
+    <h2 class="category-title">
+      <svg class="icon" viewBox="0 0 24 24" width="24" height="24">
+        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+      </svg>
+      <span class="category-name">非关系型数据库</span>
+      <span class="post-count">3篇</span>
+    </h2>
+    <div class="title-decoration"></div>
+  </div>
 
-    </div>
-      <div id="primary">
-        
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/06/17/commonly_used_data_types_in_redis/" 
-       title="Redis 常见数据类型"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.png" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>六月 17, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/06/17/commonly_used_data_types_in_redis/" title="Redis 常见数据类型" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 常见数据类型</a></h3>
-        
-        <p>Redis 中五种最常用的数据类型
-
-
-数据类型
-内部编码
-编码说明
-
-
-
-String
-raw
-动态字符串，存储大于 44 字节的长文本（Redis 7...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/06/16/redis_command_line_user_guide/" 
-       title="Redis 命令行使用指南"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>六月 16, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/06/16/redis_command_line_user_guide/" title="Redis 命令行使用指南" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 命令行使用指南</a></h3>
-        
-        <p>Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
-12345678set key value（设置键值对）example:127.0...</p>
-    </div>
-</div>
-
-
-      </div>
+  <!-- 文章列表容器（带悬浮效果） -->
+  <div class="post-list-container">
+    <ul class="category-post-list">
       
-  </div>
-  <div id="preview"></div>
-  
-
-
-      <!DOCTYPE html>
-<html>
-<head>
-<style>
-  .gradient {
-    position: relative;
-    background: linear-gradient(-45deg,
-      rgba(255, 182, 193, 0.5),
-      rgba(255, 105, 180, 0.5),
-      rgba(173, 216, 230, 0.5),
-      rgba(100, 149, 237, 0.5)
-    );
-    background-size: 400% 400%;
-    animation: gradientBG 7s ease infinite alternate;
-    overflow: hidden;
-  }
-
-  /* 粒子光点样式 */
-  .gradient::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at var(--x, 50%) var(--y, 50%), 
-      rgba(255, 255, 255, 0.25) 0%, 
-      transparent 25%
-    );
-    transition: background 0.3s ease-out;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-  }
-
-  @keyframes gradientBG {
-    0% { background-position: 0% 50%; }
-    70% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-</style>
-</head>
-<body>
-  <div class="gradient"></div>
-
-  <script>
-    // 全局监听鼠标位置（即使在浏览器外）
-    document.addEventListener('mousemove', (e) => {
-      document.documentElement.style.setProperty('--x', `${e.clientX}px`);
-      document.documentElement.style.setProperty('--y', `${e.clientY}px`);
-    });
-
-    // 鼠标离开视窗时复位到中心
-    document.addEventListener('mouseleave', () => {
-      document.documentElement.style.setProperty('--x', '50%');
-      document.documentElement.style.setProperty('--y', '50%');
-    });
-
-    // 初始化居中
-    document.documentElement.style.setProperty('--x', '50%');
-    document.documentElement.style.setProperty('--y', '50%');
-  </script>
-</body>
-</html>
- -->
- 
-<!-- 移除原先的 #top 和文章列表，改为分类目录结构 -->
-<div class="category-container" style="padding-top: 120px">
-  <!-- 分类标题 -->
-  <h2 class="category-title">🗂️ 分类：非关系型数据库</h2>
-
-  <!-- 分类文章列表（卡片式布局） -->
-  <div class="category-post-list">
-    
-      <article class="category-post-item">
-        <h3>
-          <a href="/2025/06/19/redis_single_thread_model_discussion/">关于 Redis 单线程模型的探讨</a>
-        </h3>
-        <div class="post-meta">
-          <time>2025-06-19</time>
+        <li class="post-item">
+          <!-- 文章标题（带悬停动画） -->
+          <a href="/2025/06/19/redis_single_thread_model_discussion/" class="post-title">
+            <span class="title-text">关于 Redis 单线程模型的探讨</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </a>
           
-            <span>·</span>
+          <!-- 元信息（日期+标签） -->
+          <div class="post-meta">
+            <time class="post-date">
+              <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+              </svg>
+              2025-06-19
+            </time>
             
-              <a href="/tags/Redis/" class="tag">#Redis</a>
             
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
+              <div class="post-tags">
+                
+                  <a href="/tags/Redis/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    Redis
+                  </a>
+                
+                  <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    数据库
+                  </a>
+                
+                  <a href="/tags/%E5%BA%95%E5%B1%82/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    底层
+                  </a>
+                
+                  <a href="/tags/%E6%80%A7%E8%83%BD/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    性能
+                  </a>
+                
+              </div>
             
-              <a href="/tags/%E5%BA%95%E5%B1%82/" class="tag">#底层</a>
-            
-              <a href="/tags/%E6%80%A7%E8%83%BD/" class="tag">#性能</a>
-            
+          </div>
+        </li>
+      
+        <li class="post-item">
+          <!-- 文章标题（带悬停动画） -->
+          <a href="/2025/06/17/commonly_used_data_types_in_redis/" class="post-title">
+            <span class="title-text">Redis 常见数据类型</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </a>
           
-        </div>
-      </article>
-    
-      <article class="category-post-item">
-        <h3>
-          <a href="/2025/06/17/commonly_used_data_types_in_redis/">Redis 常见数据类型</a>
-        </h3>
-        <div class="post-meta">
-          <time>2025-06-17</time>
+          <!-- 元信息（日期+标签） -->
+          <div class="post-meta">
+            <time class="post-date">
+              <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+              </svg>
+              2025-06-17
+            </time>
+            
+            
+              <div class="post-tags">
+                
+                  <a href="/tags/Redis/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    Redis
+                  </a>
+                
+                  <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    数据库
+                  </a>
+                
+                  <a href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    键值对
+                  </a>
+                
+                  <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    数据结构
+                  </a>
+                
+              </div>
+            
+          </div>
+        </li>
+      
+        <li class="post-item">
+          <!-- 文章标题（带悬停动画） -->
+          <a href="/2025/06/16/redis_command_line_user_guide/" class="post-title">
+            <span class="title-text">Redis 命令行使用指南</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </a>
           
-            <span>·</span>
+          <!-- 元信息（日期+标签） -->
+          <div class="post-meta">
+            <time class="post-date">
+              <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+              </svg>
+              2025-06-16
+            </time>
             
-              <a href="/tags/Redis/" class="tag">#Redis</a>
             
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
+              <div class="post-tags">
+                
+                  <a href="/tags/Redis/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    Redis
+                  </a>
+                
+                  <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    数据库
+                  </a>
+                
+                  <a href="/tags/%E5%91%BD%E4%BB%A4%E6%8C%87%E5%AF%BC/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    命令指导
+                  </a>
+                
+              </div>
             
-              <a href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" class="tag">#键值对</a>
-            
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" class="tag">#数据结构</a>
-            
-          
-        </div>
-      </article>
-    
-      <article class="category-post-item">
-        <h3>
-          <a href="/2025/06/16/redis_command_line_user_guide/">Redis 命令行使用指南</a>
-        </h3>
-        <div class="post-meta">
-          <time>2025-06-16</time>
-          
-            <span>·</span>
-            
-              <a href="/tags/Redis/" class="tag">#Redis</a>
-            
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" class="tag">#数据库</a>
-            
-              <a href="/tags/%E5%91%BD%E4%BB%A4%E6%8C%87%E5%AF%BC/" class="tag">#命令指导</a>
-            
-          
-        </div>
-      </article>
-    
+          </div>
+        </li>
+      
+    </ul>
   </div>
 </div>
-
 
 </body>
 

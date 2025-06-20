@@ -315,7 +315,7 @@ int
 </tr>
 </tbody></table>
 <p>下面就来一一介绍这五种常见常用的数据类型</p>
-<h2 id="String"><a href="#String" class="headerlink" title="String"></a>String</h2><h3 id="类型简介"><a href="#类型简介" class="headerlink" title="类型简介"></a>类型简介</h3><p>不同于 C++ 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h2 id="一、String"><a href="#一、String" class="headerlink" title="一、String"></a>一、String</h2><h3 id="类型简介"><a href="#类型简介" class="headerlink" title="类型简介"></a>类型简介</h3><p>不同于 C++ 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
 <h3 id="相关指令"><a href="#相关指令" class="headerlink" title="相关指令"></a>相关指令</h3><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; lpush k2 <span class="number">11</span> <span class="number">22</span> <span class="number">33</span></span><br><span class="line">(integer) <span class="number">3</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">get <span class="title">k2</span></span></span><br><span class="line"><span class="function"><span class="params">(error)</span> WRONGTYPE Operation against a key holding the wrong kind of value</span></span><br></pre></td></tr></table></figure>
 
@@ -790,12 +790,15 @@ int
   }
 
   /* 新增：黑白模式样式 */
-  .dark-mode,
-  .dark-mode *:not(button):not(input):not(textarea):not(a) {
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a) {
     color: #e0e0e0 !important;
     /* 浅色文字 */
     border-color: #444 !important;
     /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
   }
 
   /* ===== 基础样式（亮色模式） ===== */
