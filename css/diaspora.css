@@ -614,6 +614,54 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
   fill: #3498db;
 }
 
+/* 分类列表容器 - 改为竖向排列 */
+.category-list {
+  display: block; /* 取消 flex 布局 */
+}
+
+/* 单个分类项 - 添加间距和边框（可选） */
+.category-item {
+  margin-bottom: 10px;  /* 项与项之间的垂直间距 */
+  padding: 8px 12px;
+  border-left: 3px solid #336699; /* 左侧装饰线 */
+  background: #f8f8f8;  /* 背景色（可选） */
+}
+
+/* 分类链接样式 */
+.category-item a {
+  color: #333;
+  text-decoration: none;
+}
+
+/* 分类链接样式 */
+.category-link {
+  display: block;
+  padding: 8px 15px;
+  margin: 5px 0;
+  transition: all 0.3s;
+}
+.category-link:hover {
+  background: #f8f8f8;
+  transform: translateX(5px);
+}
+.category-count {
+  float: right;
+  color: #999;
+}
+
+/* 分类文章列表 */
+.category-posts {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  margin-top: 50px;
+}
+
+.category-header {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
 
 .post-list {
   background: white;
@@ -644,15 +692,6 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 .post-item h2 a:hover {
   color: #42b983;
   text-decoration: underline;
-}
-
-.post-meta {
-  font-size: 0.9rem;
-  color: #7f8c8d;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 .tag {
