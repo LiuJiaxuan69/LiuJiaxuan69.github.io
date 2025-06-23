@@ -207,7 +207,7 @@
 <p>首先得明确，Redis 的高效率是同其他数据库对比而言的<br>1、Redis 管理数据采用的是内存，内存的速度应该是无需多言的吧，对于每个数据处理请求都可以非常快速地完成<br>2、Redis 中的指令不像 MySQL 等关系型数据库，有着复杂的操作命令，如多表连接查询等等时间复杂度可以达到 O(N)以上，Redis中的命令都是简单明了的，不会有<br>高时间复杂度的查询或操作命令，因此也不会因为某些复杂的操作命令导致资源较长时间占用从而导致线程阻塞<br>3、Redis 采用的是单线程框架，它利用了内存访问快不太占用CPU资源的特性以及单线程不用担心线程安全问题的优点，大大提高了其访问效率<br>4、Redis 采用了IO多路转接技术，这种技术可以帮助 Redis 高效处理多客户端请求，通过IO多路转接技术避免了接受用户请求的忙等待，进而提高了效率</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
-            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="true">
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
             </audio>
             
