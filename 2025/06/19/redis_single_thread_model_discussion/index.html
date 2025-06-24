@@ -41,6 +41,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
 <meta name="generator" content="Hexo 7.3.0"></head>
 <script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
 
@@ -650,7 +653,7 @@
   }
 
   /* 新增：黑白模式样式 */
-  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a) {
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
     color: #e0e0e0 !important;
     /* 浅色文字 */
     border-color: #444 !important;
@@ -794,6 +797,24 @@
     background: rgba(255, 255, 255, 0.2);
     color: var(--text-color);
   }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #000 !important; /* 文字 */
+}
 </style>
 </body>
 
