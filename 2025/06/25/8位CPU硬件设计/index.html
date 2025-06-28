@@ -1,0 +1,1731 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>8位CPU硬件设计 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="设计概要如下：
+设计要求：1、通用寄存器8位，ALU 8位，内部数据总线8位。2、支持4个8位通用寄存器R0、R1、R2和R3。3、标志寄存器（FLAGS或者PSW）应至少有CF和ZF标志位。4、指,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="8位CPU硬件设计 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="设计概要如下：
+设计要求：1、通用寄存器8位，ALU 8位，内部数据总线8位。2、支持4个8位通用寄存器R0、R1、R2和R3。3、标志寄存器（FLAGS或者PSW）应至少有CF和ZF标志位。4、指,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="8位CPU硬件设计 - 刘家炫的博客"/>
+    <meta property="og:description" content="设计概要如下：
+设计要求：1、通用寄存器8位，ALU 8位，内部数据总线8位。2、支持4个8位通用寄存器R0、R1、R2和R3。3、标志寄存器（FLAGS或者PSW）应至少有CF和ZF标志位。4、指,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">8位CPU硬件设计</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">8位CPU硬件设计</h1>
+        <div class="stuff">
+            <span>六月 25, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/8bit/" rel="tag">8bit</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/CPU/" rel="tag">CPU</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Quartus2/" rel="tag">Quartus2</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%80%A7%E8%83%BD/" rel="tag">性能</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <p>设计概要如下：</p>
+<p>设计要求：<br>1、通用寄存器8位，ALU 8位，内部数据总线8位。<br>2、支持4个8位通用寄存器R0、R1、R2和R3。<br>3、标志寄存器（FLAGS或者PSW）应至少有CF和ZF标志位。<br>4、指令长度8位（指令操作码4位，指令操作数合计4位），指令寄存器IR 8位，程序（指令）计数器PC 8位。<br>5、至少支持下列指令：MOV、ADD、SUB、AND、OR、NOT、XOR和RTN，其中RTN指令用于将PC清零，即返回程序第一条指令重新开始执行。<br>6、设计SHL、SHR等移位指令。<br>7、设计LD、ST等内存数据读写指令。<br>8、可选设计JMP、JZ、JNZ等跳转指令。<br>9、可以具备基本的通用寄存器监控功能用于调试程序。<br>10、考虑与硬件外设连接的扩展设计能力。</p>
+<p>在设计一个通用8位 CPU 之前，首先需要考虑的是如何设计一个 CPU 物理结构图，这里我们先建设一个简易的物理逻辑框架出来：</p>
+<p><img src="/img/CPU_8bit/8bit_CPU.png" alt="CPU_8bit"><br><strong>（注：本结构图中的所有总线输出信号在实现中不会直接有CU去控制，而是转化为由最上层的顶层模块去控制他们，因为若不由*最上层模块去控制总线输出，会导致 Quartus2 在综合时将这些有可能触发的总线冲突的模块全部优化掉）</strong></p>
+<h2 id="基于这个框架图，我们将依次设计各个部件的模块逻辑"><a href="#基于这个框架图，我们将依次设计各个部件的模块逻辑" class="headerlink" title="基于这个框架图，我们将依次设计各个部件的模块逻辑"></a><strong>基于这个框架图，我们将依次设计各个部件的模块逻辑</strong></h2><h3 id="一、PC模块设计"><a href="#一、PC模块设计" class="headerlink" title="一、PC模块设计"></a>一、PC模块设计</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> PC(</span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="keyword">input</span>         pc_inc,       <span class="comment">// PC是否自增</span></span><br><span class="line">    <span class="keyword">input</span>         reset,</span><br><span class="line">    (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] databus       <span class="comment">// 统一数据总线</span></span><br><span class="line">);</span><br><span class="line">    <span class="comment">// reg [7:0] cur_pc;     // 当前程序计数器值</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//PC自增寄存器</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] next_pc;</span><br><span class="line">    <span class="keyword">wire</span> co;</span><br><span class="line">    <span class="comment">// 三态总线驱动（完全由外部控制）</span></span><br><span class="line">    Adder PCInc(</span><br><span class="line">        <span class="variable">.op1</span>(databus),</span><br><span class="line">        <span class="variable">.op2</span>(<span class="number">8&#x27;h01</span>),</span><br><span class="line">        <span class="variable">.suben</span>(<span class="number">0</span>),</span><br><span class="line">        <span class="variable">.sum</span>(next_pc),</span><br><span class="line">        <span class="variable">.co</span>(co)</span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// 输出到总线</span></span><br><span class="line">    <span class="comment">// assign databus = cur_pc; // 当pc_out为1时，输出当前PC值，否则为高阻态</span></span><br><span class="line">    <span class="comment">// PC核心逻辑</span></span><br><span class="line">    <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk <span class="keyword">or</span> <span class="keyword">posedge</span> reset) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span> (reset)              <span class="comment">// PC置零</span></span><br><span class="line">            databus &lt;= <span class="number">8&#x27;h00</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (pc_inc)        <span class="comment">// PC自增</span></span><br><span class="line">            databus &lt;= next_pc;</span><br><span class="line">        <span class="keyword">else</span> databus &lt;= databus;  <span class="comment">// PC不变（无信号）</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>PC信号指示图：<br><img src="/img/CPU_8bit/PC_1.png" alt="PC"></p>
+<p>输入端有时钟信号，而通过 PC 逻辑图我们可以看出，PC 需要两个（出去输出信号），一个是控制 PC 自增的信号，一个是让 PC 计数器清零的信号，这两个信号均有CU模块控制</p>
+<p>而在 PC 内部，PC 模块需要有一个 add 模块用于计算 PC 自增后的下一个数是多少，这个加法逻辑单元直接服用 ALU 模块中的加法器即可</p>
+<p>PC 的信号输出由 always 模块去控制，当到达时钟上升沿或者 reset 信号上升沿（reset变为1）的时候，就会触发 PC 内部值的改变，若遇到 reset 信号，则将输出总线数据置零，若<br>遇到 pc_inc 信号为1，则将 PC 早已算好的 next_pc 传给 总线输出单元，PC 单元的值会再次传递给加法器 Adder 的输入，因为 Adder 为组合电路，因此，几乎在同一时刻 PC 的next_pc会<br>再次计算好，等待 PC 接收到下一个 pc_inc 信号</p>
+<h3 id="二、ALU模块设计"><a href="#二、ALU模块设计" class="headerlink" title="二、ALU模块设计"></a>二、ALU模块设计</h3><p>代码总体设计如下：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> ALU(databus,inbus,clk,alua_in,alub_in,sel,cf);</span><br><span class="line">  (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] databus;       <span class="comment">// 统一数据总线</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>] inbus;</span><br><span class="line">  <span class="keyword">input</span> clk;</span><br><span class="line">  <span class="keyword">input</span> alua_in;</span><br><span class="line">  <span class="keyword">input</span> alub_in;</span><br><span class="line">  <span class="keyword">input</span>[<span class="number">2</span>:<span class="number">0</span>] sel;</span><br><span class="line">  <span class="keyword">output</span> cf;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">wire</span>[<span class="number">7</span>:<span class="number">0</span>] op1;</span><br><span class="line">  <span class="keyword">wire</span>[<span class="number">7</span>:<span class="number">0</span>] op2;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] result;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">  OPReg A(clk,alua_in,inbus,op1);</span><br><span class="line">    OPReg B(clk, alub_in,inbus,op2);</span><br><span class="line">  ALUCore u1(op1,op2,sel,result,cf);</span><br><span class="line">  <span class="comment">// OutputBufReg R(clk,result,alu_out,databus);</span></span><br><span class="line">    <span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line"></span><br><span class="line">      databus&lt;=result;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> OPReg(clk,we,din,dout);</span><br><span class="line">  <span class="keyword">input</span> clk;</span><br><span class="line">  <span class="keyword">input</span> we;</span><br><span class="line">  <span class="keyword">input</span>[<span class="number">7</span>:<span class="number">0</span>] din;</span><br><span class="line">  <span class="keyword">output</span>[<span class="number">7</span>:<span class="number">0</span>] dout;</span><br><span class="line">  <span class="keyword">reg</span>[<span class="number">7</span>:<span class="number">0</span>] dout;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span>(we==<span class="number">1&#x27;b1</span>)</span><br><span class="line">    <span class="keyword">begin</span></span><br><span class="line">      dout &lt;= din;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> ALUCore(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op1,</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op2,</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">2</span>:<span class="number">0</span>]  sel,    <span class="comment">// 扩展为3位操作码</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] result,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       cf</span><br><span class="line">);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加法器接口</span></span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] adder_op1;</span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] adder_op2;</span><br><span class="line">    <span class="keyword">reg</span> suben;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] adder_sum;</span><br><span class="line">    <span class="keyword">wire</span> adder_cout;</span><br><span class="line">    </span><br><span class="line">    Adder u1(adder_op2, adder_op1, suben, adder_sum, adder_cout);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(sel)</span><br><span class="line">            <span class="comment">// 算术运算</span></span><br><span class="line">            <span class="number">3&#x27;b000</span>, <span class="number">3&#x27;b001</span>: <span class="keyword">begin</span>  <span class="comment">// 加法/减法</span></span><br><span class="line">                <span class="comment">// 汇编代码其实是左源右目标，所以反过来放</span></span><br><span class="line">                adder_op1 = op1;</span><br><span class="line">                adder_op2 = op2;</span><br><span class="line">                suben = sel[<span class="number">0</span>];</span><br><span class="line">                result = adder_sum;</span><br><span class="line">                cf = adder_cout;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b010</span>: <span class="keyword">begin</span>  <span class="comment">// 左移</span></span><br><span class="line">                adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不需要减法</span></span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不产生进位</span></span><br><span class="line">                <span class="comment">// if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin</span></span><br><span class="line">                <span class="comment">//     result = 8&#x27;b0; // 左移后全零</span></span><br><span class="line">                <span class="comment">// end else begin</span></span><br><span class="line">                result = op2 &lt;&lt; op1;</span><br><span class="line">                <span class="comment">// end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b011</span>: <span class="keyword">begin</span>  <span class="comment">// 右移</span></span><br><span class="line">                adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不需要减法</span></span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不产生进位</span></span><br><span class="line">                <span class="comment">// if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin</span></span><br><span class="line">                <span class="comment">//     result = 8&#x27;b0; // 右移后全零</span></span><br><span class="line">                <span class="comment">// end else begin</span></span><br><span class="line">                result = op2 &gt;&gt; op1;</span><br><span class="line">                <span class="comment">// end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="comment">// 逻辑运算</span></span><br><span class="line">            <span class="number">3&#x27;b100</span>: <span class="keyword">begin</span>  <span class="comment">// 与（AND）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 &amp; op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;  <span class="comment">// 逻辑运算清零CF</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b101</span>: <span class="keyword">begin</span>  <span class="comment">// 或（OR）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 | op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b110</span>: <span class="keyword">begin</span>  <span class="comment">// 与非（NAND）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = ~(op1 &amp; op2);</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b111</span>: <span class="keyword">begin</span>  <span class="comment">// 异或（XOR）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 ^ op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> Adder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op1,     <span class="comment">// 操作数1</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op2,     <span class="comment">// 操作数2</span></span><br><span class="line">    <span class="keyword">input</span>        suben,   <span class="comment">// 减法使能（1=减法）</span></span><br><span class="line">    <span class="keyword">output</span> [<span class="number">7</span>:<span class="number">0</span>] sum,     <span class="comment">// 和/差结果</span></span><br><span class="line">    <span class="keyword">output</span>       co       <span class="comment">// 进位/借位</span></span><br><span class="line">);</span><br><span class="line">    <span class="comment">// 减法转换为补码加法</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] adj_op2 = op2 ^ &#123;<span class="number">8</span>&#123;suben&#125;&#125;;</span><br><span class="line">    <span class="keyword">wire</span> cin = suben;     <span class="comment">// 减法时cin=1（补码+1）</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生成位（Generate）和传播位（Propagate）</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] G = op1 &amp; adj_op2;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] P = op1 ^ adj_op2;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 超前进位计算（分组优化）</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] C;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = cin;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4位组间进位（关键优化点）</span></span><br><span class="line">    <span class="keyword">wire</span> C4 = G[<span class="number">3</span>] | (P[<span class="number">3</span>] &amp; G[<span class="number">2</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | </span><br><span class="line">              (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">4</span>] = C4;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">5</span>] = G[<span class="number">4</span>] | (P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">6</span>] = G[<span class="number">5</span>] | (P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">7</span>] = G[<span class="number">6</span>] | (P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最终进位和结果</span></span><br><span class="line">    <span class="keyword">assign</span> co = suben ^ (G[<span class="number">7</span>] | (P[<span class="number">7</span>] &amp; G[<span class="number">6</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | </span><br><span class="line">                (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4));</span><br><span class="line">    <span class="keyword">assign</span> sum = P ^ C;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>ALu信号指示图：<br><img src="/img/CPU_8bit/ALU_1.png" alt="ALU"></p>
+<p>• <strong>ALU总体顶部模块实现</strong></p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> ALU(databus,inbus,clk,alua_in,alub_in,sel,cf);</span><br><span class="line">  (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] databus;       <span class="comment">// 统一数据总线</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>] inbus;</span><br><span class="line">  <span class="keyword">input</span> clk;</span><br><span class="line">  <span class="keyword">input</span> alua_in;</span><br><span class="line">  <span class="keyword">input</span> alub_in;</span><br><span class="line">  <span class="keyword">input</span>[<span class="number">2</span>:<span class="number">0</span>] sel;</span><br><span class="line">  <span class="keyword">output</span> cf;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">wire</span>[<span class="number">7</span>:<span class="number">0</span>] op1;</span><br><span class="line">  <span class="keyword">wire</span>[<span class="number">7</span>:<span class="number">0</span>] op2;</span><br><span class="line">  <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] result;</span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">  OPReg A(clk,alua_in,inbus,op1);</span><br><span class="line">    OPReg B(clk, alub_in,inbus,op2);</span><br><span class="line">  ALUCore u1(op1,op2,sel,result,cf);</span><br><span class="line">  <span class="comment">// OutputBufReg R(clk,result,alu_out,databus);</span></span><br><span class="line">    <span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line"></span><br><span class="line">      databus&lt;=result;</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>输入端口包含如下：<br>inbus：用于接受数据总线上面的数据，与 alua_in、alub_in、sel 信号配合使用<br>alua_in：用于接受数据总线上面的操作数 a 的数据（四位操作数）<br>alub_in：用于接受数据总线上面的操作数 b 的数据（思维操作数）<br>sel：用于接受数据总线上面的操作符 sel 的数据（3为操作码）<br>cf：进位标识符，若想扩展进位信号，只需要新建一个寄存器将输入与 cf 连接即可</p>
+<p>输出端口包含如下：<br>op1：输入缓冲寄存器（OPReg A）接受数据后将数据输出给计算核心（ALUCore）的输出线路<br>op2：输入缓冲寄存器（OPReg B）接受数据后将数据输出给计算核心（ALUCore）的输出线路<br>result：计算核心（ALUCore）计算结果后的输出线路</p>
+<p>• <strong>ALU输入缓冲寄存器</strong></p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> OPReg(clk,we,din,dout);</span><br><span class="line">  <span class="keyword">input</span> clk;</span><br><span class="line">  <span class="keyword">input</span> we;</span><br><span class="line">  <span class="keyword">input</span>[<span class="number">7</span>:<span class="number">0</span>] din;</span><br><span class="line">  <span class="keyword">output</span>[<span class="number">7</span>:<span class="number">0</span>] dout;</span><br><span class="line">  <span class="keyword">reg</span>[<span class="number">7</span>:<span class="number">0</span>] dout;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk)</span><br><span class="line">  <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span>(we==<span class="number">1&#x27;b1</span>)</span><br><span class="line">    <span class="keyword">begin</span></span><br><span class="line">      dout &lt;= din;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>当 we 使能信号为有效时，将总线上面的数据锁存起来，结构较为简单，不再赘述</p>
+<p>• <strong>加法器实现</strong></p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> Adder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op1,     <span class="comment">// 操作数1</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op2,     <span class="comment">// 操作数2</span></span><br><span class="line">    <span class="keyword">input</span>        suben,   <span class="comment">// 减法使能（1=减法）</span></span><br><span class="line">    <span class="keyword">output</span> [<span class="number">7</span>:<span class="number">0</span>] sum,     <span class="comment">// 和/差结果</span></span><br><span class="line">    <span class="keyword">output</span>       co       <span class="comment">// 进位/借位</span></span><br><span class="line">);</span><br><span class="line">    <span class="comment">// 减法转换为补码加法</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] adj_op2 = op2 ^ &#123;<span class="number">8</span>&#123;suben&#125;&#125;;</span><br><span class="line">    <span class="keyword">wire</span> cin = suben;     <span class="comment">// 减法时cin=1（补码+1）</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 生成位（Generate）和传播位（Propagate）</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] G = op1 &amp; adj_op2;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] P = op1 ^ adj_op2;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 超前进位计算（分组优化）</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] C;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = cin;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4位组间进位（关键优化点）</span></span><br><span class="line">    <span class="keyword">wire</span> C4 = G[<span class="number">3</span>] | (P[<span class="number">3</span>] &amp; G[<span class="number">2</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | </span><br><span class="line">              (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">4</span>] = C4;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">5</span>] = G[<span class="number">4</span>] | (P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">6</span>] = G[<span class="number">5</span>] | (P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">7</span>] = G[<span class="number">6</span>] | (P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最终进位和结果</span></span><br><span class="line">    <span class="keyword">assign</span> co = suben ^ (G[<span class="number">7</span>] | (P[<span class="number">7</span>] &amp; G[<span class="number">6</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | </span><br><span class="line">                (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4));</span><br><span class="line">    <span class="keyword">assign</span> sum = P ^ C;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>输入输出如注释所示，下面介绍一下该加法器的加减二路选择功能以及串并联混用逻辑：</p>
+<p>超前进位计算技术介绍：</p>
+<p>若我们在加法计算中每一位都通过上一位的数据以及是否需要进位来判断下一位是否需要进位，那么我们所设计的电路就是8路串行，串行效率是不如并行的，首先串行代码应当如下：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assign</span> C[<span class="number">0</span>] = cin;</span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; cin);       <span class="comment">// 第0位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; C[<span class="number">0</span>]);      <span class="comment">// 第1位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; C[<span class="number">1</span>]);      <span class="comment">// 第2位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">4</span>] = G[<span class="number">3</span>] | (P[<span class="number">3</span>] &amp; C[<span class="number">2</span>]);      <span class="comment">// 第3位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">5</span>] = G[<span class="number">4</span>] | (P[<span class="number">4</span>] &amp; C[<span class="number">3</span>]);      <span class="comment">// 第4位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">6</span>] = G[<span class="number">5</span>] | (P[<span class="number">5</span>] &amp; C[<span class="number">4</span>]);      <span class="comment">// 第5位进位</span></span><br><span class="line"><span class="keyword">assign</span> C[<span class="number">7</span>] = G[<span class="number">6</span>] | (P[<span class="number">6</span>] &amp; C[<span class="number">5</span>]);      <span class="comment">// 第6位进位</span></span><br><span class="line"><span class="keyword">assign</span> co = G[<span class="number">7</span>] | (P[<span class="number">7</span>] &amp; C[<span class="number">6</span>]);      <span class="comment">// 第7位进位</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>（注意）：C[i]表示的是第i位是否需要进位</strong></p>
+<p>显然，我们是可以将 C[i] 的内容直接套到 C[i + 1] 里面去的，这样就不需要在知道 C[i] 后才能知道，当然，也不可能说八个电路全都用并联法去连接，咱的逻辑单元本来就不富裕，要是<br>到后期发现逻辑单元不够用了将其改成8路串联甚至是一种优化</p>
+<p>因此我们将电路改为4路并联2路串联，就变成了一下这种形式：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] C;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = cin;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 4位组间进位（关键优化点）</span></span><br><span class="line">    <span class="keyword">wire</span> C4 = G[<span class="number">3</span>] | (P[<span class="number">3</span>] &amp; G[<span class="number">2</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | </span><br><span class="line">              (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; C[<span class="number">0</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">4</span>] = C4;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">5</span>] = G[<span class="number">4</span>] | (P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">6</span>] = G[<span class="number">5</span>] | (P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">7</span>] = G[<span class="number">6</span>] | (P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 最终进位和结果</span></span><br><span class="line">    <span class="keyword">assign</span> co = suben ^ (G[<span class="number">7</span>] | (P[<span class="number">7</span>] &amp; G[<span class="number">6</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; G[<span class="number">5</span>]) | </span><br><span class="line">                (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; G[<span class="number">4</span>]) | (P[<span class="number">7</span>] &amp; P[<span class="number">6</span>] &amp; P[<span class="number">5</span>] &amp; P[<span class="number">4</span>] &amp; C4));</span><br></pre></td></tr></table></figure>
+
+<p>至于这个加法器是如何兼顾减法操作的，若不清楚建议跳转至这篇文章，查看最下面的<br>部分，有详细解答：<a href="https://liujiaxuan69.github.io/2025/06/23/simulated_vending_machine/" title="跳转到自动售货机">自动售货机</a></p>
+<p>• <strong>算数核心实现</strong></p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> ALUCore(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op1,</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  op2,</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">2</span>:<span class="number">0</span>]  sel,    <span class="comment">// 扩展为3位操作码</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] result,</span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>       cf</span><br><span class="line">);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加法器接口</span></span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] adder_op1;</span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] adder_op2;</span><br><span class="line">    <span class="keyword">reg</span> suben;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] adder_sum;</span><br><span class="line">    <span class="keyword">wire</span> adder_cout;</span><br><span class="line">    </span><br><span class="line">    Adder u1(adder_op2, adder_op1, suben, adder_sum, adder_cout);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(sel)</span><br><span class="line">            <span class="comment">// 算术运算</span></span><br><span class="line">            <span class="number">3&#x27;b000</span>, <span class="number">3&#x27;b001</span>: <span class="keyword">begin</span>  <span class="comment">// 加法/减法</span></span><br><span class="line">                <span class="comment">// 汇编代码其实是左源右目标，所以反过来放</span></span><br><span class="line">                adder_op1 = op1;</span><br><span class="line">                adder_op2 = op2;</span><br><span class="line">                suben = sel[<span class="number">0</span>];</span><br><span class="line">                result = adder_sum;</span><br><span class="line">                cf = adder_cout;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b010</span>: <span class="keyword">begin</span>  <span class="comment">// 左移</span></span><br><span class="line">                adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不需要减法</span></span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不产生进位</span></span><br><span class="line">                <span class="comment">// if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin</span></span><br><span class="line">                <span class="comment">//     result = 8&#x27;b0; // 左移后全零</span></span><br><span class="line">                <span class="comment">// end else begin</span></span><br><span class="line">                result = op2 &lt;&lt; op1;</span><br><span class="line">                <span class="comment">// end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b011</span>: <span class="keyword">begin</span>  <span class="comment">// 右移</span></span><br><span class="line">                adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不需要减法</span></span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>; <span class="comment">// 左移不产生进位</span></span><br><span class="line">                <span class="comment">// if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin</span></span><br><span class="line">                <span class="comment">//     result = 8&#x27;b0; // 右移后全零</span></span><br><span class="line">                <span class="comment">// end else begin</span></span><br><span class="line">                result = op2 &gt;&gt; op1;</span><br><span class="line">                <span class="comment">// end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="comment">// 逻辑运算</span></span><br><span class="line">            <span class="number">3&#x27;b100</span>: <span class="keyword">begin</span>  <span class="comment">// 与（AND）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 &amp; op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;  <span class="comment">// 逻辑运算清零CF</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b101</span>: <span class="keyword">begin</span>  <span class="comment">// 或（OR）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 | op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b110</span>: <span class="keyword">begin</span>  <span class="comment">// 与非（NAND）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = ~(op1 &amp; op2);</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b111</span>: <span class="keyword">begin</span>  <span class="comment">// 异或（XOR）</span></span><br><span class="line">        adder_op1 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                adder_op2 = <span class="number">8&#x27;b0</span>;</span><br><span class="line">                suben = <span class="number">1&#x27;b0</span>;</span><br><span class="line">                result = op1 ^ op2;</span><br><span class="line">                cf = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>功能表如下：</p>
+<table>
+<thead>
+<tr>
+<th>操作码 (sel)</th>
+<th>运算类型</th>
+<th>功能描述</th>
+<th>操作数处理 (<code>op1</code>, <code>op2</code>)</th>
+<th>结果 (<code>result</code>)</th>
+<th>进位标志 (<code>cf</code>)</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>3&#39;b000</code></td>
+<td>算术运算</td>
+<td>加法 (<code>op1 + op2</code>)</td>
+<td><code>adder_op1 = op1</code><br><code>adder_op2 = op2</code></td>
+<td><code>adder_sum</code></td>
+<td><code>adder_cout</code></td>
+<td>直接调用加法器</td>
+</tr>
+<tr>
+<td><code>3&#39;b001</code></td>
+<td>算术运算</td>
+<td>减法 (<code>op1 - op2</code>)</td>
+<td><code>adder_op1 = op1</code><br><code>adder_op2 = op2</code><br><code>suben = 1</code></td>
+<td><code>adder_sum</code></td>
+<td><code>suben ^ adder_cout</code></td>
+<td>补码减法，借位取反</td>
+</tr>
+<tr>
+<td><code>3&#39;b010</code></td>
+<td>移位运算</td>
+<td>左移 (<code>op2 &lt;&lt; op1</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>op2 &lt;&lt; op1</code></td>
+<td><code>1&#39;b0</code></td>
+<td>移位位数由 <code>op1</code> 指定</td>
+</tr>
+<tr>
+<td><code>3&#39;b011</code></td>
+<td>移位运算</td>
+<td>右移 (<code>op2 &gt;&gt; op1</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>op2 &gt;&gt; op1</code></td>
+<td><code>1&#39;b0</code></td>
+<td>逻辑右移</td>
+</tr>
+<tr>
+<td><code>3&#39;b100</code></td>
+<td>逻辑运算</td>
+<td>与 (<code>op1 &amp; op2</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>op1 &amp; op2</code></td>
+<td><code>1&#39;b0</code></td>
+<td>按位与</td>
+</tr>
+<tr>
+<td><code>3&#39;b101</code></td>
+<td>逻辑运算</td>
+<td>或 (<code>op1 | op2</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>op1 | op2</code></td>
+<td><code>1&#39;b0</code></td>
+<td>按位或</td>
+</tr>
+<tr>
+<td><code>3&#39;b110</code></td>
+<td>逻辑运算</td>
+<td>与非 (<code>~(op1 &amp; op2)</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>~(op1 &amp; op2)</code></td>
+<td><code>1&#39;b0</code></td>
+<td>按位与非</td>
+</tr>
+<tr>
+<td><code>3&#39;b111</code></td>
+<td>逻辑运算</td>
+<td>异或 (<code>op1 ^ op2</code>)</td>
+<td>忽略加法器输入</td>
+<td><code>op1 ^ op2</code></td>
+<td><code>1&#39;b0</code></td>
+<td>按位异或</td>
+</tr>
+</tbody></table>
+<p>加法和减法运算使用的是加法器实现的，因此，也只有这两个命令是需要传递 adder_op1 和 adder_op2 以及 cf 进位标识的，其他情况直接使用 传进来的 op 计算即可，但需要<br>注意的是，其他逻辑运算虽然不需要操控 cf、adder_op1 以及 adder_op2 了，但仍然需要给他们赋值，不然模块会将这些无法实时确定的单元设置为寄存器单元，会导致组合电路<br>时序化</p>
+<h3 id="三、寄存器组模块设计"><a href="#三、寄存器组模块设计" class="headerlink" title="三、寄存器组模块设计"></a>三、寄存器组模块设计</h3><h4 id="模块设计"><a href="#模块设计" class="headerlink" title="模块设计"></a>模块设计</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> reg_file(</span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="comment">// 双地址总线接口</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">2</span>:<span class="number">0</span>]  t_addrbus,    <span class="comment">// 目标地址总线</span></span><br><span class="line">  </span><br><span class="line">    (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>]  databus0, <span class="comment">// 双向数据总线（dMDR与寄存器组之间交互线）</span></span><br><span class="line">    (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>]  databus1, <span class="comment">// 双向数据总线（dMDR与寄存器组之间交互线）</span></span><br><span class="line">    (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>]  databus2, <span class="comment">// 双向数据总线（dMDR与寄存器组之间交互线）</span></span><br><span class="line">    (* keep, preserve *)<span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>]  databus3, <span class="comment">// 双向数据总线（dMDR与寄存器组之间交互线）</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>]  inbus <span class="comment">// 输入数据总线（来自ALU或其他模块）</span></span><br><span class="line">);</span><br><span class="line">  </span><br><span class="line">    <span class="comment">//------------------------------------------</span></span><br><span class="line">    <span class="comment">// 同步写逻辑</span></span><br><span class="line">    <span class="comment">//------------------------------------------</span></span><br><span class="line">    <span class="keyword">always</span> @(<span class="keyword">negedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        <span class="comment">// 目标寄存器写入（地址有效时）</span></span><br><span class="line">        <span class="keyword">if</span> (t_addrbus[<span class="number">2</span>] == <span class="number">1&#x27;b0</span>) <span class="keyword">begin</span>  <span class="comment">// 最高位=0时有效</span></span><br><span class="line">            <span class="keyword">case</span> (t_addrbus[<span class="number">1</span>:<span class="number">0</span>]) <span class="comment">// 低2位选择寄存器</span></span><br><span class="line">                <span class="number">2&#x27;d0</span>: databus0 &lt;= inbus; <span class="comment">// R0</span></span><br><span class="line">                <span class="number">2&#x27;d1</span>: databus1 &lt;= inbus; <span class="comment">// R1</span></span><br><span class="line">                <span class="number">2&#x27;d2</span>: databus2 &lt;= inbus; <span class="comment">// R2</span></span><br><span class="line">                <span class="number">2&#x27;d3</span>: databus3 &lt;= inbus; <span class="comment">// R3</span></span><br><span class="line">            <span class="keyword">endcase</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h4><p>寄存器组模块包含4个8位通用寄存器(R0-R3)，采用多总线架构设计：</p>
+<ol>
+<li><p><strong>输入接口</strong>：</p>
+<ul>
+<li><code>inbus</code>：8位输入数据总线，接收来自ALU或其他模块的数据</li>
+<li><code>t_addrbus</code>：3位目标地址总线，用于选择要写入的寄存器</li>
+</ul>
+</li>
+<li><p><strong>输出接口</strong>：</p>
+<ul>
+<li><code>databus0-3</code>：4个8位双向数据总线，分别对应R0-R3寄存器的输出</li>
+</ul>
+</li>
+<li><p><strong>核心逻辑</strong>：</p>
+<ul>
+<li>寄存器写入操作在时钟下降沿(<code>negedge clk</code>)触发</li>
+<li>地址解码规则：<ul>
+<li><code>t_addrbus[2]</code>为地址有效标志(0&#x3D;有效)</li>
+<li><code>t_addrbus[1:0]</code>选择具体寄存器：<ul>
+<li><code>2&#39;b00</code>：R0</li>
+<li><code>2&#39;b01</code>：R1</li>
+<li><code>2&#39;b10</code>：R2</li>
+<li><code>2&#39;b11</code>：R3</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>数据流向</strong>：</p>
+<ul>
+<li>写入时：<code>inbus</code>数据在时钟下降沿写入选定寄存器</li>
+<li>读取时：寄存器值持续输出到对应的<code>databus</code>上</li>
+</ul>
+</li>
+</ol>
+<h3 id="四、指令存储器模块设计"><a href="#四、指令存储器模块设计" class="headerlink" title="四、指令存储器模块设计"></a>四、指令存储器模块设计</h3><h4 id="模块设计-1"><a href="#模块设计-1" class="headerlink" title="模块设计"></a>模块设计</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> inst_mem(</span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]  pc_addr,       <span class="comment">// 程序计数器地址输入</span></span><br><span class="line">    <span class="keyword">output</span>  <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>]  databus       <span class="comment">// 数据总线输出</span></span><br><span class="line">);</span><br><span class="line">    <span class="comment">// 存储器配置 - 明确为ROM</span></span><br><span class="line">    (* preserve *)(* romstyle = <span class="string">&quot;M9K&quot;</span> *) <span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] memory [<span class="number">0</span>:<span class="number">255</span>];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">initial</span> <span class="keyword">begin</span></span><br><span class="line">    <span class="built_in">$readmemb</span>(<span class="string">&quot;program.hex&quot;</span>, memory); <span class="comment">// 覆盖初始化</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 同步读取</span></span><br><span class="line">    <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        databus &lt;= memory[pc_addr]; <span class="comment">// 输出到总线</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="工作原理-1"><a href="#工作原理-1" class="headerlink" title="工作原理"></a>工作原理</h4><p>指令存储器模块是一个256×8位的只读存储器(ROM)，用于存储程序指令：</p>
+<ol>
+<li><p><strong>输入接口</strong>：</p>
+<ul>
+<li><code>pc_addr</code>：8位地址输入，来自程序计数器(PC)</li>
+<li><code>clk</code>：系统时钟信号</li>
+</ul>
+</li>
+<li><p><strong>输出接口</strong>：</p>
+<ul>
+<li><code>databus</code>：8位数据输出总线，输出当前地址对应的指令</li>
+</ul>
+</li>
+<li><p><strong>核心逻辑</strong>：</p>
+<ul>
+<li>存储器在时钟上升沿(<code>posedge clk</code>)同步读取数据</li>
+<li>根据<code>pc_addr</code>的值从ROM中取出对应地址的指令</li>
+<li>取出的指令通过<code>databus</code>输出</li>
+</ul>
+</li>
+<li><p><strong>初始化方式</strong>：</p>
+<ul>
+<li>使用<code>$readmemb</code>系统任务从”program.hex”文件加载程序</li>
+<li>存储器被综合为FPGA的M9K存储块</li>
+</ul>
+</li>
+</ol>
+<h3 id="五、主存模块"><a href="#五、主存模块" class="headerlink" title="五、主存模块"></a>五、主存模块</h3><h4 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h4><p>主存系统采用分层设计，由外层包装模块(DataMemoryWrap)和内层存储核心(DataMemory)组成，实现了一个16×8位的RAM存储器系统，具有双地址总线接口和灵活的数据通路控制。</p>
+<h4 id="外层包装模块-DataMemoryWrap"><a href="#外层包装模块-DataMemoryWrap" class="headerlink" title="外层包装模块(DataMemoryWrap)"></a>外层包装模块(DataMemoryWrap)</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> DataMemoryWrap(</span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="comment">// 双地址总线接口</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">2</span>:<span class="number">0</span>]  s_addrbus,    <span class="comment">// 源地址总线</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">2</span>:<span class="number">0</span>]  t_addrbus,    <span class="comment">// 目标地址总线</span></span><br><span class="line">    (* keep, preserve *) <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">7</span>:<span class="number">0</span>]  databus,      <span class="comment">// 双向数据总线</span></span><br><span class="line">    <span class="keyword">input</span> [<span class="number">7</span>:<span class="number">0</span>] inbus, <span class="comment">// 输入数据总线</span></span><br><span class="line">    <span class="comment">// 控制信号</span></span><br><span class="line">    <span class="keyword">input</span>       dmdr_iin     <span class="comment">// dMDR输入使能</span></span><br><span class="line">);</span><br><span class="line">    <span class="comment">// [内部信号和DataMemory实例化]</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="功能特点"><a href="#功能特点" class="headerlink" title="功能特点"></a>功能特点</h5><ol>
+<li><p><strong>双地址总线接口</strong>：</p>
+<ul>
+<li><code>s_addrbus</code>：源地址总线(3位)</li>
+<li><code>t_addrbus</code>：目标地址总线(3位)</li>
+<li>地址<code>3&#39;b100</code>专用于内存访问</li>
+</ul>
+</li>
+<li><p><strong>数据通路控制</strong>：</p>
+<ul>
+<li><code>databus</code>：双向数据总线(8位)，作为内存数据寄存器(MDR)</li>
+<li><code>inbus</code>：输入数据总线(8位)，来自ALU或其他模块</li>
+</ul>
+</li>
+<li><p><strong>控制信号</strong>：</p>
+<ul>
+<li><code>dmdr_iin</code>：MDR输入使能信号，控制数据加载</li>
+</ul>
+</li>
+</ol>
+<h5 id="工作原理-2"><a href="#工作原理-2" class="headerlink" title="工作原理"></a>工作原理</h5><ol>
+<li><p><strong>内存访问识别</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> mem_as_target = (t_addrbus == <span class="number">3&#x27;b100</span>); <span class="comment">// 内存作为写入目标</span></span><br><span class="line"><span class="keyword">wire</span> mem_as_source = (s_addrbus == <span class="number">3&#x27;b100</span>); <span class="comment">// 内存作为读取源</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>内存接口连接</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assign</span> mem_addr = inbus; <span class="comment">// 地址来自输入总线</span></span><br><span class="line"><span class="keyword">assign</span> mem_we = mem_as_target; <span class="comment">// 写使能信号</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>数据流控制</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(<span class="keyword">negedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (dmdr_iin)</span><br><span class="line">        databus &lt;= inbus; <span class="comment">// 从总线加载到MDR</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (mem_as_source &amp;&amp; ~mem_we)</span><br><span class="line">        databus &lt;= mem_dout; <span class="comment">// 从内存读取到MDR</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="内层存储核心-DataMemory"><a href="#内层存储核心-DataMemory" class="headerlink" title="内层存储核心(DataMemory)"></a>内层存储核心(DataMemory)</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> DataMemory(</span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]  addr,</span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]  din,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">7</span>:<span class="number">0</span>]  dout,</span><br><span class="line">    <span class="keyword">input</span>         we</span><br><span class="line">);</span><br><span class="line">    (* ramstyle = <span class="string">&quot;no_rw_check, logic&quot;</span> *)</span><br><span class="line">    (* keep, preserve *)<span class="keyword">reg</span> [<span class="number">7</span>:<span class="number">0</span>] memory [<span class="number">0</span>:<span class="number">15</span>];</span><br><span class="line">    <span class="comment">// [初始化与读写逻辑]</span></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="存储结构"><a href="#存储结构" class="headerlink" title="存储结构"></a>存储结构</h5><ol>
+<li><p><strong>存储容量</strong>：</p>
+<ul>
+<li>16×8位RAM存储器</li>
+<li>使用FPGA逻辑单元实现(<code>ramstyle</code>属性指定)</li>
+</ul>
+</li>
+<li><p><strong>初始化方式</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">initial</span> <span class="keyword">begin</span></span><br><span class="line">    <span class="built_in">$readmemb</span>(<span class="string">&quot;data.hex&quot;</span>, memory); <span class="comment">// 从文件加载初始数据</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h5 id="读写操作"><a href="#读写操作" class="headerlink" title="读写操作"></a>读写操作</h5><ol>
+<li><p><strong>写入时序</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">    <span class="keyword">if</span> (we) <span class="keyword">begin</span></span><br><span class="line">        memory[addr[<span class="number">3</span>:<span class="number">0</span>]] &lt;= din; <span class="comment">// 同步写入</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>读取特性</strong>：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assign</span> dout = memory[addr[<span class="number">3</span>:<span class="number">0</span>]]; <span class="comment">// 异步读取</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="系统协作流程"><a href="#系统协作流程" class="headerlink" title="系统协作流程"></a>系统协作流程</h4><ol>
+<li><p><strong>内存写入操作</strong>：</p>
+<ul>
+<li>CU设置<code>t_addrbus=3&#39;b100</code>标识内存为目标</li>
+<li>地址通过<code>inbus</code>送入<code>mem_addr</code></li>
+<li>数据通过<code>databus</code>送入内存</li>
+<li>时钟上升沿完成写入</li>
+</ul>
+</li>
+<li><p><strong>内存读取操作</strong>：</p>
+<ul>
+<li>CU设置<code>s_addrbus=3&#39;b100</code>标识内存为源</li>
+<li>地址通过<code>inbus</code>送入<code>mem_addr</code></li>
+<li>数据在下一个时钟下降沿锁存到<code>databus</code></li>
+</ul>
+</li>
+<li><p><strong>MDR加载操作</strong>：</p>
+<ul>
+<li>当<code>dmdr_iin</code>有效时，<code>inbus</code>数据在时钟下降沿加载到<code>databus</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="六、指令寄存器模块"><a href="#六、指令寄存器模块" class="headerlink" title="六、指令寄存器模块"></a>六、指令寄存器模块</h3><h4 id="模块设计-2"><a href="#模块设计-2" class="headerlink" title="模块设计"></a>模块设计</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> IR (</span><br><span class="line">    <span class="comment">// 系统信号</span></span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 双向数据总线接口</span></span><br><span class="line">    (* keep, preserve *) <span class="keyword">output</span> <span class="keyword">reg</span>  [<span class="number">7</span>:<span class="number">0</span>]  databus,</span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">7</span>:<span class="number">0</span>]  inbus,        <span class="comment">// 输入数据总线（来自ALU或其他模块）</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 控制信号</span></span><br><span class="line">    <span class="keyword">input</span>         ir_in,        <span class="comment">// 从总线加载指令（上升沿有效）</span></span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 译码输出</span></span><br><span class="line">    (* keep *)<span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>]  opcode,       <span class="comment">// 高4位操作码 -&gt; CU（存在3位操作码）</span></span><br><span class="line">    (* keep *)<span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>]  operand       <span class="comment">// 低4位操作数 -&gt; CU（存在5位操作数为立即数）</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h4 id="工作原理-3"><a href="#工作原理-3" class="headerlink" title="工作原理"></a>工作原理</h4><p>指令寄存器(IR)是CPU中用于暂存当前执行指令的关键组件，具有指令锁存和译码输出功能：</p>
+<ol>
+<li><p><strong>输入接口</strong>：</p>
+<ul>
+<li><code>inbus</code>：8位输入数据总线，接收来自指令存储器的指令</li>
+<li><code>ir_in</code>：控制信号，上升沿有效时加载新指令</li>
+</ul>
+</li>
+<li><p><strong>输出接口</strong>：</p>
+<ul>
+<li><code>databus</code>：8位双向数据总线，可输出当前指令</li>
+<li><code>opcode</code>：4位操作码输出（指令高4位）</li>
+<li><code>operand</code>：4位操作数输出（指令低4位）</li>
+</ul>
+</li>
+<li><p><strong>核心逻辑</strong>：</p>
+<ul>
+<li>在<code>ir_in</code>信号的上升沿将<code>inbus</code>上的指令锁存到内部寄存器</li>
+<li>锁存的指令持续输出到<code>opcode</code>和<code>operand</code>供控制单元(CU)译码</li>
+<li>当前指令可通过<code>databus</code>输出到数据总线</li>
+</ul>
+</li>
+</ol>
+<h4 id="关键特性"><a href="#关键特性" class="headerlink" title="关键特性"></a>关键特性</h4><ol>
+<li><p><strong>指令锁存</strong>：严格在控制信号上升沿锁存指令，确保指令稳定性</p>
+</li>
+<li><p><strong>实时译码</strong>：持续输出操作码和操作数字段，减少控制单元译码延迟</p>
+</li>
+<li><p><strong>双向接口</strong>：既可从总线加载指令，也可将当前指令输出到总线</p>
+</li>
+<li><p><strong>位宽优化</strong>：支持4位操作码和4位操作数输出，满足基本指令集需求</p>
+</li>
+</ol>
+<h4 id="典型工作流程"><a href="#典型工作流程" class="headerlink" title="典型工作流程"></a>典型工作流程</h4><ol>
+<li><p><strong>取指阶段</strong>：</p>
+<ul>
+<li>指令存储器将指令送至<code>inbus</code></li>
+<li>CU发出<code>ir_in</code>脉冲信号</li>
+<li>在<code>ir_in</code>上升沿，指令被锁存到IR</li>
+</ul>
+</li>
+<li><p><strong>译码阶段</strong>：</p>
+<ul>
+<li>锁存的指令自动分离为<code>opcode</code>和<code>operand</code></li>
+<li>控制单元根据<code>opcode</code>生成控制信号</li>
+<li><code>operand</code>直接用于执行单元或地址计算</li>
+</ul>
+</li>
+<li><p><strong>指令输出</strong>：</p>
+<ul>
+<li>当需要重新发送当前指令时，IR通过<code>databus</code>输出</li>
+</ul>
+</li>
+</ol>
+<h4 id="信号时序说明"><a href="#信号时序说明" class="headerlink" title="信号时序说明"></a>信号时序说明</h4><table>
+<thead>
+<tr>
+<th>信号</th>
+<th>触发条件</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ir_in</td>
+<td>上升沿</td>
+<td>锁存新指令到IR</td>
+</tr>
+<tr>
+<td>opcode</td>
+<td>持续输出</td>
+<td>当前指令的高4位操作码</td>
+</tr>
+<tr>
+<td>operand</td>
+<td>持续输出</td>
+<td>当前指令的低4位操作数</td>
+</tr>
+<tr>
+<td>databus</td>
+<td>由外部控制</td>
+<td>输出当前指令内容</td>
+</tr>
+</tbody></table>
+<h4 id="设计特点"><a href="#设计特点" class="headerlink" title="设计特点"></a>设计特点</h4><ol>
+<li><p><strong>同步加载</strong>：所有指令加载操作严格同步于控制信号上升沿</p>
+</li>
+<li><p><strong>低延迟译码</strong>：操作码和操作数字段持续输出，无需额外时钟周期</p>
+</li>
+<li><p><strong>灵活接口</strong>：支持指令回读功能，便于实现复杂指令流程</p>
+</li>
+<li><p><strong>资源优化</strong>：仅实现必要功能，保持硬件实现简洁高效</p>
+</li>
+</ol>
+<h3 id="七、CU模块"><a href="#七、CU模块" class="headerlink" title="七、CU模块"></a>七、CU模块</h3><p>这个模块应该是整个 CPU 中最重要的模块了，需要根据指令表来译码，其中指令表如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">编号</th>
+<th align="left">编码(二进制)</th>
+<th align="left">汇编指令</th>
+<th align="left">操作</th>
+<th align="center">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">0</td>
+<td align="left"><code>0000xxyy</code></td>
+<td align="left">mov rx, ry</td>
+<td align="left">ry   &lt;&#x3D; rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="left"><code>0001xxyy</code></td>
+<td align="left">mov rx, (ry)</td>
+<td align="left">(ry) &lt;&#x3D; rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="left"><code>001iiiii</code></td>
+<td align="left">mov i</td>
+<td align="left">r0   &lt;&#x3D; i</td>
+<td align="center">隐含目的操作数<code>r0</code>，i的高3位补0</td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="left"><code>010iiiii</code></td>
+<td align="left">mov (i)</td>
+<td align="left">r0   &lt;&#x3D; (i)</td>
+<td align="center">隐含目的操作数<code>r0</code>，i的高3位补0</td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="left"><code>0110xxyy</code></td>
+<td align="left">mov (rx), ry</td>
+<td align="left">ry   &lt;&#x3D; (rx)</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">5</td>
+<td align="left"><code>01110000</code></td>
+<td align="left">rtn</td>
+<td align="left">PC   &lt;&#x3D; 0</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">6</td>
+<td align="left"><code>1000xxyy</code></td>
+<td align="left">and rx, ry</td>
+<td align="left">ry   &lt;&#x3D; rx &amp; ry</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">7</td>
+<td align="left"><code>1001xxyy</code></td>
+<td align="left">or  rx, ry</td>
+<td align="left">ry   &lt;&#x3D; rx | ry</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">8</td>
+<td align="left"><code>101000xx</code></td>
+<td align="left">not rx</td>
+<td align="left">rx   &lt;&#x3D; ~rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">9</td>
+<td align="left"><code>1011xxyy</code></td>
+<td align="left">xor rx, ry</td>
+<td align="left">ry   &lt;&#x3D; rx ^ ry</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">13</td>
+<td align="left"><code>1100xxyy</code></td>
+<td align="left">shl rx, ry</td>
+<td align="left">ry &lt;&#x3D; ry &lt;&lt; rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">11</td>
+<td align="left"><code>1101xxyy</code></td>
+<td align="left">add rx, ry</td>
+<td align="left">ry &lt;&#x3D; ry + rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td align="left"><code>1110xxyy</code></td>
+<td align="left">shr rx, ry</td>
+<td align="left">ry &lt;&#x3D; ry &gt;&gt; rx</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">12</td>
+<td align="left"><code>1111xxyy</code></td>
+<td align="left">sub rx, ry</td>
+<td align="left">ry &lt;&#x3D; ry - rx</td>
+<td align="center"></td>
+</tr>
+</tbody></table>
+<p>模块实现如下：</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> CU (</span><br><span class="line">    <span class="comment">// 时钟与复位</span></span><br><span class="line">    <span class="keyword">input</span>         clk,</span><br><span class="line">    <span class="keyword">input</span>         rst,          <span class="comment">// 全局复位信号</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 指令接口</span></span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">3</span>:<span class="number">0</span>]  opcode,</span><br><span class="line">    <span class="keyword">input</span>  [<span class="number">3</span>:<span class="number">0</span>]  operand,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 程序地址总线控制</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>      pc_reset,       <span class="comment">// PC清零</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        pc_out,         <span class="comment">// PC地址输出使能</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        pc_inc,         <span class="comment">// PC自增</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 指令寄存器总线控制</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        iMDRout,        <span class="comment">// iMDR写入总线</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 寄存器组总线控制</span></span><br><span class="line">    <span class="comment">// ALU总线控制</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        ALUAin,         <span class="comment">// ALU数据A输入</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        ALUBin,         <span class="comment">// ALU数据B输入</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        ALUout,         <span class="comment">// ALU数据输出</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]  ALUop,          <span class="comment">// ALU操作选择</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 数据存储器总线控制</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        dmdr_iin,       <span class="comment">// dMDR和总线输入使能</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        dmdr_iout,      <span class="comment">// dMDR和总线输出使能（数据总线输出）</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        ir_in,          <span class="comment">// 从总线加载指令（上升沿有效）</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span>        imm_out,        <span class="comment">// 立即数输出（低五位）</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]  s_addrbus,      <span class="comment">// 源地址选择</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>]  t_addrbus       <span class="comment">// 目标地址选择</span></span><br><span class="line"></span><br><span class="line">);</span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">2</span>:<span class="number">0</span>] cur_sta;</span><br><span class="line">    <span class="keyword">reg</span> fetch1_wait; <span class="comment">// 等待信号</span></span><br><span class="line">    <span class="keyword">parameter</span> </span><br><span class="line">        FETCH1   = <span class="number">3&#x27;b000</span>,</span><br><span class="line">        FETCH2   = <span class="number">3&#x27;b001</span>,</span><br><span class="line">        EXEC1    = <span class="number">3&#x27;b010</span>,</span><br><span class="line">        EXEC2    = <span class="number">3&#x27;b011</span>,</span><br><span class="line">        EXEC3    = <span class="number">3&#x27;b100</span>,</span><br><span class="line">        EXEC4    = <span class="number">3&#x27;b101</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// reg double_clk;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// always @(posedge clk) begin</span></span><br><span class="line">    <span class="comment">//     double_clk &lt;= ~double_clk;</span></span><br><span class="line">    <span class="comment">// end</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">always</span> @(<span class="keyword">negedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span> (cur_sta)</span><br><span class="line">            <span class="comment">// 取指阶段</span></span><br><span class="line">            FETCH1: <span class="keyword">begin</span></span><br><span class="line">                pc_out &lt;= <span class="number">1</span>;            <span class="comment">// PC输出至数据总线</span></span><br><span class="line">                s_addrbus &lt;= <span class="number">3&#x27;b110</span>;    <span class="comment">// 指令存储器读取指令</span></span><br><span class="line">                t_addrbus &lt;= <span class="number">3&#x27;b111</span>;    <span class="comment">// 无目标地址</span></span><br><span class="line">                <span class="keyword">if</span> (fetch1_wait) <span class="keyword">begin</span></span><br><span class="line">                    fetch1_wait &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 取指等待信号复位</span></span><br><span class="line">                    cur_sta &lt;= FETCH1; <span class="comment">// 保持在FETCH1状态</span></span><br><span class="line">                <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">                    cur_sta &lt;= FETCH2;    <span class="comment">// 状态转移到FETCH2</span></span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            FETCH2: <span class="keyword">begin</span></span><br><span class="line">                pc_out &lt;= <span class="number">0</span>;            <span class="comment">// PC停止总线输出</span></span><br><span class="line">                s_addrbus &lt;= <span class="number">3&#x27;b111</span>;    <span class="comment">// 停止指令存储器读取指令</span></span><br><span class="line">                iMDRout &lt;= <span class="number">1</span>;           <span class="comment">// 指令数据存储器输出数据至总线</span></span><br><span class="line">                ir_in &lt;= <span class="number">1</span>;             <span class="comment">// 指令寄存器从总线中读取指令</span></span><br><span class="line">                pc_inc &lt;= <span class="number">1</span>;            <span class="comment">// PC自增</span></span><br><span class="line">                cur_sta &lt;= EXEC1;    <span class="comment">// 状态转移到EXEC1</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            EXEC1: <span class="keyword">begin</span></span><br><span class="line">                pc_inc &lt;= <span class="number">0</span>;            <span class="comment">// PC停止自增</span></span><br><span class="line">                iMDRout &lt;= <span class="number">0</span>;           <span class="comment">// 指令数据存储器停止输出数据至总线</span></span><br><span class="line">                ir_in &lt;= <span class="number">0</span>;             <span class="comment">// 指令寄存器停止读取指令</span></span><br><span class="line">                </span><br><span class="line">                <span class="comment">// Start</span></span><br><span class="line">                <span class="keyword">case</span> (opcode)</span><br><span class="line">                    <span class="comment">// move rx, ry step1(move)</span></span><br><span class="line">                    <span class="number">4&#x27;b0000</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">3</span>:<span class="number">2</span>]&#125;;    <span class="comment">// rx发送数据信息至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;   <span class="comment">// ry接受数据总线上的数据信息</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move rx, (ry) step1(间接寻址)</span></span><br><span class="line">                    <span class="number">4&#x27;b0001</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">3</span>:<span class="number">2</span>]&#125;;    <span class="comment">// rx发送数据信息至数据总线</span></span><br><span class="line">                        dmdr_iin &lt;= <span class="number">1</span>;                        <span class="comment">// MDR接收总线数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move i step1(move)</span></span><br><span class="line">                    <span class="number">4&#x27;b0010</span>, <span class="number">4&#x27;b0011</span>: <span class="keyword">begin</span></span><br><span class="line">                        imm_out &lt;= <span class="number">1</span>;                        <span class="comment">// IR输出立即数至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b000</span>;                 <span class="comment">// R0存储立即数</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (i) step1(间接寻址)</span></span><br><span class="line">                    <span class="number">4&#x27;b0100</span>, <span class="number">4&#x27;b0101</span>: <span class="keyword">begin</span></span><br><span class="line">                        imm_out &lt;= <span class="number">1</span>;                        <span class="comment">// 立即数写入数据总线</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b100</span>;                 <span class="comment">// 主存根据立即数访存</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (rx), ry step1(间接寻址)</span></span><br><span class="line">                    <span class="number">4&#x27;b0110</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">3</span>:<span class="number">2</span>]&#125;;    <span class="comment">// rx输出地址数据至数据总线</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// rtn step1(rtn)</span></span><br><span class="line">                    <span class="number">4&#x27;b0111</span>: <span class="keyword">begin</span></span><br><span class="line">                        pc_reset &lt;= <span class="number">1</span>;                       <span class="comment">// PC清零</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// and/or/xor/add/sub/shl/shr rx ry step1(alua &lt;= rx)</span></span><br><span class="line">                    <span class="number">4&#x27;b1000</span>, <span class="number">4&#x27;b1001</span>, <span class="number">4&#x27;b1011</span>, <span class="number">4&#x27;b1101</span>, <span class="number">4&#x27;b1111</span>, <span class="number">4&#x27;b1100</span>, <span class="number">4&#x27;b1110</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">3</span>:<span class="number">2</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="keyword">default</span>: cur_sta &lt;= cur_sta;</span><br><span class="line">                <span class="keyword">endcase</span></span><br><span class="line">                cur_sta &lt;= EXEC2;    <span class="comment">// 状态转移到EXEC2</span></span><br><span class="line"></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            EXEC2: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">case</span> (opcode)</span><br><span class="line">                    <span class="comment">// move rx, ry endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0000</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b111</span>;</span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b111</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move rx, (ry) step2(move)</span></span><br><span class="line">                    <span class="number">4&#x27;b0001</span>: <span class="keyword">begin</span></span><br><span class="line">                        dmdr_iin &lt;= <span class="number">0</span>;                        <span class="comment">// MDR停止接收总线数据</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;    <span class="comment">// ry发送地址信息至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b100</span>;                 <span class="comment">// 通过总线数据地址信息将对应内存数据存至dMDR</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move i endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0010</span>, <span class="number">4&#x27;b0011</span>: <span class="keyword">begin</span></span><br><span class="line">                        imm_out &lt;= <span class="number">0</span>;                        <span class="comment">// IR停止输出立即数至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b111</span>;                 <span class="comment">// R0停止存储立即数</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (i) step2(move)</span></span><br><span class="line">                    <span class="number">4&#x27;b0100</span>, <span class="number">4&#x27;b0101</span>: <span class="keyword">begin</span></span><br><span class="line">                        imm_out &lt;= <span class="number">0</span>;                        <span class="comment">// 停止立即数输出</span></span><br><span class="line">                        dmdr_iout &lt;= <span class="number">1</span>;                      <span class="comment">// 主存输出数据至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b000</span>;                 <span class="comment">// R0接受数据总线上的数据</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b100</span>;                 <span class="comment">// 停止主存地址发送数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (rx), ry step2(move)</span></span><br><span class="line">                    <span class="number">4&#x27;b0110</span>: <span class="keyword">begin</span></span><br><span class="line">                        dmdr_iout &lt;= <span class="number">1</span>;                      <span class="comment">// dMDR输出数据至数据总线</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b100</span>; <span class="comment">// 主存根据地址数据总线访存</span></span><br><span class="line">                        t_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;; <span class="comment">// ry接受数据总线上的数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// rtn endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0111</span>: <span class="keyword">begin</span></span><br><span class="line">                        pc_reset &lt;= <span class="number">0</span>;                       <span class="comment">// PC停止清零</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// and rx ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1000</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b100</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// or rx ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1001</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b101</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// xor rx ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1011</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b111</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// not ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1010</span>:  <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b110</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// shl rx, ry (alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1100</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b010</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// and rx ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1101</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b000</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// shr rx ry(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1110</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b011</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// sub rx ry step2(alub &lt;= ry)</span></span><br><span class="line">                    <span class="number">4&#x27;b1111</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;</span><br><span class="line">                        ALUAin &lt;= <span class="number">0</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">1</span>;</span><br><span class="line">                        ALUop  &lt;= <span class="number">3&#x27;b001</span>;</span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="keyword">default</span>: cur_sta &lt;= cur_sta;</span><br><span class="line">                <span class="keyword">endcase</span></span><br><span class="line">                <span class="comment">// 状态转移到EXEC3</span></span><br><span class="line">                cur_sta &lt;= EXEC3;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            EXEC3: <span class="keyword">begin</span></span><br><span class="line">                <span class="keyword">case</span> (opcode)</span><br><span class="line">                    <span class="comment">// move rx, (ry) endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0001</span>: <span class="keyword">begin</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b111</span>;                      <span class="comment">// 停止源地址发送数据  </span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b111</span>;                 <span class="comment">// 停止目标地址接受数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (i) endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0100</span>, <span class="number">4&#x27;b0101</span>: <span class="keyword">begin</span></span><br><span class="line">                        dmdr_iout &lt;= <span class="number">0</span>;                          <span class="comment">// 主存停止输出数据至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b111</span>;                     <span class="comment">// R0停止接受数据总线上的数据</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b111</span>;                     <span class="comment">// 停止源地址发送数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// move (rx), ry endstep</span></span><br><span class="line">                    <span class="number">4&#x27;b0110</span>: <span class="keyword">begin</span></span><br><span class="line">                        dmdr_iout &lt;= <span class="number">0</span>;                          <span class="comment">// dMDR停止输出数据至数据总线</span></span><br><span class="line">                        t_addrbus &lt;= <span class="number">3&#x27;b111</span>;                     <span class="comment">// ry停止接受数据总线上的数据</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b111</span>;                     <span class="comment">// 停止源地址发送数据</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="comment">// and/or/xor/add/sub/shl/shr rx ry step3 (result &lt;= databus)</span></span><br><span class="line">                    <span class="number">4&#x27;b1000</span>, <span class="number">4&#x27;b1001</span>, <span class="number">4&#x27;b1010</span>, <span class="number">4&#x27;b1011</span>, <span class="number">4&#x27;b1101</span>, <span class="number">4&#x27;b1111</span>, <span class="number">4&#x27;b1100</span>, <span class="number">4&#x27;b1110</span>: <span class="keyword">begin</span></span><br><span class="line">                        <span class="comment">//clear</span></span><br><span class="line">                        s_addrbus &lt;= <span class="number">3&#x27;b111</span>;</span><br><span class="line">                        ALUBin &lt;= <span class="number">0</span>;</span><br><span class="line">                        <span class="comment">//operate</span></span><br><span class="line">                        ALUout &lt;= <span class="number">1</span>;                         </span><br><span class="line">                        t_addrbus &lt;= &#123;<span class="number">1&#x27;b0</span>, operand[<span class="number">1</span>:<span class="number">0</span>]&#125;;        <span class="comment">// 计算结果写入ry</span></span><br><span class="line">                    <span class="keyword">end</span></span><br><span class="line">                    <span class="keyword">default</span>: cur_sta &lt;= cur_sta;</span><br><span class="line">                    <span class="keyword">endcase</span></span><br><span class="line">                <span class="comment">// 状态转移到EXEC4</span></span><br><span class="line">                cur_sta &lt;= EXEC4;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            EXEC4: <span class="keyword">begin</span></span><br><span class="line">            <span class="keyword">case</span> (opcode)</span><br><span class="line">            <span class="comment">// (and/or/not/xor/add/sub/shl/shr rx ry) / add/sub i endstep</span></span><br><span class="line">            <span class="number">4&#x27;b1000</span>, <span class="number">4&#x27;b1001</span>, <span class="number">4&#x27;b1010</span>, <span class="number">4&#x27;b1011</span>, <span class="number">4&#x27;b1100</span>, <span class="number">4&#x27;b1101</span>, <span class="number">4&#x27;b1110</span>, <span class="number">4&#x27;b1111</span>, <span class="number">4&#x27;b1100</span>, <span class="number">4&#x27;b1110</span>: <span class="keyword">begin</span></span><br><span class="line">                ALUout &lt;= <span class="number">0</span>;                         </span><br><span class="line">                t_addrbus &lt;= <span class="number">3&#x27;b111</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">default</span>: cur_sta &lt;= cur_sta;</span><br><span class="line">            <span class="keyword">endcase</span></span><br><span class="line">            <span class="comment">// 状态转移到FETCH1</span></span><br><span class="line">            cur_sta &lt;= FETCH1;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (rst) <span class="keyword">begin</span></span><br><span class="line">            cur_sta &lt;= FETCH1; <span class="comment">// 复位时状态机回到FETCH1</span></span><br><span class="line">            pc_reset &lt;= <span class="number">1&#x27;b0</span>;</span><br><span class="line">            pc_out &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// PC输出停止</span></span><br><span class="line">            pc_inc &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// PC自增停止</span></span><br><span class="line">            iMDRout &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 指令存储器输出停止</span></span><br><span class="line">            ALUAin &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// ALU A输入停止</span></span><br><span class="line">            ALUBin &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// ALU B输入停止</span></span><br><span class="line">            ALUout &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// ALU输出停止</span></span><br><span class="line">            ALUop &lt;= <span class="number">3&#x27;b000</span>; <span class="comment">// ALU操作码清零</span></span><br><span class="line">            dmdr_iin &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 数据存储器输入停止</span></span><br><span class="line">            dmdr_iout &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 数据存储器输出停止</span></span><br><span class="line">            ir_in &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 指令寄存器输入停止</span></span><br><span class="line">            imm_out &lt;= <span class="number">1&#x27;b0</span>; <span class="comment">// 立即数输出停止</span></span><br><span class="line">            s_addrbus &lt;= <span class="number">3&#x27;b111</span>; <span class="comment">// 源地址总线置空</span></span><br><span class="line">            t_addrbus &lt;= <span class="number">3&#x27;b111</span>; <span class="comment">// 目标地址总线置空</span></span><br><span class="line">            fetch1_wait &lt;= <span class="number">1&#x27;b1</span>; <span class="comment">// 清除等待状态</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+
+<p>CU模块进行节拍控制，一个周期分为6个节拍，第一个节拍和第二个节拍用于取址，后面的节拍则用于指令处理</p>
+<p>CU以输出信号为主，下面是对于每个信号的介绍，其中每一个信号在上面都介绍过，只不过在其他模块是作为输入信号来使用的，而<br>在CU模块中是作为输出信号来使用的，这个也是毋庸置疑的，因为正是 CU 模块来控制各个单元工作</p>
+<p>其中 cur_sta 用于控制当前处于的节拍状态，一共有6个节拍状态，分别为 FETCH1，FETCH2，EXEC1，EXEC2，EXEC3，EXEC4</p>
+<table>
+<thead>
+<tr>
+<th>节拍状态</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FETCH1</td>
+<td>取指阶段1：PC输出指令地址到总线</td>
+</tr>
+<tr>
+<td>FETCH2</td>
+<td>取指阶段2：指令存储器输出指令到总线并加载到IR</td>
+</tr>
+<tr>
+<td>EXEC1</td>
+<td>执行阶段1：指令译码并准备操作数</td>
+</tr>
+<tr>
+<td>EXEC2</td>
+<td>执行阶段2：执行指令核心操作</td>
+</tr>
+<tr>
+<td>EXEC3</td>
+<td>执行阶段3：处理指令结果</td>
+</tr>
+<tr>
+<td>EXEC4</td>
+<td>执行阶段4：清理状态准备下一条指令</td>
+</tr>
+</tbody></table>
+<p>每个节拍详解如下：</p>
+<table>
+<thead>
+<tr>
+<th>指令类型</th>
+<th>FETCH1</th>
+<th>FETCH2</th>
+<th>EXEC1</th>
+<th>EXEC2</th>
+<th>EXEC3</th>
+<th>EXEC4</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>move rx, ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出到总线<br>ry作为目标</td>
+<td>无操作</td>
+<td>无操作</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>move rx, (ry)</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出到总线<br>MDR接收数据</td>
+<td>ry输出地址<br>内存作为目标</td>
+<td>清理总线信号</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>move i (立即数)</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>立即数输出到总线<br>R0作为目标</td>
+<td>无操作</td>
+<td>无操作</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>move (i) (内存间接)</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>立即数输出到总线<br>内存作为源</td>
+<td>内存数据输出到总线<br>R0作为目标</td>
+<td>清理总线信号</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>move (rx), ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出地址到总线</td>
+<td>内存数据输出到总线<br>ry作为目标</td>
+<td>清理总线信号</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>rtn</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>PC清零</td>
+<td>无操作</td>
+<td>无操作</td>
+<td>无操作</td>
+</tr>
+<tr>
+<td><strong>and&#x2F;or&#x2F;xor rx, ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出到ALU A输入</td>
+<td>ry输出到ALU B输入<br>设置ALU操作码</td>
+<td>ALU结果输出到总线<br>ry作为目标</td>
+<td>清理ALU输出</td>
+</tr>
+<tr>
+<td><strong>not ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>无操作</td>
+<td>ry输出到ALU B输入<br>设置ALU操作码</td>
+<td>ALU结果输出到总线<br>ry作为目标</td>
+<td>清理ALU输出</td>
+</tr>
+<tr>
+<td><strong>add&#x2F;sub rx, ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出到ALU A输入</td>
+<td>ry输出到ALU B输入<br>设置ALU操作码</td>
+<td>ALU结果输出到总线<br>ry作为目标</td>
+<td>清理ALU输出</td>
+</tr>
+<tr>
+<td><strong>shl&#x2F;shr rx, ry</strong></td>
+<td>PC输出地址<br>s_addrbus&#x3D;110</td>
+<td>加载指令到IR<br>PC自增</td>
+<td>rx输出到ALU A输入</td>
+<td>ry输出到ALU B输入<br>设置ALU操作码</td>
+<td>ALU结果输出到总线<br>ry作为目标</td>
+<td>清理ALU输出</td>
+</tr>
+</tbody></table>
+<h4 id="关键控制信号变化"><a href="#关键控制信号变化" class="headerlink" title="关键控制信号变化"></a>关键控制信号变化</h4><h5 id="取指阶段-FETCH1-FETCH2"><a href="#取指阶段-FETCH1-FETCH2" class="headerlink" title="取指阶段(FETCH1-FETCH2)"></a>取指阶段(FETCH1-FETCH2)</h5><table>
+<thead>
+<tr>
+<th>信号</th>
+<th>FETCH1</th>
+<th>FETCH2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>pc_out</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>s_addrbus</td>
+<td>110(指令存储器)</td>
+<td>111(无)</td>
+</tr>
+<tr>
+<td>iMDRout</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>ir_in</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>pc_inc</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody></table>
+<h5 id="通用执行阶段-EXEC1-EXEC4"><a href="#通用执行阶段-EXEC1-EXEC4" class="headerlink" title="通用执行阶段(EXEC1-EXEC4)"></a>通用执行阶段(EXEC1-EXEC4)</h5><table>
+<thead>
+<tr>
+<th>信号</th>
+<th>EXEC1</th>
+<th>EXEC2</th>
+<th>EXEC3</th>
+<th>EXEC4</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ALUAin</td>
+<td>算术指令:1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>ALUBin</td>
+<td>0</td>
+<td>算术指令:1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>ALUout</td>
+<td>0</td>
+<td>0</td>
+<td>算术指令:1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>dmdr_iin</td>
+<td>内存指令:1</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>dmdr_iout</td>
+<td>0</td>
+<td>内存指令:1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h4 id="指令执行特点"><a href="#指令执行特点" class="headerlink" title="指令执行特点"></a>指令执行特点</h4><ol>
+<li><strong>统一取指周期</strong>：所有指令共享相同的FETCH1和FETCH2阶段</li>
+<li><strong>流水线设计</strong>：当前指令执行时已经开始下一条指令的取指</li>
+<li><strong>内存访问优化</strong>：内存操作需要额外节拍处理地址和数据</li>
+<li><strong>算术指令标准化</strong>：所有算术逻辑指令采用相同的三节拍执行流程</li>
+<li><strong>立即数处理</strong>：立即数移动指令可在两个节拍内完成</li>
+</ol>
+<h2 id="顶层模块"><a href="#顶层模块" class="headerlink" title="顶层模块"></a>顶层模块</h2><p>最后的任务就是将所有的模块联系起来，放在顶层模块：</p>
+<h4 id="模块架构概述"><a href="#模块架构概述" class="headerlink" title="模块架构概述"></a>模块架构概述</h4><p>core8模块是整个8位CPU的顶层封装，负责协调所有子模块的工作，并通过统一的数据总线实现各组件间的通信。该设计采用冯·诺依曼架构，指令和数据共享同一总线。</p>
+<h4 id="主要接口信号"><a href="#主要接口信号" class="headerlink" title="主要接口信号"></a>主要接口信号</h4><table>
+<thead>
+<tr>
+<th>信号类别</th>
+<th>信号名称</th>
+<th>位宽</th>
+<th>方向</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>系统信号</td>
+<td>clk</td>
+<td>1</td>
+<td>输入</td>
+<td>系统时钟</td>
+</tr>
+<tr>
+<td></td>
+<td>rst</td>
+<td>1</td>
+<td>输入</td>
+<td>全局复位</td>
+</tr>
+<tr>
+<td>数据总线</td>
+<td>databus</td>
+<td>8</td>
+<td>双向</td>
+<td>统一数据总线</td>
+</tr>
+<tr>
+<td>调试输出</td>
+<td>r00-r07</td>
+<td>1</td>
+<td>输出</td>
+<td>R0寄存器各位状态</td>
+</tr>
+</tbody></table>
+<h4 id="地址总线仲裁逻辑"><a href="#地址总线仲裁逻辑" class="headerlink" title="地址总线仲裁逻辑"></a>地址总线仲裁逻辑</h4><h5 id="源地址总线-s-addrbus-控制"><a href="#源地址总线-s-addrbus-控制" class="headerlink" title="源地址总线(s_addrbus)控制"></a>源地址总线(s_addrbus)控制</h5><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> [<span class="number">7</span>:<span class="number">0</span>] reg_bus[<span class="number">0</span>:<span class="number">3</span>]; <span class="comment">// 寄存器组输出总线</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 寄存器组输出选择</span></span><br><span class="line"><span class="keyword">assign</span> databus = ... s_addrbus[<span class="number">2</span>] == <span class="number">1&#x27;b0</span> ? reg_bus[&#123;s_addrbus[<span class="number">1</span>:<span class="number">0</span>]&#125;] : ...</span><br></pre></td></tr></table></figure>
+
+<p>源地址编码表：</p>
+<table>
+<thead>
+<tr>
+<th>s_addrbus[2:0]</th>
+<th>选择的源设备</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>000-011</td>
+<td>寄存器R0-R3</td>
+</tr>
+<tr>
+<td>100</td>
+<td>数据存储器</td>
+</tr>
+<tr>
+<td>110</td>
+<td>指令存储器</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>无源设备</td>
+</tr>
+</tbody></table>
+<h5 id="目标地址总线-t-addrbus-控制"><a href="#目标地址总线-t-addrbus-控制" class="headerlink" title="目标地址总线(t_addrbus)控制"></a>目标地址总线(t_addrbus)控制</h5><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在reg_file模块中实现</span></span><br><span class="line"><span class="keyword">if</span> (t_addrbus[<span class="number">2</span>] == <span class="number">1&#x27;b0</span>) <span class="keyword">begin</span> <span class="comment">// 目标地址有效</span></span><br><span class="line">    <span class="keyword">case</span> (t_addrbus[<span class="number">1</span>:<span class="number">0</span>])</span><br><span class="line">        <span class="number">2&#x27;d0</span>: databus0 &lt;= inbus; <span class="comment">// R0</span></span><br><span class="line">        <span class="number">2&#x27;d1</span>: databus1 &lt;= inbus; <span class="comment">// R1</span></span><br><span class="line">        <span class="number">2&#x27;d2</span>: databus2 &lt;= inbus; <span class="comment">// R2</span></span><br><span class="line">        <span class="number">2&#x27;d3</span>: databus3 &lt;= inbus; <span class="comment">// R3</span></span><br><span class="line">    <span class="keyword">endcase</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>目标地址编码表：</p>
+<table>
+<thead>
+<tr>
+<th>t_addrbus[2:0]</th>
+<th>选择的目标设备</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>000-011</td>
+<td>寄存器R0-R3</td>
+</tr>
+<tr>
+<td>100</td>
+<td>数据存储器</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>无目标设备</td>
+</tr>
+</tbody></table>
+<h4 id="数据总线仲裁逻辑"><a href="#数据总线仲裁逻辑" class="headerlink" title="数据总线仲裁逻辑"></a>数据总线仲裁逻辑</h4><h5 id="总线多路复用器设计"><a href="#总线多路复用器设计" class="headerlink" title="总线多路复用器设计"></a>总线多路复用器设计</h5><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assign</span> databus = </span><br><span class="line">    (pc_out) ? pc_bus :          <span class="comment">// 程序计数器输出</span></span><br><span class="line">    (iMDRout) ? imem_bus :       <span class="comment">// 指令存储器输出</span></span><br><span class="line">    (dmdr_iout) ? dmem_bus :     <span class="comment">// 数据存储器输出</span></span><br><span class="line">    (imm_out) ? ir_bus :         <span class="comment">// 指令寄存器立即数输出</span></span><br><span class="line">    (alu_out) ? alu_bus :        <span class="comment">// ALU输出</span></span><br><span class="line">    s_addrbus[<span class="number">2</span>] == <span class="number">1&#x27;b0</span> ? reg_bus[&#123;s_addrbus[<span class="number">1</span>:<span class="number">0</span>]&#125;] : <span class="comment">// 寄存器组输出</span></span><br><span class="line">    <span class="number">8&#x27;bzzzz_zzzz</span>;                <span class="comment">// 高阻态</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="总线优先级顺序"><a href="#总线优先级顺序" class="headerlink" title="总线优先级顺序"></a>总线优先级顺序</h5><ol>
+<li><strong>程序计数器输出</strong>(pc_out)</li>
+<li><strong>指令存储器输出</strong>(iMDRout) </li>
+<li><strong>数据存储器输出</strong>(dmdr_iout)</li>
+<li><strong>立即数输出</strong>(imm_out)</li>
+<li><strong>ALU输出</strong>(alu_out)</li>
+<li><strong>寄存器组输出</strong>(s_addrbus选择)</li>
+<li><strong>高阻态</strong>(无设备驱动)</li>
+</ol>
+<h4 id="关键子模块交互"><a href="#关键子模块交互" class="headerlink" title="关键子模块交互"></a>关键子模块交互</h4><h5 id="取指周期数据流"><a href="#取指周期数据流" class="headerlink" title="取指周期数据流"></a>取指周期数据流</h5><ol>
+<li>CU置pc_out&#x3D;1，PC地址输出到databus</li>
+<li>指令存储器读取databus上的地址</li>
+<li>CU置iMDRout&#x3D;1，指令数据输出到databus</li>
+<li>CU置ir_in&#x3D;1，指令锁存到IR</li>
+</ol>
+<h5 id="执行周期数据流示例-MOV-R0-R1"><a href="#执行周期数据流示例-MOV-R0-R1" class="headerlink" title="执行周期数据流示例(MOV R0, R1)"></a>执行周期数据流示例(MOV R0, R1)</h5><ol>
+<li>CU设置s_addrbus&#x3D;001(选择R1)</li>
+<li>R1数据自动输出到databus</li>
+<li>CU设置t_addrbus&#x3D;000(目标R0)</li>
+<li>数据在时钟下降沿写入R0</li>
+</ol>
+<h4 id="设计特点-1"><a href="#设计特点-1" class="headerlink" title="设计特点"></a>设计特点</h4><ol>
+<li><strong>统一总线架构</strong>：所有数据传输通过共享的8位databus完成</li>
+<li><strong>严格时序控制</strong>：由CU精确控制各设备的输出使能</li>
+<li><strong>优先级仲裁</strong>：避免总线冲突，确保关键数据优先传输</li>
+<li><strong>同步设计</strong>：所有状态变化发生在时钟边沿</li>
+<li><strong>调试支持</strong>：提供R0寄存器各位状态输出</li>
+</ol>
+<h4 id="典型工作流程-1"><a href="#典型工作流程-1" class="headerlink" title="典型工作流程"></a>典型工作流程</h4><pre class="mermaid">sequenceDiagram
+    participant CU
+    participant PC
+    participant IMEM
+    participant IR
+    participant REG
+    participant ALU
+    participant DMEM
+  
+    CU->>PC: pc_out=1
+    PC->>databus: 地址
+    CU->>IMEM: iMDRout=1
+    IMEM->>databus: 指令
+    CU->>IR: ir_in=1
+    IR->>CU: opcode/operand
+    CU->>REG: s_addrbus=src
+    REG->>databus: 数据
+    CU->>ALU: alua_in=1
+    ALU->>databus: 结果
+    CU->>REG: t_addrbus=dst</pre>
+
+<p>该设计通过精心设计的总线仲裁机制，在有限的硬件资源下实现了高效的指令流水线执行。</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.jpg', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.png', '/img/bg9.jpg', '/img/bg10.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
