@@ -1048,6 +1048,107 @@
     CU->>REG: t_addrbus=dst</pre>
 
 <p>该设计通过精心设计的总线仲裁机制，在有限的硬件资源下实现了高效的指令流水线执行。</p>
+<p>最后进行综合测试：</p>
+<p>测试数据如下：</p>
+<table>
+<thead>
+<tr>
+<th>地址</th>
+<th>二进制指令</th>
+<th>操作码</th>
+<th>操作数</th>
+<th>汇编指令</th>
+<th>功能描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0x00</td>
+<td>01001010</td>
+<td>0100</td>
+<td>1010</td>
+<td>mov (i)</td>
+<td>R0 &lt;&#x3D; (0x0A)</td>
+</tr>
+<tr>
+<td>0x01</td>
+<td>01000000</td>
+<td>0100</td>
+<td>0000</td>
+<td>mov (i)</td>
+<td>R0 &lt;&#x3D; (0x00)</td>
+</tr>
+<tr>
+<td>0x02</td>
+<td>00000001</td>
+<td>0000</td>
+<td>0001</td>
+<td>mov r0, r1</td>
+<td>R1 &lt;&#x3D; R0</td>
+</tr>
+<tr>
+<td>0x03</td>
+<td>00100010</td>
+<td>0010</td>
+<td>0010</td>
+<td>mov i</td>
+<td>R0 &lt;&#x3D; 0x02</td>
+</tr>
+<tr>
+<td>0x04</td>
+<td>11110001</td>
+<td>1111</td>
+<td>0001</td>
+<td>sub r0, r1</td>
+<td>R1 &lt;&#x3D; R1 - R0</td>
+</tr>
+<tr>
+<td>0x05</td>
+<td>00100011</td>
+<td>0010</td>
+<td>0011</td>
+<td>mov i</td>
+<td>R0 &lt;&#x3D; 0x03</td>
+</tr>
+<tr>
+<td>0x06</td>
+<td>11010001</td>
+<td>1101</td>
+<td>0001</td>
+<td>add r0, r1</td>
+<td>R1 &lt;&#x3D; R1 + R0</td>
+</tr>
+<tr>
+<td>0x07</td>
+<td>11000001</td>
+<td>1100</td>
+<td>0001</td>
+<td>shl r0, r1</td>
+<td>R1 &lt;&#x3D; R1 &lt;&lt; R0</td>
+</tr>
+<tr>
+<td>0x08</td>
+<td>11100001</td>
+<td>1110</td>
+<td>0001</td>
+<td>shr r0, r1</td>
+<td>R1 &lt;&#x3D; R1 &gt;&gt; R0</td>
+</tr>
+<tr>
+<td>0x09</td>
+<td>01001010</td>
+<td>0100</td>
+<td>1010</td>
+<td>mov (i)</td>
+<td>R0 &lt;&#x3D; (0x0A)</td>
+</tr>
+</tbody></table>
+<p>测试结果如下（Quartus仿真）：</p>
+<p><img src="/img/CPU_8bit/8bit_CPU_test1.png" alt="CPU"></p>
+<p>MedelSim仿真：</p>
+<p><img src="/img/CPU_8bit/8bit_CPU_test2.png" alt="CPU"></p>
+<p>两者仿真结果一样，注意到 Quartus 仿真时出现了bug：</p>
+<p><img src="/img/CPU_8bit/8bit_CPU_test_bug1.png" alt="CPU"></p>
+<p>展开数据可以看到结果应当为48，无需在意</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
