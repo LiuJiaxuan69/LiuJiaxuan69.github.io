@@ -1,7 +1,7 @@
 module core8(
     input clk,
     input n_rst,
-    // ±£³ÖĞÅºÅ£¬·ÀÖ¹ÓÅ»¯µô
+    // ä¿æŒä¿¡å·ï¼Œé˜²æ­¢ä¼˜åŒ–æ‰
     output r00,
     output r01,
     output r02,
@@ -10,11 +10,11 @@ module core8(
     output r05,
     output r06,
     output r07,
-    // ´®¿ÚÍ¨ĞÅ½Ó¿Ú
-    input rx, // ´®¿Ú½ÓÊÕ
-    output tx // ´®¿Ú·¢ËÍ
+    // ä¸²å£é€šä¿¡æ¥å£
+    input rx, // ä¸²å£æ¥æ”¶
+    output tx // ä¸²å£å‘é€
 );
-    wire rst = ~n_rst; // µÍµçÆ½¸´Î»ĞÅºÅ
+    wire rst = ~n_rst; // ä½ç”µå¹³å¤ä½ä¿¡å·
 
     wire [7:0] databus;
     
@@ -24,36 +24,36 @@ module core8(
     wire[2:0] sel;
     wire cf;
     wire zf;
-    wire pc_inc; // ³ÌĞò¼ÆÊıÆ÷×ÔÔö
-    wire pc_jump; // ³ÌĞò¼ÆÊıÆ÷Ìø×ª
-    wire pc_out; // ³ÌĞò¼ÆÊıÆ÷Êä³öµ½×ÜÏß
-    wire pc_reset; // ³ÌĞò¼ÆÊıÆ÷¸´Î»
-    wire[2:0] s_addrbus; // Ô´¼Ä´æÆ÷µØÖ·×ÜÏß
-    wire[2:0] t_addrbus; // Ä¿±ê¼Ä´æÆ÷µØÖ·×ÜÏß 
+    wire pc_inc; // ç¨‹åºè®¡æ•°å™¨è‡ªå¢
+    wire pc_jump; // ç¨‹åºè®¡æ•°å™¨è·³è½¬
+    wire pc_out; // ç¨‹åºè®¡æ•°å™¨è¾“å‡ºåˆ°æ€»çº¿
+    wire pc_reset; // ç¨‹åºè®¡æ•°å™¨å¤ä½
+    wire[2:0] s_addrbus; // æºå¯„å­˜å™¨åœ°å€æ€»çº¿
+    wire[2:0] t_addrbus; // ç›®æ ‡å¯„å­˜å™¨åœ°å€æ€»çº¿ 
     wire iMDRout;
-    wire dmdr_iin; // Êı¾İ´æ´¢Æ÷ÊäÈë
-    wire dmdr_iout; // Êı¾İ´æ´¢Æ÷Êä³ö¡¢
-    wire ir_in; // Ö¸Áî¼Ä´æÆ÷ÊäÈë
-    wire imm_out; // Á¢¼´ÊıÊä³ö
-    wire[3:0] opcode; // ²Ù×÷Âë
-    wire[3:0] operand; // ²Ù×÷Êı
+    wire dmdr_iin; // æ•°æ®å­˜å‚¨å™¨è¾“å…¥
+    wire dmdr_iout; // æ•°æ®å­˜å‚¨å™¨è¾“å‡ºã€
+    wire ir_in; // æŒ‡ä»¤å¯„å­˜å™¨è¾“å…¥
+    wire imm_out; // ç«‹å³æ•°è¾“å‡º
+    wire[3:0] opcode; // æ“ä½œç 
+    wire[3:0] operand; // æ“ä½œæ•°
     wire[7:0] cnt;
     wire[7:0] r3dbg;
     
     
-    // ¸÷²¿¼şÊı¾İ×ÜÏß
+    // å„éƒ¨ä»¶æ•°æ®æ€»çº¿
     wire [7:0] alu_bus;
     wire [7:0] pc_bus;
     wire [7:0] ir_bus;
     wire [7:0] reg_bus[0:3];
-    wire cur_reg_bus_in; // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊä³ö
-    wire cur_reg_en_in; // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
-    wire cur_reg_bus_out; // µ±Ç°¼Ä´æÆ÷×éÊä³ö
-    wire cur_reg_en_out; // µ±Ç°¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
+    wire cur_reg_bus_in; // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„è¾“å‡º
+    wire cur_reg_en_in; // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
+    wire cur_reg_bus_out; // å½“å‰å¯„å­˜å™¨ç»„è¾“å‡º
+    wire cur_reg_en_out; // å½“å‰å¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
     wire [7:0] imem_bus;
     wire [7:0] dmem_bus;
-    reg [3:0] cur_send_sta = 4'b0000; // µ±Ç°·¢ËÍ×´Ì¬¼Ä´æÆ÷
-    wire mem_as_target; // Êı¾İ´æ´¢Æ÷×÷ÎªÄ¿±êµØÖ·×ÜÏß
+    reg [3:0] cur_send_sta = 4'b0000; // å½“å‰å‘é€çŠ¶æ€å¯„å­˜å™¨
+    wire mem_as_target; // æ•°æ®å­˜å‚¨å™¨ä½œä¸ºç›®æ ‡åœ°å€æ€»çº¿
     wire mem_as_source;
 
     assign r00 = r3dbg[0];
@@ -70,15 +70,15 @@ module core8(
     // always @(posedge clk) clk2 <= ~clk2;
     // always @(posedge clk2) clk4 <= ~clk4;
 
-    // ¶Ôdatabus¶àÂ·¸´ÓÃ
+    // å¯¹databuså¤šè·¯å¤ç”¨
     assign databus = 
-        (pc_out) ? pc_bus :          // ³ÌĞò¼ÆÊıÆ÷Êä³ö
-        (iMDRout) ? imem_bus :      // Ö¸Áî´æ´¢Æ÷Êä³ö
-        (dmdr_iout) ? dmem_bus :    // Êı¾İ´æ´¢Æ÷Êä³ö
-        (imm_out) ? ir_bus :          // Ö¸Áî¼Ä´æÆ÷ÊäÈë
-        (alu_out) ? alu_bus :       // ALUÊä³ö
-        s_addrbus[2] == 1'b0 ? reg_bus[{s_addrbus[1:0]}] : // Ô´¼Ä´æÆ÷×éÊä³ö
-        8'bzzzz_zzzz;                    // ¼Ä´æÆ÷×éÊä³ö
+        (pc_out) ? pc_bus :          // ç¨‹åºè®¡æ•°å™¨è¾“å‡º
+        (iMDRout) ? imem_bus :      // æŒ‡ä»¤å­˜å‚¨å™¨è¾“å‡º
+        (dmdr_iout) ? dmem_bus :    // æ•°æ®å­˜å‚¨å™¨è¾“å‡º
+        (imm_out) ? ir_bus :          // æŒ‡ä»¤å¯„å­˜å™¨è¾“å…¥
+        (alu_out) ? alu_bus :       // ALUè¾“å‡º
+        s_addrbus[2] == 1'b0 ? reg_bus[{s_addrbus[1:0]}] : // æºå¯„å­˜å™¨ç»„è¾“å‡º
+        8'bzzzz_zzzz;                    // å¯„å­˜å™¨ç»„è¾“å‡º
 
     // Instantiate ALU
     ALU alu_inst(
@@ -89,26 +89,26 @@ module core8(
         .alub_in(alub_in),
         .sel(sel),
         .cf(cf),
-        .zf(zf) // Áã±êÖ¾£¨ZF£©
+        .zf(zf) // é›¶æ ‡å¿—ï¼ˆZFï¼‰
     );
 
 
     //----------------------------------
-    // ×ÓÄ£¿éÊµÀı»¯
+    // å­æ¨¡å—å®ä¾‹åŒ–
     //----------------------------------
-    // ³ÌĞò¼ÆÊıÆ÷
+    // ç¨‹åºè®¡æ•°å™¨
     PC u_PC (
         .clk(clk),
         .pc_inc(pc_inc),
         .pc_jump(pc_jump),
         .databus(pc_bus),
-        .inbus(databus), // ÊäÈëÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
+        .inbus(databus), // è¾“å…¥æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
         .reset(pc_reset | rst)
     );
-    // Í¨ÓÃ¼Ä´æÆ÷
+    // é€šç”¨å¯„å­˜å™¨
     reg_file u_reg_file (
         .clk(clk),
-        .rst(rst | pc_reset), // È«¾Ö¸´Î»ĞÅºÅ
+        .rst(rst | pc_reset), // å…¨å±€å¤ä½ä¿¡å·
         .t_addrbus(t_addrbus),
         .s_addrbus(s_addrbus),
         .databus0(reg_bus[0]),
@@ -116,74 +116,74 @@ module core8(
         .databus2(reg_bus[2]),
         .databus3(reg_bus[3]),
         .inbus(databus),
-        .cur_reg_bus_in(cur_reg_bus_in), // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊä³ö
-        .cur_reg_en_in(cur_reg_en_in), // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ 
-        .cur_reg_bus_out(cur_reg_bus_out), // µ±Ç°¼Ä´æÆ÷×éÊä³ö
-        .cur_reg_en_out(cur_reg_en_out), // µ±Ç°¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
+        .cur_reg_bus_in(cur_reg_bus_in), // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„è¾“å‡º
+        .cur_reg_en_in(cur_reg_en_in), // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å· 
+        .cur_reg_bus_out(cur_reg_bus_out), // å½“å‰å¯„å­˜å™¨ç»„è¾“å‡º
+        .cur_reg_en_out(cur_reg_en_out), // å½“å‰å¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
         .r3dbg(r3dbg)
     );
 
-    // Ö¸Áî´æ´¢Æ÷
+    // æŒ‡ä»¤å­˜å‚¨å™¨
     inst_mem u_inst_mem (
         .clk(clk),
-        .pc_addr(databus),      // ´Ó×ÜÏß»ñÈ¡µØÖ·
-        .databus(imem_bus)      // Êä³öµ½×ÜÏß
+        .pc_addr(databus),      // ä»æ€»çº¿è·å–åœ°å€
+        .databus(imem_bus)      // è¾“å‡ºåˆ°æ€»çº¿
     );
 
-    // Êı¾İ´æ´¢Æ÷
+    // æ•°æ®å­˜å‚¨å™¨
     DataMemory u_data_memory (
         .clk(clk),
         // .rst(rst),
-        .mem_as_target(mem_as_target), // Êı¾İ´æ´¢Æ÷×÷ÎªÄ¿±êµØÖ·×ÜÏß
+        .mem_as_target(mem_as_target), // æ•°æ®å­˜å‚¨å™¨ä½œä¸ºç›®æ ‡åœ°å€æ€»çº¿
         .mem_as_source(mem_as_source),
-        .databus(dmem_bus),      // Êı¾İ×ÜÏß
-        .inbus(databus), // ÊäÈëÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
-        .dmdr_iin(dmdr_iin),    // ÊäÈëÊ¹ÄÜ
-        .cnt(cnt) // ¼ÆÊıÆ÷Êä³ö£¨ÓÃÓÚUART·¢ËÍ£©
+        .databus(dmem_bus),      // æ•°æ®æ€»çº¿
+        .inbus(databus), // è¾“å…¥æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
+        .dmdr_iin(dmdr_iin),    // è¾“å…¥ä½¿èƒ½
+        .cnt(cnt) // è®¡æ•°å™¨è¾“å‡ºï¼ˆç”¨äºUARTå‘é€ï¼‰
     );
 
-    // Ö¸Áî¼Ä´æÆ÷
+    // æŒ‡ä»¤å¯„å­˜å™¨
     IR u_IR (
         .clk(clk),
         .databus(ir_bus),
-        .inbus(databus), // ÊäÈëÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
+        .inbus(databus), // è¾“å…¥æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
         .ir_in(ir_in),
-        .opcode(opcode),              // ÄÚ²¿Á¬½ÓÖÁCU
-        .operand(operand)              // ÄÚ²¿Á¬½ÓÖÁCU
+        .opcode(opcode),              // å†…éƒ¨è¿æ¥è‡³CU
+        .operand(operand)              // å†…éƒ¨è¿æ¥è‡³CU
     );
 
-        // ¿ØÖÆµ¥Ôª
+        // æ§åˆ¶å•å…ƒ
     CU u_CU (
         .clk(clk),
-        .rst(rst),         // È«¾Ö¸´Î»ĞÅºÅ
-        .opcode(opcode),   // Ö±½ÓÁ¬½ÓIRÄÚ²¿ĞÅºÅ
+        .rst(rst),         // å…¨å±€å¤ä½ä¿¡å·
+        .opcode(opcode),   // ç›´æ¥è¿æ¥IRå†…éƒ¨ä¿¡å·
         .operand(operand),
-        .pc_reset(pc_reset),       // ¹²ÓÃ¸´Î»
+        .pc_reset(pc_reset),       // å…±ç”¨å¤ä½
         .pc_out(pc_out),
         .pc_inc(pc_inc),
-        .pc_jump(pc_jump), // PCÌø×ª
+        .pc_jump(pc_jump), // PCè·³è½¬
         .iMDRout(iMDRout),
         .ALUAin(alua_in),
         .ALUBin(alub_in),
         .ALUout(alu_out),
         .ALUop(sel),
         .cf(cf),
-        .zf(zf), // Áã±êÖ¾£¨ZF£©
+        .zf(zf), // é›¶æ ‡å¿—ï¼ˆZFï¼‰
         .dmdr_iin(dmdr_iin),
         .dmdr_iout(dmdr_iout),
-        .mem_as_target(mem_as_target), // Êı¾İ´æ´¢Æ÷×÷ÎªÄ¿±êµØÖ·×ÜÏß
+        .mem_as_target(mem_as_target), // æ•°æ®å­˜å‚¨å™¨ä½œä¸ºç›®æ ‡åœ°å€æ€»çº¿
         .mem_as_source(mem_as_source),
         .ir_in(ir_in),
         .imm_out(imm_out),
         .s_addrbus(s_addrbus),
         .t_addrbus(t_addrbus),
         .cnt(cnt),
-        .rx(rx), // ´®¿Ú½ÓÊÕ
-        .tx(tx), // ´®¿Ú·¢ËÍ
-        .reg_bus_in(cur_reg_bus_in),  // ¼Ä´æÆ÷×éÊä³ö
-        .reg_en_in(cur_reg_en_in),    // ¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
-        .reg_bus_out(cur_reg_bus_out), // µ±Ç°¼Ä´æÆ÷×éÊä³ö
-        .reg_en_out(cur_reg_en_out)  // µ±Ç°¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
+        .rx(rx), // ä¸²å£æ¥æ”¶
+        .tx(tx), // ä¸²å£å‘é€
+        .reg_bus_in(cur_reg_bus_in),  // å¯„å­˜å™¨ç»„è¾“å‡º
+        .reg_en_in(cur_reg_en_in),    // å¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
+        .reg_bus_out(cur_reg_bus_out), // å½“å‰å¯„å­˜å™¨ç»„è¾“å‡º
+        .reg_en_out(cur_reg_en_out)  // å½“å‰å¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
     );
 
 endmodule
@@ -191,38 +191,38 @@ endmodule
 //PC
 module PC(
     input         clk,
-    input         pc_inc,       // PCÊÇ·ñ×ÔÔö
-    input         pc_jump,      // PCÊÇ·ñÌø×ª
+    input         pc_inc,       // PCæ˜¯å¦è‡ªå¢
+    input         pc_jump,      // PCæ˜¯å¦è·³è½¬
     input         reset,
-    input      [7:0] inbus,        // ÊäÈëÊı¾İ×ÜÏß
-    output reg [7:0] databus       // Í³Ò»Êı¾İ×ÜÏß
+    input      [7:0] inbus,        // è¾“å…¥æ•°æ®æ€»çº¿
+    output reg [7:0] databus       // ç»Ÿä¸€æ•°æ®æ€»çº¿
 );
-    // reg [7:0] cur_pc;     // µ±Ç°³ÌĞò¼ÆÊıÆ÷Öµ
+    // reg [7:0] cur_pc;     // å½“å‰ç¨‹åºè®¡æ•°å™¨å€¼
 
-    //PC×ÔÔö¼Ä´æÆ÷
+    //PCè‡ªå¢å¯„å­˜å™¨
     wire [7:0] next_pc;
-    // ÈıÌ¬×ÜÏßÇı¶¯£¨ÍêÈ«ÓÉÍâ²¿¿ØÖÆ£©
+    // ä¸‰æ€æ€»çº¿é©±åŠ¨ï¼ˆå®Œå…¨ç”±å¤–éƒ¨æ§åˆ¶ï¼‰
     Incrementer PCInc(
         .op(databus),
         .next_op(next_pc)
     );
-    // Êä³öµ½×ÜÏß
-    // assign databus = cur_pc; // µ±pc_outÎª1Ê±£¬Êä³öµ±Ç°PCÖµ£¬·ñÔòÎª¸ß×èÌ¬
-    // PCºËĞÄÂß¼­
+    // è¾“å‡ºåˆ°æ€»çº¿
+    // assign databus = cur_pc; // å½“pc_outä¸º1æ—¶ï¼Œè¾“å‡ºå½“å‰PCå€¼ï¼Œå¦åˆ™ä¸ºé«˜é˜»æ€
+    // PCæ ¸å¿ƒé€»è¾‘
     always @(posedge clk or posedge reset) begin
-        if (reset)              // PCÖÃÁã
+        if (reset)              // PCç½®é›¶
             databus <= 8'h00;
-        else if (pc_inc)        // PC×ÔÔö
+        else if (pc_inc)        // PCè‡ªå¢
             databus <= next_pc;
-        else if (pc_jump) // PCÌø×ª
-            databus <= inbus;  // Ìø×ªµ½Ö¸¶¨µØÖ·
-        else databus <= databus;  // PC²»±ä£¨ÎŞĞÅºÅ£©
+        else if (pc_jump) // PCè·³è½¬
+            databus <= inbus;  // è·³è½¬åˆ°æŒ‡å®šåœ°å€
+        else databus <= databus;  // PCä¸å˜ï¼ˆæ— ä¿¡å·ï¼‰
     end
 endmodule
 
 //ALU
 module ALU(databus,inbus,clk,alua_in,alub_in,sel,cf,zf);
-	output reg [7:0] databus;       // Í³Ò»Êı¾İ×ÜÏß
+	output reg [7:0] databus;       // ç»Ÿä¸€æ•°æ®æ€»çº¿
     input [7:0] inbus;
 	input clk;
 	input alua_in;
@@ -265,13 +265,13 @@ endmodule
 module ALUCore(
     input [7:0]  op1,
     input [7:0]  op2,
-    input [2:0]  sel,    // À©Õ¹Îª3Î»²Ù×÷Âë
+    input [2:0]  sel,    // æ‰©å±•ä¸º3ä½æ“ä½œç 
     output reg [7:0] result,
     output reg       cf,
-    output reg       zf // Áã±êÖ¾£¨ZF£©
+    output reg       zf // é›¶æ ‡å¿—ï¼ˆZFï¼‰
 );
     
-    // ¼Ó·¨Æ÷½Ó¿Ú
+    // åŠ æ³•å™¨æ¥å£
     reg [7:0] adder_op1;
     reg [7:0] adder_op2;
     reg suben;
@@ -282,60 +282,60 @@ module ALUCore(
     
     always @(*) begin
         case(sel)
-            // ËãÊõÔËËã
-            3'b000, 3'b001: begin  // ¼Ó·¨/¼õ·¨
-                // »ã±à´úÂëÆäÊµÊÇ×óÔ´ÓÒÄ¿±ê£¬ËùÒÔ·´¹ıÀ´·Å
+            // ç®—æœ¯è¿ç®—
+            3'b000, 3'b001: begin  // åŠ æ³•/å‡æ³•
+                // æ±‡ç¼–ä»£ç å…¶å®æ˜¯å·¦æºå³ç›®æ ‡ï¼Œæ‰€ä»¥åè¿‡æ¥æ”¾
                 adder_op1 = op1;
                 adder_op2 = op2;
                 suben = sel[0];
                 result = adder_sum;
                 cf = adder_cout;
             end
-            3'b010: begin  // ×óÒÆ
+            3'b010: begin  // å·¦ç§»
                 adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
-                suben = 1'b0; // ×óÒÆ²»ĞèÒª¼õ·¨
-                cf = 1'b0; // ×óÒÆ²»²úÉú½øÎ»
+                suben = 1'b0; // å·¦ç§»ä¸éœ€è¦å‡æ³•
+                cf = 1'b0; // å·¦ç§»ä¸äº§ç”Ÿè¿›ä½
                 // if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin
-                //     result = 8'b0; // ×óÒÆºóÈ«Áã
+                //     result = 8'b0; // å·¦ç§»åå…¨é›¶
                 // end else begin
                 result = op2 << op1;
                 // end
             end
-            3'b011: begin  // ÓÒÒÆ
+            3'b011: begin  // å³ç§»
                 adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
-                suben = 1'b0; // ×óÒÆ²»ĞèÒª¼õ·¨
-                cf = 1'b0; // ×óÒÆ²»²úÉú½øÎ»
+                suben = 1'b0; // å·¦ç§»ä¸éœ€è¦å‡æ³•
+                cf = 1'b0; // å·¦ç§»ä¸äº§ç”Ÿè¿›ä½
                 // if(adder_op1[7] | adder_op1[6] | adder_op1[5] | adder_op1[4] | adder_op1[3]) begin
-                //     result = 8'b0; // ÓÒÒÆºóÈ«Áã
+                //     result = 8'b0; // å³ç§»åå…¨é›¶
                 // end else begin
                 result = op2 >> op1;
                 // end
             end
-            // Âß¼­ÔËËã
-            3'b100: begin  // Óë£¨AND£©
+            // é€»è¾‘è¿ç®—
+            3'b100: begin  // ä¸ï¼ˆANDï¼‰
 				adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
                 suben = 1'b0;
                 result = op1 & op2;
-                cf = 1'b0;  // Âß¼­ÔËËãÇåÁãCF
+                cf = 1'b0;  // é€»è¾‘è¿ç®—æ¸…é›¶CF
             end
-            3'b101: begin  // »ò£¨OR£©
+            3'b101: begin  // æˆ–ï¼ˆORï¼‰
 				adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
                 suben = 1'b0;
                 result = op1 | op2;
                 cf = 1'b0;
             end
-            3'b110: begin  // ·Ç£¨NOT£©
+            3'b110: begin  // éï¼ˆNOTï¼‰
 				adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
                 suben = 1'b0;
-                result = op2 ^ 8'hFF; // È¡·´
+                result = op2 ^ 8'hFF; // å–å
                 cf = 1'b0;
             end
-            3'b111: begin  // Òì»ò£¨XOR£©
+            3'b111: begin  // å¼‚æˆ–ï¼ˆXORï¼‰
 				adder_op1 = 8'b0;
                 adder_op2 = 8'b0;
                 suben = 1'b0;
@@ -343,34 +343,34 @@ module ALUCore(
                 cf = 1'b0;
             end
         endcase
-        zf = (result == 8'b0); // Áã±êÖ¾£¨ZF£©Îª1±íÊ¾½á¹ûÎª0
+        zf = (result == 8'b0); // é›¶æ ‡å¿—ï¼ˆZFï¼‰ä¸º1è¡¨ç¤ºç»“æœä¸º0
     end
 endmodule
 
 
 module Adder(
-    input [7:0]  op1,     // ²Ù×÷Êı1
-    input [7:0]  op2,     // ²Ù×÷Êı2
-    input        suben,   // ¼õ·¨Ê¹ÄÜ£¨1=¼õ·¨£©
-    output [7:0] sum,     // ºÍ/²î½á¹û
-    output       co       // ½øÎ»/½èÎ»
+    input [7:0]  op1,     // æ“ä½œæ•°1
+    input [7:0]  op2,     // æ“ä½œæ•°2
+    input        suben,   // å‡æ³•ä½¿èƒ½ï¼ˆ1=å‡æ³•ï¼‰
+    output [7:0] sum,     // å’Œ/å·®ç»“æœ
+    output       co       // è¿›ä½/å€Ÿä½
 );
-    // ¼õ·¨×ª»»Îª²¹Âë¼Ó·¨
+    // å‡æ³•è½¬æ¢ä¸ºè¡¥ç åŠ æ³•
     wire [7:0] adj_op2 = op2 ^ {8{suben}};
-    wire cin = suben;     // ¼õ·¨Ê±cin=1£¨²¹Âë+1£©
+    wire cin = suben;     // å‡æ³•æ—¶cin=1ï¼ˆè¡¥ç +1ï¼‰
 
-    // Éú³ÉÎ»£¨Generate£©ºÍ´«²¥Î»£¨Propagate£©
+    // ç”Ÿæˆä½ï¼ˆGenerateï¼‰å’Œä¼ æ’­ä½ï¼ˆPropagateï¼‰
     wire [7:0] G = op1 & adj_op2;
     wire [7:0] P = op1 ^ adj_op2;
 
-    // ³¬Ç°½øÎ»¼ÆËã£¨·Ö×éÓÅ»¯£©
+    // è¶…å‰è¿›ä½è®¡ç®—ï¼ˆåˆ†ç»„ä¼˜åŒ–ï¼‰
     wire [7:0] C;
     assign C[0] = cin;
     assign C[1] = G[0] | (P[0] & C[0]);
     assign C[2] = G[1] | (P[1] & G[0]) | (P[1] & P[0] & C[0]);
     assign C[3] = G[2] | (P[2] & G[1]) | (P[2] & P[1] & G[0]) | (P[2] & P[1] & P[0] & C[0]);
     
-    // 4Î»×é¼ä½øÎ»£¨¹Ø¼üÓÅ»¯µã£©
+    // 4ä½ç»„é—´è¿›ä½ï¼ˆå…³é”®ä¼˜åŒ–ç‚¹ï¼‰
     wire C4 = G[3] | (P[3] & G[2]) | (P[3] & P[2] & G[1]) | (P[3] & P[2] & P[1] & G[0]) | 
               (P[3] & P[2] & P[1] & P[0] & C[0]);
     
@@ -379,7 +379,7 @@ module Adder(
     assign C[6] = G[5] | (P[5] & G[4]) | (P[5] & P[4] & C4);
     assign C[7] = G[6] | (P[6] & G[5]) | (P[6] & P[5] & G[4]) | (P[6] & P[5] & P[4] & C4);
 
-    // ×îÖÕ½øÎ»ºÍ½á¹û
+    // æœ€ç»ˆè¿›ä½å’Œç»“æœ
     assign co = suben ^ (G[7] | (P[7] & G[6]) | (P[7] & P[6] & G[5]) | 
                 (P[7] & P[6] & P[5] & G[4]) | (P[7] & P[6] & P[5] & P[4] & C4));
     assign sum = P ^ C;
@@ -389,31 +389,31 @@ endmodule
 module reg_file(
     input         clk,
     input       rst,
-    // Ë«µØÖ·×ÜÏß½Ó¿Ú
-    input  [2:0]  t_addrbus,    // Ä¿±êµØÖ·×ÜÏß
+    // åŒåœ°å€æ€»çº¿æ¥å£
+    input  [2:0]  t_addrbus,    // ç›®æ ‡åœ°å€æ€»çº¿
 	input  [2:0]  s_addrbus,
     
-    output reg [7:0]  databus0, // Ë«ÏòÊı¾İ×ÜÏß£¨dMDRÓë¼Ä´æÆ÷×éÖ®¼ä½»»¥Ïß£©
-    output reg [7:0]  databus1, // Ë«ÏòÊı¾İ×ÜÏß£¨dMDRÓë¼Ä´æÆ÷×éÖ®¼ä½»»¥Ïß£©
-    output reg [7:0]  databus2, // Ë«ÏòÊı¾İ×ÜÏß£¨dMDRÓë¼Ä´æÆ÷×éÖ®¼ä½»»¥Ïß£©
-    output reg [7:0]  databus3, // Ë«ÏòÊı¾İ×ÜÏß£¨dMDRÓë¼Ä´æÆ÷×éÖ®¼ä½»»¥Ïß£©
-    input [7:0]  inbus,  // ÊäÈëÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
-    // ¿ØÖÆĞÅºÅ
-    input cur_reg_bus_in, // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊä³ö
-    input cur_reg_en_in, // ¿ØÖÆµ¥Ôª¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
-    output reg cur_reg_bus_out, // µ±Ç°¼Ä´æÆ÷×éÊä³ö
-    input cur_reg_en_out, // µ±Ç°¼Ä´æÆ÷×éÊ¹ÄÜĞÅºÅ
+    output reg [7:0]  databus0, // åŒå‘æ•°æ®æ€»çº¿ï¼ˆdMDRä¸å¯„å­˜å™¨ç»„ä¹‹é—´äº¤äº’çº¿ï¼‰
+    output reg [7:0]  databus1, // åŒå‘æ•°æ®æ€»çº¿ï¼ˆdMDRä¸å¯„å­˜å™¨ç»„ä¹‹é—´äº¤äº’çº¿ï¼‰
+    output reg [7:0]  databus2, // åŒå‘æ•°æ®æ€»çº¿ï¼ˆdMDRä¸å¯„å­˜å™¨ç»„ä¹‹é—´äº¤äº’çº¿ï¼‰
+    output reg [7:0]  databus3, // åŒå‘æ•°æ®æ€»çº¿ï¼ˆdMDRä¸å¯„å­˜å™¨ç»„ä¹‹é—´äº¤äº’çº¿ï¼‰
+    input [7:0]  inbus,  // è¾“å…¥æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
+    // æ§åˆ¶ä¿¡å·
+    input cur_reg_bus_in, // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„è¾“å‡º
+    input cur_reg_en_in, // æ§åˆ¶å•å…ƒå¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
+    output reg cur_reg_bus_out, // å½“å‰å¯„å­˜å™¨ç»„è¾“å‡º
+    input cur_reg_en_out, // å½“å‰å¯„å­˜å™¨ç»„ä½¿èƒ½ä¿¡å·
     output [7:0] r3dbg
 );
     assign r3dbg = databus3;
     
     //------------------------------------------
-    // Í¬²½Ğ´Âß¼­
+    // åŒæ­¥å†™é€»è¾‘
     //------------------------------------------
     always @(negedge clk) begin
-        // Ä¿±ê¼Ä´æÆ÷Ğ´Èë£¨µØÖ·ÓĞĞ§Ê±£©
+        // ç›®æ ‡å¯„å­˜å™¨å†™å…¥ï¼ˆåœ°å€æœ‰æ•ˆæ—¶ï¼‰
         if (cur_reg_en_in) begin
-            case (t_addrbus[1:0]) // µÍ2Î»Ñ¡Ôñ¼Ä´æÆ÷
+            case (t_addrbus[1:0]) // ä½2ä½é€‰æ‹©å¯„å­˜å™¨
                 2'd0: databus0[7] <= cur_reg_bus_in; // R0
                 2'd1: databus1[7] <= cur_reg_bus_in; // R1
                 2'd2: databus2[7] <= cur_reg_bus_in; // R2
@@ -421,15 +421,15 @@ module reg_file(
             endcase
         end
         else if (cur_reg_en_out) begin
-            case(s_addrbus[1:0]) // µÍ2Î»Ñ¡Ôñ¼Ä´æÆ÷
+            case(s_addrbus[1:0]) // ä½2ä½é€‰æ‹©å¯„å­˜å™¨
                 2'd0: cur_reg_bus_out <= databus0[0]; // R0
                 2'd1: cur_reg_bus_out <= databus1[0]; // R1
                 2'd2: cur_reg_bus_out <= databus2[0]; // R2
                 2'd3: cur_reg_bus_out <= databus3[0]; // R3
             endcase
         end
-        else if (t_addrbus[2] == 1'b0) begin  // ×î¸ßÎ»=0Ê±ÓĞĞ§
-            case (t_addrbus[1:0]) // µÍ2Î»Ñ¡Ôñ¼Ä´æÆ÷
+        else if (t_addrbus[2] == 1'b0) begin  // æœ€é«˜ä½=0æ—¶æœ‰æ•ˆ
+            case (t_addrbus[1:0]) // ä½2ä½é€‰æ‹©å¯„å­˜å™¨
                 2'd0: databus0 <= inbus; // R0
                 2'd1: databus1 <= inbus; // R1
                 2'd2: databus2 <= inbus; // R2
@@ -438,7 +438,7 @@ module reg_file(
         end
 
         if (rst) begin
-            // È«²¿¼Ä´æÆ÷¸´Î»Îª0
+            // å…¨éƒ¨å¯„å­˜å™¨å¤ä½ä¸º0
             databus0 <= 8'b0;
             databus1 <= 8'b0;
             databus2 <= 8'b0;
@@ -447,22 +447,22 @@ module reg_file(
     end
 endmodule
 
-//Ö¸Áî´æ´¢Æ÷
+//æŒ‡ä»¤å­˜å‚¨å™¨
 module inst_mem(
     input         clk,
-    input  [7:0]  pc_addr,       // ³ÌĞò¼ÆÊıÆ÷µØÖ·ÊäÈë
-    output  reg [7:0]  databus       // Êı¾İ×ÜÏßÊä³ö
+    input  [7:0]  pc_addr,       // ç¨‹åºè®¡æ•°å™¨åœ°å€è¾“å…¥
+    output  reg [7:0]  databus       // æ•°æ®æ€»çº¿è¾“å‡º
 );
-    // ´æ´¢Æ÷ÅäÖÃ - Ã÷È·ÎªROM
+    // å­˜å‚¨å™¨é…ç½® - æ˜ç¡®ä¸ºROM
     (* romstyle = "M9K" *) reg [7:0] memory [0:255];
 
 	initial begin
-		$readmemb("uart_ic.hex", memory); // ¸²¸Ç³õÊ¼»¯
+		$readmemb("uart_ic.hex", memory); // è¦†ç›–åˆå§‹åŒ–
 	end
     
-    // Í¬²½¶ÁÈ¡
+    // åŒæ­¥è¯»å–
     always @(posedge clk) begin
-        databus <= memory[pc_addr]; // Êä³öµ½×ÜÏß
+        databus <= memory[pc_addr]; // è¾“å‡ºåˆ°æ€»çº¿
     end
     // wire [7:0] dataout;
     // wire dv;
@@ -490,47 +490,47 @@ endmodule
 module DataMemory(
     input         clk,
     // input         rst,
-    // Ë«µØÖ·×ÜÏß½Ó¿Ú
+    // åŒåœ°å€æ€»çº¿æ¥å£
     input  mem_as_source,
-    // input  [2:0]  t_addrbus,    // Ä¿±êµØÖ·×ÜÏß
+    // input  [2:0]  t_addrbus,    // ç›®æ ‡åœ°å€æ€»çº¿
     input  mem_as_target,
-    output reg  [7:0]  databus,      // Ë«ÏòÊı¾İ×ÜÏß£¨dMDRÓëÊı¾İ×ÜÏßÖ®¼ä½»»¥¼Ä´æÆ÷£©
-    input [7:0] inbus, // ÊäÈëµ½dMDRµÄÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
-    // ¿ØÖÆĞÅºÅ
-    input       dmdr_iin,     // dMDRºÍ×ÜÏßÊäÈëÊ¹ÄÜ
-    input [7:0] cnt // ¼ÆÊıÆ÷Êä³ö£¨ÓÃÓÚUART·¢ËÍ£© - Ö±½ÓÁ¬½Óµ½DataMemory
+    output reg  [7:0]  databus,      // åŒå‘æ•°æ®æ€»çº¿ï¼ˆdMDRä¸æ•°æ®æ€»çº¿ä¹‹é—´äº¤äº’å¯„å­˜å™¨ï¼‰
+    input [7:0] inbus, // è¾“å…¥åˆ°dMDRçš„æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
+    // æ§åˆ¶ä¿¡å·
+    input       dmdr_iin,     // dMDRå’Œæ€»çº¿è¾“å…¥ä½¿èƒ½
+    input [7:0] cnt // è®¡æ•°å™¨è¾“å‡ºï¼ˆç”¨äºUARTå‘é€ï¼‰ - ç›´æ¥è¿æ¥åˆ°DataMemory
 );
 
-    (* ramstyle = "no_rw_check, logic" *)  // ½ûÓÃ¶ÁĞ´³åÍ»¼ì²é
+    (* ramstyle = "no_rw_check, logic" *)  // ç¦ç”¨è¯»å†™å†²çªæ£€æŸ¥
     reg [7:0] memory [0:7];
 
 
-    // DataMemoryÊµÀı
+    // DataMemoryå®ä¾‹
     wire [7:0] mem_dout;
     wire        mem_we;
-    wire [7:0] mem_addr; // ÄÚ´æµØÖ·¼Ä´æÆ÷
+    wire [7:0] mem_addr; // å†…å­˜åœ°å€å¯„å­˜å™¨
 
-    // Ğ´Ê¹ÄÜÂß¼­£ºt_addrbus==100Ê±Ğ´Èë
+    // å†™ä½¿èƒ½é€»è¾‘ï¼št_addrbus==100æ—¶å†™å…¥
     // wire mem_as_target = (t_addrbus == 3'b100);
     // wire mem_as_source = (s_addrbus == 3'b100);
 
-    // assign mem_addr = inbus; // µØÖ·¼Ä´æÆ÷¸üĞÂ
-    // assign mem_din = mem_as_target ? inbus : 8'bzzzz_zzzz; // Ğ´ÈëÊı¾İ×ÜÏß£¨¸ß×èÌ¬£©
+    // assign mem_addr = inbus; // åœ°å€å¯„å­˜å™¨æ›´æ–°
+    // assign mem_din = mem_as_target ? inbus : 8'bzzzz_zzzz; // å†™å…¥æ•°æ®æ€»çº¿ï¼ˆé«˜é˜»æ€ï¼‰
 
-    // MDRÓëÄÚ´æ¡¢×ÜÏßµÄÊı¾İÁ÷¿ØÖÆ
+    // MDRä¸å†…å­˜ã€æ€»çº¿çš„æ•°æ®æµæ§åˆ¶
     always @(negedge clk) begin
-        // ×ÜÏßÊäÈëµ½MDR
+        // æ€»çº¿è¾“å…¥åˆ°MDR
         if (dmdr_iin)
             databus <= inbus;
-        // MDRĞ´µ½ÄÚ´æ
+        // MDRå†™åˆ°å†…å­˜
         else if (mem_as_target)
             memory[mem_addr[2:0]] <= databus;
-        // ÄÚ´æ¶Áµ½MDR
+        // å†…å­˜è¯»åˆ°MDR
         else if (mem_as_source)
             databus <= memory[mem_addr[2:0]];
 
-        if (memory[6] == memory[7]) begin // 14ºÍ15¼Ä´æÆ÷ÏàµÈÊ±£¬Êä³öPWMµ÷¹âĞÅºÅ
-            memory[5][0] <= 1'b1; // 13¼Ä´æÆ÷×îµÍÎ»Îª1
+        if (memory[6] == memory[7]) begin // 14å’Œ15å¯„å­˜å™¨ç›¸ç­‰æ—¶ï¼Œè¾“å‡ºPWMè°ƒå…‰ä¿¡å·
+            memory[5][0] <= 1'b1; // 13å¯„å­˜å™¨æœ€ä½ä½ä¸º1
         end
         memory[7] <= cnt;
     end
@@ -539,92 +539,92 @@ module DataMemory(
 endmodule
 
 module IR (
-    // ÏµÍ³ĞÅºÅ
+    // ç³»ç»Ÿä¿¡å·
     input         clk,
     
-    // Ë«ÏòÊı¾İ×ÜÏß½Ó¿Ú
+    // åŒå‘æ•°æ®æ€»çº¿æ¥å£
     output reg  [7:0]  databus,
-    input  [7:0]  inbus,        // ÊäÈëÊı¾İ×ÜÏß£¨À´×ÔALU»òÆäËûÄ£¿é£©
+    input  [7:0]  inbus,        // è¾“å…¥æ•°æ®æ€»çº¿ï¼ˆæ¥è‡ªALUæˆ–å…¶ä»–æ¨¡å—ï¼‰
     
-    // ¿ØÖÆĞÅºÅ
-    input         ir_in,        // ´Ó×ÜÏß¼ÓÔØÖ¸Áî£¨ÉÏÉıÑØÓĞĞ§£©
+    // æ§åˆ¶ä¿¡å·
+    input         ir_in,        // ä»æ€»çº¿åŠ è½½æŒ‡ä»¤ï¼ˆä¸Šå‡æ²¿æœ‰æ•ˆï¼‰
     
-    // ÒëÂëÊä³ö
-    output [3:0]  opcode,       // ¸ß4Î»²Ù×÷Âë -> CU£¨´æÔÚ3Î»²Ù×÷Âë£©
-    output [3:0]  operand       // µÍ4Î»²Ù×÷Êı -> CU£¨´æÔÚ5Î»²Ù×÷ÊıÎªÁ¢¼´Êı£©
+    // è¯‘ç è¾“å‡º
+    output [3:0]  opcode,       // é«˜4ä½æ“ä½œç  -> CUï¼ˆå­˜åœ¨3ä½æ“ä½œç ï¼‰
+    output [3:0]  operand       // ä½4ä½æ“ä½œæ•° -> CUï¼ˆå­˜åœ¨5ä½æ“ä½œæ•°ä¸ºç«‹å³æ•°ï¼‰
 );
 
     //----------------------------------
-    // ÄÚ²¿¼Ä´æÆ÷Óë×´Ì¬»ú
+    // å†…éƒ¨å¯„å­˜å™¨ä¸çŠ¶æ€æœº
     //----------------------------------
     
-    // ³ÖĞøÊä³öµ½¿ØÖÆµ¥Ôª
+    // æŒç»­è¾“å‡ºåˆ°æ§åˆ¶å•å…ƒ
     assign opcode   = databus[7:4];
     assign operand  = databus[3:0];
 
     //----------------------------------
-    // Í¬²½¿ØÖÆÂß¼­
+    // åŒæ­¥æ§åˆ¶é€»è¾‘
     //----------------------------------
     always @(posedge clk) begin
-        // Ö¸Áî¼ÓÔØ½×¶Î
+        // æŒ‡ä»¤åŠ è½½é˜¶æ®µ
         if (ir_in) begin
-            databus <= inbus;    // Ëø´æ×ÜÏßÊı¾İ
+            databus <= inbus;    // é”å­˜æ€»çº¿æ•°æ®
         end
     end
 
 endmodule
 
 module CU (
-    // Ê±ÖÓÓë¸´Î»
+    // æ—¶é’Ÿä¸å¤ä½
     input         clk,
-    input         rst,          // È«¾Ö¸´Î»ĞÅºÅ
+    input         rst,          // å…¨å±€å¤ä½ä¿¡å·
     
-    // Ö¸Áî½Ó¿Ú
+    // æŒ‡ä»¤æ¥å£
     input  [3:0]  opcode,
     input  [3:0]  operand,
 
-    // ³ÌĞòµØÖ·×ÜÏß¿ØÖÆ
-    output reg      pc_reset,       // PCÇåÁã
-    output reg        pc_out,         // PCµØÖ·Êä³öÊ¹ÄÜ
-    output reg        pc_inc,         // PC×ÔÔö
-    output reg        pc_jump,        // PCÌø×ª
+    // ç¨‹åºåœ°å€æ€»çº¿æ§åˆ¶
+    output reg      pc_reset,       // PCæ¸…é›¶
+    output reg        pc_out,         // PCåœ°å€è¾“å‡ºä½¿èƒ½
+    output reg        pc_inc,         // PCè‡ªå¢
+    output reg        pc_jump,        // PCè·³è½¬
     
-    // Ö¸Áî¼Ä´æÆ÷×ÜÏß¿ØÖÆ
-    output reg        iMDRout,        // iMDRĞ´Èë×ÜÏß
+    // æŒ‡ä»¤å¯„å­˜å™¨æ€»çº¿æ§åˆ¶
+    output reg        iMDRout,        // iMDRå†™å…¥æ€»çº¿
 
-    // ¼Ä´æÆ÷×é×ÜÏß¿ØÖÆ
-    // ALU×ÜÏß¿ØÖÆ
-    output reg        ALUAin,         // ALUÊı¾İAÊäÈë
-    output reg        ALUBin,         // ALUÊı¾İBÊäÈë
-    output reg        ALUout,         // ALUÊı¾İÊä³ö
-    output reg [2:0]  ALUop,          // ALU²Ù×÷Ñ¡Ôñ
-    input             cf,             // ½øÎ»±êÖ¾£¨CF£©
-    input             zf,             // Áã±êÖ¾£¨ZF£©
+    // å¯„å­˜å™¨ç»„æ€»çº¿æ§åˆ¶
+    // ALUæ€»çº¿æ§åˆ¶
+    output reg        ALUAin,         // ALUæ•°æ®Aè¾“å…¥
+    output reg        ALUBin,         // ALUæ•°æ®Bè¾“å…¥
+    output reg        ALUout,         // ALUæ•°æ®è¾“å‡º
+    output reg [2:0]  ALUop,          // ALUæ“ä½œé€‰æ‹©
+    input             cf,             // è¿›ä½æ ‡å¿—ï¼ˆCFï¼‰
+    input             zf,             // é›¶æ ‡å¿—ï¼ˆZFï¼‰
 
-    // Êı¾İ´æ´¢Æ÷×ÜÏß¿ØÖÆ
-    output reg        dmdr_iin,       // dMDRºÍ×ÜÏßÊäÈëÊ¹ÄÜ
-    output reg        dmdr_iout,      // dMDRºÍ×ÜÏßÊä³öÊ¹ÄÜ£¨Êı¾İ×ÜÏßÊä³ö£©
-    output reg        mem_as_target,  // Êı¾İ´æ´¢Æ÷×÷ÎªÄ¿±êµØÖ·×ÜÏß
+    // æ•°æ®å­˜å‚¨å™¨æ€»çº¿æ§åˆ¶
+    output reg        dmdr_iin,       // dMDRå’Œæ€»çº¿è¾“å…¥ä½¿èƒ½
+    output reg        dmdr_iout,      // dMDRå’Œæ€»çº¿è¾“å‡ºä½¿èƒ½ï¼ˆæ•°æ®æ€»çº¿è¾“å‡ºï¼‰
+    output reg        mem_as_target,  // æ•°æ®å­˜å‚¨å™¨ä½œä¸ºç›®æ ‡åœ°å€æ€»çº¿
     output reg        mem_as_source,
 
-    output reg        ir_in,          // ´Ó×ÜÏß¼ÓÔØÖ¸Áî£¨ÉÏÉıÑØÓĞĞ§£©
-    output reg        imm_out,        // Á¢¼´ÊıÊä³ö£¨µÍÎåÎ»£©
+    output reg        ir_in,          // ä»æ€»çº¿åŠ è½½æŒ‡ä»¤ï¼ˆä¸Šå‡æ²¿æœ‰æ•ˆï¼‰
+    output reg        imm_out,        // ç«‹å³æ•°è¾“å‡ºï¼ˆä½äº”ä½ï¼‰
 
-    output reg [2:0]  s_addrbus,      // Ô´µØÖ·Ñ¡Ôñ
-    output reg [2:0]  t_addrbus,      // Ä¿±êµØÖ·Ñ¡Ôñ
+    output reg [2:0]  s_addrbus,      // æºåœ°å€é€‰æ‹©
+    output reg [2:0]  t_addrbus,      // ç›®æ ‡åœ°å€é€‰æ‹©
     output reg [7:0]  cnt,
     output     [7:0]  next_cnt,
-    input      rx, // UART½ÓÊÕÏß£¨¿ÉÑ¡£©
-    output reg tx, // UART·¢ËÍÏß£¨¿ÉÑ¡£©
-    output reg reg_bus_in, // ¼Ä´æÆ÷×éÊäÈë£¨R0-R3£©
-    output reg reg_en_in, // ¼Ä´æÆ÷×éÊäÈëÊ¹ÄÜ£¨R0-R3£©
-    input  reg_bus_out, // ¼Ä´æÆ÷×éÊä³ö£¨R0-R3£©
-    output reg reg_en_out // ¼Ä´æÆ÷×éÊä³öÊ¹ÄÜ£¨R0-R3£©
+    input      rx, // UARTæ¥æ”¶çº¿ï¼ˆå¯é€‰ï¼‰
+    output reg tx, // UARTå‘é€çº¿ï¼ˆå¯é€‰ï¼‰
+    output reg reg_bus_in, // å¯„å­˜å™¨ç»„è¾“å…¥ï¼ˆR0-R3ï¼‰
+    output reg reg_en_in, // å¯„å­˜å™¨ç»„è¾“å…¥ä½¿èƒ½ï¼ˆR0-R3ï¼‰
+    input  reg_bus_out, // å¯„å­˜å™¨ç»„è¾“å‡ºï¼ˆR0-R3ï¼‰
+    output reg reg_en_out // å¯„å­˜å™¨ç»„è¾“å‡ºä½¿èƒ½ï¼ˆR0-R3ï¼‰
 );
-    reg imm_get_en; // Á¢¼´Êı»ñÈ¡Ê¹ÄÜ
+    reg imm_get_en; // ç«‹å³æ•°è·å–ä½¿èƒ½
     reg [2:0] cur_sta;
-    reg fetch1_wait; // µÈ´ıĞÅºÅ
-    reg [1:0] imm_reg; // Á¢¼´Êı¼Ä´æÆ÷
+    reg fetch1_wait; // ç­‰å¾…ä¿¡å·
+    reg [1:0] imm_reg; // ç«‹å³æ•°å¯„å­˜å™¨
     parameter 
         FETCH1   = 3'b000,
         FETCH2   = 3'b001,
@@ -639,74 +639,74 @@ module CU (
 	);
     always @(negedge clk) begin
         case (cur_sta)
-            // È¡Ö¸½×¶Î
+            // å–æŒ‡é˜¶æ®µ
             FETCH1: begin
-                pc_out <= 1;            // PCÊä³öÖÁÊı¾İ×ÜÏß
-                s_addrbus <= 3'b110;    // Ö¸Áî´æ´¢Æ÷¶ÁÈ¡Ö¸Áî
-                t_addrbus <= 3'b111;    // ÎŞÄ¿±êµØÖ·
+                pc_out <= 1;            // PCè¾“å‡ºè‡³æ•°æ®æ€»çº¿
+                s_addrbus <= 3'b110;    // æŒ‡ä»¤å­˜å‚¨å™¨è¯»å–æŒ‡ä»¤
+                t_addrbus <= 3'b111;    // æ— ç›®æ ‡åœ°å€
                 if (fetch1_wait) begin
-                    fetch1_wait <= 1'b0; // È¡Ö¸µÈ´ıĞÅºÅ¸´Î»
-                    cur_sta <= FETCH1; // ±£³ÖÔÚFETCH1×´Ì¬
+                    fetch1_wait <= 1'b0; // å–æŒ‡ç­‰å¾…ä¿¡å·å¤ä½
+                    cur_sta <= FETCH1; // ä¿æŒåœ¨FETCH1çŠ¶æ€
                 end else begin
-                    cur_sta <= FETCH2;    // ×´Ì¬×ªÒÆµ½FETCH2
+                    cur_sta <= FETCH2;    // çŠ¶æ€è½¬ç§»åˆ°FETCH2
                 end
             end
             FETCH2: begin
-                pc_out <= 0;            // PCÍ£Ö¹×ÜÏßÊä³ö
-                s_addrbus <= 3'b111;    // Í£Ö¹Ö¸Áî´æ´¢Æ÷¶ÁÈ¡Ö¸Áî
-                iMDRout <= 1;           // Ö¸ÁîÊı¾İ´æ´¢Æ÷Êä³öÊı¾İÖÁ×ÜÏß
-                ir_in <= 1;             // Ö¸Áî¼Ä´æÆ÷´Ó×ÜÏßÖĞ¶ÁÈ¡Ö¸Áî
-                pc_inc <= 1;            // PC×ÔÔö
-                cur_sta <= EXEC1;    // ×´Ì¬×ªÒÆµ½EXEC1
+                pc_out <= 0;            // PCåœæ­¢æ€»çº¿è¾“å‡º
+                s_addrbus <= 3'b111;    // åœæ­¢æŒ‡ä»¤å­˜å‚¨å™¨è¯»å–æŒ‡ä»¤
+                iMDRout <= 1;           // æŒ‡ä»¤æ•°æ®å­˜å‚¨å™¨è¾“å‡ºæ•°æ®è‡³æ€»çº¿
+                ir_in <= 1;             // æŒ‡ä»¤å¯„å­˜å™¨ä»æ€»çº¿ä¸­è¯»å–æŒ‡ä»¤
+                pc_inc <= 1;            // PCè‡ªå¢
+                cur_sta <= EXEC1;    // çŠ¶æ€è½¬ç§»åˆ°EXEC1
             end
             EXEC1: begin
-                pc_inc <= 0;            // PCÍ£Ö¹×ÔÔö
-                iMDRout <= 0;           // Ö¸ÁîÊı¾İ´æ´¢Æ÷Í£Ö¹Êä³öÊı¾İÖÁ×ÜÏß
-                ir_in <= 0;             // Ö¸Áî¼Ä´æÆ÷Í£Ö¹¶ÁÈ¡Ö¸Áî
+                pc_inc <= 0;            // PCåœæ­¢è‡ªå¢
+                iMDRout <= 0;           // æŒ‡ä»¤æ•°æ®å­˜å‚¨å™¨åœæ­¢è¾“å‡ºæ•°æ®è‡³æ€»çº¿
+                ir_in <= 0;             // æŒ‡ä»¤å¯„å­˜å™¨åœæ­¢è¯»å–æŒ‡ä»¤
                 
                 // Start
                 case (opcode)
                     // move rx, ry step1(move)
                     4'b0000: begin
-                        s_addrbus <= {1'b0, operand[3:2]};    // rx·¢ËÍÊı¾İĞÅÏ¢ÖÁÊı¾İ×ÜÏß
-                        t_addrbus <= {1'b0, operand[1:0]};   // ry½ÓÊÜÊı¾İ×ÜÏßÉÏµÄÊı¾İĞÅÏ¢
+                        s_addrbus <= {1'b0, operand[3:2]};    // rxå‘é€æ•°æ®ä¿¡æ¯è‡³æ•°æ®æ€»çº¿
+                        t_addrbus <= {1'b0, operand[1:0]};   // ryæ¥å—æ•°æ®æ€»çº¿ä¸Šçš„æ•°æ®ä¿¡æ¯
                     end
-                    // move rx, (ry) step1(¼ä½ÓÑ°Ö·)
+                    // move rx, (ry) step1(é—´æ¥å¯»å€)
                     4'b0001: begin
-                        s_addrbus <= {1'b0, operand[3:2]};    // rx·¢ËÍÊı¾İĞÅÏ¢ÖÁÊı¾İ×ÜÏß
-                        dmdr_iin <= 1;                        // MDR½ÓÊÕ×ÜÏßÊı¾İ
+                        s_addrbus <= {1'b0, operand[3:2]};    // rxå‘é€æ•°æ®ä¿¡æ¯è‡³æ•°æ®æ€»çº¿
+                        dmdr_iin <= 1;                        // MDRæ¥æ”¶æ€»çº¿æ•°æ®
                     end
                     // move i ry
                     4'b0010: begin
-                        imm_reg <= operand[1:0]; // Ëø´æÁ¢¼´Êı¶ÁÈ¡µÄ¼Ä´æÆ÷±àºÅ
-                        pc_out <= 1;                     // PCÊä³öÖÁÊı¾İ×ÜÏß
-                        s_addrbus <= 3'b110;             // Ö¸Áî´æ´¢Æ÷¶ÁÈ¡Ö¸Áî
-                        imm_get_en <= 1;              // Á¢¼´Êı»ñÈ¡Ê¹ÄÜ
+                        imm_reg <= operand[1:0]; // é”å­˜ç«‹å³æ•°è¯»å–çš„å¯„å­˜å™¨ç¼–å·
+                        pc_out <= 1;                     // PCè¾“å‡ºè‡³æ•°æ®æ€»çº¿
+                        s_addrbus <= 3'b110;             // æŒ‡ä»¤å­˜å‚¨å™¨è¯»å–æŒ‡ä»¤
+                        imm_get_en <= 1;              // ç«‹å³æ•°è·å–ä½¿èƒ½
                     end
                     // jump
                     4'b0100: begin
                         case (operand[3:2])
                             // ry
                             2'b00: begin
-                                pc_jump <= 1;               // PCÌø×ª
-                                s_addrbus <= {1'b0, operand[1:0]}; // Ö±½ÓÌø×ªµ½µØÖ·
+                                pc_jump <= 1;               // PCè·³è½¬
+                                s_addrbus <= {1'b0, operand[1:0]}; // ç›´æ¥è·³è½¬åˆ°åœ°å€
                             end
                             // jc ry
                             2'b01: begin
                                 if (cf) begin
-                                    pc_jump <= 1;           // PCÌø×ª
-                                    s_addrbus <= {1'b0, operand[1:0]}; // Ö±½ÓÌø×ªµ½µØÖ·
+                                    pc_jump <= 1;           // PCè·³è½¬
+                                    s_addrbus <= {1'b0, operand[1:0]}; // ç›´æ¥è·³è½¬åˆ°åœ°å€
                                 end else begin
-                                    pc_jump <= 0;           // PC²»Ìø×ª
+                                    pc_jump <= 0;           // PCä¸è·³è½¬
                                 end
                             end
                             // jz ry
                             2'b10: begin
                                 if (zf) begin
-                                    pc_jump <= 1;           // PCÌø×ª
-                                    s_addrbus <= {1'b0, operand[1:0]}; // Ö±½ÓÌø×ªµ½µØÖ·
+                                    pc_jump <= 1;           // PCè·³è½¬
+                                    s_addrbus <= {1'b0, operand[1:0]}; // ç›´æ¥è·³è½¬åˆ°åœ°å€
                                 end else begin
-                                    pc_jump <= 0;           // PC²»Ìø×ª
+                                    pc_jump <= 0;           // PCä¸è·³è½¬
                                 end
                             end
                         endcase
@@ -716,8 +716,8 @@ module CU (
                         // in ry // ry <= uart receive
                         2'b00: begin
                             t_addrbus <= {1'b0, operand[1:0]};
-                            reg_bus_in <= rx;               // ¼Ä´æÆ÷×éÊäÈë
-                            reg_en_in <= 1;                 // ¼Ä´æÆ÷×éÊäÈëÊ¹ÄÜĞÅºÅ
+                            reg_bus_in <= rx;               // å¯„å­˜å™¨ç»„è¾“å…¥
+                            reg_en_in <= 1;                 // å¯„å­˜å™¨ç»„è¾“å…¥ä½¿èƒ½ä¿¡å·
                         end
                         // out ry // uart send
                         2'b01: begin
@@ -726,14 +726,14 @@ module CU (
                         end
                         endcase
                     end
-                    // move (rx), ry step1(¼ä½ÓÑ°Ö·)
+                    // move (rx), ry step1(é—´æ¥å¯»å€)
                     4'b0110: begin
-                        s_addrbus <= {1'b0, operand[3:2]};    // rxÊä³öµØÖ·Êı¾İÖÁÊı¾İ×ÜÏß
+                        s_addrbus <= {1'b0, operand[3:2]};    // rxè¾“å‡ºåœ°å€æ•°æ®è‡³æ•°æ®æ€»çº¿
                         mem_as_source <= 1;
                     end
                     // rtn step1(rtn)
                     4'b0111: begin
-                        pc_reset <= 1;                       // PCÇåÁã
+                        pc_reset <= 1;                       // PCæ¸…é›¶
                     end
                     // and/or/xor/add/sub/shl/shr rx ry step1(alua <= rx)
                     4'b1000, 4'b1001, 4'b1011, 4'b1101, 4'b1111, 4'b1100, 4'b1110: begin
@@ -742,16 +742,16 @@ module CU (
                     end
                     default: cur_sta <= cur_sta;
                 endcase
-                cur_sta <= EXEC2;    // ×´Ì¬×ªÒÆµ½EXEC2
+                cur_sta <= EXEC2;    // çŠ¶æ€è½¬ç§»åˆ°EXEC2
 
             end
             EXEC2: begin
                 if (imm_get_en) begin
-                    pc_out <= 0;                       // PCÍ£Ö¹Êä³ö
-                    pc_inc <= 1;                       // PC×ÔÔö
-                    s_addrbus <= 3'b111;                // Í£Ö¹Ô´µØÖ··¢ËÍÊı¾İ
-                    iMDRout <= 1;                  // Ö¸ÁîÊı¾İ´æ´¢Æ÷Êä³öÊı¾İÖÁ×ÜÏß
-                    ir_in <= 1;                     // Ö¸Áî¼Ä´æÆ÷´Ó×ÜÏßÖĞ¶ÁÈ¡Ö¸Áî
+                    pc_out <= 0;                       // PCåœæ­¢è¾“å‡º
+                    pc_inc <= 1;                       // PCè‡ªå¢
+                    s_addrbus <= 3'b111;                // åœæ­¢æºåœ°å€å‘é€æ•°æ®
+                    iMDRout <= 1;                  // æŒ‡ä»¤æ•°æ®å­˜å‚¨å™¨è¾“å‡ºæ•°æ®è‡³æ€»çº¿
+                    ir_in <= 1;                     // æŒ‡ä»¤å¯„å­˜å™¨ä»æ€»çº¿ä¸­è¯»å–æŒ‡ä»¤
                 end else begin
                 case (opcode)
                     // move rx, ry endstep
@@ -761,40 +761,40 @@ module CU (
                     end
                     // move rx, (ry) step2(move)
                     4'b0001: begin
-                        dmdr_iin <= 0;                        // MDRÍ£Ö¹½ÓÊÕ×ÜÏßÊı¾İ
-                        s_addrbus <= {1'b0, operand[1:0]};    // ry·¢ËÍµØÖ·ĞÅÏ¢ÖÁÊı¾İ×ÜÏß
-                        // t_addrbus <= 3'b100;                 // Í¨¹ı×ÜÏßÊı¾İµØÖ·ĞÅÏ¢½«¶ÔÓ¦ÄÚ´æÊı¾İ´æÖÁdMDR
-                        mem_as_target <= 1;                // Êı¾İ´æ´¢Æ÷×÷ÎªÄ¿±êµØÖ·×ÜÏß
+                        dmdr_iin <= 0;                        // MDRåœæ­¢æ¥æ”¶æ€»çº¿æ•°æ®
+                        s_addrbus <= {1'b0, operand[1:0]};    // ryå‘é€åœ°å€ä¿¡æ¯è‡³æ•°æ®æ€»çº¿
+                        // t_addrbus <= 3'b100;                 // é€šè¿‡æ€»çº¿æ•°æ®åœ°å€ä¿¡æ¯å°†å¯¹åº”å†…å­˜æ•°æ®å­˜è‡³dMDR
+                        mem_as_target <= 1;                // æ•°æ®å­˜å‚¨å™¨ä½œä¸ºç›®æ ‡åœ°å€æ€»çº¿
                     end
                     // jump step2(jump)
                     4'b0100: begin
-                        pc_jump <= 0;                       // PCÍ£Ö¹Ìø×ª
-                        s_addrbus <= 3'b111;                // Í£Ö¹Ô´µØÖ··¢ËÍÊı¾İ
-                        t_addrbus <= 3'b111;                // Í£Ö¹Ä¿±êµØÖ·½ÓÊÜÊı¾İ
+                        pc_jump <= 0;                       // PCåœæ­¢è·³è½¬
+                        s_addrbus <= 3'b111;                // åœæ­¢æºåœ°å€å‘é€æ•°æ®
+                        t_addrbus <= 3'b111;                // åœæ­¢ç›®æ ‡åœ°å€æ¥å—æ•°æ®
                     end
                     4'b0101: begin
                         case(operand[3:2])
                         // in ry step2(in)
                         2'b00: begin
-                            t_addrbus <= 3'b111;                // Í£Ö¹¼Ä´æÆ÷×éÊäÈë
-                            reg_en_in <= 0;                     // ¼Ä´æÆ÷×éÊäÈëÊ¹ÄÜĞÅ
+                            t_addrbus <= 3'b111;                // åœæ­¢å¯„å­˜å™¨ç»„è¾“å…¥
+                            reg_en_in <= 0;                     // å¯„å­˜å™¨ç»„è¾“å…¥ä½¿èƒ½ä¿¡
                         end
                         2'b01:begin
-                            s_addrbus <= 3'b111;                // Í£Ö¹¼Ä´æÆ÷×éÊä³ö
-                            reg_en_out <= 0;                    // ¼Ä´æÆ÷×éÊä³öÊ¹ÄÜĞÅ
+                            s_addrbus <= 3'b111;                // åœæ­¢å¯„å­˜å™¨ç»„è¾“å‡º
+                            reg_en_out <= 0;                    // å¯„å­˜å™¨ç»„è¾“å‡ºä½¿èƒ½ä¿¡
                         end
                         endcase
                     end
                     // move (rx), ry step2(move)
                     4'b0110: begin
                         mem_as_source <= 0;
-                        dmdr_iout <= 1;                         // dMDRÊä³öÊı¾İÖÁÊı¾İ×ÜÏß
-                        // s_addrbus <= 3'b100;                    // Ö÷´æ¸ù¾İµØÖ·Êı¾İ×ÜÏß·Ã´æ
-                        t_addrbus <= {1'b0, operand[1:0]}; // ry½ÓÊÜÊı¾İ×ÜÏßÉÏµÄÊı¾İ
+                        dmdr_iout <= 1;                         // dMDRè¾“å‡ºæ•°æ®è‡³æ•°æ®æ€»çº¿
+                        // s_addrbus <= 3'b100;                    // ä¸»å­˜æ ¹æ®åœ°å€æ•°æ®æ€»çº¿è®¿å­˜
+                        t_addrbus <= {1'b0, operand[1:0]}; // ryæ¥å—æ•°æ®æ€»çº¿ä¸Šçš„æ•°æ®
                     end
                     // rtn endstep
                     4'b0111: begin
-                        pc_reset <= 0;                          // PCÍ£Ö¹ÇåÁã
+                        pc_reset <= 0;                          // PCåœæ­¢æ¸…é›¶
                     end
                     // and rx ry step2(alub <= ry)
                     4'b1000: begin
@@ -855,36 +855,36 @@ module CU (
                     default: cur_sta <= cur_sta;
                 endcase
                 end
-                // ×´Ì¬×ªÒÆµ½EXEC3
+                // çŠ¶æ€è½¬ç§»åˆ°EXEC3
                 cur_sta <= EXEC3;
             end
             EXEC3: begin
                 if (imm_get_en) begin
-                    pc_inc <= 0;                       // PCÍ£Ö¹×ÔÔö
-                    iMDRout <= 0;                  // Ö¸ÁîÊı¾İ´æ´¢Æ÷Í£Ö¹Êä³öÊı¾İÖÁ×ÜÏß
-                    ir_in <= 0;                     // Ö¸Áî¼Ä´æÆ÷Í£Ö¹¶ÁÈ¡Ö¸Áî
-                    imm_out <= 1;                  // Á¢¼´ÊıÊä³öÊ¹ÄÜ
-                    t_addrbus <= {1'b0, imm_reg}; // Á¢¼´ÊıĞ´Èë¼Ä´æÆ÷
+                    pc_inc <= 0;                       // PCåœæ­¢è‡ªå¢
+                    iMDRout <= 0;                  // æŒ‡ä»¤æ•°æ®å­˜å‚¨å™¨åœæ­¢è¾“å‡ºæ•°æ®è‡³æ€»çº¿
+                    ir_in <= 0;                     // æŒ‡ä»¤å¯„å­˜å™¨åœæ­¢è¯»å–æŒ‡ä»¤
+                    imm_out <= 1;                  // ç«‹å³æ•°è¾“å‡ºä½¿èƒ½
+                    t_addrbus <= {1'b0, imm_reg}; // ç«‹å³æ•°å†™å…¥å¯„å­˜å™¨
                 end else begin
                 case (opcode)
                     // move rx, (ry) endstep
                     4'b0001: begin
-                        s_addrbus <= 3'b111;                      // Í£Ö¹Ô´µØÖ··¢ËÍÊı¾İ  
-                        t_addrbus <= 3'b111;                 // Í£Ö¹Ä¿±êµØÖ·½ÓÊÜÊı¾İ
+                        s_addrbus <= 3'b111;                      // åœæ­¢æºåœ°å€å‘é€æ•°æ®  
+                        t_addrbus <= 3'b111;                 // åœæ­¢ç›®æ ‡åœ°å€æ¥å—æ•°æ®
                         mem_as_target <= 0;
                     end
                     4'b0101: begin
                         case(operand[3:2])
                         2'b01:begin
-                            tx <= reg_bus_out;               // ¼Ä´æÆ÷×éÊä³öÊ¹ÄÜ
+                            tx <= reg_bus_out;               // å¯„å­˜å™¨ç»„è¾“å‡ºä½¿èƒ½
                         end
                         endcase
                     end
                     // move (rx), ry endstep
                     4'b0110: begin
-                        dmdr_iout <= 0;                          // dMDRÍ£Ö¹Êä³öÊı¾İÖÁÊı¾İ×ÜÏß
-                        t_addrbus <= 3'b111;                     // ryÍ£Ö¹½ÓÊÜÊı¾İ×ÜÏßÉÏµÄÊı¾İ
-                        s_addrbus <= 3'b111;                     // Í£Ö¹Ô´µØÖ··¢ËÍÊı¾İ
+                        dmdr_iout <= 0;                          // dMDRåœæ­¢è¾“å‡ºæ•°æ®è‡³æ•°æ®æ€»çº¿
+                        t_addrbus <= 3'b111;                     // ryåœæ­¢æ¥å—æ•°æ®æ€»çº¿ä¸Šçš„æ•°æ®
+                        s_addrbus <= 3'b111;                     // åœæ­¢æºåœ°å€å‘é€æ•°æ®
                     end
                     // and/or/xor/add/sub/shl/shr rx ry step3 (result <= databus)
                     4'b1000, 4'b1001, 4'b1010, 4'b1011, 4'b1101, 4'b1111, 4'b1100, 4'b1110: begin
@@ -893,19 +893,19 @@ module CU (
                         ALUBin <= 0;
                         //operate
                         ALUout <= 1;                         
-                        t_addrbus <= {1'b0, operand[1:0]};        // ¼ÆËã½á¹ûĞ´Èëry
+                        t_addrbus <= {1'b0, operand[1:0]};        // è®¡ç®—ç»“æœå†™å…¥ry
                     end
                     default: cur_sta <= cur_sta;
                     endcase
-                // ×´Ì¬×ªÒÆµ½EXEC4
+                // çŠ¶æ€è½¬ç§»åˆ°EXEC4
                 end
                 cur_sta <= EXEC4;
             end
             EXEC4: begin
                 if (imm_get_en) begin
-                    imm_out <= 0; // Á¢¼´ÊıÊä³öÍ£Ö¹
-                    imm_get_en <= 0; // Á¢¼´Êı»ñÈ¡Ê¹ÄÜ¸´Î»
-                    t_addrbus <= 3'b111; // Í£Ö¹Ä¿±êµØÖ·½ÓÊÜÊı¾İ
+                    imm_out <= 0; // ç«‹å³æ•°è¾“å‡ºåœæ­¢
+                    imm_get_en <= 0; // ç«‹å³æ•°è·å–ä½¿èƒ½å¤ä½
+                    t_addrbus <= 3'b111; // åœæ­¢ç›®æ ‡åœ°å€æ¥å—æ•°æ®
                 end else begin
                     case (opcode)
                     // (and/or/not/xor/add/sub/shl/shr rx ry) / add/sub i endstep
@@ -916,7 +916,7 @@ module CU (
                     default: cur_sta <= cur_sta;
                     endcase
                 end
-                // ×´Ì¬×ªÒÆµ½FETCH1
+                // çŠ¶æ€è½¬ç§»åˆ°FETCH1
                 cur_sta <= FETCH1;
                 if(cnt[3] & cnt[4] & cnt[6] & cnt[7]) cnt <= 0;
                 // if(cnt == 19) cnt <= 0;
@@ -934,22 +934,22 @@ module CU (
         endcase
 
         if (rst) begin
-            cur_sta <= FETCH1; // ¸´Î»Ê±×´Ì¬»ú»Øµ½FETCH1
+            cur_sta <= FETCH1; // å¤ä½æ—¶çŠ¶æ€æœºå›åˆ°FETCH1
             pc_reset <= 1'b0;
-            pc_out <= 1'b0; // PCÊä³öÍ£Ö¹
-            pc_inc <= 1'b0; // PC×ÔÔöÍ£Ö¹
-            iMDRout <= 1'b0; // Ö¸Áî´æ´¢Æ÷Êä³öÍ£Ö¹
-            ALUAin <= 1'b0; // ALU AÊäÈëÍ£Ö¹
-            ALUBin <= 1'b0; // ALU BÊäÈëÍ£Ö¹
-            ALUout <= 1'b0; // ALUÊä³öÍ£Ö¹
-            ALUop <= 3'b000; // ALU²Ù×÷ÂëÇåÁã
-            dmdr_iin <= 1'b0; // Êı¾İ´æ´¢Æ÷ÊäÈëÍ£Ö¹
-            dmdr_iout <= 1'b0; // Êı¾İ´æ´¢Æ÷Êä³öÍ£Ö¹
-            ir_in <= 1'b0; // Ö¸Áî¼Ä´æÆ÷ÊäÈëÍ£Ö¹
-            imm_out <= 1'b0; // Á¢¼´ÊıÊä³öÍ£Ö¹
-            s_addrbus <= 3'b111; // Ô´µØÖ·×ÜÏßÖÃ¿Õ
-            t_addrbus <= 3'b111; // Ä¿±êµØÖ·×ÜÏßÖÃ¿Õ
-            fetch1_wait <= 1'b1; // Çå³ıµÈ´ı×´Ì¬
+            pc_out <= 1'b0; // PCè¾“å‡ºåœæ­¢
+            pc_inc <= 1'b0; // PCè‡ªå¢åœæ­¢
+            iMDRout <= 1'b0; // æŒ‡ä»¤å­˜å‚¨å™¨è¾“å‡ºåœæ­¢
+            ALUAin <= 1'b0; // ALU Aè¾“å…¥åœæ­¢
+            ALUBin <= 1'b0; // ALU Bè¾“å…¥åœæ­¢
+            ALUout <= 1'b0; // ALUè¾“å‡ºåœæ­¢
+            ALUop <= 3'b000; // ALUæ“ä½œç æ¸…é›¶
+            dmdr_iin <= 1'b0; // æ•°æ®å­˜å‚¨å™¨è¾“å…¥åœæ­¢
+            dmdr_iout <= 1'b0; // æ•°æ®å­˜å‚¨å™¨è¾“å‡ºåœæ­¢
+            ir_in <= 1'b0; // æŒ‡ä»¤å¯„å­˜å™¨è¾“å…¥åœæ­¢
+            imm_out <= 1'b0; // ç«‹å³æ•°è¾“å‡ºåœæ­¢
+            s_addrbus <= 3'b111; // æºåœ°å€æ€»çº¿ç½®ç©º
+            t_addrbus <= 3'b111; // ç›®æ ‡åœ°å€æ€»çº¿ç½®ç©º
+            fetch1_wait <= 1'b1; // æ¸…é™¤ç­‰å¾…çŠ¶æ€
             cnt <= 0;
             tx <= 1;
         end
@@ -964,13 +964,13 @@ module Incrementer(
     input [7:0]  op,
     output [7:0] next_op
 );
-    // Éú³É½øÎ»Á´
+    // ç”Ÿæˆè¿›ä½é“¾
     wire [7:0] carry;
     
-    // ×îµÍÎ»µÄ½øÎ»ÊÇ1£¨ÒòÎªÎÒÃÇÒª¼Ó1£©
+    // æœ€ä½ä½çš„è¿›ä½æ˜¯1ï¼ˆå› ä¸ºæˆ‘ä»¬è¦åŠ 1ï¼‰
     assign carry[0] = 1'b1;
     
-    // ¼ÆËã¸÷½øÎ»Î»
+    // è®¡ç®—å„è¿›ä½ä½
     assign carry[1] = op[0] & carry[0];
     assign carry[2] = op[1] & carry[1];
     assign carry[3] = op[2] & carry[2];
@@ -979,7 +979,7 @@ module Incrementer(
     assign carry[6] = op[5] & carry[5];
     assign carry[7] = op[6] & carry[6];
     
-    // ¼ÆËãÔöÁ¿½á¹û
+    // è®¡ç®—å¢é‡ç»“æœ
     // next_op = op + 1 = op ^ carry ^ {carry[6:0], 1'b0}
     assign next_op = op ^ carry;
 endmodule
