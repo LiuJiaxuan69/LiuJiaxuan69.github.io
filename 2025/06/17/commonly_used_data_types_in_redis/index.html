@@ -318,36 +318,136 @@ int
 </tr>
 </tbody></table>
 <p>下面就来一一介绍这五种常见常用的数据类型</p>
-<h2 id="一、String"><a href="#一、String" class="headerlink" title="一、String"></a>一、String</h2><h3 id="类型简介"><a href="#类型简介" class="headerlink" title="类型简介"></a>类型简介</h3><p>不同于 C++ 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h2 id="一、String"><a href="#一、String" class="headerlink" title="一、String"></a>一、String</h2><h3 id="类型简介"><a href="#类型简介" class="headerlink" title="类型简介"></a>类型简介</h3><p>不同于 shell 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
 <h3 id="相关指令"><a href="#相关指令" class="headerlink" title="相关指令"></a>相关指令</h3><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; lpush k2 <span class="number">11</span> <span class="number">22</span> <span class="number">33</span></span><br><span class="line">(integer) <span class="number">3</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">get <span class="title">k2</span></span></span><br><span class="line"><span class="function"><span class="params">(error)</span> WRONGTYPE Operation against a key holding the wrong kind of value</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush k2 11 22 33</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
 
 <p>当然，除此之外，还有一些专门针对 String 类型的便捷指令：</p>
 <p>1、setex 指令</p>
 <p>用法：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setex key seconds value</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setex key seconds value</span><br></pre></td></tr></table></figure>
 
 <p>该指令其实可以直接通过 set 指令直接实现，但通过 setex 实现会更加简洁便利，下面是两个代码的对比：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; set key1 <span class="number">123</span> ex <span class="number">5</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; setex key1 <span class="number">5</span> <span class="number">123</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 123 ex 5</span><br><span class="line">127.0.0.1:6379&gt; setex key1 5 123</span><br></pre></td></tr></table></figure>
 
 <p>使用 setex 命令可以避免写 ex 来表示附加过期时间设置，而且这种命令看起来非常直白，一看就能知道这个命令的用法是什么</p>
 <p>2、psetex 指令</p>
 <p>与之对应的就是 psetex，没错，相信你看到这个命令就已经知道这个命令是用来干什么的了，这不就多了一个 p 嘛，那这个指令肯定就是以 ms 为单位来设置过期时间的了</p>
 <p>3、setnx 指令</p>
 <p>该指令是用来设置不存在的键值对的，存在的键值是无法修改的，用法如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value</span><br></pre></td></tr></table></figure>
 
 <p>具体例子如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">setnx key1 <span class="title">value1</span></span></span><br><span class="line"><span class="function"><span class="params">(integer)</span> 1</span></span><br><span class="line"><span class="function">127.0.0.1:<span class="number">6379</span>&gt; setnx key1 value1</span></span><br><span class="line"><span class="function">(integer) <span class="number">0</span></span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
 
 <p>4、incr 及 incrby 指令</p>
 <p>String 类型若存放一个64位以内的整数，这个数就会在底层被以 int 类型存储，而这时就可以通过 incr 指令来对某个数进行加一操作了，同样的，通过incrby就可以给一个数<br>加上一个特定的值，当然也可以是一个负数，同时，它们两者可以对一个不存在的键值对进行操作，会将这个值设定为0，语法如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">incr key</span><br><span class="line">incrby key increment</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">incr key</span><br><span class="line">incrby key increment</span><br></pre></td></tr></table></figure>
 
 <p>下面是使用举例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置一个已经存在的 key 值 key1</span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; set key1 <span class="number">1</span></span><br><span class="line">OK</span><br><span class="line"><span class="comment">//让 key1 自增 </span></span><br><span class="line"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; <span class="function">incr <span class="title">key1</span></span></span><br><span class="line"><span class="function"><span class="params">(integer)</span> 2</span></span><br><span class="line"><span class="function"><span class="comment">//让不存在的 key2 自增</span></span></span><br><span class="line"><span class="function">127.0.0.1:<span class="number">6379</span>&gt; incr key2</span></span><br><span class="line"><span class="function">(integer) <span class="number">1</span></span></span><br><span class="line"><span class="function">//对存在的 key1 加<span class="number">10</span></span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key1 <span class="number">10</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">12</span></span></span><br><span class="line"><span class="function">//对不存在的 key3 加<span class="number">20</span></span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key3 <span class="number">20</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">20</span></span></span><br><span class="line"><span class="function">//对 key3 加<span class="number">-10</span>（减<span class="number">10</span>）</span></span><br><span class="line"><span class="function"><span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span>:<span class="number">6379</span>&gt; incrby key3 <span class="number">-10</span></span></span><br><span class="line"><span class="function">(integer) <span class="number">10</span></span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 设置一个已经存在的 key 值 key1</span><br><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">// 让 key1 自增 </span><br><span class="line">127.0.0.1:6379&gt; incr key1</span><br><span class="line">(integer) 2</span><br><span class="line">// 让不存在的 key2 自增</span><br><span class="line">127.0.0.1:6379&gt; incr key2</span><br><span class="line">(integer) 1</span><br><span class="line">// 对存在的 key1 加10</span><br><span class="line">127.0.0.1:6379&gt; incrby key1 10</span><br><span class="line">(integer) 12</span><br><span class="line">// 对不存在的 key3 加20</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 20</span><br><span class="line">(integer) 20</span><br><span class="line">// 对 key3 加-10（减10）</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 -10</span><br><span class="line">(integer) 10</span><br></pre></td></tr></table></figure>
 
-<p>未完待续</p>
+<p>5、decr 及 decrby 指令</p>
+<p>这个指令用法和 incr、incrby 完全一致，你们可能会疑惑，incr 和 incrby 已经可以处理减法操作了，那为啥还要有减法指令呢？道理很简单，假如说<br>你去银行取100块钱，银行跟你说已存钱-100块，你听着舒服吗，这样设计是为了让命令用起来更加人性化，当然，decr一类指令也可以通过减负数来实现<br>加法运算，下面是使用示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; decr key1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; decr key2</span><br><span class="line">(integer) -1</span><br><span class="line">127.0.0.1:6379&gt; decrby key1 10</span><br><span class="line">(integer) -10</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 20</span><br><span class="line">(integer) -20</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 -10</span><br><span class="line">(integer) -10</span><br></pre></td></tr></table></figure>
+
+<p>6、append 指令<br>如果 key 已经存在并且是⼀个 string，命令会将 value 追加到原有 string 的后边。如果 key 不存在，则效果等同于 SET 命令。</p>
+<p>该命令的时间复杂度为O(1)，追加的字符串⼀般⻓度较短, 可以视为 O(1)，其返回值为追加完成之后 string 的⻓度，下面是使用示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 给一个不存在的 key 值使用 append 指令，效果等同于 set 指令</span><br><span class="line">127.0.0.1:6379&gt; append k1 hello</span><br><span class="line">(integer) 5</span><br><span class="line">// 追加字符串 world</span><br><span class="line">127.0.0.1:6379&gt; append k1 world</span><br><span class="line">(integer) 10</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld&quot;</span><br><span class="line">// 追加带有空格的字符串（使用引号） &#x27; world&#x27;</span><br><span class="line">127.0.0.1:6379&gt; append k1 &#x27; world&#x27;</span><br><span class="line">(integer) 16</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld world&quot;</span><br></pre></td></tr></table></figure>
+
+<p>7、getrange 指令<br>返回 key 对应的 string 的⼦串，由 start 和 end 确定（左闭右闭）。可以使⽤负数表⽰倒数。-1 代表倒数第⼀个字符，-2 代表<br>倒数第⼆个，其他的与此类似。超过范围的偏移量会根据 string 的⻓度调整成正确的值</p>
+<p>使用示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 截取从下标1到下标3的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 3</span><br><span class="line">&quot;aab&quot;</span><br><span class="line">// 截取从下标1到倒数第一个的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 -1</span><br><span class="line">&quot;aabbbcccddd&quot;</span><br><span class="line">// 非正常操作，范围不可能前面大后面小</span><br><span class="line">127.0.0.1:6379&gt; getrange key -1 -3</span><br><span class="line">&quot;&quot;</span><br><span class="line">127.0.0.1:6379&gt; getrange key -3 -1</span><br><span class="line">&quot;ddd&quot;</span><br></pre></td></tr></table></figure>
+
+<p>8、setrange 指令<br>该指令可以从指定偏移量开始覆盖字符串，其返回值为覆盖后字符串的长度</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 从0开始覆盖写入 eee</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 0 eee</span><br><span class="line">(integer) 12</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccddd&quot;</span><br><span class="line">// 偏移量不能采用负数表示</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 -1 fff</span><br><span class="line">(error) ERR offset is out of range</span><br><span class="line">// 写入字符串末尾，实现效果和 append 指令相同</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 12 fff</span><br><span class="line">(integer) 15</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccdddfff&quot;</span><br></pre></td></tr></table></figure>
+
+<p>对于不存在的键值，利用该指令覆盖字符串，偏移量前面会用\x00来表示</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setrange k2 3 aaaaaa</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">&quot;\x00\x00\x00aaaaaa&quot;</span><br></pre></td></tr></table></figure>
+
+<p>9、strlen 指令</p>
+<p>该指令用于计算字符串的长度（按字节计算）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbccc</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k1</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; set k2 你好</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k2</span><br><span class="line">(integer) 6</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>命令</th>
+<th>执行效果</th>
+<th>时间复杂度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>set key value [key value…]</td>
+<td>设置 key 的值是 value</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>get key</td>
+<td>获取 key 的值</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>del key [key …]</td>
+<td>删除指定的 key</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>mset key value [key value …]</td>
+<td>批量设置指定的 key 和 value</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>mget key [key …]</td>
+<td>批量获取 key 的值</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>incr key</td>
+<td>指定的 key 的值 +1</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>decr key</td>
+<td>指定的 key 的值 -1</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>incrby key n</td>
+<td>指定的 key 的值 +n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>decrby key n</td>
+<td>指定的 key 的值 -n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>incrbyfloat key n</td>
+<td>指定的 key 的值 +n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>append key value</td>
+<td>指定的 key 的值追加 value</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>strlen key</td>
+<td>获取指定 key 的值的长度</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>setrange key offset value</td>
+<td>覆盖指定 key 的从 offset 开始的部分值</td>
+<td>O(n), n 是字符串长度, 通常视为 O(1)</td>
+</tr>
+<tr>
+<td>getrange key start end</td>
+<td>获取指定 key 的从 start 到 end 的部分值</td>
+<td>O(n), n 是字符串长度, 通常视为 O(1)</td>
+</tr>
+</tbody></table>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">

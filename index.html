@@ -189,7 +189,7 @@
     </p>
 </div>
 
-  <div id="container" class="gradient">
+  <div id="container">
     
     <div id="screen">
         <div id="mark">
@@ -230,7 +230,7 @@
     <a href="/2025/06/25/8%E4%BD%8DCPU%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/" 
        title="8位CPU硬件设计"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -251,7 +251,7 @@
     <a href="/2025/06/23/4bit_alu/" 
        title="4bit ALU verilog 设计"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -271,7 +271,7 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
     <a href="/2025/06/23/simulated_vending_machine/" 
        title="模拟自动售货机（加法器）"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -290,7 +290,7 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
     <a href="/2025/06/19/redis_single_thread_model_discussion/" 
        title="关于 Redis 单线程模型的探讨"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -310,7 +310,7 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
     <a href="/2025/06/17/commonly_used_data_types_in_redis/" 
        title="Redis 常见数据类型"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -340,7 +340,7 @@ raw
     <a href="/2025/06/16/redis_command_line_user_guide/" 
        title="Redis 命令行使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -360,7 +360,7 @@ raw
     <a href="/2025/05/29/Hello-World/" 
        title="Hello World"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -382,7 +382,7 @@ raw
     <a href="/2025/05/29/test/" 
        title="test"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -407,13 +407,13 @@ raw
 <html>
 <head>
 <style>
-  .gradient {
+  /* .gradient {
     position: relative;
     background: linear-gradient(-45deg,
-      rgba(255, 182, 193, 0.5),
-      rgba(255, 105, 180, 0.5),
+      rgba(208, 255, 182, 0.5),
+      rgba(105, 255, 225, 0.5),
       rgba(173, 216, 230, 0.5),
-      rgba(100, 149, 237, 0.5)
+      rgba(109, 100, 237, 0.5)
     );
     background-size: 400% 400%;
     animation: gradientBG 7s ease infinite alternate;
@@ -421,7 +421,7 @@ raw
   }
 
   /* 粒子光点样式 */
-  .gradient::before {
+  /*.gradient::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -439,7 +439,127 @@ raw
     0% { background-position: 0% 50%; }
     70% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  } */
+
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
+
+:root {
+  font-size: 15px;
+}
+
+body {
+  font-family: 'Quicksand', sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  background-color: #e493d0;
+  background-image: 
+    radial-gradient(closest-side, rgba(235, 105, 78, 1), rgba(235, 105, 78, 0)),
+    radial-gradient(closest-side, rgba(243, 11, 164, 1), rgba(243, 11, 164, 0)),
+    radial-gradient(closest-side, rgba(254, 234, 131, 1), rgba(254, 234, 131, 0)),
+    radial-gradient(closest-side, rgba(170, 142, 245, 1), rgba(170, 142, 245, 0)),
+    radial-gradient(closest-side, rgba(248, 192, 147, 1), rgba(248, 192, 147, 0));
+  background-size: 
+    130vmax 130vmax,
+    80vmax 80vmax,
+    90vmax 90vmax,
+    110vmax 110vmax,
+    90vmax 90vmax;
+  background-position:
+    -80vmax -80vmax,
+    60vmax -30vmax,
+    10vmax 10vmax,
+    -30vmax -10vmax,
+    50vmax 50vmax;
+  background-repeat: no-repeat;
+  animation: 10s movement linear infinite;
+}
+
+body::after {
+  content: '';
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+span {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  font-size: 5rem;
+  color: transparent;
+  text-shadow:
+    0px 0px 1px rgba(255, 255, 255, .6),
+    0px 4px 4px rgba(0, 0, 0, .05);
+  letter-spacing: .2rem;
+}
+
+@keyframes movement {
+  0%, 100% {
+    background-size: 
+      130vmax 130vmax,
+      80vmax 80vmax,
+      90vmax 90vmax,
+      110vmax 110vmax,
+      90vmax 90vmax;
+    background-position:
+      -80vmax -80vmax,
+      60vmax -30vmax,
+      10vmax 10vmax,
+      -30vmax -10vmax,
+      50vmax 50vmax;
   }
+  25% {
+    background-size: 
+      100vmax 100vmax,
+      90vmax 90vmax,
+      100vmax 100vmax,
+      90vmax 90vmax,
+      60vmax 60vmax;
+    background-position:
+      -60vmax -90vmax,
+      50vmax -40vmax,
+      0vmax -20vmax,
+      -40vmax -20vmax,
+      40vmax 60vmax;
+  }
+  50% {
+    background-size: 
+      80vmax 80vmax,
+      110vmax 110vmax,
+      80vmax 80vmax,
+      60vmax 60vmax,
+      80vmax 80vmax;
+    background-position:
+      -50vmax -70vmax,
+      40vmax -30vmax,
+      10vmax 0vmax,
+      20vmax 10vmax,
+      30vmax 70vmax;
+  }
+  75% {
+    background-size: 
+      90vmax 90vmax,
+      90vmax 90vmax,
+      100vmax 100vmax,
+      90vmax 90vmax,
+      70vmax 70vmax;
+    background-position:
+      -50vmax -40vmax,
+      50vmax -30vmax,
+      20vmax 0vmax,
+      -10vmax 10vmax,
+      40vmax 60vmax;
+  }
+}
 </style>
 </head>
 <body>
