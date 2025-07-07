@@ -272,6 +272,66 @@
 </div>
 
 <style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
   /* 新增：背景图平滑过渡 */
   #custom-bg {
     transition: background-image 1.2s ease-in-out;

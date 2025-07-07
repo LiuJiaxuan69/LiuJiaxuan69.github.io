@@ -213,14 +213,14 @@
 <p>当然，这种软件思维设计逻辑结构会非常复杂:</p>
 <p><img src="/img/simulated_vending_machine/soft_struct1.png" alt="struct"></p>
 <p>所以我们需要基于这一问题设计一个硬件思维的逻辑结构：</p>
-<h2 id="首先实现一个四位加法器替换加法运算："><a href="#首先实现一个四位加法器替换加法运算：" class="headerlink" title="首先实现一个四位加法器替换加法运算："></a><strong>首先实现一个四位加法器替换加法运算：</strong></h2><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> FourBitAdder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">input</span> CI,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S,</span><br><span class="line">    <span class="keyword">output</span> CO</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] P = A ^ B;  </span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] G = A &amp; B;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] C;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = CI;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> CO   = G[<span class="number">3</span>] | P[<span class="number">3</span>] &amp; C[<span class="number">3</span>];</span><br><span class="line">    <span class="keyword">assign</span> S = P ^ C;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+<h2><span id="首先实现一个四位加法器替换加法运算"><strong>首先实现一个四位加法器替换加法运算：</strong></span></h2><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> FourBitAdder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">input</span> CI,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S,</span><br><span class="line">    <span class="keyword">output</span> CO</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] P = A ^ B;  </span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] G = A &amp; B;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] C;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = CI;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> CO   = G[<span class="number">3</span>] | P[<span class="number">3</span>] &amp; C[<span class="number">3</span>];</span><br><span class="line">    <span class="keyword">assign</span> S = P ^ C;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
 
 <p>该加法器使用的是3位并联加一位串联，在唐朔飞的《计算机组成原理》第285面的6.23中可以看到实现原理，这里不再赘述，但我加了一个小改动，因为串联电路CO若也通过并联方式<br>来实现的话，那么对于CO而言电路就非常复杂了，实现代码如下：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">assign</span> CO   = G[<span class="number">3</span>] | P[<span class="number">3</span>] &amp; G[<span class="number">2</span>] | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">3</span>] &amp; P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br></pre></td></tr></table></figure>
 
 <p>会使用相当多的门电路，所以我单独把 CO 设置成了串联电路，即在 C[3] 计算出来后再利用 C[3] 计算 CO，不过经过测试，直接使用书上的格式效率差不多，所谓力大砖飞</p>
 <p>加法器中加的这个数是根据inscoin来判断的，判断如下：</p>
-<h3 id="inscoin-输入对应加数-B-映射表"><a href="#inscoin-输入对应加数-B-映射表" class="headerlink" title="inscoin 输入对应加数 B 映射表"></a><code>inscoin</code> 输入对应加数 <code>B</code> 映射表</h3><table>
+<h3><span id="inscoin-输入对应加数-b-映射表"><code>inscoin</code> 输入对应加数 <code>B</code> 映射表</span></h3><table>
 <thead>
 <tr>
 <th><code>inscoin</code> (二进制)</th>
@@ -264,7 +264,7 @@
 <td><code>B = &#123;2&#39;b00, 1&amp;~1, 1&amp;~1&#125;</code></td>
 </tr>
 </tbody></table>
-<h4 id="计算公式"><a href="#计算公式" class="headerlink" title="计算公式"></a>计算公式</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] B = &#123;<span class="number">2&#x27;b00</span>, inscoin[<span class="number">1</span>] &amp; ~inscoin[<span class="number">0</span>], inscoin[<span class="number">0</span>] &amp; ~inscoin[<span class="number">1</span>]&#125;;</span><br></pre></td></tr></table></figure>
+<h4><span id="计算公式">计算公式</span></h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] B = &#123;<span class="number">2&#x27;b00</span>, inscoin[<span class="number">1</span>] &amp; ~inscoin[<span class="number">0</span>], inscoin[<span class="number">0</span>] &amp; ~inscoin[<span class="number">1</span>]&#125;;</span><br></pre></td></tr></table></figure>
 
 <p>计算过程如下：<br>首先01和10两种情况加上的数就是0001和0010，因此这两种情况直接将 inscoin 的两位数作为最低数即可，而当遇到 inscoin 为00或11时加上得数应当为0，<br>因此，在 inscoin 两位异或为1时加数是有效的，否则为0，故：</p>
 <p>B[1] &#x3D; inscoin[1] &amp; (inscoin[0] ^ inscoin[1]) &#x3D; inscoins[1] &amp; ~inscoin[0] (化简过程自己脑补)<br>B[0] &#x3D; inscoin[0] &amp; (inscoin[1] ^ inscoin[0]) &#x3D; inscoins[0] &amp; ~inscoin[1] (你知道我要说什么的)</p>
@@ -350,6 +350,66 @@
 </div>
 
 <style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
   /* 新增：背景图平滑过渡 */
   #custom-bg {
     transition: background-image 1.2s ease-in-out;

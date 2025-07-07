@@ -10,8 +10,19 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="设计概要如下：
-CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数op0[3:0]、第二4位操作数op1[3:0]、功能选择s[2:0]、输出使能信号oe、时钟信号clk输出信号：4位,"> 
+    <meta name="description" content="
+
+
+一、实现所有的运算逻辑，包装成底层模块
+二、顶层模块复用所有子模块
+三、结果选择器实现
+四、D触发器存储结果数据实现
+五、最终输出
+
+
+
+设计概要如下：
+CPU中简单的4位ALU（算术逻辑单元,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -22,8 +33,19 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
     
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:title" content="4bit ALU verilog 设计 - 刘家炫的博客"/>
-    <meta name="twitter:description" content="设计概要如下：
-CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数op0[3:0]、第二4位操作数op1[3:0]、功能选择s[2:0]、输出使能信号oe、时钟信号clk输出信号：4位,"/>
+    <meta name="twitter:description" content="
+
+
+一、实现所有的运算逻辑，包装成底层模块
+二、顶层模块复用所有子模块
+三、结果选择器实现
+四、D触发器存储结果数据实现
+五、最终输出
+
+
+
+设计概要如下：
+CPU中简单的4位ALU（算术逻辑单元,"/>
     
     
     
@@ -31,8 +53,19 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
     <meta property="og:title" content="4bit ALU verilog 设计 - 刘家炫的博客"/>
-    <meta property="og:description" content="设计概要如下：
-CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数op0[3:0]、第二4位操作数op1[3:0]、功能选择s[2:0]、输出使能信号oe、时钟信号clk输出信号：4位,"/>
+    <meta property="og:description" content="
+
+
+一、实现所有的运算逻辑，包装成底层模块
+二、顶层模块复用所有子模块
+三、结果选择器实现
+四、D触发器存储结果数据实现
+五、最终输出
+
+
+
+设计概要如下：
+CPU中简单的4位ALU（算术逻辑单元,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -203,20 +236,31 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <p>设计概要如下：</p>
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E4%B8%80-%E5%AE%9E%E7%8E%B0%E6%89%80%E6%9C%89%E7%9A%84%E8%BF%90%E7%AE%97%E9%80%BB%E8%BE%91%E5%8C%85%E8%A3%85%E6%88%90%E5%BA%95%E5%B1%82%E6%A8%A1%E5%9D%97">一、实现所有的运算逻辑，包装成底层模块</a></li>
+<li><a href="#%E4%BA%8C-%E9%A1%B6%E5%B1%82%E6%A8%A1%E5%9D%97%E5%A4%8D%E7%94%A8%E6%89%80%E6%9C%89%E5%AD%90%E6%A8%A1%E5%9D%97">二、顶层模块复用所有子模块</a></li>
+<li><a href="#%E4%B8%89-%E7%BB%93%E6%9E%9C%E9%80%89%E6%8B%A9%E5%99%A8%E5%AE%9E%E7%8E%B0">三、结果选择器实现</a></li>
+<li><a href="#%E5%9B%9B-d%E8%A7%A6%E5%8F%91%E5%99%A8%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%9C%E6%95%B0%E6%8D%AE%E5%AE%9E%E7%8E%B0">四、D触发器存储结果数据实现</a></li>
+<li><a href="#%E4%BA%94-%E6%9C%80%E7%BB%88%E8%BE%93%E5%87%BA">五、最终输出</a></li>
+</ul>
+<!-- tocstop -->
+
+<p>设计概要如下：</p>
 <p>CPU中简单的4位ALU（算术逻辑单元）<br>输入信号：第一4位操作数op0[3:0]、第二4位操作数op1[3:0]、功能选择s[2:0]、输出使能信号oe、时钟信号clk<br>输出信号：4位运算结果r[3:0]、进位标志cf<br>设计要求：<br>1、根据功能选择信号s[2:0]选择算术或者逻辑运算功能，s[2:0]值为3’b000（即二进制000B）时为加法运算，3’b001时为减法运算，3’b100时为与运算，3’b101时为或运算，3’b110时为非运算（注意非运算只使用第一4位操作数），3’b111时为异或（XOR）运算。<br>2、运算结果必须先存储在4位结果寄存器（使用D触发器实现）中，clk上升沿时运算结果存入4位结果寄存器，此功能必须实现。<br>3、如果加法发生向更高位进位（运算结果超过4位），则需要将进位存储在一个1位的进位寄存器（使用D触发器实现）中，发生进位存储1，反之存储0；如果减法发生向更高位借位，则需要将借位也存储在与加法相同的进位寄存器中，发生借位存储1，反之存储0；同样是clk上升沿时进位或者借位存入1位进位寄存器。此功能必须实现。<br>4、oe低电平有效，oe高电平时，r[3:0]和cf均为高阻态输出（相当于输出无效）；oe低电平时，r[3:0]等于4位结果寄存器（D触发器）的输出，cf等于1位进位寄存器（D触发器）的输出。</p>
 <p>设计一个四位的ALU直接使用软件思维非常简单，直接疯狂的条件判断就完事了，但值得注意的一点是，我们需要将结果利用 D 触发器保存到寄存器中，然后将寄存器结果与<br>输出结果相连即可：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> alu(</span><br><span class="line">    <span class="keyword">input</span> <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] op0, <span class="comment">// operator0</span></span><br><span class="line">    <span class="keyword">input</span> <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] op1, <span class="comment">// operator1</span></span><br><span class="line">    <span class="keyword">input</span> <span class="keyword">wire</span> [<span class="number">2</span>:<span class="number">0</span>] s,      <span class="comment">// functional option</span></span><br><span class="line">    <span class="keyword">input</span> clk,              <span class="comment">// clock</span></span><br><span class="line">    <span class="keyword">input</span> <span class="keyword">wire</span> oe,          <span class="comment">// result enable</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] r,          <span class="comment">// result output</span></span><br><span class="line">    <span class="keyword">output</span> <span class="keyword">reg</span> cf          <span class="comment">// carry</span></span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// internal register</span></span><br><span class="line">    <span class="keyword">reg</span> [<span class="number">3</span>:<span class="number">0</span>] result_reg;    <span class="comment">// 4-bit result register</span></span><br><span class="line">    <span class="keyword">reg</span> cf_reg;              <span class="comment">// carry flag register</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">4</span>:<span class="number">0</span>] adder_result; <span class="comment">// output(include carry)</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] logic_result; <span class="comment">// logic calculated result</span></span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] result_raw;   <span class="comment">// final result</span></span><br><span class="line">    <span class="keyword">wire</span>        cf_raw;         <span class="comment">// carry/borrow flag</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// arithmetic operation module</span></span><br><span class="line">    <span class="keyword">assign</span> adder_result = (s == <span class="number">3&#x27;b000</span>) ? (op0 + op1) : <span class="comment">// add</span></span><br><span class="line">                        (s == <span class="number">3&#x27;b001</span>) ? (op0 + (~op1 + <span class="number">1</span>)) : <span class="comment">// sub</span></span><br><span class="line">                        <span class="number">5&#x27;b0</span>;</span><br><span class="line">                      </span><br><span class="line">    <span class="comment">// carry/borrow flag calculate</span></span><br><span class="line">    <span class="keyword">assign</span> cf_raw = s == <span class="number">3&#x27;b000</span> ? adder_result[<span class="number">4</span>]:  <span class="comment">// carry or borrow</span></span><br><span class="line">                    s == <span class="number">3&#x27;b001</span> ? (op0 &lt; op1) :</span><br><span class="line">                    <span class="number">0</span>;</span><br><span class="line">                </span><br><span class="line">    <span class="comment">// logic operation module</span></span><br><span class="line">    <span class="keyword">assign</span> logic_result = (s == <span class="number">3&#x27;b100</span>) ? (op0 &amp; op1) : <span class="comment">// and</span></span><br><span class="line">                        (s == <span class="number">3&#x27;b101</span>) ? (op0 | op1) : <span class="comment">// or</span></span><br><span class="line">                        (s == <span class="number">3&#x27;b110</span>) ? (~op0):        <span class="comment">// not</span></span><br><span class="line">                        (s == <span class="number">3&#x27;b111</span>) ? (op0 ^ op1):  <span class="comment">// xor</span></span><br><span class="line">                        <span class="number">4&#x27;b0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// final result choose</span></span><br><span class="line">    <span class="keyword">assign</span> result_raw = (s[<span class="number">2</span>] == <span class="number">1&#x27;b0</span>) ? adder_result[<span class="number">3</span>:<span class="number">0</span>] : <span class="comment">//arithmetic operation</span></span><br><span class="line">                        logic_result[<span class="number">3</span>:<span class="number">0</span>];                     <span class="comment">// logic operation</span></span><br><span class="line">                    </span><br><span class="line">    <span class="comment">// D trigger</span></span><br><span class="line">    <span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        result_reg &lt;= result_raw;</span><br><span class="line">        cf_reg &lt;= cf_raw;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// output control</span></span><br><span class="line">    <span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span>(!oe) <span class="keyword">begin</span></span><br><span class="line">            r &lt;= result_reg;</span><br><span class="line">            cf &lt;= cf_reg;</span><br><span class="line">        <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">            r &lt;= <span class="number">4&#x27;bzzzz</span>;</span><br><span class="line">            cf &lt;= <span class="number">1&#x27;bz</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
 
 <p>是的，C语言咋写你就咋写，当然设计的核心在硬件思维的设计，下面我将基于这个 ALU 的软件思维的初版代码，设计一个纯硬件思维的电路出来</p>
-<h3 id="一、实现所有的运算逻辑，包装成底层模块"><a href="#一、实现所有的运算逻辑，包装成底层模块" class="headerlink" title="一、实现所有的运算逻辑，包装成底层模块"></a>一、实现所有的运算逻辑，包装成底层模块</h3><h4 id="1、加减法模块"><a href="#1、加减法模块" class="headerlink" title="1、加减法模块"></a>1、加减法模块</h4><p>还记得上一个实验吗，自动售货机，没错，直接把那边的四位加减法器ban过来即可：</p>
+<h3><span id="一-实现所有的运算逻辑包装成底层模块">一、实现所有的运算逻辑，包装成底层模块</span></h3><h4><span id="1-加减法模块">1、加减法模块</span></h4><p>还记得上一个实验吗，自动售货机，没错，直接把那边的四位加减法器ban过来即可：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> FourBitAdder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">input</span> SubEn,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S,</span><br><span class="line">    <span class="keyword">output</span> CO</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] last_B = &#123;<span class="number">4</span>&#123;SubEn&#125;&#125; ^ B;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] P = last_B ^ A;  </span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] G = A &amp; last_B;</span><br><span class="line">    <span class="keyword">wire</span> [<span class="number">3</span>:<span class="number">0</span>] C;</span><br><span class="line">    <span class="keyword">wire</span> CI = SubEn;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">0</span>] = CI;</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">1</span>] = G[<span class="number">0</span>] | (P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">2</span>] = G[<span class="number">1</span>] | (P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> C[<span class="number">3</span>] = G[<span class="number">2</span>] | (P[<span class="number">2</span>] &amp; G[<span class="number">1</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; G[<span class="number">0</span>]) | (P[<span class="number">2</span>] &amp; P[<span class="number">1</span>] &amp; P[<span class="number">0</span>] &amp; CI);</span><br><span class="line">    <span class="keyword">assign</span> CO   = SubEn ^ (G[<span class="number">3</span>] | P[<span class="number">3</span>] &amp; C[<span class="number">3</span>]);</span><br><span class="line">    <span class="keyword">assign</span> S = P ^ C;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
 
 <p>对的对的直接 ban 就可以了，要是不懂怎么实现的建议回去看一下上一篇文章<a href="https://liujiaxuan69.github.io/2025/06/23/simulated_vending_machine/" title="跳转到自动售货机">自动售货机</a></p>
-<h4 id="2、与-或-非-异或模块"><a href="#2、与-或-非-异或模块" class="headerlink" title="2、与&#x2F;或&#x2F;非&#x2F;异或模块"></a>2、与&#x2F;或&#x2F;非&#x2F;异或模块</h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> FourBitAnder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A &amp; B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitOrer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A | B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitNoer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = ~A;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitXorer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A ^ B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
+<h4><span id="2-与x2f或x2f非x2f异或模块">2、与&#x2F;或&#x2F;非&#x2F;异或模块</span></h4><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> FourBitAnder(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A &amp; B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitOrer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A | B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitNoer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = ~A;</span><br><span class="line"><span class="keyword">endmodule</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">module</span> FourBitXorer(</span><br><span class="line">    <span class="keyword">input</span> [<span class="number">3</span>:<span class="number">0</span>] A, B,</span><br><span class="line">    <span class="keyword">output</span> [<span class="number">3</span>:<span class="number">0</span>] S</span><br><span class="line">);</span><br><span class="line">    <span class="keyword">assign</span> S = A ^ B;</span><br><span class="line"><span class="keyword">endmodule</span></span><br></pre></td></tr></table></figure>
 
 <p>这个太简单了就不解释了，按理来说其实不需要给他们单独设置模块，但这样写更清晰一些</p>
-<h3 id="二、顶层模块复用所有子模块"><a href="#二、顶层模块复用所有子模块" class="headerlink" title="二、顶层模块复用所有子模块"></a>二、顶层模块复用所有子模块</h3><p>房子造好了自己不会住我就帮不了了哈，首先我得说明一下这个 ALU 的全局逻辑，首先，这个 ALU 涉及6个运算逻辑，即加、减、与、或、非、异或，首先让<br>这些逻辑并行计算所有的结果，也就是所谓的<strong>全路径计算</strong>，流程图如下：</p>
+<h3><span id="二-顶层模块复用所有子模块">二、顶层模块复用所有子模块</span></h3><p>房子造好了自己不会住我就帮不了了哈，首先我得说明一下这个 ALU 的全局逻辑，首先，这个 ALU 涉及6个运算逻辑，即加、减、与、或、非、异或，首先让<br>这些逻辑并行计算所有的结果，也就是所谓的<strong>全路径计算</strong>，流程图如下：</p>
 <pre class="mermaid">graph LR
     A[输入数A] --> B[并发数据传递]
     C[输入数B] --> B
@@ -232,13 +276,13 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
 <p>复用部分实现如下：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">FourBitAdder add(</span><br><span class="line">        <span class="variable">.A</span>(op0),</span><br><span class="line">        <span class="variable">.B</span>(op1),</span><br><span class="line">        <span class="variable">.SubEn</span>(s[<span class="number">0</span>]),</span><br><span class="line">        <span class="variable">.S</span>(add_res),</span><br><span class="line">        <span class="variable">.CO</span>(cout)</span><br><span class="line">    );</span><br><span class="line">    FourBitAnder(</span><br><span class="line">        <span class="variable">.A</span>(op0),</span><br><span class="line">        <span class="variable">.B</span>(op1),</span><br><span class="line">        <span class="variable">.S</span>(and_res)</span><br><span class="line">    );</span><br><span class="line">    FourBitOrer(</span><br><span class="line">        <span class="variable">.A</span>(op0),</span><br><span class="line">        <span class="variable">.B</span>(op1),</span><br><span class="line">        <span class="variable">.S</span>(or_res)</span><br><span class="line">    );</span><br><span class="line">    FourBitNoer(</span><br><span class="line">        <span class="variable">.A</span>(op0),</span><br><span class="line">        <span class="variable">.S</span>(no_res)</span><br><span class="line">    );</span><br><span class="line">    FourBitXorer(</span><br><span class="line">        <span class="variable">.A</span>(op0),</span><br><span class="line">        <span class="variable">.B</span>(op1),</span><br><span class="line">        <span class="variable">.S</span>(xor_res)</span><br><span class="line">    );</span><br></pre></td></tr></table></figure>
 
-<h4 id="注意：加法和减法使用的是同一个逻辑运算单元"><a href="#注意：加法和减法使用的是同一个逻辑运算单元" class="headerlink" title="注意：加法和减法使用的是同一个逻辑运算单元"></a><strong>注意：加法和减法使用的是同一个逻辑运算单元</strong></h4><h3 id="三、结果选择器实现"><a href="#三、结果选择器实现" class="headerlink" title="三、结果选择器实现"></a>三、结果选择器实现</h3><p>这样一来，我们就只剩下结果选择没有实现了，这里使用 case 语法即可简单实现：</p>
+<h4><span id="注意加法和减法使用的是同一个逻辑运算单元"><strong>注意：加法和减法使用的是同一个逻辑运算单元</strong></span></h4><h3><span id="三-结果选择器实现">三、结果选择器实现</span></h3><p>这样一来，我们就只剩下结果选择没有实现了，这里使用 case 语法即可简单实现：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">case</span>(s)</span><br><span class="line">            <span class="number">3&#x27;b000</span>, <span class="number">3&#x27;b001</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = add_res;</span><br><span class="line">                cf_raw = cout;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b100</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = and_res;</span><br><span class="line">                cf_raw = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b101</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = or_res;</span><br><span class="line">                cf_raw = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b110</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = no_res;</span><br><span class="line">                cf_raw = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="number">3&#x27;b111</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = xor_res;</span><br><span class="line">                cf_raw = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">default</span>: <span class="keyword">begin</span></span><br><span class="line">                result_raw = <span class="number">4&#x27;b0000</span>;</span><br><span class="line">                cf_raw = <span class="number">1&#x27;b0</span>;</span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">endcase</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="四、D触发器存储结果数据实现"><a href="#四、D触发器存储结果数据实现" class="headerlink" title="四、D触发器存储结果数据实现"></a>四、D触发器存储结果数据实现</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        result_reg &lt;= result_raw;</span><br><span class="line">        cf_reg &lt;= cf_raw;</span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3><span id="四-d触发器存储结果数据实现">四、D触发器存储结果数据实现</span></h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(<span class="keyword">posedge</span> clk) <span class="keyword">begin</span></span><br><span class="line">        result_reg &lt;= result_raw;</span><br><span class="line">        cf_reg &lt;= cf_raw;</span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 
 <p>这个实现很简单，在每次上升沿将结果存储到寄存器中即可，利用D触发器作为数据缓冲，保证数据不会乱（消除毛刺）</p>
-<h3 id="五、最终输出"><a href="#五、最终输出" class="headerlink" title="五、最终输出"></a>五、最终输出</h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span>(~oe) <span class="keyword">begin</span></span><br><span class="line">            r = result_reg;</span><br><span class="line">            cf = cf_reg;</span><br><span class="line">        <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">            r = <span class="number">4&#x27;bzzzz</span>;</span><br><span class="line">            cf = <span class="number">1&#x27;bz</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3><span id="五-最终输出">五、最终输出</span></h3><figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">always</span> @(*) <span class="keyword">begin</span></span><br><span class="line">        <span class="keyword">if</span>(~oe) <span class="keyword">begin</span></span><br><span class="line">            r = result_reg;</span><br><span class="line">            cf = cf_reg;</span><br><span class="line">        <span class="keyword">end</span> <span class="keyword">else</span> <span class="keyword">begin</span></span><br><span class="line">            r = <span class="number">4&#x27;bzzzz</span>;</span><br><span class="line">            cf = <span class="number">1&#x27;bz</span>;</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br></pre></td></tr></table></figure>
 
 <p>将寄存器中的值传到输出端，从而实现最终数据输出</p>
 <p>最终代码实现如下：</p>
@@ -307,6 +351,66 @@ CPU中简单的4位ALU（算术逻辑单元）输入信号：第一4位操作数
 </div>
 
 <style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
   /* 新增：背景图平滑过渡 */
   #custom-bg {
     transition: background-image 1.2s ease-in-out;

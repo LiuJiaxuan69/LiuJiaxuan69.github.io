@@ -10,8 +10,19 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
-12345678set key value（设置键值对）example:127.0.0.1:6379&amp;gt; set key1,"> 
+    <meta name="description" content="
+
+
+Redis 命令行中的两个核心（最基础）的命令
+1.set命令
+2.get命令
+
+
+全局环境的命令
+一、keys
+二、exists
+三、del
+四、expire 和 ttl（pexpire 和,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -22,8 +33,19 @@
     
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:title" content="Redis 命令行使用指南 - 刘家炫的博客"/>
-    <meta name="twitter:description" content="Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
-12345678set key value（设置键值对）example:127.0.0.1:6379&amp;gt; set key1,"/>
+    <meta name="twitter:description" content="
+
+
+Redis 命令行中的两个核心（最基础）的命令
+1.set命令
+2.get命令
+
+
+全局环境的命令
+一、keys
+二、exists
+三、del
+四、expire 和 ttl（pexpire 和,"/>
     
     
     
@@ -31,8 +53,19 @@
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
     <meta property="og:title" content="Redis 命令行使用指南 - 刘家炫的博客"/>
-    <meta property="og:description" content="Redis 命令行中的两个核心（最基础）的命令1.set命令基础用法：
-12345678set key value（设置键值对）example:127.0.0.1:6379&amp;gt; set key1,"/>
+    <meta property="og:description" content="
+
+
+Redis 命令行中的两个核心（最基础）的命令
+1.set命令
+2.get命令
+
+
+全局环境的命令
+一、keys
+二、exists
+三、del
+四、expire 和 ttl（pexpire 和,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -203,45 +236,64 @@
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <h2 id="Redis-命令行中的两个核心（最基础）的命令"><a href="#Redis-命令行中的两个核心（最基础）的命令" class="headerlink" title="Redis 命令行中的两个核心（最基础）的命令"></a><strong>Redis 命令行中的两个核心（最基础）的命令</strong></h2><h3 id="1-set命令"><a href="#1-set命令" class="headerlink" title="1.set命令"></a>1.set命令</h3><p>基础用法：</p>
+            <!-- toc -->
+
+<ul>
+<li><a href="#redis-%E5%91%BD%E4%BB%A4%E8%A1%8C%E4%B8%AD%E7%9A%84%E4%B8%A4%E4%B8%AA%E6%A0%B8%E5%BF%83%E6%9C%80%E5%9F%BA%E7%A1%80%E7%9A%84%E5%91%BD%E4%BB%A4"><strong>Redis 命令行中的两个核心（最基础）的命令</strong></a><ul>
+<li><a href="#1set%E5%91%BD%E4%BB%A4">1.set命令</a></li>
+<li><a href="#2get%E5%91%BD%E4%BB%A4">2.get命令</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%A8%E5%B1%80%E7%8E%AF%E5%A2%83%E7%9A%84%E5%91%BD%E4%BB%A4">全局环境的命令</a><ul>
+<li><a href="#%E4%B8%80-keys">一、keys</a></li>
+<li><a href="#%E4%BA%8C-exists">二、exists</a></li>
+<li><a href="#%E4%B8%89-del">三、del</a></li>
+<li><a href="#%E5%9B%9B-expire-%E5%92%8C-ttlpexpire-%E5%92%8C-pttl">四、expire 和 ttl（pexpire 和 pttl）</a></li>
+<li><a href="#%E4%BA%94-type">五、type</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="redis-命令行中的两个核心最基础的命令"><strong>Redis 命令行中的两个核心（最基础）的命令</strong></span></h2><h3><span id="1set命令">1.set命令</span></h3><p>基础用法：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">set key value（设置键值对）</span><br><span class="line">example:</span><br><span class="line">127.0.0.1:6379&gt; set key1 value1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; set key2 value2</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; set &#x27;key3&#x27; &quot;value3&quot;</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
 
 <p>set命令后面的键值对（即key和value）都是字符串数据类型，但我们并不需要给这两个值刻意添加单引号或者双引号，但是添加了也是无伤大雅的</p>
-<h3 id="2-get命令"><a href="#2-get命令" class="headerlink" title="2.get命令"></a>2.get命令</h3><p>基础用法：</p>
+<h3><span id="2get命令">2.get命令</span></h3><p>基础用法：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">get key（通过键获取对应的值）</span><br><span class="line">example:</span><br><span class="line">127.0.0.1:6379&gt; get key1</span><br><span class="line">&quot;value1&quot;</span><br><span class="line">127.0.0.1:6379&gt; get key2</span><br><span class="line">&quot;value2&quot;</span><br><span class="line">127.0.0.1:6379&gt; get key3</span><br><span class="line">&quot;value3&quot;</span><br></pre></td></tr></table></figure>
 
 <p>但是若尝试访问一个并没有被set的key时，会返回nil(即空)</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; get key4</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
 
-<h2 id="全局环境的命令"><a href="#全局环境的命令" class="headerlink" title="全局环境的命令"></a>全局环境的命令</h2><h3 id="一、keys"><a href="#一、keys" class="headerlink" title="一、keys"></a>一、keys</h3><p>这个命令可以用来查找所有与查询要求相匹配的 key 值，用法如下：</p>
+<h2><span id="全局环境的命令">全局环境的命令</span></h2><h3><span id="一-keys">一、keys</span></h3><p>这个命令可以用来查找所有与查询要求相匹配的 key 值，用法如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keys pattern</span><br></pre></td></tr></table></figure>
 
 <p>pattern 就是一个匹配条件了，匹配方式如下：<br>在举例之前，我们先插入几个新的键值对方便演示：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set hello 1</span><br><span class="line">127.0.0.1:6379&gt; set hallo 2</span><br><span class="line">127.0.0.1:6379&gt; set hcllo 3</span><br><span class="line">127.0.0.1:6379&gt; set hllo 4</span><br><span class="line">127.0.0.1:6379&gt; set heeeeeeeeeello 5</span><br></pre></td></tr></table></figure>
 
-<h4 id="1、精准匹配"><a href="#1、精准匹配" class="headerlink" title="1、精准匹配"></a>1、精准匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys hello</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; keys hlllo</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
+<h4><span id="1-精准匹配">1、精准匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys hello</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; keys hlllo</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
 
 <p>这种匹配方式简单明了，你输入啥他就直接查询你所输入的键，他的作用可能就只能用来查询某个键是否存在了，不过与其这样，通过 exists 命令查询效率会更高</p>
-<h4 id="2、单字符模糊匹配"><a href="#2、单字符模糊匹配" class="headerlink" title="2、单字符模糊匹配"></a>2、单字符模糊匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h?llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hcllo&quot;</span><br><span class="line">3) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="2-单字符模糊匹配">2、单字符模糊匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h?llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hcllo&quot;</span><br><span class="line">3) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
 
 <p>问号处可以用任意字符替代，符合该要求的键就会被筛选出来</p>
-<h4 id="3、单字符指定匹配"><a href="#3、单字符指定匹配" class="headerlink" title="3、单字符指定匹配"></a>3、单字符指定匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[ac]llo</span><br><span class="line">1) &quot;hcllo&quot;</span><br><span class="line">2) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="3-单字符指定匹配">3、单字符指定匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[ac]llo</span><br><span class="line">1) &quot;hcllo&quot;</span><br><span class="line">2) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
 
 <p>h和llo中间的字符只能是中括号中的任意一个字符，其余字符则不满足匹配要求</p>
-<h4 id="4、单字符范围指定匹配"><a href="#4、单字符范围指定匹配" class="headerlink" title="4、单字符范围指定匹配"></a>4、单字符范围指定匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[b-z]llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hcllo&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="4-单字符范围指定匹配">4、单字符范围指定匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[b-z]llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hcllo&quot;</span><br></pre></td></tr></table></figure>
 
 <p>与单字符指定匹配相似，这种方式是通过指定某个范围内的字符均可以匹配，如b到z之间的字符都匹配</p>
-<h4 id="5、内容模糊匹配"><a href="#5、内容模糊匹配" class="headerlink" title="5、内容模糊匹配"></a>5、内容模糊匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h*llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hllo&quot;</span><br><span class="line">3) &quot;heeeeeeeeeello&quot;</span><br><span class="line">4) &quot;hcllo&quot;</span><br><span class="line">5) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="5-内容模糊匹配">5、内容模糊匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h*llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">2) &quot;hllo&quot;</span><br><span class="line">3) &quot;heeeeeeeeeello&quot;</span><br><span class="line">4) &quot;hcllo&quot;</span><br><span class="line">5) &quot;hallo&quot;</span><br></pre></td></tr></table></figure>
 
 <p>‘*’中的内容可以是空字符，也可以是一个字符，也可以是多个字符，只要符合条件都可以匹配</p>
-<h4 id="6、排斥匹配"><a href="#6、排斥匹配" class="headerlink" title="6、排斥匹配"></a>6、排斥匹配</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[^ac]llo</span><br><span class="line">1) &quot;hello&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="6-排斥匹配">6、排斥匹配</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[^ac]llo</span><br><span class="line">1) &quot;hello&quot;</span><br></pre></td></tr></table></figure>
 
 <p>上尖括号指的是除此之外的内容都适配，因此在这个示例中，只要中括号中的内容不是a和c，都可以匹配筛选出来<br>排斥匹配可以和上面五中匹配方式自由搭配，例如：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; keys h[^a-c]llo</span><br><span class="line">1) &quot;hello&quot;</span><br><span class="line">127.0.0.1:6379&gt; keys ^*</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
 
 <p>当然，像 keys ^* 就确实是没啥意义了，把自己选择的键全都给排斥掉了，一般也不会有这么用吧（maybe）</p>
 <p>当然呢，keys命令在生产环境当中是不鼓励高频率使用的，因为他的时间复杂度是O(N)，尤其是像 keys * 这样<br>的命令更是不推荐使用，它会将所有的键全部都枚举出来，时间开销极大，肯定是不鼓励使用的，redis若在分布式<br>环境中使用这条指令，是会导致redis的其他进程调度被阻塞住的，不利于生产环境</p>
-<h3 id="二、exists"><a href="#二、exists" class="headerlink" title="二、exists"></a>二、exists</h3><p>这个命令是用来判断某个键值是否存在的，具体用法如下：</p>
+<h3><span id="二-exists">二、exists</span></h3><p>这个命令是用来判断某个键值是否存在的，具体用法如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exists key [key ...]</span><br></pre></td></tr></table></figure>
 
 <p>没错，这个命令可以一次查询多个键值是否存在，返回结果为输入的键值中有几个是存在的，示例如下：</p>
@@ -252,21 +304,22 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; exists hello</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; exists hllo</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; exists hbllo</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
 
 <p>两种写法均可以查出这三个键值中有几个是存在的，看似两者的性能差不多，但是后者在实际生产环境中的效率肯定是更低的，<br>要记住，redis 和 MySQL 一样，都是处理服务端与客户端之间交互的数据处理媒介，若对三个键值分别查询，就需要走三次网络通信，<br>效率固然是不如一次性查询的，网络通信设计包的封装和分发，性能如何可想而知。当然，若需要知道某个指定的键值是否存在，那肯定是分别查询了</p>
-<h3 id="三、del"><a href="#三、del" class="headerlink" title="三、del"></a>三、del</h3><p>这个命令是用来删除 redis 中的键值的，用法和 exists 类似：</p>
+<h3><span id="三-del">三、del</span></h3><p>这个命令是用来删除 redis 中的键值的，用法和 exists 类似：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">del key [key ...]</span><br></pre></td></tr></table></figure>
 
 <p>同样，这个命令可以单独删除某个键，也可以一次删除多个键，返回值是被删除的键值的数量，用法如下</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 1</span><br><span class="line">127.0.0.1:6379&gt; set k2 2</span><br><span class="line">127.0.0.1:6379&gt; set k3 3</span><br><span class="line">127.0.0.1:6379&gt; del k1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; del k2 k3 k4</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
 
 <p>在 redis 中，删除命令就不会像 MySQL 那样风险极高了，因为 redis 一般是用来为 MySQL 分担压力的，对于热点数据，redis 会从 MySQL 中<br>取出，利用内存的高性能从而解决大量的访问请求，若真的不小心删掉了，只需要从类似于 MySQL 这样的关系型数据库中再拿过来就行了，当然，对于<br>某些对性能要求极高的商业场景，直接使用 redis 作为数据库，而不是作为一个中间介质，那误删带来的后果还是很大的</p>
-<h3 id="四、expire-和-ttl（pexpire-和-pttl）"><a href="#四、expire-和-ttl（pexpire-和-pttl）" class="headerlink" title="四、expire 和 ttl（pexpire 和 pttl）"></a>四、expire 和 ttl（pexpire 和 pttl）</h3><p>expire 和 ttl命令通常是关联起来使用的，分别用来设置过期时间和查询剩余过期时间，单位为秒，而 pexpire 和 pttl 用法和 expire 以及 ttl一样，只不过<br>时间单位是毫秒，因此这里我们只通过对 expire 和 ttl 的用法进行说明和举例，用法格式如下：</p>
+<h3><span id="四-expire-和-ttlpexpire-和-pttl">四、expire 和 ttl（pexpire 和 pttl）</span></h3><p>expire 和 ttl命令通常是关联起来使用的，分别用来设置过期时间和查询剩余过期时间，单位为秒，而 pexpire 和 pttl 用法和 expire 以及 ttl一样，只不过<br>时间单位是毫秒，因此这里我们只通过对 expire 和 ttl 的用法进行说明和举例，用法格式如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">expire key seconds</span><br><span class="line">ttl key</span><br></pre></td></tr></table></figure>
 
 <p>其中 expire 设置过期时间成功则返回1，否则返回0，而 ttl 正常则返回剩余过期时间，若返回-1则表明没有关联过期时间，若返回-2则表明 key 值不存在<br>下面是一个使用示例：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">//k1 未被创建时查看 k1 剩余过期时间</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) -2</span><br><span class="line">//k1 未被创建时设置 k1 过期时间</span><br><span class="line">127.0.0.1:6379&gt; expire k1 20</span><br><span class="line">(integer) 0</span><br><span class="line">//设置键值 k1</span><br><span class="line">127.0.0.1:6379&gt; set k1 1</span><br><span class="line">OK</span><br><span class="line">//k1 未被设置过期时间时查询剩余过期时间</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) -1</span><br><span class="line">//设置 k1 过期时间</span><br><span class="line">127.0.0.1:6379&gt; expire k1 10</span><br><span class="line">(integer) 1</span><br><span class="line">//k1 距离过期剩余7秒</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) 7</span><br><span class="line">//k1 距离过期剩余4秒</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) 4</span><br><span class="line">//k1 距离过期剩余1秒</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) 1</span><br><span class="line">//k1 已过期，因此查询不到 k1，返回-2</span><br><span class="line">127.0.0.1:6379&gt; ttl k1</span><br><span class="line">(integer) -2</span><br><span class="line">//验证 k1 是否已经过期</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
 
 <p><strong>redis 是如何处理过期的key的？</strong><br>这是一个非常经典的面试题，redis 处理过期 key 的方法分为两个策略，分别为定期删除和惰性删除：<br>定期删除是每隔一段时间 redis 定期检查一部分 key 值是否过期，若过期则将他们删除<br>惰性删除则是在每次用户对 key 进行操作的时候检查该 key 时候过期，若过期则返回 nil<br>当然，几遍有了这两种策略，还是很难避免 redis 中有许多一直没有使用的残留 key 没有被及时清理，这就会导致内存有许多空间被不必要地占用了，因此，针对这种情况，<br>redis 还提供了一系列的内存淘汰机制，通过这一套机制，可以基本保障过期 key 值不会对内存造成什么影响</p>
-<h3 id="正如前面所说，Redis-是非常注重效率的，因此，Redis-针对-set-和-expire-这两个命令是做了集合的，也就是说，这两个命令是可以一起使用的"><a href="#正如前面所说，Redis-是非常注重效率的，因此，Redis-针对-set-和-expire-这两个命令是做了集合的，也就是说，这两个命令是可以一起使用的" class="headerlink" title="正如前面所说，Redis 是非常注重效率的，因此，Redis 针对 set 和 expire 这两个命令是做了集合的，也就是说，这两个命令是可以一起使用的"></a><strong>正如前面所说，Redis 是非常注重效率的，因此，Redis 针对 set 和 expire 这两个命令是做了集合的，也就是说，这两个命令是可以一起使用的</strong></h3><p>命令格式如下；</p>
+<p><strong>正如前面所说，Redis 是非常注重效率的，因此，Redis 针对 set 和 expire 这两个命令是做了集合的，也就是说，这两个命令是可以一起使用的</strong></p>
+<p>命令格式如下；</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set key value [expiration EX seconds | PX milliseconds] [NX | XX]</span><br></pre></td></tr></table></figure>
 
 <p>其中 NX 选项表示的是只有在当前不存在该键值的情况下才能创建对应的键值，也就是说加上了这个选项就无法通过 set 直接修改 key 所对应的 value 了<br>但通过 XX 选项只有在 key 值存在的情况下才可以修改 key 值，所以，XX 选项意味着 set 命令只能够修改某个 key 所对应的值，而无法创建一个新的键值对<br>使用示例如下：</p>
@@ -274,7 +327,7 @@
 
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k2 2 ex 10 XX</span><br><span class="line">(nil)</span><br><span class="line">127.0.0.1:6379&gt; set k2 2 ex 10 NX</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
 
-<h3 id="五、type"><a href="#五、type" class="headerlink" title="五、type"></a>五、type</h3><p>显而易见，这个命令是用来判断 key 所对应的value的类型的，返回值为对应类型，命令格式如下：</p>
+<h3><span id="五-type">五、type</span></h3><p>显而易见，这个命令是用来判断 key 所对应的value的类型的，返回值为对应类型，命令格式如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type key</span><br></pre></td></tr></table></figure>
 
 <p>下面是一个使用示例：</p>
@@ -345,6 +398,66 @@
 </div>
 
 <style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
   /* 新增：背景图平滑过渡 */
   #custom-bg {
     transition: background-image 1.2s ease-in-out;
