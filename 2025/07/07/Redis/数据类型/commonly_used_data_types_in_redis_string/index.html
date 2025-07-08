@@ -1,0 +1,1270 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redis 常见数据类型-String 类型 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+类型简介
+相关指令
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Redis 常见数据类型-String 类型 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+类型简介
+相关指令
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Redis 常见数据类型-String 类型 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+类型简介
+相关指令
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Redis 常见数据类型-String 类型</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Redis 常见数据类型-String 类型</h1>
+        <div class="stuff">
+            <span>七月 07, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" rel="tag">键值对</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B">类型简介</a></li>
+<li><a href="#%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4">相关指令</a><ul>
+<li><a href="#1-setex-%E6%8C%87%E4%BB%A4">1、setex 指令</a></li>
+<li><a href="#2-psetex-%E6%8C%87%E4%BB%A4">2、psetex 指令</a></li>
+<li><a href="#3-setnx-%E6%8C%87%E4%BB%A4">3、setnx 指令</a></li>
+<li><a href="#4-incr-%E5%8F%8A-incrby-%E6%8C%87%E4%BB%A4">4、incr 及 incrby 指令</a></li>
+<li><a href="#5-decr-%E5%8F%8A-decrby-%E6%8C%87%E4%BB%A4">5、decr 及 decrby 指令</a></li>
+<li><a href="#6-append-%E6%8C%87%E4%BB%A4">6、append 指令</a></li>
+<li><a href="#7-getrange-%E6%8C%87%E4%BB%A4">7、getrange 指令</a></li>
+<li><a href="#8-setrange-%E6%8C%87%E4%BB%A4">8、setrange 指令</a></li>
+<li><a href="#9-strlen-%E6%8C%87%E4%BB%A4">9、strlen 指令</a></li>
+</ul>
+</li>
+<li><a href="#string-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB%E8%A1%A8">String 相关指令汇总表</a><ul>
+<li><a href="#%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99">内部编码规则</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%B8%E5%9E%8B%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF">典型业务场景</a><ul>
+<li><a href="#%E7%BC%93%E5%AD%98%E5%8A%9F%E8%83%BD">缓存功能</a></li>
+<li><a href="#%E8%AE%A1%E6%95%B0%E5%8A%9F%E8%83%BD">计数功能</a></li>
+<li><a href="#%E4%BC%9A%E8%AF%9D%E5%8A%9F%E8%83%BD">会话功能</a></li>
+<li><a href="#%E6%89%8B%E6%9C%BA%E9%AA%8C%E8%AF%81%E7%A0%81">手机验证码</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="类型简介">类型简介</span></h2><p>不同于 shell 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h2><span id="相关指令">相关指令</span></h2><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush k2 11 22 33</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+
+<p>当然，除此之外，还有一些专门针对 String 类型的便捷指令：</p>
+<h3><span id="1-setex-指令">1、setex 指令</span></h3><p>用法：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setex key seconds value</span><br></pre></td></tr></table></figure>
+
+<p>该指令其实可以直接通过 set 指令直接实现，但通过 setex 实现会更加简洁便利，下面是两个代码的对比：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 123 ex 5</span><br><span class="line">127.0.0.1:6379&gt; setex key1 5 123</span><br></pre></td></tr></table></figure>
+
+<p>使用 setex 命令可以避免写 ex 来表示附加过期时间设置，而且这种命令看起来非常直白，一看就能知道这个命令的用法是什么</p>
+<h3><span id="2-psetex-指令">2、psetex 指令</span></h3><p>与之对应的就是 psetex，没错，相信你看到这个命令就已经知道这个命令是用来干什么的了，这不就多了一个 p 嘛，那这个指令肯定就是以 ms 为单位来设置过期时间的了</p>
+<h3><span id="3-setnx-指令">3、setnx 指令</span></h3><p>该指令是用来设置不存在的键值对的，存在的键值是无法修改的，用法如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value</span><br></pre></td></tr></table></figure>
+
+<p>具体例子如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-incr-及-incrby-指令">4、incr 及 incrby 指令</span></h3><p>String 类型若存放一个64位以内的整数，这个数就会在底层被以 int 类型存储，而这时就可以通过 incr 指令来对某个数进行加一操作了，同样的，通过incrby就可以给一个数<br>加上一个特定的值，当然也可以是一个负数，同时，它们两者可以对一个不存在的键值对进行操作，会将这个值设定为0，语法如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">incr key</span><br><span class="line">incrby key increment</span><br></pre></td></tr></table></figure>
+
+<p>下面是使用举例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 设置一个已经存在的 key 值 key1</span><br><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">// 让 key1 自增 </span><br><span class="line">127.0.0.1:6379&gt; incr key1</span><br><span class="line">(integer) 2</span><br><span class="line">// 让不存在的 key2 自增</span><br><span class="line">127.0.0.1:6379&gt; incr key2</span><br><span class="line">(integer) 1</span><br><span class="line">// 对存在的 key1 加10</span><br><span class="line">127.0.0.1:6379&gt; incrby key1 10</span><br><span class="line">(integer) 12</span><br><span class="line">// 对不存在的 key3 加20</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 20</span><br><span class="line">(integer) 20</span><br><span class="line">// 对 key3 加-10（减10）</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 -10</span><br><span class="line">(integer) 10</span><br></pre></td></tr></table></figure>
+
+<h3><span id="5-decr-及-decrby-指令">5、decr 及 decrby 指令</span></h3><p>这个指令用法和 incr、incrby 完全一致，你们可能会疑惑，incr 和 incrby 已经可以处理减法操作了，那为啥还要有减法指令呢？道理很简单，假如说<br>你去银行取100块钱，银行跟你说已存钱-100块，你听着舒服吗，这样设计是为了让命令用起来更加人性化，当然，decr一类指令也可以通过减负数来实现<br>加法运算，下面是使用示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; decr key1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; decr key2</span><br><span class="line">(integer) -1</span><br><span class="line">127.0.0.1:6379&gt; decrby key1 10</span><br><span class="line">(integer) -10</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 20</span><br><span class="line">(integer) -20</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 -10</span><br><span class="line">(integer) -10</span><br></pre></td></tr></table></figure>
+
+<h3><span id="6-append-指令">6、append 指令</span></h3><p>如果 key 已经存在并且是⼀个 string，命令会将 value 追加到原有 string 的后边。如果 key 不存在，则效果等同于 SET 命令。</p>
+<p>该命令的时间复杂度为O(1)，追加的字符串⼀般⻓度较短, 可以视为 O(1)，其返回值为追加完成之后 string 的⻓度，下面是使用示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 给一个不存在的 key 值使用 append 指令，效果等同于 set 指令</span><br><span class="line">127.0.0.1:6379&gt; append k1 hello</span><br><span class="line">(integer) 5</span><br><span class="line">// 追加字符串 world</span><br><span class="line">127.0.0.1:6379&gt; append k1 world</span><br><span class="line">(integer) 10</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld&quot;</span><br><span class="line">// 追加带有空格的字符串（使用引号） &#x27; world&#x27;</span><br><span class="line">127.0.0.1:6379&gt; append k1 &#x27; world&#x27;</span><br><span class="line">(integer) 16</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld world&quot;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="7-getrange-指令">7、getrange 指令</span></h3><p>返回 key 对应的 string 的⼦串，由 start 和 end 确定（左闭右闭）。可以使⽤负数表⽰倒数。-1 代表倒数第⼀个字符，-2 代表<br>倒数第⼆个，其他的与此类似。超过范围的偏移量会根据 string 的⻓度调整成正确的值</p>
+<p>使用示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 截取从下标1到下标3的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 3</span><br><span class="line">&quot;aab&quot;</span><br><span class="line">// 截取从下标1到倒数第一个的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 -1</span><br><span class="line">&quot;aabbbcccddd&quot;</span><br><span class="line">// 非正常操作，范围不可能前面大后面小</span><br><span class="line">127.0.0.1:6379&gt; getrange key -1 -3</span><br><span class="line">&quot;&quot;</span><br><span class="line">127.0.0.1:6379&gt; getrange key -3 -1</span><br><span class="line">&quot;ddd&quot;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="8-setrange-指令">8、setrange 指令</span></h3><p>该指令可以从指定偏移量开始覆盖字符串，其返回值为覆盖后字符串的长度</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 从0开始覆盖写入 eee</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 0 eee</span><br><span class="line">(integer) 12</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccddd&quot;</span><br><span class="line">// 偏移量不能采用负数表示</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 -1 fff</span><br><span class="line">(error) ERR offset is out of range</span><br><span class="line">// 写入字符串末尾，实现效果和 append 指令相同</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 12 fff</span><br><span class="line">(integer) 15</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccdddfff&quot;</span><br></pre></td></tr></table></figure>
+
+<p>对于不存在的键值，利用该指令覆盖字符串，偏移量前面会用\x00来表示</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setrange k2 3 aaaaaa</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">&quot;\x00\x00\x00aaaaaa&quot;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="9-strlen-指令">9、strlen 指令</span></h3><p>该指令用于计算字符串的长度（按字节计算）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbccc</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k1</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; set k2 你好</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k2</span><br><span class="line">(integer) 6</span><br></pre></td></tr></table></figure>
+
+<h2><span id="string-相关指令汇总表">String 相关指令汇总表</span></h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>执行效果</th>
+<th>时间复杂度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>set key value [key value…]</td>
+<td>设置 key 的值是 value</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>get key</td>
+<td>获取 key 的值</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>del key [key …]</td>
+<td>删除指定的 key</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>mset key value [key value …]</td>
+<td>批量设置指定的 key 和 value</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>mget key [key …]</td>
+<td>批量获取 key 的值</td>
+<td>O(k), k 是键个数</td>
+</tr>
+<tr>
+<td>incr key</td>
+<td>指定的 key 的值 +1</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>decr key</td>
+<td>指定的 key 的值 -1</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>incrby key n</td>
+<td>指定的 key 的值 +n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>decrby key n</td>
+<td>指定的 key 的值 -n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>incrbyfloat key n</td>
+<td>指定的 key 的值 +n</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>append key value</td>
+<td>指定的 key 的值追加 value</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>strlen key</td>
+<td>获取指定 key 的值的长度</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>setrange key offset value</td>
+<td>覆盖指定 key 的从 offset 开始的部分值</td>
+<td>O(n), n 是字符串长度, 通常视为 O(1)</td>
+</tr>
+<tr>
+<td>getrange key start end</td>
+<td>获取指定 key 的从 start 到 end 的部分值</td>
+<td>O(n), n 是字符串长度, 通常视为 O(1)</td>
+</tr>
+</tbody></table>
+<h3><span id="内部编码规则">内部编码规则</span></h3><p>字符串类型的内部编码有 3 种：</p>
+<ul>
+<li>int：8 个字节的⻓整型</li>
+<li>embstr：⼩于等于 39 个字节的字符串</li>
+<li>raw：⼤于 39 个字节的字符串</li>
+</ul>
+<p>39这个数字并不是固定的，众所周知，Redis 是开源的。你若想要修改这个数值是完全没有问题的，在 Redis 高版本数值也是不一样的<br>，因此我们重点需要知道的是这两种编码方式的区别（下面以高版本 Redis 为例进行讲解）：</p>
+<ol>
+<li>embstr vs raw<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>embstr</code> (嵌入式字符串)</th>
+<th><code>raw</code> (原始字符串)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>适用长度</strong></td>
+<td>≤ <strong>44字节</strong>（Redis 5+）</td>
+<td>&gt; 44字节</td>
+</tr>
+<tr>
+<td><strong>内存分配</strong></td>
+<td><strong>单次分配</strong>（连续内存）</td>
+<td><strong>两次分配</strong>（<code>redisObject</code> + <code>SDS</code>）</td>
+</tr>
+<tr>
+<td><strong>内存局部性</strong></td>
+<td><strong>更好</strong>（CPU缓存友好）</td>
+<td><strong>稍差</strong>（可能内存碎片）</td>
+</tr>
+<tr>
+<td><strong>访问速度</strong></td>
+<td><strong>稍快</strong>（减少指针跳转）</td>
+<td><strong>稍慢</strong>（需解引用）</td>
+</tr>
+<tr>
+<td><strong>修改时的行为</strong></td>
+<td>修改时会转为 <code>raw</code></td>
+<td>直接修改</td>
+</tr>
+</tbody></table>
+</li>
+<li>为什么短字符串用 embstr？<br>（1）内存效率更高<br>embstr 将 Redis对象头（redisObject） 和 字符串数据（SDS，Simple Dynamic String） 存储在 一块连续内存 中，减少内存碎片。<br>raw 需要分别分配 redisObject 和 SDS，占用更多内存，且可能产生内存碎片。<br>（2）CPU缓存友好<br>embstr 的数据在内存中是连续的，CPU 缓存命中率更高，访问速度更快。<br>raw 需要额外解引用指针，可能触发 CPU 缓存未命中（Cache Miss）。<br>（3）减少内存分配次数<br>embstr 只需 1次内存分配，而 raw 需要 2次（先分配 redisObject，再分配 SDS）。</li>
+<li>为什么长字符串用 raw？<br>（1）避免大块连续内存分配<br>Redis 的 jemalloc 内存分配器对 小内存块（≤64字节） 有优化，但大内存块分配效率较低。<br>如果长字符串也用 embstr，会导致 大块连续内存请求，可能引发内存碎片问题。<br>（2）修改时不需转换<br>embstr 是 只读的，如果修改它，Redis 会先将其转为 raw 再修改。<br>长字符串更可能被修改（如 APPEND 操作），直接用 raw 避免转换开销。</li>
+</ol>
+<p>下面我们利用命令来查看一下不同的字符串存储方式的不同：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 123456789</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k1</span><br><span class="line">&quot;int&quot;</span><br><span class="line">127.0.0.1:6379&gt; set k2 abc</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k2</span><br><span class="line">&quot;embstr&quot;</span><br><span class="line">127.0.0.1:6379&gt; set k3 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k3</span><br><span class="line">&quot;raw&quot;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="典型业务场景">典型业务场景</span></h2><h3><span id="缓存功能">缓存功能</span></h3><p>String 在 Redis 缓存中的典型流程如下：</p>
+<pre class="mermaid">sequenceDiagram
+    participant 用户
+    participant 业务层
+    participant Redis缓存
+    participant MySQL
+
+    用户->>业务层: 请求数据
+    业务层->>Redis缓存: 查询缓存（GET key）
+    alt 缓存命中
+        Redis缓存-->>业务层: 返回数据（String 反序列化）
+        业务层-->>用户: 返回数据
+    else 缓存未命中
+        业务层->>MySQL: 查询数据库
+        MySQL-->>业务层: 返回数据
+        业务层->>Redis缓存: 写入缓存（SET key 序列化后的String）
+        业务层-->>用户: 返回数据
+    end</pre>
+
+<p>Redis 一般处理的是网络通信，因此在发送信息或接受信息的时候序列化和反序列化是必要的，因此最终在网络中传输的数据本质上就是 Redis 中的 String</p>
+<p>缓存一般分为两步：</p>
+<ul>
+<li>缓存查询（GET）</li>
+</ul>
+<p>Redis 返回的是 序列化后的 String（如 JSON、Protocol Buffers、MessagePack 等格式）。<br>业务层需要 反序列化 后才能使用（例如 JSON.parse()）。</p>
+<ul>
+<li>缓存写入（SET）</li>
+</ul>
+<p>业务层从 MySQL 获取数据后，需先 序列化成 String（如 JSON.stringify()），再存入 Redis。<br>如果数据较大，Redis 会使用 raw 编码存储。</p>
+<p>缓存实现方案示例：基于Redis和MySQL的用户信息查询优化</p>
+<p>1、业务需求<br>根据用户uid获取用户信息<br>接口定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UserInfo <span class="title function_">getUserInfo</span><span class="params">(<span class="type">long</span> uid)</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、从Redis获取用户信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据uid生成Redis键</span></span><br><span class="line"><span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> <span class="string">&quot;user:info:&quot;</span> + uid;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试从Redis获取值</span></span><br><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> Redis执行命令: get key;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存命中处理</span></span><br><span class="line"><span class="keyword">if</span> (value != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 反序列化JSON格式的用户信息</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> JSON反序列化(value);</span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、 缓存未命中时从MySQL获取</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 缓存未命中处理</span></span><br><span class="line"><span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 从数据库查询</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> MySQL执行SQL: select * from user_info <span class="type">where</span> <span class="variable">uid</span> <span class="operator">=</span> &lt;uid&gt;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 用户不存在处理</span></span><br><span class="line">    <span class="keyword">if</span> (userInfo == <span class="literal">null</span>) &#123;</span><br><span class="line">        响应<span class="number">404</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 序列化用户信息</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> JSON序列化(userInfo);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 写入Redis并设置1小时(3600秒)过期时间</span></span><br><span class="line">    Redis执行命令: set key value ex <span class="number">3600</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 返回用户信息</span></span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面的优化，理想情况下，每个用户信息每小时只会有1次MySQL查询，显著提升了查询效率，且有效降低了MySQL访问压力<br><strong>注意：在 Redis 中命名需要言简意赅，为了提高内存访问速度，在保证业务正常运转的前提下，字符串长度肯定是越短越好，因此有时候可以利用缩写来代替全名</strong></p>
+<h3><span id="计数功能">计数功能</span></h3><p>String 类型不仅能作为缓存，还能通过其原子性操作（如 <code>INCR</code>、<code>INCRBY</code>）和高性能内存读写实现计数功能</p>
+<h4><span id="redis-string-在计数场景的优势">Redis String 在计数场景的优势</span></h4><p>1、原子性操作</p>
+<ul>
+<li>Redis 的 <code>INCR</code>、<code>INCRBY</code> 是 原子操作，无需加锁即可避免并发冲突。<br>2、超高吞吐量</li>
+<li>Redis 单机可支持 <strong>10万+ QPS</strong> 的写入，适合高频计数（如热门视频的播放量统计）。</li>
+<li>对比 MySQL：<ul>
+<li>MySQL 的 <code>UPDATE counters SET value=value+1 WHERE id=123</code> 在高并发下可能成为瓶颈。</li>
+<li>Redis 的 <code>INCR</code> 直接操作内存，性能碾压。</li>
+</ul>
+</li>
+</ul>
+<p>3、灵活过期控制<br>我们可以利用 expire 命令设置过期时间（如按天统计）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INCR daily:uv:20240501  <span class="comment"># 记录2025年7月8日的UV</span></span><br><span class="line">EXPIRE daily:uv:20240501 86400  <span class="comment"># 1天后自动删除</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="技术场景中的典型示例">技术场景中的典型示例</span></h4><p>视频播放量统计</p>
+<pre class="mermaid">sequenceDiagram
+    participant 用户
+    participant 业务层
+    participant Redis
+    participant 消息队列
+    participant MySQL
+
+    用户->>业务层: 请求播放视频ID=123
+    业务层->>Redis: INCR video:views:123
+    Redis-->>业务层: 返回当前播放量（如42）
+    业务层-->>用户: 返回视频数据+播放量
+    loop 异步持久化
+        Redis->>消息队列: 定时推送增量数据（如video:123 +1）
+        消息队列->>MySQL: 消费并更新数据库
+    end</pre>
+
+<p>当然，实际中要开发⼀个成熟、稳定的真实计数系统，要⾯临的挑战远不⽌如此简单：防作弊、按<br>照不同维度计数、避免单点问题、数据持久化到底层数据源等。</p>
+<h3><span id="会话功能">会话功能</span></h3><p>一个分布式 Web 服务将⽤⼾的 Session 信息（例如⽤⼾登录信息）保存在各⾃的服务器中，但这样会造成⼀个问题：出于负载均衡的考虑，<br>分布式服务会将⽤⼾的访问请求均衡到不同的服务器上，并且通常⽆法保证⽤⼾每次请求都会被均衡到同⼀台服务器上，这样当⽤⼾刷新⼀<br>次访问是可能会发现需要重新登录，这个问题是⽤⼾⽆法容忍的。</p>
+<p>为了解决这个问题，可以使⽤ Redis 将⽤⼾的 Session 信息进⾏集中管理，在这种模式下，只要保证 Redis 是⾼可⽤和可扩展性的，⽆论⽤⼾<br>被均衡到哪台 Web 服务器上，都集中从Redis 中查询、更新 Session 信息：</p>
+<h4><span id="redis-集中式会话管理基于-string-数据类型">Redis 集中式会话管理（基于 String 数据类型）</span></h4><pre class="mermaid">graph TD
+    A[用户] --> B[负载均衡器]
+    B --> C[Web 服务器 1]
+    B --> D[Web 服务器 2]
+    B --> E[Web 服务器 N]
+    C --> F[Redis]
+    D --> F
+    E --> F
+    
+    subgraph 会话存储
+    F[("Redis (String 数据类型)")]
+    end</pre>
+
+<h3><span id="手机验证码">手机验证码</span></h3><p>许多应⽤出于安全考虑，会在每次进⾏登录时，让⽤⼾输⼊⼿机号并且配合给⼿机发送验证码，然后让⽤⼾再次输⼊收到的验证码<br>并进⾏验证，从⽽确定是否是⽤⼾本⼈。为了短信接⼝不会频繁访问，会限制⽤⼾每分钟获取验证码的频率，实现的伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">String 发送验证码(phoneNumber) &#123;</span><br><span class="line">    key = <span class="string">&quot;shortMsg:limit:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 设置过期时间为 1 分钟（60 秒）</span></span><br><span class="line">    <span class="comment">// 使⽤ NX，只在不存在 key 时才能设置成功</span></span><br><span class="line">    <span class="type">bool</span> <span class="variable">r</span> <span class="operator">=</span> Redis 执⾏命令：set key <span class="number">1</span> ex <span class="number">60</span> nx</span><br><span class="line">    <span class="title function_">if</span> <span class="params">(r == <span class="literal">false</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 说明之前设置过该⼿机的验证码了</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">c</span> <span class="operator">=</span> Redis 执⾏命令：incr key</span><br><span class="line">        <span class="title function_">if</span> <span class="params">(c &gt; <span class="number">5</span>)</span> &#123;</span><br><span class="line">            <span class="comment">// 说明超过了⼀分钟 5 次的限制了</span></span><br><span class="line">            <span class="comment">// 限制发送</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 说明要么之前没有设置过⼿机的验证码；要么次数没有超过 5 次</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">validationCode</span> <span class="operator">=</span> ⽣成随机的 <span class="number">6</span> 位数的验证码();</span><br><span class="line">  </span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 验证码 5 分钟（300 秒）内有效</span></span><br><span class="line">    Redis 执⾏命令：set validationKey validationCode ex <span class="number">300</span>;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 返回验证码，随后通过⼿机短信发送给⽤⼾</span></span><br><span class="line">    <span class="keyword">return</span> validationCode;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 验证⽤⼾输⼊的验证码是否正确</span></span><br><span class="line">bool 验证验证码(phoneNumber, validationCode) &#123;</span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">  </span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> Redis 执⾏命令：get validationKey;</span><br><span class="line">    <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 说明没有这个⼿机的验证码记录，验证失败</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (value == validationCode) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，Redis 中字符串数据类型的应用场景还远不止于此，这里介绍的是几个非常典型的应用场景</p>
+
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+    
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
