@@ -263,7 +263,7 @@
 </ul>
 <!-- tocstop -->
 
-<h2><span id="类型简介">类型简介</span></h2><p>不同于 shell 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h2><span id="类型简介">类型简介</span></h2><p>不同于 cpp 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
 <h2><span id="相关指令">相关指令</span></h2><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush k2 11 22 33</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
 
