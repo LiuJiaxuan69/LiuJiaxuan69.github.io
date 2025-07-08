@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Redis 常见数据类型 - 刘家炫的博客</title>
+    <title>Redis 常见数据类型-String 类型 - 刘家炫的博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
@@ -13,27 +13,15 @@
     <meta name="description" content="
 
 
-Redis 中五种最常用的数据类型
-一、String
 类型简介
 相关指令
-
-
-
-
-
-Redis 中五种最常用的数据类型
-
-
-数据类型
-内部编码
-编码说明
-
-
-
-String
-raw
-动态字符串,"> 
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -43,62 +31,38 @@ raw
     
     
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="Redis 常见数据类型 - 刘家炫的博客"/>
+    <meta name="twitter:title" content="Redis 常见数据类型-String 类型 - 刘家炫的博客"/>
     <meta name="twitter:description" content="
 
 
-Redis 中五种最常用的数据类型
-一、String
 类型简介
 相关指令
-
-
-
-
-
-Redis 中五种最常用的数据类型
-
-
-数据类型
-内部编码
-编码说明
-
-
-
-String
-raw
-动态字符串,"/>
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"/>
     
     
     
     
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
-    <meta property="og:title" content="Redis 常见数据类型 - 刘家炫的博客"/>
+    <meta property="og:title" content="Redis 常见数据类型-String 类型 - 刘家炫的博客"/>
     <meta property="og:description" content="
 
 
-Redis 中五种最常用的数据类型
-一、String
 类型简介
 相关指令
-
-
-
-
-
-Redis 中五种最常用的数据类型
-
-
-数据类型
-内部编码
-编码说明
-
-
-
-String
-raw
-动态字符串,"/>
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 decrby 指令
+6、append 指令
+7、,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -229,7 +193,7 @@ raw
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
-    <h3 class="subtitle">Redis 常见数据类型</h3>
+    <h3 class="subtitle">Redis 常见数据类型-String 类型</h3>
     <div class="social">
         <div>
             <div class="share">
@@ -258,7 +222,7 @@ raw
     border-radius: 12px; /* 可选圆角 */
     position: relative; /* 确保堆叠上下文 */
     z-index: 1;">
-        <h1 class="title">Redis 常见数据类型</h1>
+        <h1 class="title">Redis 常见数据类型-String 类型</h1>
         <div class="stuff">
             <span>七月 07, 2025</span>
             
@@ -272,131 +236,79 @@ raw
             <!-- toc -->
 
 <ul>
-<li><a href="#redis-%E4%B8%AD%E4%BA%94%E7%A7%8D%E6%9C%80%E5%B8%B8%E7%94%A8%E7%9A%84%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">Redis 中五种最常用的数据类型</a></li>
-<li><a href="#%E4%B8%80-string">一、String</a><ul>
 <li><a href="#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B">类型简介</a></li>
-<li><a href="#%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4">相关指令</a></li>
+<li><a href="#%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4">相关指令</a><ul>
+<li><a href="#1-setex-%E6%8C%87%E4%BB%A4">1、setex 指令</a></li>
+<li><a href="#2-psetex-%E6%8C%87%E4%BB%A4">2、psetex 指令</a></li>
+<li><a href="#3-setnx-%E6%8C%87%E4%BB%A4">3、setnx 指令</a></li>
+<li><a href="#4-incr-%E5%8F%8A-incrby-%E6%8C%87%E4%BB%A4">4、incr 及 incrby 指令</a></li>
+<li><a href="#5-decr-%E5%8F%8A-decrby-%E6%8C%87%E4%BB%A4">5、decr 及 decrby 指令</a></li>
+<li><a href="#6-append-%E6%8C%87%E4%BB%A4">6、append 指令</a></li>
+<li><a href="#7-getrange-%E6%8C%87%E4%BB%A4">7、getrange 指令</a></li>
+<li><a href="#8-setrange-%E6%8C%87%E4%BB%A4">8、setrange 指令</a></li>
+<li><a href="#9-strlen-%E6%8C%87%E4%BB%A4">9、strlen 指令</a></li>
+</ul>
+</li>
+<li><a href="#string-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB%E8%A1%A8">String 相关指令汇总表</a><ul>
+<li><a href="#%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81%E8%A7%84%E5%88%99">内部编码规则</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%B8%E5%9E%8B%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF">典型业务场景</a><ul>
+<li><a href="#%E7%BC%93%E5%AD%98%E5%8A%9F%E8%83%BD">缓存功能</a></li>
+<li><a href="#%E8%AE%A1%E6%95%B0%E5%8A%9F%E8%83%BD">计数功能</a></li>
+<li><a href="#%E4%BC%9A%E8%AF%9D%E5%8A%9F%E8%83%BD">会话功能</a></li>
+<li><a href="#%E6%89%8B%E6%9C%BA%E9%AA%8C%E8%AF%81%E7%A0%81">手机验证码</a></li>
 </ul>
 </li>
 </ul>
 <!-- tocstop -->
 
-<h2><span id="redis-中五种最常用的数据类型">Redis 中五种最常用的数据类型</span></h2><table>
-<thead>
-<tr>
-<th>数据类型</th>
-<th>内部编码</th>
-<th>编码说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>String</strong></td>
-<td><code>raw</code></td>
-<td>动态字符串，存储大于 44 字节的长文本（Redis 7.0+ 阈值）</td>
-</tr>
-<tr>
-<td></td>
-<td><code>int</code></td>
-<td>整数类型，存储 64 位有符号整数（如 <code>SET key 123</code>）</td>
-</tr>
-<tr>
-<td></td>
-<td><code>embstr</code></td>
-<td>嵌入式字符串，存储 ≤44 字节的短文本（内存连续，减少碎片）</td>
-</tr>
-<tr>
-<td><strong>List</strong></td>
-<td><code>ziplist</code></td>
-<td>压缩列表（Redis 7.0 前），连续内存存储，适合小列表</td>
-</tr>
-<tr>
-<td></td>
-<td><code>linkedlist</code></td>
-<td>双向链表（Redis 7.0 前），支持快速头尾操作</td>
-</tr>
-<tr>
-<td></td>
-<td><code>quicklist</code></td>
-<td>快速列表（Redis 4.0+ 默认），由多个 ziplist 组成的双向链表</td>
-</tr>
-<tr>
-<td><strong>Hash</strong></td>
-<td><code>ziplist</code></td>
-<td>压缩列表存储，适用于字段数 ≤ <code>hash-max-ziplist-entries</code> 且值长度 ≤ <code>hash-max-ziplist-value</code></td>
-</tr>
-<tr>
-<td></td>
-<td><code>hashtable</code></td>
-<td>哈希表，支持 O(1) 复杂度的字段访问</td>
-</tr>
-<tr>
-<td><strong>Set</strong></td>
-<td><code>intset</code></td>
-<td>整数集合，当元素均为整数且数量 ≤ <code>set-max-intset-entries</code> 时使用</td>
-</tr>
-<tr>
-<td></td>
-<td><code>hashtable</code></td>
-<td>哈希表（值为 NULL 的哈希表），存储非整数或大集合</td>
-</tr>
-<tr>
-<td><strong>ZSet</strong></td>
-<td><code>ziplist</code></td>
-<td>压缩列表存储，按分值排序，元素数 ≤ <code>zset-max-ziplist-entries</code> 且值长度 ≤ <code>zset-max-ziplist-value</code></td>
-</tr>
-<tr>
-<td></td>
-<td><code>skiplist</code> + <code>hashtable</code></td>
-<td>跳表（排序） + 哈希表（快速查找），支持 O(logN) 范围查询和 O(1) 单元素访问</td>
-</tr>
-</tbody></table>
-<p>下面就来一一介绍这五种常见常用的数据类型</p>
-<h2><span id="一-string">一、String</span></h2><h3><span id="类型简介">类型简介</span></h3><p>不同于 shell 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
-<h3><span id="相关指令">相关指令</span></h3><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
+<h2><span id="类型简介">类型简介</span></h2><p>不同于 shell 里面的 String，Redis 中的 String 更像是一种比特数组，也就是说，Redis 中的 String 是直接将用户输入的数据按照比特的方式存放到数组中的，<br>在 Redis 中，这些比特的编码方式不会像 MySQL 那样存在所谓的编码转化，用户在写入数据时使用的是哪种编码方式，在 Redis 中同样也会采用对应的编码方式，从而<br>避免了频繁的编码方式转化所带来的不必要的开销</p>
+<h2><span id="相关指令">相关指令</span></h2><p>针对 String， 有着专门的设置和查询指令，即 set 和 get，首先我们都知道，Redis 中的 key 都是 String 类型的，而通过 set 命令可以设置一个 key 所对应的 String 类型<br>的 value 值，通过 get 也可以查询到 String 类型的 value，因此，若通过 get 命令查询一个类型不是 String 的value，就会报错，如下所示：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush k2 11 22 33</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
 
 <p>当然，除此之外，还有一些专门针对 String 类型的便捷指令：</p>
-<h4><span id="1-setex-指令">1、setex 指令</span></h4><p>用法：</p>
+<h3><span id="1-setex-指令">1、setex 指令</span></h3><p>用法：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setex key seconds value</span><br></pre></td></tr></table></figure>
 
 <p>该指令其实可以直接通过 set 指令直接实现，但通过 setex 实现会更加简洁便利，下面是两个代码的对比：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 123 ex 5</span><br><span class="line">127.0.0.1:6379&gt; setex key1 5 123</span><br></pre></td></tr></table></figure>
 
 <p>使用 setex 命令可以避免写 ex 来表示附加过期时间设置，而且这种命令看起来非常直白，一看就能知道这个命令的用法是什么</p>
-<h4><span id="2-psetex-指令">2、psetex 指令</span></h4><p>与之对应的就是 psetex，没错，相信你看到这个命令就已经知道这个命令是用来干什么的了，这不就多了一个 p 嘛，那这个指令肯定就是以 ms 为单位来设置过期时间的了</p>
-<h4><span id="3-setnx-指令">3、setnx 指令</span></h4><p>该指令是用来设置不存在的键值对的，存在的键值是无法修改的，用法如下：</p>
+<h3><span id="2-psetex-指令">2、psetex 指令</span></h3><p>与之对应的就是 psetex，没错，相信你看到这个命令就已经知道这个命令是用来干什么的了，这不就多了一个 p 嘛，那这个指令肯定就是以 ms 为单位来设置过期时间的了</p>
+<h3><span id="3-setnx-指令">3、setnx 指令</span></h3><p>该指令是用来设置不存在的键值对的，存在的键值是无法修改的，用法如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setnx key value</span><br></pre></td></tr></table></figure>
 
 <p>具体例子如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; setnx key1 value1</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
 
-<h4><span id="4-incr-及-incrby-指令">4、incr 及 incrby 指令</span></h4><p>String 类型若存放一个64位以内的整数，这个数就会在底层被以 int 类型存储，而这时就可以通过 incr 指令来对某个数进行加一操作了，同样的，通过incrby就可以给一个数<br>加上一个特定的值，当然也可以是一个负数，同时，它们两者可以对一个不存在的键值对进行操作，会将这个值设定为0，语法如下：</p>
+<h3><span id="4-incr-及-incrby-指令">4、incr 及 incrby 指令</span></h3><p>String 类型若存放一个64位以内的整数，这个数就会在底层被以 int 类型存储，而这时就可以通过 incr 指令来对某个数进行加一操作了，同样的，通过incrby就可以给一个数<br>加上一个特定的值，当然也可以是一个负数，同时，它们两者可以对一个不存在的键值对进行操作，会将这个值设定为0，语法如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">incr key</span><br><span class="line">incrby key increment</span><br></pre></td></tr></table></figure>
 
 <p>下面是使用举例：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 设置一个已经存在的 key 值 key1</span><br><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">// 让 key1 自增 </span><br><span class="line">127.0.0.1:6379&gt; incr key1</span><br><span class="line">(integer) 2</span><br><span class="line">// 让不存在的 key2 自增</span><br><span class="line">127.0.0.1:6379&gt; incr key2</span><br><span class="line">(integer) 1</span><br><span class="line">// 对存在的 key1 加10</span><br><span class="line">127.0.0.1:6379&gt; incrby key1 10</span><br><span class="line">(integer) 12</span><br><span class="line">// 对不存在的 key3 加20</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 20</span><br><span class="line">(integer) 20</span><br><span class="line">// 对 key3 加-10（减10）</span><br><span class="line">127.0.0.1:6379&gt; incrby key3 -10</span><br><span class="line">(integer) 10</span><br></pre></td></tr></table></figure>
 
-<h4><span id="5-decr-及-decrby-指令">5、decr 及 decrby 指令</span></h4><p>这个指令用法和 incr、incrby 完全一致，你们可能会疑惑，incr 和 incrby 已经可以处理减法操作了，那为啥还要有减法指令呢？道理很简单，假如说<br>你去银行取100块钱，银行跟你说已存钱-100块，你听着舒服吗，这样设计是为了让命令用起来更加人性化，当然，decr一类指令也可以通过减负数来实现<br>加法运算，下面是使用示例：</p>
+<h3><span id="5-decr-及-decrby-指令">5、decr 及 decrby 指令</span></h3><p>这个指令用法和 incr、incrby 完全一致，你们可能会疑惑，incr 和 incrby 已经可以处理减法操作了，那为啥还要有减法指令呢？道理很简单，假如说<br>你去银行取100块钱，银行跟你说已存钱-100块，你听着舒服吗，这样设计是为了让命令用起来更加人性化，当然，decr一类指令也可以通过减负数来实现<br>加法运算，下面是使用示例：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key1 1</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; decr key1</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; decr key2</span><br><span class="line">(integer) -1</span><br><span class="line">127.0.0.1:6379&gt; decrby key1 10</span><br><span class="line">(integer) -10</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 20</span><br><span class="line">(integer) -20</span><br><span class="line">127.0.0.1:6379&gt; decrby key3 -10</span><br><span class="line">(integer) -10</span><br></pre></td></tr></table></figure>
 
-<h4><span id="6-append-指令">6、append 指令</span></h4><p>如果 key 已经存在并且是⼀个 string，命令会将 value 追加到原有 string 的后边。如果 key 不存在，则效果等同于 SET 命令。</p>
+<h3><span id="6-append-指令">6、append 指令</span></h3><p>如果 key 已经存在并且是⼀个 string，命令会将 value 追加到原有 string 的后边。如果 key 不存在，则效果等同于 SET 命令。</p>
 <p>该命令的时间复杂度为O(1)，追加的字符串⼀般⻓度较短, 可以视为 O(1)，其返回值为追加完成之后 string 的⻓度，下面是使用示例：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 给一个不存在的 key 值使用 append 指令，效果等同于 set 指令</span><br><span class="line">127.0.0.1:6379&gt; append k1 hello</span><br><span class="line">(integer) 5</span><br><span class="line">// 追加字符串 world</span><br><span class="line">127.0.0.1:6379&gt; append k1 world</span><br><span class="line">(integer) 10</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld&quot;</span><br><span class="line">// 追加带有空格的字符串（使用引号） &#x27; world&#x27;</span><br><span class="line">127.0.0.1:6379&gt; append k1 &#x27; world&#x27;</span><br><span class="line">(integer) 16</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;helloworld world&quot;</span><br></pre></td></tr></table></figure>
 
-<h4><span id="7-getrange-指令">7、getrange 指令</span></h4><p>返回 key 对应的 string 的⼦串，由 start 和 end 确定（左闭右闭）。可以使⽤负数表⽰倒数。-1 代表倒数第⼀个字符，-2 代表<br>倒数第⼆个，其他的与此类似。超过范围的偏移量会根据 string 的⻓度调整成正确的值</p>
+<h3><span id="7-getrange-指令">7、getrange 指令</span></h3><p>返回 key 对应的 string 的⼦串，由 start 和 end 确定（左闭右闭）。可以使⽤负数表⽰倒数。-1 代表倒数第⼀个字符，-2 代表<br>倒数第⼆个，其他的与此类似。超过范围的偏移量会根据 string 的⻓度调整成正确的值</p>
 <p>使用示例如下：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set key aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 截取从下标1到下标3的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 3</span><br><span class="line">&quot;aab&quot;</span><br><span class="line">// 截取从下标1到倒数第一个的字符串</span><br><span class="line">127.0.0.1:6379&gt; getrange key 1 -1</span><br><span class="line">&quot;aabbbcccddd&quot;</span><br><span class="line">// 非正常操作，范围不可能前面大后面小</span><br><span class="line">127.0.0.1:6379&gt; getrange key -1 -3</span><br><span class="line">&quot;&quot;</span><br><span class="line">127.0.0.1:6379&gt; getrange key -3 -1</span><br><span class="line">&quot;ddd&quot;</span><br></pre></td></tr></table></figure>
 
-<h4><span id="8-setrange-指令">8、setrange 指令</span></h4><p>该指令可以从指定偏移量开始覆盖字符串，其返回值为覆盖后字符串的长度</p>
+<h3><span id="8-setrange-指令">8、setrange 指令</span></h3><p>该指令可以从指定偏移量开始覆盖字符串，其返回值为覆盖后字符串的长度</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbcccddd</span><br><span class="line">OK</span><br><span class="line">// 从0开始覆盖写入 eee</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 0 eee</span><br><span class="line">(integer) 12</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccddd&quot;</span><br><span class="line">// 偏移量不能采用负数表示</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 -1 fff</span><br><span class="line">(error) ERR offset is out of range</span><br><span class="line">// 写入字符串末尾，实现效果和 append 指令相同</span><br><span class="line">127.0.0.1:6379&gt; setrange k1 12 fff</span><br><span class="line">(integer) 15</span><br><span class="line">127.0.0.1:6379&gt; get k1</span><br><span class="line">&quot;eeebbbcccdddfff&quot;</span><br></pre></td></tr></table></figure>
 
 <p>对于不存在的键值，利用该指令覆盖字符串，偏移量前面会用\x00来表示</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; setrange k2 3 aaaaaa</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; get k2</span><br><span class="line">&quot;\x00\x00\x00aaaaaa&quot;</span><br></pre></td></tr></table></figure>
 
-<h4><span id="9-strlen-指令">9、strlen 指令</span></h4><p>该指令用于计算字符串的长度（按字节计算）</p>
+<h3><span id="9-strlen-指令">9、strlen 指令</span></h3><p>该指令用于计算字符串的长度（按字节计算）</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 aaabbbccc</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k1</span><br><span class="line">(integer) 9</span><br><span class="line">127.0.0.1:6379&gt; set k2 你好</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; strlen k2</span><br><span class="line">(integer) 6</span><br></pre></td></tr></table></figure>
 
-<h4><span id="string-相关指令汇总表">String 相关指令汇总表</span></h4><table>
+<h2><span id="string-相关指令汇总表">String 相关指令汇总表</span></h2><table>
 <thead>
 <tr>
 <th>命令</th>
@@ -475,6 +387,146 @@ raw
 <td>O(n), n 是字符串长度, 通常视为 O(1)</td>
 </tr>
 </tbody></table>
+<h3><span id="内部编码规则">内部编码规则</span></h3><p>字符串类型的内部编码有 3 种：</p>
+<ul>
+<li>int：8 个字节的⻓整型</li>
+<li>embstr：⼩于等于 39 个字节的字符串</li>
+<li>raw：⼤于 39 个字节的字符串</li>
+</ul>
+<p>39这个数字并不是固定的，众所周知，Redis 是开源的。你若想要修改这个数值是完全没有问题的，在 Redis 高版本数值也是不一样的<br>，因此我们重点需要知道的是这两种编码方式的区别（下面以高版本 Redis 为例进行讲解）：</p>
+<ol>
+<li>embstr vs raw<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>embstr</code> (嵌入式字符串)</th>
+<th><code>raw</code> (原始字符串)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>适用长度</strong></td>
+<td>≤ <strong>44字节</strong>（Redis 5+）</td>
+<td>&gt; 44字节</td>
+</tr>
+<tr>
+<td><strong>内存分配</strong></td>
+<td><strong>单次分配</strong>（连续内存）</td>
+<td><strong>两次分配</strong>（<code>redisObject</code> + <code>SDS</code>）</td>
+</tr>
+<tr>
+<td><strong>内存局部性</strong></td>
+<td><strong>更好</strong>（CPU缓存友好）</td>
+<td><strong>稍差</strong>（可能内存碎片）</td>
+</tr>
+<tr>
+<td><strong>访问速度</strong></td>
+<td><strong>稍快</strong>（减少指针跳转）</td>
+<td><strong>稍慢</strong>（需解引用）</td>
+</tr>
+<tr>
+<td><strong>修改时的行为</strong></td>
+<td>修改时会转为 <code>raw</code></td>
+<td>直接修改</td>
+</tr>
+</tbody></table>
+</li>
+<li>为什么短字符串用 embstr？<br>（1）内存效率更高<br>embstr 将 Redis对象头（redisObject） 和 字符串数据（SDS，Simple Dynamic String） 存储在 一块连续内存 中，减少内存碎片。<br>raw 需要分别分配 redisObject 和 SDS，占用更多内存，且可能产生内存碎片。<br>（2）CPU缓存友好<br>embstr 的数据在内存中是连续的，CPU 缓存命中率更高，访问速度更快。<br>raw 需要额外解引用指针，可能触发 CPU 缓存未命中（Cache Miss）。<br>（3）减少内存分配次数<br>embstr 只需 1次内存分配，而 raw 需要 2次（先分配 redisObject，再分配 SDS）。</li>
+<li>为什么长字符串用 raw？<br>（1）避免大块连续内存分配<br>Redis 的 jemalloc 内存分配器对 小内存块（≤64字节） 有优化，但大内存块分配效率较低。<br>如果长字符串也用 embstr，会导致 大块连续内存请求，可能引发内存碎片问题。<br>（2）修改时不需转换<br>embstr 是 只读的，如果修改它，Redis 会先将其转为 raw 再修改。<br>长字符串更可能被修改（如 APPEND 操作），直接用 raw 避免转换开销。</li>
+</ol>
+<p>下面我们利用命令来查看一下不同的字符串存储方式的不同：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; set k1 123456789</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k1</span><br><span class="line">&quot;int&quot;</span><br><span class="line">127.0.0.1:6379&gt; set k2 abc</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k2</span><br><span class="line">&quot;embstr&quot;</span><br><span class="line">127.0.0.1:6379&gt; set k3 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; object encoding k3</span><br><span class="line">&quot;raw&quot;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="典型业务场景">典型业务场景</span></h2><h3><span id="缓存功能">缓存功能</span></h3><p>String 在 Redis 缓存中的典型流程如下：</p>
+<pre class="mermaid">sequenceDiagram
+    participant 用户
+    participant 业务层
+    participant Redis缓存
+    participant MySQL
+
+    用户->>业务层: 请求数据
+    业务层->>Redis缓存: 查询缓存（GET key）
+    alt 缓存命中
+        Redis缓存-->>业务层: 返回数据（String 反序列化）
+        业务层-->>用户: 返回数据
+    else 缓存未命中
+        业务层->>MySQL: 查询数据库
+        MySQL-->>业务层: 返回数据
+        业务层->>Redis缓存: 写入缓存（SET key 序列化后的String）
+        业务层-->>用户: 返回数据
+    end</pre>
+
+<p>Redis 一般处理的是网络通信，因此在发送信息或接受信息的时候序列化和反序列化是必要的，因此最终在网络中传输的数据本质上就是 Redis 中的 String</p>
+<p>缓存一般分为两步：</p>
+<ul>
+<li>缓存查询（GET）</li>
+</ul>
+<p>Redis 返回的是 序列化后的 String（如 JSON、Protocol Buffers、MessagePack 等格式）。<br>业务层需要 反序列化 后才能使用（例如 JSON.parse()）。</p>
+<ul>
+<li>缓存写入（SET）</li>
+</ul>
+<p>业务层从 MySQL 获取数据后，需先 序列化成 String（如 JSON.stringify()），再存入 Redis。<br>如果数据较大，Redis 会使用 raw 编码存储。</p>
+<p>缓存实现方案示例：基于Redis和MySQL的用户信息查询优化</p>
+<p>1、业务需求<br>根据用户uid获取用户信息<br>接口定义：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UserInfo <span class="title function_">getUserInfo</span><span class="params">(<span class="type">long</span> uid)</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、从Redis获取用户信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 根据uid生成Redis键</span></span><br><span class="line"><span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> <span class="string">&quot;user:info:&quot;</span> + uid;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 尝试从Redis获取值</span></span><br><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> Redis执行命令: get key;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 缓存命中处理</span></span><br><span class="line"><span class="keyword">if</span> (value != <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 反序列化JSON格式的用户信息</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> JSON反序列化(value);</span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、 缓存未命中时从MySQL获取</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 缓存未命中处理</span></span><br><span class="line"><span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="comment">// 从数据库查询</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> MySQL执行SQL: select * from user_info <span class="type">where</span> <span class="variable">uid</span> <span class="operator">=</span> &lt;uid&gt;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 用户不存在处理</span></span><br><span class="line">    <span class="keyword">if</span> (userInfo == <span class="literal">null</span>) &#123;</span><br><span class="line">        响应<span class="number">404</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 序列化用户信息</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> JSON序列化(userInfo);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 写入Redis并设置1小时(3600秒)过期时间</span></span><br><span class="line">    Redis执行命令: set key value ex <span class="number">3600</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 返回用户信息</span></span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通过上面的优化，理想情况下，每个用户信息每小时只会有1次MySQL查询，显著提升了查询效率，且有效降低了MySQL访问压力<br><strong>注意：在 Redis 中命名需要言简意赅，为了提高内存访问速度，在保证业务正常运转的前提下，字符串长度肯定是越短越好，因此有时候可以利用缩写来代替全名</strong></p>
+<h3><span id="计数功能">计数功能</span></h3><p>String 类型不仅能作为缓存，还能通过其原子性操作（如 <code>INCR</code>、<code>INCRBY</code>）和高性能内存读写实现计数功能</p>
+<h4><span id="redis-string-在计数场景的优势">Redis String 在计数场景的优势</span></h4><p>1、原子性操作</p>
+<ul>
+<li>Redis 的 <code>INCR</code>、<code>INCRBY</code> 是 原子操作，无需加锁即可避免并发冲突。<br>2、超高吞吐量</li>
+<li>Redis 单机可支持 <strong>10万+ QPS</strong> 的写入，适合高频计数（如热门视频的播放量统计）。</li>
+<li>对比 MySQL：<ul>
+<li>MySQL 的 <code>UPDATE counters SET value=value+1 WHERE id=123</code> 在高并发下可能成为瓶颈。</li>
+<li>Redis 的 <code>INCR</code> 直接操作内存，性能碾压。</li>
+</ul>
+</li>
+</ul>
+<p>3、灵活过期控制<br>我们可以利用 expire 命令设置过期时间（如按天统计）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INCR daily:uv:20240501  <span class="comment"># 记录2025年7月8日的UV</span></span><br><span class="line">EXPIRE daily:uv:20240501 86400  <span class="comment"># 1天后自动删除</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="技术场景中的典型示例">技术场景中的典型示例</span></h4><p>视频播放量统计</p>
+<pre class="mermaid">sequenceDiagram
+    participant 用户
+    participant 业务层
+    participant Redis
+    participant 消息队列
+    participant MySQL
+
+    用户->>业务层: 请求播放视频ID=123
+    业务层->>Redis: INCR video:views:123
+    Redis-->>业务层: 返回当前播放量（如42）
+    业务层-->>用户: 返回视频数据+播放量
+    loop 异步持久化
+        Redis->>消息队列: 定时推送增量数据（如video:123 +1）
+        消息队列->>MySQL: 消费并更新数据库
+    end</pre>
+
+<p>当然，实际中要开发⼀个成熟、稳定的真实计数系统，要⾯临的挑战远不⽌如此简单：防作弊、按<br>照不同维度计数、避免单点问题、数据持久化到底层数据源等。</p>
+<h3><span id="会话功能">会话功能</span></h3><p>一个分布式 Web 服务将⽤⼾的 Session 信息（例如⽤⼾登录信息）保存在各⾃的服务器中，但这样会造成⼀个问题：出于负载均衡的考虑，<br>分布式服务会将⽤⼾的访问请求均衡到不同的服务器上，并且通常⽆法保证⽤⼾每次请求都会被均衡到同⼀台服务器上，这样当⽤⼾刷新⼀<br>次访问是可能会发现需要重新登录，这个问题是⽤⼾⽆法容忍的。</p>
+<p>为了解决这个问题，可以使⽤ Redis 将⽤⼾的 Session 信息进⾏集中管理，在这种模式下，只要保证 Redis 是⾼可⽤和可扩展性的，⽆论⽤⼾<br>被均衡到哪台 Web 服务器上，都集中从Redis 中查询、更新 Session 信息：</p>
+<h4><span id="redis-集中式会话管理基于-string-数据类型">Redis 集中式会话管理（基于 String 数据类型）</span></h4><pre class="mermaid">graph TD
+    A[用户] --> B[负载均衡器]
+    B --> C[Web 服务器 1]
+    B --> D[Web 服务器 2]
+    B --> E[Web 服务器 N]
+    C --> F[Redis]
+    D --> F
+    E --> F
+    
+    subgraph 会话存储
+    F[("Redis (String 数据类型)")]
+    end</pre>
+
+<h3><span id="手机验证码">手机验证码</span></h3><p>许多应⽤出于安全考虑，会在每次进⾏登录时，让⽤⼾输⼊⼿机号并且配合给⼿机发送验证码，然后让⽤⼾再次输⼊收到的验证码<br>并进⾏验证，从⽽确定是否是⽤⼾本⼈。为了短信接⼝不会频繁访问，会限制⽤⼾每分钟获取验证码的频率，实现的伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">String 发送验证码(phoneNumber) &#123;</span><br><span class="line">    key = <span class="string">&quot;shortMsg:limit:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 设置过期时间为 1 分钟（60 秒）</span></span><br><span class="line">    <span class="comment">// 使⽤ NX，只在不存在 key 时才能设置成功</span></span><br><span class="line">    <span class="type">bool</span> <span class="variable">r</span> <span class="operator">=</span> Redis 执⾏命令：set key <span class="number">1</span> ex <span class="number">60</span> nx</span><br><span class="line">    <span class="title function_">if</span> <span class="params">(r == <span class="literal">false</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 说明之前设置过该⼿机的验证码了</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">c</span> <span class="operator">=</span> Redis 执⾏命令：incr key</span><br><span class="line">        <span class="title function_">if</span> <span class="params">(c &gt; <span class="number">5</span>)</span> &#123;</span><br><span class="line">            <span class="comment">// 说明超过了⼀分钟 5 次的限制了</span></span><br><span class="line">            <span class="comment">// 限制发送</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 说明要么之前没有设置过⼿机的验证码；要么次数没有超过 5 次</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">validationCode</span> <span class="operator">=</span> ⽣成随机的 <span class="number">6</span> 位数的验证码();</span><br><span class="line">  </span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 验证码 5 分钟（300 秒）内有效</span></span><br><span class="line">    Redis 执⾏命令：set validationKey validationCode ex <span class="number">300</span>;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 返回验证码，随后通过⼿机短信发送给⽤⼾</span></span><br><span class="line">    <span class="keyword">return</span> validationCode;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 验证⽤⼾输⼊的验证码是否正确</span></span><br><span class="line">bool 验证验证码(phoneNumber, validationCode) &#123;</span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">  </span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> Redis 执⾏命令：get validationKey;</span><br><span class="line">    <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 说明没有这个⼿机的验证码记录，验证失败</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (value == validationCode) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，Redis 中字符串数据类型的应用场景还远不止于此，这里介绍的是几个非常典型的应用场景</p>
 
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
