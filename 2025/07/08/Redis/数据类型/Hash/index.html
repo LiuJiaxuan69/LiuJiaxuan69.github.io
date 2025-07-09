@@ -535,7 +535,7 @@
 <p>优点：简单、直观、灵活。尤其是针对信息的局部变更或者获取操作。<br>缺点：需要控制哈希在 ziplist 和 hashtable 两种内部编码的转换，可能会造成内存的较⼤消耗。</p>
 <p>相⽐于使⽤ JSON 格式的字符串缓存⽤⼾信息，哈希类型变得更加直观，并且在更新操作上变得更灵活。可以将每个⽤⼾的 id 定义<br>为键后缀，多对 field-value 对应⽤⼾的各个属性，类似如下伪代码</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 根据用户ID获取用户信息（缓存优先）</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> uid 用户ID</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 用户信息对象，未找到时返回null</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">UserInfo <span class="title function_">getUserInfo</span><span class="params">(<span class="type">long</span> uid)</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 构建Redis键</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> <span class="string">&quot;user:&quot;</span> + uid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 尝试从Redis获取缓存数据</span></span><br><span class="line">    Map&lt;String, String&gt; userInfoMap = Redis执行命令：hgetall key;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 缓存命中处理</span></span><br><span class="line">    <span class="keyword">if</span> (userInfoMap != <span class="literal">null</span> &amp;&amp; !userInfoMap.isEmpty()) &#123;</span><br><span class="line">        <span class="comment">// 将Redis哈希数据转换为UserInfo对象</span></span><br><span class="line">        <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> 利用映射关系构建对象(userInfoMap);</span><br><span class="line">        <span class="keyword">return</span> userInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 缓存未命中，查询数据库</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> MySQL执行SQL：select * from user_info <span class="type">where</span> <span class="variable">uid</span> <span class="operator">=</span> &lt;uid&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5. 处理未找到用户的情况</span></span><br><span class="line">    <span class="keyword">if</span> (userInfo == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 记录日志或响应404</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6. 写入Redis缓存</span></span><br><span class="line">    Redis执行命令：hmset key </span><br><span class="line">        name userInfo.name </span><br><span class="line">        age userInfo.age </span><br><span class="line">        city userInfo.city;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 7. 设置缓存过期时间（1小时）</span></span><br><span class="line">    Redis执行命令：expire key <span class="number">3600</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 8. 返回用户信息</span></span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
@@ -1010,6 +1010,34 @@
 
 
 <style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
   /* 新增：黑白模式切换按钮样式 */
   .theme-toggle {
     position: fixed;

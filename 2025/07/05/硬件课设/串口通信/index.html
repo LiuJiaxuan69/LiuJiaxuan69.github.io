@@ -391,7 +391,7 @@
 <p>010100yy 对应的是 in 指令，用于将接受到的数据存到指定寄存器的最高位</p>
 <p>010101yy 对应的是 out 指令，用于发送指定寄存器的最低位（将寄存器最低位传到 tx）</p>
 <p>首先说一说怎么实现串口通信吧，基本原理如下：</p>
-<p><img src="/img/serial_port_communication/spc1.png" alt="serial_port_communication"></p>
+<p><img src="/img/HD/serial_port_communication/spc1.png" alt="serial_port_communication"></p>
 <p>呐，这张图上面的61引脚和62引脚分别对应的是 rxd32 和 txd32，也就是发送引脚和输出引脚，假设我们顶层模块中设置的发送端口为rx，接收端口<br>位tx，那么就需要将这两个端口分别连接到61号引脚以及62号引脚（在.qsf配置文件中加上如下配置）：</p>
 <figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set_location_assignment PIN_61 -to rx    <span class="comment">// 将61号引脚与 rx 端口连接作为接收端口</span></span><br><span class="line">set_location_assignment PIN_62 -to tx    <span class="comment">// 将62号引脚与 rx 端口连接作为发送端口</span></span><br></pre></td></tr></table></figure>
 
@@ -507,11 +507,11 @@
 
 <h3><span id="超频">超频</span></h3><p>感兴趣的可以看看，结论先放出来，不分配是最好的<br>接下来我们需要决策一下使用几分频：</p>
 <p>首先试一试四分频（数据传输安全，但帧率低）：</p>
-<p><img src="/img/serial_port_communication/result_clk4.png" alt="serial_port_communication"></p>
+<p><img src="/img/HD/serial_port_communication/result_clk4.png" alt="serial_port_communication"></p>
 <p>然后试试二分频（数据传输不太安全，但帧率变高）：</p>
-<p><img src="/img/serial_port_communication/result_clk2.png" alt="serial_port_communication"></p>
+<p><img src="/img/HD/serial_port_communication/result_clk2.png" alt="serial_port_communication"></p>
 <p>最后试一试不分频（数据传输没有保障，但帧率极高）：</p>
-<p><img src="/img/serial_port_communication/result_clk.png" alt="serial_port_communication"></p>
+<p><img src="/img/HD/serial_port_communication/result_clk.png" alt="serial_port_communication"></p>
 <p>那么，我们该如何计算正确率呢，没错，再写一个小demo：</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fstream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">calculater</span><span class="params">(<span class="type">const</span> std::string &amp;inputFilename, <span class="type">const</span> std::string &amp;compare_num)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="function">std::ifstream <span class="title">inputFile</span><span class="params">(inputFilename)</span></span>;</span><br><span class="line">    <span class="keyword">if</span> (!inputFile.<span class="built_in">is_open</span>()) &#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;Error: Could not open input file &quot;</span> &lt;&lt; inputFilename &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> total_num = <span class="number">0</span>, true_num = <span class="number">0</span>;</span><br><span class="line">    std::string word;</span><br><span class="line">    <span class="keyword">while</span>(inputFile &gt;&gt; word)</span><br><span class="line">    &#123;</span><br><span class="line">        ++total_num;</span><br><span class="line">        <span class="keyword">if</span>(word == compare_num) ++true_num;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (<span class="type">double</span>)(true_num) / total_num;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">3</span>) &#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;Usage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; &lt;input_file.xxx&gt;&quot;</span> &lt;&lt; <span class="string">&quot;compare_str&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    std::string inputFilename = argv[<span class="number">1</span>];</span><br><span class="line">    std::cout &lt;&lt; <span class="built_in">calculater</span>(inputFilename, argv[<span class="number">2</span>]);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -520,7 +520,7 @@
 
 <p>最后把所有的代码（适配uart版本）呈现给大家：</p>
 <p>适配 uart 的 CPU 代码<br><a href="/demo/serial_port_communication/core8.v">core8.v</a><br>uart 汇编代码<br><a href="/demo/serial_port_communication/uart.asm">uart.asm</a><br>辅助\测试工具 demo<br><a href="/demo/serial_port_communication/icex.cpp">icex.cpp</a><br><a href="/demo/serial_port_communication/accurancy.cpp">accurancy.cpp</a></p>
-
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
@@ -995,6 +995,34 @@
 
 
 <style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
   /* 新增：黑白模式切换按钮样式 */
   .theme-toggle {
     position: fixed;

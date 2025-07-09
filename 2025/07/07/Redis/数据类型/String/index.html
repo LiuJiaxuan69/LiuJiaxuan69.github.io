@@ -527,7 +527,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">String 发送验证码(phoneNumber) &#123;</span><br><span class="line">    key = <span class="string">&quot;shortMsg:limit:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 设置过期时间为 1 分钟（60 秒）</span></span><br><span class="line">    <span class="comment">// 使⽤ NX，只在不存在 key 时才能设置成功</span></span><br><span class="line">    <span class="type">bool</span> <span class="variable">r</span> <span class="operator">=</span> Redis 执⾏命令：set key <span class="number">1</span> ex <span class="number">60</span> nx</span><br><span class="line">    <span class="title function_">if</span> <span class="params">(r == <span class="literal">false</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 说明之前设置过该⼿机的验证码了</span></span><br><span class="line">        <span class="type">long</span> <span class="variable">c</span> <span class="operator">=</span> Redis 执⾏命令：incr key</span><br><span class="line">        <span class="title function_">if</span> <span class="params">(c &gt; <span class="number">5</span>)</span> &#123;</span><br><span class="line">            <span class="comment">// 说明超过了⼀分钟 5 次的限制了</span></span><br><span class="line">            <span class="comment">// 限制发送</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 说明要么之前没有设置过⼿机的验证码；要么次数没有超过 5 次</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">validationCode</span> <span class="operator">=</span> ⽣成随机的 <span class="number">6</span> 位数的验证码();</span><br><span class="line">  </span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">    <span class="comment">// 验证码 5 分钟（300 秒）内有效</span></span><br><span class="line">    Redis 执⾏命令：set validationKey validationCode ex <span class="number">300</span>;</span><br><span class="line">  </span><br><span class="line">    <span class="comment">// 返回验证码，随后通过⼿机短信发送给⽤⼾</span></span><br><span class="line">    <span class="keyword">return</span> validationCode;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 验证⽤⼾输⼊的验证码是否正确</span></span><br><span class="line">bool 验证验证码(phoneNumber, validationCode) &#123;</span><br><span class="line">    validationKey = <span class="string">&quot;validation:&quot;</span> + phoneNumber;</span><br><span class="line">  </span><br><span class="line">    <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> Redis 执⾏命令：get validationKey;</span><br><span class="line">    <span class="keyword">if</span> (value == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 说明没有这个⼿机的验证码记录，验证失败</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (value == validationCode) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>当然，Redis 中字符串数据类型的应用场景还远不止于此，这里介绍的是几个非常典型的应用场景</p>
-
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
@@ -1002,6 +1002,34 @@
 
 
 <style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
   /* 新增：黑白模式切换按钮样式 */
   .theme-toggle {
     position: fixed;
