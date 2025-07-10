@@ -1,0 +1,1979 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redis 常见数据类型-Zset 类型 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+类型简介
+相关指令
+ZADD 指令深度解析
+zcard
+zcount
+zrange
+ZREVRANGE
+ZPOPMAX
+POPMIN、ZPOPMIN
+ZRANK、ZREVRANK
+ZSCORE,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Redis 常见数据类型-Zset 类型 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+类型简介
+相关指令
+ZADD 指令深度解析
+zcard
+zcount
+zrange
+ZREVRANGE
+ZPOPMAX
+POPMIN、ZPOPMIN
+ZRANK、ZREVRANK
+ZSCORE,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Redis 常见数据类型-Zset 类型 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+类型简介
+相关指令
+ZADD 指令深度解析
+zcard
+zcount
+zrange
+ZREVRANGE
+ZPOPMAX
+POPMIN、ZPOPMIN
+ZRANK、ZREVRANK
+ZSCORE,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Redis 常见数据类型-Zset 类型</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Redis 常见数据类型-Zset 类型</h1>
+        <div class="stuff">
+            <span>七月 10, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E9%94%AE%E5%80%BC%E5%AF%B9/" rel="tag">键值对</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B">类型简介</a></li>
+<li><a href="#%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4">相关指令</a><ul>
+<li><a href="#zadd-%E6%8C%87%E4%BB%A4%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><strong>ZADD 指令深度解析</strong></a></li>
+<li><a href="#zcard">zcard</a></li>
+<li><a href="#zcount">zcount</a></li>
+<li><a href="#zrange">zrange</a></li>
+<li><a href="#zrevrange">ZREVRANGE</a></li>
+<li><a href="#zpopmax">ZPOPMAX</a></li>
+<li><a href="#popmin-zpopmin">POPMIN、ZPOPMIN</a></li>
+<li><a href="#zrank-zrevrank">ZRANK、ZREVRANK</a></li>
+<li><a href="#zscore-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">ZSCORE 指令详解</a></li>
+<li><a href="#zrem-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">ZREM 指令详解</a></li>
+<li><a href="#zremrangebyrank">ZREMRANGEBYRANK</a></li>
+<li><a href="#zremrangebyscore">ZREMRANGEBYSCORE</a></li>
+<li><a href="#zincrby-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">ZINCRBY 指令详解</a></li>
+</ul>
+</li>
+<li><a href="#%E9%9B%86%E5%90%88%E9%97%B4%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4">集合间操作指令</a><ul>
+<li><a href="#zinterstore-%E6%8C%87%E4%BB%A4%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><strong>ZINTERSTORE 指令深度解析</strong></a></li>
+<li><a href="#zunionstore">ZUNIONSTORE</a></li>
+</ul>
+</li>
+<li><a href="#zset-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB%E8%A1%A8">Zset 相关指令汇总表</a></li>
+<li><a href="#%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81">内部编码</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">应用场景</a><ul>
+<li><a href="#1-%E5%AE%9E%E6%97%B6%E6%8E%92%E8%A1%8C%E6%A6%9C%E7%B3%BB%E7%BB%9F">1. 实时排行榜系统</a></li>
+<li><a href="#2-%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97%E7%B3%BB%E7%BB%9F">2. 延迟队列系统</a></li>
+<li><a href="#3-%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E9%99%90%E6%B5%81">3. 滑动窗口限流</a></li>
+<li><a href="#4-%E5%B8%A6%E6%9D%83%E9%87%8D%E7%9A%84%E6%8A%95%E7%A5%A8%E7%B3%BB%E7%BB%9F">4. 带权重的投票系统</a></li>
+<li><a href="#5-%E6%97%B6%E9%97%B4%E7%BA%BF%E6%8E%92%E5%BA%8F">5. 时间线排序</a></li>
+<li><a href="#6-%E5%A4%9A%E7%BB%B4%E5%BA%A6%E6%8E%92%E5%BA%8F">6. 多维度排序</a></li>
+<li><a href="#7-%E5%AE%9E%E6%97%B6%E7%AB%9E%E8%B5%9B%E7%B3%BB%E7%BB%9F">7. 实时竞赛系统</a></li>
+<li><a href="#8-%E7%83%AD%E7%82%B9%E6%95%B0%E6%8D%AE%E7%BC%93%E5%AD%98">8. 热点数据缓存</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="类型简介">类型简介</span></h2><p>有序集合保留了集合不能有重复成员的特点，但与集合不同的是，有序集合中的每个元素都有⼀个唯⼀的浮点类型的分数（score）与之关<br>联，这使得有序集合中的元素是可以维护有序性的，但这个有序不是用下标作为排序依据而是用这个分数。</p>
+<p>下面是列表、集合、有序集合三者的异同点</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>是否允许重复元素</th>
+<th>是否有序</th>
+<th>有序依据</th>
+<th>应用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>列表</td>
+<td>是</td>
+<td>是</td>
+<td>索引下标</td>
+<td>时间轴、消息队列等</td>
+</tr>
+<tr>
+<td>集合</td>
+<td>否</td>
+<td>否</td>
+<td>-</td>
+<td>标签、社交等</td>
+</tr>
+<tr>
+<td>有序集合</td>
+<td>否</td>
+<td>是</td>
+<td>分数</td>
+<td>排行榜系统、社交等</td>
+</tr>
+</tbody></table>
+<h2><span id="相关指令">相关指令</span></h2><h3><span id="zadd-指令深度解析"><strong>ZADD 指令深度解析</strong></span></h3><p>将一个或多个成员元素及其分数值加入到有序集（sorted set）中。如果成员已经存在于有序集合中，则会更新其分数值，并根据新的分数值重新排序。</p>
+<p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZADD key [NX|XX] [GT|LT] [CH] [INCR] score member [score member ...]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="选项说明">选项说明</span></h4><ul>
+<li><strong>NX</strong>：仅添加新元素，不更新已存在的元素</li>
+<li><strong>XX</strong>：仅更新已存在的元素，不添加新元素</li>
+<li><strong>GT</strong>：只有当新分数大于当前分数时才更新（Redis 7.0+）</li>
+<li><strong>LT</strong>：只有当新分数小于当前分数时才更新（Redis 7.0+）</li>
+<li><strong>CH</strong>：返回被修改的元素总数（包括新增和更新的）</li>
+<li><strong>INCR</strong>：将指定成员的分数增加给定值（相当于ZINCRBY）</li>
+</ul>
+<p>时间复杂度：</p>
+<ul>
+<li>O(log(N))：添加单个元素（N是有序集的基数）</li>
+<li>O(M*log(N))：添加M个元素</li>
+</ul>
+<p>返回值：</p>
+<ul>
+<li>不使用CH选项时：新增的元素数量</li>
+<li>使用CH选项时：被修改的元素总数（包括新增和更新的）</li>
+<li>使用INCR选项时：成员的新分数值（字符串形式）</li>
+</ul>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li>基本用法：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加三个成员</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset 1 &quot;one&quot; 2 &quot;two&quot; 3 &quot;three&quot;</span><br><span class="line">(integer) 3</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看有序集</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">3) &quot;two&quot;</span><br><span class="line">4) &quot;2&quot;</span><br><span class="line">5) &quot;three&quot;</span><br><span class="line">6) &quot;3&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用NX选项（仅添加新元素）：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试更新已存在的元素<span class="string">&quot;one&quot;</span>（失败）</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset NX 4 &quot;one&quot; 5 &quot;four&quot;</span><br><span class="line">(integer) 1  # 只新增了&quot;four&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">3) &quot;two&quot;</span><br><span class="line">4) &quot;2&quot;</span><br><span class="line">5) &quot;three&quot;</span><br><span class="line">6) &quot;3&quot;</span><br><span class="line">7) &quot;four&quot;</span><br><span class="line">8) &quot;5&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>使用XX选项（仅更新已存在元素）：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试更新已存在的<span class="string">&quot;one&quot;</span>和新增<span class="string">&quot;five&quot;</span></span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset XX 10 &quot;one&quot; 5 &quot;five&quot;</span><br><span class="line">(integer) 1  # 只更新了&quot;one&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;one&quot;</span><br><span class="line">8) &quot;10&quot;  # &quot;one&quot;的分数被更新</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>使用CH选项（返回修改总数）：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新一个已存在元素，添加一个新元素</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset CH 15 &quot;one&quot; 20 &quot;five&quot;</span><br><span class="line">(integer) 2  # 一个更新，一个新增</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;one&quot;</span><br><span class="line">8) &quot;15&quot;</span><br><span class="line">9) &quot;five&quot;</span><br><span class="line">10) &quot;20&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>使用INCR选项（分数递增）：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将<span class="string">&quot;one&quot;</span>的分数增加5</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset INCR 5 &quot;one&quot;</span><br><span class="line">&quot;20&quot;  # 返回新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;five&quot;</span><br><span class="line">8) &quot;20&quot;</span><br><span class="line">9) &quot;one&quot;</span><br><span class="line">10) &quot;20&quot;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>使用GT&#x2F;LT选项：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只有当新分数大于当前分数时才更新</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset GT 25 &quot;one&quot;  # 当前分数20 &lt; 25，会更新</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试用更小的分数更新</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset GT 10 &quot;one&quot;  # 当前分数25 &gt; 10，不会更新</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用LT选项（只有当新分数小于当前分数时才更新）</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset LT 8 &quot;two&quot;  # 当前分数2 &lt; 8，不会更新</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; zadd myzset LT 1 &quot;two&quot;  # 当前分数2 &gt; 1，会更新</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li>分数值是64位双精度浮点数，可以表示的范围为-(2^53)到+(2^53)</li>
+<li>相同分数的成员按字典序排序</li>
+<li>从Redis 3.0.2开始，ZADD支持多参数语法</li>
+<li>GT&#x2F;LT选项需要Redis 7.0及以上版本</li>
+<li>INCR选项不能与其他选项（NX&#x2F;XX&#x2F;GT&#x2F;LT）一起使用</li>
+</ol>
+<h3><span id="zcard">zcard</span></h3><p>该指令获取—个 zset 的基数（cardinality），即 zset 中的元素个数</p>
+<p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZCARD key</span><br></pre></td></tr></table></figure>
+
+<p>时间复杂度：O(1)</p>
+<p>返回值：zset 内的元素个数</p>
+<p>使用示例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd k1 10 a 20 b</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询 k1 中的元素个数</span></span><br><span class="line">127.0.0.1:6379&gt; zcard k1</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+
+<h3><span id="zcount">zcount</span></h3><p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZCOUNT key min max</span><br></pre></td></tr></table></figure>
+
+<p>返回有序集合中分数值在<code>min</code>和<code>max</code>之间的成员数量（默认包含边界值）</p>
+<p>时间复杂度：O(log(N))，其中N是有序集合的基数</p>
+<p>返回值：指定分数范围内的成员数量</p>
+<h4><span id="开区间功能">开区间功能</span></h4><ul>
+<li>使用<code>(</code>前缀表示排除边界值（开区间）</li>
+<li><code>(min</code>表示大于min（不包含min）</li>
+<li><code>(max</code>表示小于max（不包含max）</li>
+<li>可以组合使用，如<code>(min (max</code>表示大于min且小于max</li>
+</ul>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li>基本用法（闭区间）：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建有序集合</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot;</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计200-400分（包含边界）的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores 200 400</span><br><span class="line">(integer) 3  # 包含Bob(200), Charlie(300), David(400)</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>开区间用法：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计大于200且小于400的成员（排除边界）</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 (400</span><br><span class="line">(integer) 1  # 仅Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅排除下限</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 400</span><br><span class="line">(integer) 2  # Charlie(300), David(400)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅排除上限</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores 200 (400</span><br><span class="line">(integer) 2  # Bob(200), Charlie(300)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>无限区间：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计所有小于300分的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores -inf 300</span><br><span class="line">(integer) 3  # Alice(100), Bob(200), Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计所有大于200分的成员（不包含200）</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 +inf</span><br><span class="line">(integer) 2  # Charlie(300), David(400)</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li>默认范围是闭区间（包含边界值）</li>
+<li><code>-inf</code>和<code>+inf</code>表示无限小和无限大</li>
+<li>键不存在时返回0</li>
+<li>分数值使用双精度浮点数存储</li>
+</ol>
+<h3><span id="zrange">zrange</span></h3><p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZRANGE key start stop [BYSCORE | BYLEX] [REV] [LIMIT offset count] [WITHSCORES]</span><br></pre></td></tr></table></figure>
+
+<p>返回有序集合中指定区间内的成员，支持按索引、分数或字典序查询</p>
+<h4><span id="核心功能">核心功能</span></h4><ol>
+<li><strong>索引范围查询</strong>（默认）：<ul>
+<li><code>start</code>和<code>stop</code>为从0开始的索引（包含边界）</li>
+<li>支持负数索引（-1表示最后一个元素）</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取前3个元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 2</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>分数范围查询</strong>（BYSCORE）：<ul>
+<li>使用<code>(</code>表示开区间</li>
+<li>支持<code>-inf</code>和<code>+inf</code>表示无限</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取分数在(100,300]之间的元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores (100 300 BYSCORE</span><br><span class="line">1) &quot;Bob&quot;</span><br><span class="line">2) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>字典序查询</strong>（BYLEX）：<ul>
+<li>要求所有元素分数相同</li>
+<li>使用<code>[</code>或<code>(</code>指定闭&#x2F;开区间</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD k1 1 a 1 b 1 c 1 d 1 e 1 f</span><br><span class="line">(integer) 6</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取字典序在[a,e)之间的元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE k1 [a (e BYLEX</span><br><span class="line">1) &quot;a&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;c&quot;</span><br><span class="line">4) &quot;d&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="关键选项">关键选项：</span></h4><ul>
+<li><code>REV</code>：反向排序（从高到低）</li>
+<li><code>LIMIT</code>：分页查询（类似SQL的LIMIT）</li>
+<li><code>WITHSCORES</code>：返回成员及其分数</li>
+</ul>
+<h4><span id="时间复杂度">时间复杂度：</span></h4><ul>
+<li>O(log(N)+M)，N是有序集合基数，M是返回元素数</li>
+</ul>
+<h4><span id="使用示例">使用示例：</span></h4><ol>
+<li>基本范围查询：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>带分数的反向查询：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 REV WITHSCORES</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br><span class="line">3) &quot;Bob&quot;</span><br><span class="line">4) &quot;200&quot;</span><br><span class="line">5) &quot;Alice&quot;</span><br><span class="line">6) &quot;100&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>开区间查询：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZRANGE scores (100 (300 BYSCORE</span><br><span class="line">1) &quot;Bob&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li>Redis 6.2+版本开始替代了ZREVRANGE等命令</li>
+<li>使用BYLEX时所有成员分数必须相同</li>
+<li>大范围查询可能影响性能（时间复杂度O(log(N)+M)）</li>
+</ol>
+<h3><span id="zrevrange">ZREVRANGE</span></h3><p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREVRANGE key start stop [WITHSCORES]</span><br></pre></td></tr></table></figure>
+
+<p>返回有序集合中指定索引范围内的成员，按分数从高到低排序（与ZRANGE排序相反）</p>
+<h4><span id="核心特性">核心特性</span></h4><ol>
+<li><strong>反向排序</strong>：默认按分数降序排列（最高分在前）</li>
+<li><strong>索引范围</strong>：<ul>
+<li><code>start</code>和<code>stop</code>为基于0的索引</li>
+<li>支持负数索引（-1表示最后一个元素）</li>
+</ul>
+</li>
+<li><strong>分数相同</strong>时按字典序降序排列</li>
+</ol>
+<p>时间复杂度：O(log(N)+M)，N是有序集合基数，M是返回元素数</p>
+<p>返回值：指定范围内的成员列表（可选包含分数）</p>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li>基本用法：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZREVRANGE scores 0 -1  # 获取全部元素（降序）</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Alice&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>带分数返回：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZREVRANGE scores 0 1 WITHSCORES  # 获取前两名</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br><span class="line">3) &quot;Bob&quot;</span><br><span class="line">4) &quot;200&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li><strong>已弃用</strong>：Redis 6.2+建议改用<code>ZRANGE key start stop REV</code></li>
+<li>索引越界时自动截断</li>
+<li>键不存在时返回空列表</li>
+</ol>
+<h4><span id="典型应用场景">典型应用场景</span></h4><ol>
+<li>排行榜（显示前N名）</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZREVRANGE leaderboard 0 9 WITHSCORES</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>优先级队列（处理高优先级任务）</li>
+<li>时间线（最新内容优先）</li>
+</ol>
+<h3><span id="zpopmax">ZPOPMAX</span></h3><p>命令格式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZPOPMAX key [count]</span><br></pre></td></tr></table></figure>
+
+<p>移除并返回有序集合中分数最高的成员（默认返回1个）</p>
+<h4><span id="核心特性">核心特性</span></h4><ol>
+<li><strong>原子性操作</strong>：同时完成查询和删除操作</li>
+<li><strong>排序规则</strong>：按分数降序返回（最高分在前）</li>
+<li><strong>默认行为</strong>：未指定count时只返回1个成员</li>
+</ol>
+<p>时间复杂度：O(log(N)*M)，N是有序集合基数，M是返回元素数</p>
+<p>返回值：被移除的成员及其分数（数组形式）</p>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li>基本用法：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX scores  # 移除并返回最高分成员</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>批量移除：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX scores 2  # 移除前两名</span><br><span class="line">1) &quot;Bob&quot;</span><br><span class="line">2) &quot;200&quot;</span><br><span class="line">3) &quot;Alice&quot;</span><br><span class="line">4) &quot;100&quot;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>异常情况：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键不存在时</span></span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX not_exists</span><br><span class="line">(empty array)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型时</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX wrong_type</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li><strong>count限制</strong>：<ul>
+<li>必须为非负整数</li>
+<li>超过集合大小时返回全部元素</li>
+</ul>
+</li>
+<li><strong>数据修改</strong>：操作后成员会从集合中永久移除</li>
+<li><strong>替代命令</strong>：Redis 6.2+推荐使用<code>ZRANGE</code>+<code>ZREM</code>组合实现类似功能</li>
+</ol>
+<h4><span id="典型应用场景">典型应用场景</span></h4><ol>
+<li>任务队列（处理高优先级任务）</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX pending_tasks</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>实时排行榜（获取当日冠军）</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX daily_ranking WITHSCORES</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>流量控制（处理最高权重请求）</li>
+</ol>
+<h3><span id="popmin-zpopmin">POPMIN、ZPOPMIN</span></h3><p>用法和POPMAX 和 ZPOPMAX 类型，这里不再赘述</p>
+<h3><span id="zrank-zrevrank">ZRANK、ZREVRANK</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><ul>
+<li><strong>ZRANK</strong>：返回成员在有序集合中的升序排名（分数从低到高），排名从0开始计算，最低分成员排名为0</li>
+<li><strong>ZREVRANK</strong>：返回成员在有序集合中的降序排名（分数从高到低），排名从0开始计算，最高分成员排名为0</li>
+</ul>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZRANK key member [WITHSCORE]</span><br><span class="line">ZREVRANK key member [WITHSCORE]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-共同特性">3. 共同特性</span></h4><ul>
+<li>时间复杂度：O(log(N))</li>
+<li>返回值类型：<ul>
+<li>成员存在时返回整数排名</li>
+<li>成员不存在或key不存在时返回nil</li>
+<li>Redis 7.2+支持WITHSCORE选项可同时返回分数（返回数组格式[排名,分数]）</li>
+</ul>
+</li>
+</ul>
+<h4><span id="4-核心区别">4. 核心区别</span></h4><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>ZRANK</th>
+<th>ZREVRANK</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>排序方向</td>
+<td>分数升序（低→高）</td>
+<td>分数降序（高→低）</td>
+</tr>
+<tr>
+<td>最高分排名</td>
+<td>最大排名值</td>
+<td>0</td>
+</tr>
+<tr>
+<td>最低分排名</td>
+<td>0</td>
+<td>最大排名值</td>
+</tr>
+</tbody></table>
+<h4><span id="5-使用示例">5. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD leaderboard 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ZRANK示例（升序排名）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANK leaderboard &quot;Alice&quot;  # 最低分→排名0</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; ZRANK leaderboard &quot;Charlie&quot;  # 最高分→排名2</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ZREVRANK示例（降序排名）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Alice&quot;  # 最低分→排名2</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Charlie&quot;  # 最高分→排名0</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">WITHSCORE选项（Redis 7.2+）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Bob&quot; WITHSCORE</span><br><span class="line">1) (integer) 1</span><br><span class="line">2) &quot;200&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="6-应用场景">6. 应用场景</span></h4><ul>
+<li><p><strong>ZRANK适用场景</strong>：</p>
+<ul>
+<li>需要知道成员在整体中的相对位置（如成绩百分位）</li>
+<li>按成本&#x2F;价格从低到高排序的场景</li>
+</ul>
+</li>
+<li><p><strong>ZREVRANK适用场景</strong>：</p>
+<ul>
+<li>排行榜系统（显示TOP N用户）</li>
+<li>按热度&#x2F;评分从高到低排序的场景</li>
+</ul>
+</li>
+</ul>
+<h4><span id="7-注意事项">7. 注意事项</span></h4><ul>
+<li>两个命令都采用0-based排名体系</li>
+<li>分数相同的成员按字典序决定排名</li>
+<li>大集合中使用时要注意O(log(N))的时间复杂度</li>
+</ul>
+<h3><span id="zscore-指令详解">ZSCORE 指令详解</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><p>返回有序集合中指定成员的分数值。如果成员不存在或key不存在，返回nil</p>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZSCORE key member</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-核心特性">3. 核心特性</span></h4><ul>
+<li>时间复杂度：O(1)</li>
+<li>返回值类型：<ul>
+<li>字符串形式返回双精度浮点数分数值</li>
+<li>成员不存在时返回nil</li>
+<li>Redis 7.2+支持WITHSCORE选项可同时返回排名和分数</li>
+</ul>
+</li>
+</ul>
+<h4><span id="4-使用示例">4. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询成员分数</span></span><br><span class="line">127.0.0.1:6379&gt; ZSCORE scores &quot;Alice&quot;</span><br><span class="line">&quot;100&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不存在的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZSCORE scores &quot;David&quot;</span><br><span class="line">(nil)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZSCORE wrong_type &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-应用场景">5. 应用场景</span></h4><ul>
+<li>排行榜系统（查看用户得分）</li>
+<li>优先级任务检查（确认任务优先级）</li>
+<li>游戏计分系统（查询玩家分数）</li>
+</ul>
+<hr>
+<h3><span id="zrem-指令详解">ZREM 指令详解</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><p>从有序集合中移除一个或多个成员，不存在的成员会被忽略</p>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREM key member [member ...]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-核心特性">3. 核心特性</span></h4><ul>
+<li>时间复杂度：O(M*log(N))，M为移除成员数，N为集合基数</li>
+<li>返回值：实际移除的成员数量（不包含不存在的成员）</li>
+<li>支持批量操作（Redis 2.4+）</li>
+</ul>
+<h4><span id="4-使用示例">4. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除单个成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZREM scores &quot;Alice&quot;</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">批量移除</span></span><br><span class="line">127.0.0.1:6379&gt; ZREM scores &quot;Bob&quot; &quot;David&quot;  # David不存在</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZREM wrong_type &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-应用场景">5. 应用场景</span></h4><ul>
+<li>排行榜更新（移除过期用户）</li>
+<li>任务队列管理（完成的任务移出队列）</li>
+<li>实时数据清理（移除过期数据）</li>
+</ul>
+<h4><span id="6-注意事项">6. 注意事项</span></h4><ul>
+<li>与ZREMRANGEBYRANK不同，ZREM是按成员值移除而非排名</li>
+<li>大集合批量移除时建议使用管道(pipeline)提高效率</li>
+</ul>
+<h3><span id="zremrangebyrank">ZREMRANGEBYRANK</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>移除有序集合中指定<strong>排名范围</strong>内的所有成员，按<strong>升序排名</strong>（分数从低到高）计算范围。</p>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREMRANGEBYRANK key start stop</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
+<li><strong>时间复杂度</strong>：<code>O(log(N) + M)</code>，其中 <code>N</code> 是集合大小，<code>M</code> 是被移除的成员数量。</li>
+<li><strong>排名规则</strong>：<ul>
+<li>排名从 <code>0</code> 开始（最低分成员的排名为 <code>0</code>）。</li>
+<li>支持<strong>负数索引</strong>（<code>-1</code> 表示最后一个成员，<code>-2</code> 表示倒数第二个，依此类推）。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：被移除的成员数量（若 <code>key</code> 不存在或范围无效，返回 <code>0</code>）。</li>
+</ul>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot; 500 &quot;Eve&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除排名 0-2（最低分的3个成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYRANK scores 0 2</span><br><span class="line">(integer) 3  # 移除了 Alice(100), Bob(200), Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查剩余成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 WITHSCORES</span><br><span class="line">1) &quot;David&quot;</span><br><span class="line">2) &quot;400&quot;</span><br><span class="line">3) &quot;Eve&quot;</span><br><span class="line">4) &quot;500&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用负数索引（移除倒数2个成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYRANK scores -2 -1</span><br><span class="line">(integer) 2  # 移除了 David(400), Eve(500)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查是否为空</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
+<li><strong>排行榜清理</strong>（定期移除排名最低的N个用户）</li>
+<li><strong>数据分页删除</strong>（批量移除指定范围的记录）</li>
+<li><strong>缓存淘汰策略</strong>（移除低优先级数据）</li>
+</ul>
+<h4><span id="6-注意事项"><strong>6. 注意事项</strong></span></h4><ul>
+<li><strong>与 <code>ZREMRANGEBYSCORE</code> 的区别</strong>：<ul>
+<li><code>ZREMRANGEBYRANK</code> 按<strong>排名</strong>移除（基于排序后的位置）。</li>
+<li><code>ZREMRANGEBYSCORE</code> 按<strong>分数范围</strong>移除（如 <code>ZREMRANGEBYSCORE scores 100 300</code>）。</li>
+</ul>
+</li>
+<li><strong>索引越界</strong>：<ul>
+<li>若 <code>start</code> 超过最大排名，不会移除任何成员。</li>
+<li>若 <code>stop</code> 超过最大排名，会截断到最后一个成员。</li>
+</ul>
+</li>
+<li><strong>键不存在时</strong>：返回 <code>0</code>，不会报错。</li>
+</ul>
+<h4><span id="7-替代方案redis-62"><strong>7. 替代方案（Redis 6.2+）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 ZRANGE + ZREM 组合（适用于复杂条件删除）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 2 BYSCORE | xargs redis-cli ZREM scores</span><br></pre></td></tr></table></figure>
+
+<p><strong>总结</strong>：<code>ZREMRANGEBYRANK</code> 适用于<strong>按排名批量删除</strong>，适合排行榜维护、数据清理等场景，使用时需注意排名方向和索引范围。</p>
+<h3><span id="zremrangebyscore">ZREMRANGEBYSCORE</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>移除有序集合中<strong>分数在指定范围内</strong>的所有成员（包含 <code>min</code> 和 <code>max</code> 边界值）。</p>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREMRANGEBYSCORE key min max</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
+<li><strong>时间复杂度</strong>：<code>O(log(N) + M)</code>，<code>N</code> 是集合大小，<code>M</code> 是被移除的成员数量。</li>
+<li><strong>分数范围</strong>：<ul>
+<li>默认包含边界值（如 <code>ZREMRANGEBYSCORE key 100 200</code> 移除分数 100 ≤ score ≤ 200 的成员）。</li>
+<li>支持<strong>开区间</strong>（使用 <code>(</code> 符号，如 <code>(100</code> 表示 &gt;100，<code>200</code> 表示 ≤200）。</li>
+<li>支持特殊值 <code>-inf</code>（负无穷）和 <code>+inf</code>（正无穷）。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：被移除的成员数量（若 <code>key</code> 不存在或范围无效，返回 <code>0</code>）。</li>
+</ul>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot; 500 &quot;Eve&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除分数 200 ≤ score ≤ 400 的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores 200 400</span><br><span class="line">(integer) 3  # 移除了 Bob(200), Charlie(300), David(400)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查剩余成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 WITHSCORES</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;100&quot;</span><br><span class="line">3) &quot;Eve&quot;</span><br><span class="line">4) &quot;500&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用开区间（移除分数 &gt;100 且 ≤300 的成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores (100 300</span><br><span class="line">(integer) 1  # 仅移除了 Bob(200)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 -inf 和 +inf（移除所有成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores -inf +inf</span><br><span class="line">(integer) 2  # 移除了剩余 Alice(100), Eve(500)</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
+<li><strong>数据清理</strong>（如删除过期低分数据）。</li>
+<li><strong>动态排行榜维护</strong>（定期移除低活跃用户）。</li>
+<li><strong>范围任务处理</strong>（批量移除特定优先级的任务）。</li>
+</ul>
+<h4><span id="6-注意事项"><strong>6. 注意事项</strong></span></h4><ul>
+<li><strong>与 <code>ZREMRANGEBYRANK</code> 区别</strong>：<ul>
+<li><code>ZREMRANGEBYSCORE</code> 按<strong>分数范围</strong>移除。</li>
+<li><code>ZREMRANGEBYRANK</code> 按<strong>排名范围</strong>移除（如 <code>ZREMRANGEBYRANK scores 0 2</code>）。</li>
+</ul>
+</li>
+<li><strong>键不存在时</strong>：返回 <code>0</code>，无错误。</li>
+<li><strong>错误类型</strong>：若键存在但非有序集合，返回 <code>WRONGTYPE</code> 错误。</li>
+</ul>
+<h4><span id="7-替代方案复杂条件删除"><strong>7. 替代方案（复杂条件删除）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 ZRANGEBYSCORE + ZREM 组合（适用于非连续范围）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGEBYSCORE scores 100 300 | xargs redis-cli ZREM scores</span><br></pre></td></tr></table></figure>
+
+<p><strong>总结</strong>：<code>ZREMRANGEBYSCORE</code> 适用于<strong>按分数批量删除</strong>，支持灵活的范围设定，适合数据过滤和动态集合维护场景。</p>
+<h3><span id="zincrby-指令详解">ZINCRBY 指令详解</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>对有序集合中的指定成员进行<strong>分数增减操作</strong>。若成员不存在，则自动创建并设置初始分数为 <code>0.0</code> 后增减；若键不存在，则创建新有序集合并添加该成员。</p>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZINCRBY key increment member</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
+<li><strong>时间复杂度</strong>：<code>O(log(N))</code>，<code>N</code> 为有序集合的成员数量。</li>
+<li><strong>分数规则</strong>：<ul>
+<li><code>increment</code> 可为正数（增加分数）或负数（减少分数）。</li>
+<li>支持<strong>双精度浮点数</strong>（如 <code>3.14</code> 或 <code>-1.5</code>）。</li>
+</ul>
+</li>
+<li><strong>键和成员处理</strong>：<ul>
+<li>若 <code>key</code> 不存在，自动创建新有序集合。</li>
+<li>若 <code>member</code> 不存在，视为初始分数 <code>0.0</code> 并增减。</li>
+<li>若 <code>key</code> 存在但非有序集合，返回错误。</li>
+</ul>
+</li>
+</ul>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">初始数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">增加 Alice 的分数 (+50)</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores 50 &quot;Alice&quot;</span><br><span class="line">&quot;150&quot;  # 新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">减少 Bob 的分数 (-30)</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores -30 &quot;Bob&quot;</span><br><span class="line">&quot;170&quot;  # 新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不存在的成员（自动创建，初始分数 0 + 10）</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores 10 &quot;Charlie&quot;</span><br><span class="line">&quot;10&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误示例（键存在但非有序集合）</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY wrong_type 5 &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
+<li><strong>实时排行榜更新</strong>（如游戏积分变动）。</li>
+<li><strong>优先级任务调整</strong>（动态修改任务优先级）。</li>
+<li><strong>计数器系统</strong>（支持增减的浮点计数器）。</li>
+</ul>
+<h4><span id="6-注意事项"><strong>6. 注意事项</strong></span></h4><ul>
+<li><strong>返回值</strong>：始终返回成员增减后的<strong>新分数</strong>（字符串形式的浮点数）。</li>
+<li><strong>精度问题</strong>：浮点数运算可能存在微小误差，需业务层处理。</li>
+<li><strong>性能</strong>：高频操作时建议使用管道（pipeline）优化。</li>
+</ul>
+<h4><span id="7-对比其他命令"><strong>7. 对比其他命令</strong></span></h4><ul>
+<li>与 <code>ZADD</code> 区别：<code>ZINCRBY</code> 专用于<strong>增量修改</strong>，而 <code>ZADD</code> 直接覆盖分数。</li>
+<li>与 <code>HINCRBY</code> 区别：<code>HINCRBY</code> 用于哈希结构且仅支持整数增减。</li>
+</ul>
+<p><strong>总结</strong>：<code>ZINCRBY</code> 是动态维护有序集合分数的核心命令，适用于需频繁增减分数的场景，如排行榜、优先级队列等。</p>
+<p>等等，我知道你想问什么，ZADD 好像已经有了 ZINCRBY 的功能呀，那为什么还要保留这个命令呢？感兴趣可以展开看看：</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <ol>
+<li><strong>语义清晰性</strong></li>
+</ol>
+<ul>
+<li><code>ZINCRBY</code> 明确表达了”增量”操作的意图，代码可读性更强</li>
+<li><code>ZADD ... INCR</code> 的语法相对隐晦，不够直观</li>
+</ul>
+<ol start="2">
+<li><strong>使用便捷性</strong></li>
+</ol>
+<ul>
+<li><code>ZINCRBY</code> 语法更简洁：<code>ZINCRBY key increment member</code></li>
+<li><code>ZADD</code> 实现相同功能需要：<code>ZADD key INCR increment member</code></li>
+</ul>
+<ol start="3">
+<li><strong>历史原因</strong></li>
+</ol>
+<ul>
+<li><code>ZINCRBY</code> 是早期版本就存在的命令(1.2.0引入)</li>
+<li><code>ZADD</code> 的 <code>INCR</code> 选项是后来添加的(2.6.9版本)</li>
+</ul>
+<ol start="4">
+<li><strong>性能考虑</strong></li>
+</ol>
+<ul>
+<li>虽然差异很小，但专用命令(<code>ZINCRBY</code>)可能比通用命令(<code>ZADD</code>带选项)有轻微的性能优势</li>
+<li><code>ZINCRBY</code> 的实现路径更直接，不需要解析额外选项</li>
+</ul>
+<ol start="5">
+<li><strong>错误预防</strong></li>
+</ol>
+<ul>
+<li><code>ZINCRBY</code> 明确限制为单成员操作，避免误用</li>
+<li><code>ZADD</code> 支持多成员操作，配合 <code>INCR</code> 时容易误传多个成员导致错误</li>
+</ul>
+<p>实际建议：</p>
+<ul>
+<li><strong>当明确要做增量操作时</strong>，优先使用 <code>ZINCRBY</code>，代码更清晰</li>
+<li><strong>需要批量操作或复杂条件时</strong>，使用 <code>ZADD</code> 的选项功能</li>
+<li><strong>维护旧代码时</strong>，保持原有命令使用的一致性</li>
+</ul>
+<p>Redis 的设计哲学之一是保持命令的专一性和明确性，即使某些功能有重叠，也会保留更专门的命令来满足不同场景的需求。</p>
+
+    </div>
+</div>
+
+<h2><span id="集合间操作指令">集合间操作指令</span></h2><h3><span id="zinterstore-指令深度解析"><strong>ZINTERSTORE 指令深度解析</strong></span></h3><h4><span id="1-核心功能"><strong>1. 核心功能</strong></span></h4><p>计算多个有序集合的交集，并将结果存储到指定的目标键中。仅保留同时存在于所有输入集合的成员，其分数通过可配置的聚合规则计算。</p>
+<hr>
+<h4><span id="2-完整命令格式"><strong>2. 完整命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZINTERSTORE destination numkeys key [key ...] </span><br><span class="line">    [WEIGHTS weight [weight ...]] </span><br><span class="line">    [AGGREGATE SUM|MIN|MAX]</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="3-参数详解"><strong>3. 参数详解</strong></span></h4><h5><span id="31-必选参数"><strong>3.1 必选参数</strong></span></h5><ul>
+<li><strong>destination</strong>：存储结果的键名。若已存在会被覆盖（无论原类型）。</li>
+<li><strong>numkeys</strong>：指定参与计算的有序集合数量（必须与实际输入的key数量一致）。</li>
+<li><strong>key [key …]</strong>：参与交集的集合键名（至少1个）。</li>
+</ul>
+<h5><span id="32-可选参数"><strong>3.2 可选参数</strong></span></h5><h6><span id="weights"><strong>WEIGHTS</strong></span></h6><ul>
+<li><strong>作用</strong>：为每个输入集合的分数设置权重乘法因子。</li>
+<li><strong>规则</strong>：<ul>
+<li>权重数量必须与<code>numkeys</code>一致，未指定时默认为<code>1</code>。</li>
+<li>支持浮点数（如<code>2.5</code>），可正可负。</li>
+</ul>
+</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集合1分数×10，集合2分数×0.5</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 WEIGHTS 10 0.5</span><br></pre></td></tr></table></figure>
+
+<h6><span id="aggregate"><strong>AGGREGATE</strong></span></h6><ul>
+<li><strong>作用</strong>：控制交集成员的分数计算方式。</li>
+<li><strong>选项</strong>：<ul>
+<li><strong>SUM</strong>（默认）：各集合分数×权重后<strong>相加</strong>。</li>
+<li><strong>MIN</strong>：取各集合分数×权重后的<strong>最小值</strong>。</li>
+<li><strong>MAX</strong>：取各集合分数×权重后的<strong>最大值</strong>。</li>
+</ul>
+</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">取分数的最小值</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 AGGREGATE MIN</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="4-执行逻辑"><strong>4. 执行逻辑</strong></span></h4><ol>
+<li><strong>交集判定</strong>：仅保留所有输入集合中均存在的成员。</li>
+<li><strong>分数计算</strong>：<ul>
+<li>对每个成员，按<code>WEIGHTS</code>对原始分数加权。</li>
+<li>按<code>AGGREGATE</code>规则聚合加权后的分数。</li>
+</ul>
+</li>
+<li><strong>存储结果</strong>：覆盖<code>destination</code>键，类型转为有序集合。</li>
+</ol>
+<hr>
+<h4><span id="5-时间复杂度"><strong>5. 时间复杂度</strong></span></h4><ul>
+<li><strong>O(N<em>K) + O(M</em>log(M))</strong>：<ul>
+<li><code>N</code>：最小输入集合的成员数。</li>
+<li><code>K</code>：输入集合数量。</li>
+<li><code>M</code>：结果集的成员数。</li>
+</ul>
+</li>
+</ul>
+<p>下面是对于这个时间复杂度的说明，感兴趣可以展开看看：</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <p><strong>1. 时间复杂度组成</strong><br><code>O(N*K) + O(M*log(M))</code> 由两部分构成：</p>
+<ul>
+<li><p><strong><code>O(N*K)</code></strong>：计算交集的核心成本</p>
+<ul>
+<li><code>N</code>：<strong>最小输入集合</strong>的成员数量（需遍历该集合的所有成员）</li>
+<li><code>K</code>：参与交集的集合数量（每个成员需检查是否存在于其他 <code>K-1</code> 个集合）</li>
+<li>例如：3个集合分别有100、200、300个成员，则 <code>N=100</code>，<code>K=3</code>。</li>
+</ul>
+</li>
+<li><p><strong><code>O(M*log(M))</code></strong>：存储结果集的成本</p>
+<ul>
+<li><code>M</code>：结果集的成员数量（需对 <code>M</code> 个成员按分数排序后存储）</li>
+<li>使用跳表（Skip List）结构存储，插入单个成员的时间为 <code>O(log(M))</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>2. 为什么是这种复杂度？</strong><br><strong>2.1 交集计算逻辑</strong></p>
+<ol>
+<li><strong>选择基准集合</strong>：取成员数最少的集合（<code>N</code>最小）作为遍历基准</li>
+<li><strong>成员存在性检查</strong>：对基准集合的每个成员，检查是否在其他 <code>K-1</code> 个集合中存在：<ul>
+<li>每个检查操作时间复杂度为 <code>O(log(S))</code>（<code>S</code>为被检查集合的大小），但因有序集合使用哈希表+跳表，实际平均为 <code>O(1)</code></li>
+<li>总检查成本为 <code>O(N*K)</code>（简化模型）</li>
+</ul>
+</li>
+</ol>
+<p><strong>2.2 结果集存储</strong></p>
+<ul>
+<li>交集成员需按分数重新排序后存入目标键：<ul>
+<li>插入 <code>M</code> 个成员到跳表的总成本为 <code>O(M*log(M))</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>3. 影响因素</strong></p>
+<ul>
+<li><strong>数据分布</strong>：<ul>
+<li>若输入集合的成员高度重合（<code>M</code>接近 <code>N</code>），<code>O(M*log(M))</code> 会显著增加</li>
+<li>若成员几乎无交集（<code>M≈0</code>），则主要成本为 <code>O(N*K)</code></li>
+</ul>
+</li>
+<li><strong>权重与聚合操作</strong>：<ul>
+<li><code>WEIGHTS</code> 和 <code>AGGREGATE</code> 的计算成本已包含在 <code>O(N*K)</code> 中（仅额外算术操作）</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>4. 实测验证</strong></p>
+<ul>
+<li><strong>测试场景</strong>（参考实际案例）：<ul>
+<li>交集两个集合（在线用户与付费用户），规模从1k到1M成员。</li>
+<li>结果：当 <code>N=1k</code> 时，单次操作约0.5ms；<code>N=1M</code> 时约200ms，符合 <code>O(N*K)</code> 趋势</li>
+</ul>
+</li>
+<li><strong>关键结论</strong>：<ul>
+<li>小数据集（<code>N&lt;10k</code>）实时计算可行；大数据集需权衡性能</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>5. 对比其他命令</strong></p>
+<ul>
+<li><strong>与 <code>ZUNIONSTORE</code> 区别</strong>：<ul>
+<li>并集需遍历所有集合的成员，时间复杂度为 <code>O(N)</code>（<code>N</code>为所有集合成员总数）</li>
+</ul>
+</li>
+<li><strong>与 <code>ZINTER</code> 区别</strong>：<ul>
+<li><code>ZINTER</code> 仅返回结果，不存储，省去 <code>O(M*log(M))</code> 成本</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>总结</strong>：<code>ZINTERSTORE</code> 的时间复杂度由<strong>交集计算</strong>和<strong>结果存储</strong>两部分决定，实际性能取决于最小集合大小和结果集规模。业务中建议对大数据集预分片或离线计算[5]。</p>
+
+    </div>
+</div>
+
+<hr>
+<h4><span id="6-使用示例"><strong>6. 使用示例</strong></span></h4><h5><span id="61-基础交集"><strong>6.1 基础交集</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">ZADD set1 1 &quot;A&quot; 2 &quot;B&quot;</span><br><span class="line">ZADD set2 2 &quot;B&quot; 3 &quot;C&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">计算交集（默认SUM聚合）</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;B&quot;</span>的分数=2(set1)+2(set2)=4</span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="62-加权与聚合"><strong>6.2 加权与聚合</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加权计算（set1分数×10，set2分数×0.1）</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 WEIGHTS 10 0.1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">&quot;B&quot;</span>的分数=2×10 + 2×0.1=20.2</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MIN聚合</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 AGGREGATE MIN</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">&quot;B&quot;</span>的分数=min(2, 2)=2</span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="63-错误处理"><strong>6.3 错误处理</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键类型错误（非有序集合）</span></span><br><span class="line">SET wrong_type &quot;value&quot;</span><br><span class="line">ZINTERSTORE result 1 wrong_type</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回: (error) WRONGTYPE</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="7-应用场景"><strong>7. 应用场景</strong></span></h4><ul>
+<li><strong>共同好友统计</strong>：计算多个用户的共同关注列表。</li>
+<li><strong>商品筛选</strong>：找出同时满足多个条件的商品（如价格区间+评分区间）。</li>
+<li><strong>优先级任务合并</strong>：整合多来源的高优先级任务。</li>
+</ul>
+<hr>
+<h4><span id="8-注意事项"><strong>8. 注意事项</strong></span></h4><ol>
+<li><strong>覆盖风险</strong>：目标键会被强制覆盖，包括类型转换。</li>
+<li><strong>权重顺序</strong>：<code>WEIGHTS</code>顺序需与输入集合顺序严格对应。</li>
+<li><strong>空集合处理</strong>：若输入集合无交集，结果集为空（返回<code>0</code>）。</li>
+<li><strong>性能影响</strong>：大集合交集的CPU和内存消耗较高，建议在低峰期执行。</li>
+</ol>
+<h3><span id="zunionstore">ZUNIONSTORE</span></h3><p>该指令用法和 ZINERSTORE 相同，故不再赘述，下面是使用示例：</p>
+<h4><span id="1-基础并集计算"><strong>1. 基础并集计算</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建两个有序集合</span></span><br><span class="line">ZADD set1 1 &quot;A&quot; 2 &quot;B&quot;</span><br><span class="line">ZADD set2 2 &quot;B&quot; 3 &quot;C&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">计算并集（默认SUM聚合）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(4=2+2), <span class="string">&quot;C&quot;</span>(3)</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-使用权重weights"><strong>2. 使用权重（WEIGHTS）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集合1分数×10，集合2分数×0.5</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 WEIGHTS 10 0.5</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(10=1×10), <span class="string">&quot;B&quot;</span>(21=2×10 + 2×0.5), <span class="string">&quot;C&quot;</span>(1.5=3×0.5)</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-聚合规则aggregate"><strong>3. 聚合规则（AGGREGATE）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MIN聚合（取最小分数）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 AGGREGATE MIN</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(2), <span class="string">&quot;C&quot;</span>(3)</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MAX聚合（取最大分数）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 AGGREGATE MAX</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(2), <span class="string">&quot;C&quot;</span>(3)</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="4-多集合并集"><strong>4. 多集合并集</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">三个集合的并集</span></span><br><span class="line">ZADD set3 4 &quot;B&quot; 5 &quot;D&quot;</span><br><span class="line">ZUNIONSTORE result 3 set1 set2 set3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(8=2+2+4), <span class="string">&quot;C&quot;</span>(3), <span class="string">&quot;D&quot;</span>(5)</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-异常处理"><strong>5. 异常处理</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键不存在时</span></span><br><span class="line">ZUNIONSTORE result 1 non_existing_key</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: (<span class="built_in">integer</span>) 0</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键类型错误（非有序集合）</span></span><br><span class="line">SET wrong_type &quot;value&quot;</span><br><span class="line">ZUNIONSTORE result 1 wrong_type</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: (error) WRONGTYPE</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="zset-相关指令汇总表">Zset 相关指令汇总表</span></h2><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>时间复杂度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>基本操作</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZADD key score member [score member ...]</code></td>
+<td>O(k * log(n))</td>
+<td>k是添加&#x2F;更新的成员个数，n是集合当前元素总数</td>
+</tr>
+<tr>
+<td><code>ZCARD key</code></td>
+<td>O(1)</td>
+<td>获取有序集合的基数（成员数量）</td>
+</tr>
+<tr>
+<td><code>ZSCORE key member</code></td>
+<td>O(1)</td>
+<td>获取指定成员的分数值</td>
+</tr>
+<tr>
+<td><strong>排名查询</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZRANK key member</code></td>
+<td>O(log(n))</td>
+<td>获取成员升序排名（从0开始计）</td>
+</tr>
+<tr>
+<td><code>ZREVRANK key member</code></td>
+<td>O(log(n))</td>
+<td>获取成员降序排名</td>
+</tr>
+<tr>
+<td><strong>增删操作</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZREM key member [member ...]</code></td>
+<td>O(k * log(n))</td>
+<td>k是删除的成员个数</td>
+</tr>
+<tr>
+<td><code>ZINCRBY key increment member</code></td>
+<td>O(log(n))</td>
+<td>对成员分数进行增量操作（原子性）</td>
+</tr>
+<tr>
+<td><strong>范围查询</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZRANGE key start end [WITHSCORES]</code></td>
+<td>O(log(n) + k)</td>
+<td>k是返回的成员个数（原图公式顺序有误，已修正）</td>
+</tr>
+<tr>
+<td><code>ZREVRANGE key start end [WITHSCORES]</code></td>
+<td>O(log(n) + k)</td>
+<td>降序版的ZRANGE</td>
+</tr>
+<tr>
+<td><code>ZRANGEBYSCORE key min max [WITHSCORES]</code></td>
+<td>O(log(n) + k)</td>
+<td>按分数区间升序查询</td>
+</tr>
+<tr>
+<td><code>ZREVRANGEBYSCORE key max min [WITHSCORES]</code></td>
+<td>O(log(n) + k)</td>
+<td>按分数区间降序查询</td>
+</tr>
+<tr>
+<td><strong>统计操作</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZCOUNT key min max</code></td>
+<td>O(log(n))</td>
+<td>统计分数区间内的成员数量</td>
+</tr>
+<tr>
+<td><strong>批量删除</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZREMRANGEBYRANK key start end</code></td>
+<td>O(log(n) + k)</td>
+<td>按排名区间删除成员</td>
+</tr>
+<tr>
+<td><code>ZREMRANGEBYSCORE key min max</code></td>
+<td>O(log(n) + k)</td>
+<td>按分数区间删除成员</td>
+</tr>
+<tr>
+<td><strong>集合运算</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ZINTERSTORE dest numkeys key [key ...]</code></td>
+<td>O(n<em>k) + O(m</em>log(m))</td>
+<td>n是最小输入集合大小，k是集合数，m是结果集大小</td>
+</tr>
+<tr>
+<td><code>ZUNIONSTORE dest numkeys key [key ...]</code></td>
+<td>O(n) + O(m*log(m))</td>
+<td>n是输入集合总大小，m是结果集大小</td>
+</tr>
+</tbody></table>
+<h2><span id="内部编码">内部编码</span></h2><p>以下是整理后的Markdown格式内容：</p>
+<p>有序集合类型的内部编码有两种：</p>
+<h4><span id="1-ziplist压缩列表">1. ziplist（压缩列表）</span></h4><ul>
+<li><strong>使用条件</strong>：<ul>
+<li>元素个数 &lt; <code>zset-max-ziplist-entries</code>（默认128）</li>
+<li>每个元素值大小 &lt; <code>zset-max-ziplist-value</code>（默认64字节）</li>
+</ul>
+</li>
+<li><strong>优势</strong>：有效减少内存使用</li>
+<li><strong>示例</strong>：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 e1 60 e2 30 e3</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;ziplist&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-skiplist跳表">2. skiplist（跳表）</span></h4><ul>
+<li><strong>使用条件</strong>：当不满足ziplist条件时自动切换</li>
+<li><strong>原因</strong>：元素过多或过大时，ziplist操作效率会下降</li>
+<li><strong>示例1（元素数量超过限制）</strong>：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 e1 60 e2 30 e3 ... e129</span><br><span class="line">(integer) 129</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;skiplist&quot;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>示例2（元素大小超过限制）</strong>：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 &quot;超长字符串...(超过64字节)...&quot;</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;skiplist&quot;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="配置参数">配置参数</span></h4><table>
+<thead>
+<tr>
+<th>参数名</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>zset-max-ziplist-entries</code></td>
+<td>128</td>
+<td>使用ziplist的最大元素个数</td>
+</tr>
+<tr>
+<td><code>zset-max-ziplist-value</code></td>
+<td>64</td>
+<td>使用ziplist的单个元素最大字节数</td>
+</tr>
+</tbody></table>
+<h2><span id="应用场景">应用场景</span></h2><h3><span id="1-实时排行榜系统">1. 实时排行榜系统</span></h3><h4><span id="游戏积分排行榜">游戏积分排行榜</span></h4><ul>
+<li>使用 <code>ZADD</code> 添加玩家分数</li>
+<li><code>ZREVRANGE</code> 获取前N名玩家</li>
+<li><code>ZINCRBY</code> 实时更新玩家分数</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD game_leaderboard 1500 &quot;player1&quot; 2000 &quot;player2&quot; 1800 &quot;player3&quot;</span><br><span class="line">ZREVRANGE game_leaderboard 0 9 WITHSCORES  # 获取TOP10</span><br><span class="line">ZINCRBY game_leaderboard 50 &quot;player1&quot;      # 玩家1增加50分</span><br></pre></td></tr></table></figure>
+
+<h4><span id="微博热搜榜">微博热搜榜</span></h4><ul>
+<li>使用 <code>ZINCRBY</code> 增加话题热度</li>
+<li><code>ZREVRANGE</code> 获取实时热搜</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZINCRBY weibo_trending 1000000 &quot;#世界杯决赛#&quot;</span><br><span class="line">ZINCRBY weibo_trending 500000 &quot;#元旦假期安排#&quot;</span><br><span class="line">ZREVRANGE weibo_trending 0 4 WITHSCORES  # 获取TOP5热搜</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-延迟队列系统">2. 延迟队列系统</span></h3><h4><span id="订单超时处理">订单超时处理</span></h4><ul>
+<li>使用分数存储执行时间戳</li>
+<li>定时任务获取到期订单</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD delay_queue 1672531200 &quot;order_123&quot;  # 2023-01-01 00:00:00执行</span><br><span class="line">ZRANGEBYSCORE delay_queue 0 1672531200  # 获取到期订单</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-滑动窗口限流">3. 滑动窗口限流</span></h3><h4><span id="api访问频率控制">API访问频率控制</span></h4><ul>
+<li>使用时间戳作为分数</li>
+<li>统计窗口内请求数</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ZADD api_limit 1672500000 &quot;req_1&quot;</span><br><span class="line">ZADD api_limit 1672500001 &quot;req_2&quot;</span><br><span class="line">ZREMRANGEBYSCORE api_limit 0 1672500000  # 清理1秒前的请求</span><br><span class="line">ZCARD api_limit                          # 获取当前秒内请求数</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-带权重的投票系统">4. 带权重的投票系统</span></h3><h4><span id="热门内容评选">热门内容评选</span></h4><ul>
+<li>不同用户投票权重不同</li>
+<li>实时计算内容得分</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD content_votes 5 &quot;article_123&quot;  # 初始5票</span><br><span class="line">ZINCRBY content_votes 2 &quot;article_123&quot;  # VIP用户投票权重为2</span><br><span class="line">ZREVRANGE content_votes 0 9 WITHSCORES  # 获取TOP10内容</span><br></pre></td></tr></table></figure>
+
+<h3><span id="5-时间线排序">5. 时间线排序</span></h3><h4><span id="朋友圈动态">朋友圈动态</span></h4><ul>
+<li>使用发布时间戳作为分数</li>
+<li>获取最新动态</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD friend_timeline 1672500000 &quot;post_123&quot;  # 发布动态</span><br><span class="line">ZREVRANGE friend_timeline 0 19  # 获取最新20条动态</span><br></pre></td></tr></table></figure>
+
+<h3><span id="6-多维度排序">6. 多维度排序</span></h3><h4><span id="商品综合排序">商品综合排序</span></h4><ul>
+<li>使用加权分数计算综合评分</li>
+<li>销量、好评率、价格等多维度</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD product_rank 85 &quot;product_123&quot;  # 初始综合分85</span><br><span class="line">ZINCRBY product_rank 5 &quot;product_123&quot;  # 销量增加提升排名</span><br></pre></td></tr></table></figure>
+
+<h3><span id="7-实时竞赛系统">7. 实时竞赛系统</span></h3><h4><span id="在线编程比赛">在线编程比赛</span></h4><ul>
+<li>实时更新选手得分</li>
+<li>获取实时排名</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD coding_contest 3 &quot;user_123&quot;  # 3道题正确</span><br><span class="line">ZINCRBY coding_contest 1 &quot;user_123&quot;  # 又解决1题</span><br><span class="line">ZREVRANK coding_contest &quot;user_123&quot;  # 获取用户排名</span><br></pre></td></tr></table></figure>
+
+<h3><span id="8-热点数据缓存">8. 热点数据缓存</span></h3><h4><span id="新闻点击排行">新闻点击排行</span></h4><ul>
+<li>记录点击事件</li>
+<li>实时统计热点</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD news_clicks 1500 &quot;news_123&quot;  # 初始点击量</span><br><span class="line">ZINCRBY news_clicks 1 &quot;news_123&quot;  # 用户点击+1</span><br><span class="line">ZREVRANGE news_clicks 0 9  # 获取TOP10热点新闻</span><br></pre></td></tr></table></figure>
+
+<p>ZSet的这些特性使其成为处理需要实时排序和加权计算场景的理想选择，性能优异且实现简洁。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
