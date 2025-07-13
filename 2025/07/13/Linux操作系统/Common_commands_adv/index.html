@@ -10,11 +10,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="上一节命令讲解跳转：Linux 最基础的命令
-接下来要讲解的命令都和上一节的 cat 命令息息相关
-echo该命令主要用于在终端输出文本或变量的值
-下面是 echo 的基础用法示例：
-123456╭,"> 
+    <meta name="description" content="
+
+
+echo
+-n
+-e
+
+
+Linux 重定向详解（结合 echo 和 cat 实践）
+一、重定向基础概念
+二、输出重定向（&amp;gt; 和 &amp;gt;&amp;gt;）
+三、输入重定向（&amp;lt; 和 &amp;lt,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -25,11 +32,18 @@ echo该命令主要用于在终端输出文本或变量的值
     
     <meta name="twitter:card" content="summary"/>
     <meta name="twitter:title" content="Linux 其他基础命令 - 刘家炫的博客"/>
-    <meta name="twitter:description" content="上一节命令讲解跳转：Linux 最基础的命令
-接下来要讲解的命令都和上一节的 cat 命令息息相关
-echo该命令主要用于在终端输出文本或变量的值
-下面是 echo 的基础用法示例：
-123456╭,"/>
+    <meta name="twitter:description" content="
+
+
+echo
+-n
+-e
+
+
+Linux 重定向详解（结合 echo 和 cat 实践）
+一、重定向基础概念
+二、输出重定向（&amp;gt; 和 &amp;gt;&amp;gt;）
+三、输入重定向（&amp;lt; 和 &amp;lt,"/>
     
     
     
@@ -37,11 +51,18 @@ echo该命令主要用于在终端输出文本或变量的值
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
     <meta property="og:title" content="Linux 其他基础命令 - 刘家炫的博客"/>
-    <meta property="og:description" content="上一节命令讲解跳转：Linux 最基础的命令
-接下来要讲解的命令都和上一节的 cat 命令息息相关
-echo该命令主要用于在终端输出文本或变量的值
-下面是 echo 的基础用法示例：
-123456╭,"/>
+    <meta property="og:description" content="
+
+
+echo
+-n
+-e
+
+
+Linux 重定向详解（结合 echo 和 cat 实践）
+一、重定向基础概念
+二、输出重定向（&amp;gt; 和 &amp;gt;&amp;gt;）
+三、输入重定向（&amp;lt; 和 &amp;lt,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -212,7 +233,45 @@ echo该命令主要用于在终端输出文本或变量的值
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <p>上一节命令讲解跳转：<a href="https://liujiaxuan69.github.io/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_basic/" title="跳转到上一节">Linux 最基础的命令</a></p>
+            <!-- toc -->
+
+<ul>
+<li><a href="#echo">echo</a><ul>
+<li><a href="#-n">-n</a></li>
+<li><a href="#-e">-e</a></li>
+</ul>
+</li>
+<li><a href="#linux-%E9%87%8D%E5%AE%9A%E5%90%91%E8%AF%A6%E8%A7%A3%E7%BB%93%E5%90%88-echo-%E5%92%8C-cat-%E5%AE%9E%E8%B7%B5"><strong>Linux 重定向详解（结合 echo 和 cat 实践）</strong></a><ul>
+<li><a href="#%E4%B8%80-%E9%87%8D%E5%AE%9A%E5%90%91%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5">一、重定向基础概念</a></li>
+<li><a href="#%E4%BA%8C-%E8%BE%93%E5%87%BA%E9%87%8D%E5%AE%9A%E5%90%91-%E5%92%8C">二、输出重定向（&gt; 和 &gt;&gt;）</a></li>
+<li><a href="#%E4%B8%89-%E8%BE%93%E5%85%A5%E9%87%8D%E5%AE%9A%E5%90%91-%E5%92%8C">三、输入重定向（&lt; 和 &lt;&lt;）</a></li>
+<li><a href="#%E5%9B%9B-%E9%94%99%E8%AF%AF%E9%87%8D%E5%AE%9A%E5%90%912-%E5%92%8C-2">四、错误重定向（2&gt; 和 2&gt;&gt;）</a></li>
+<li><a href="#%E4%BA%94-%E7%BB%BC%E5%90%88%E5%AE%9E%E8%B7%B5%E6%A1%88%E4%BE%8B">五、综合实践案例</a></li>
+</ul>
+</li>
+<li><a href="#more">more</a><ul>
+<li><a href="#%E4%B8%80-%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><strong>一、基本用法</strong></a></li>
+<li><a href="#%E4%BA%8C-%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD%E7%89%B9%E7%82%B9"><strong>二、核心功能特点</strong></a></li>
+<li><a href="#%E4%B8%89-%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C%E6%8C%87%E4%BB%A4"><strong>三、常用操作指令</strong></a></li>
+<li><a href="#%E5%9B%9B-%E4%B8%8E-less-%E5%91%BD%E4%BB%A4%E7%9A%84%E5%AF%B9%E6%AF%94"><strong>四、与 <code>less</code> 命令的对比</strong></a></li>
+<li><a href="#%E4%BA%94-%E5%AE%9E%E7%94%A8%E6%8A%80%E5%B7%A7%E7%A4%BA%E4%BE%8B"><strong>五、实用技巧示例</strong></a></li>
+</ul>
+</li>
+<li><a href="#linux-less-%E5%91%BD%E4%BB%A4%E8%AE%B2%E8%A7%A3">Linux <code>less</code> 命令讲解</a><ul>
+<li><a href="#%E4%B8%80-%E6%A0%B8%E5%BF%83%E4%BC%98%E5%8A%BF"><strong>一、核心优势</strong></a></li>
+<li><a href="#%E4%BA%8C-%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><strong>二、基本用法</strong></a></li>
+<li><a href="#%E4%B8%89-%E5%AF%BC%E8%88%AA%E5%91%BD%E4%BB%A4%E5%A4%A7%E5%85%A8"><strong>三、导航命令大全</strong></a></li>
+<li><a href="#%E5%9B%9B-%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD%E8%AF%A6%E8%A7%A3"><strong>四、搜索功能详解</strong></a></li>
+<li><a href="#%E4%BA%94-%E5%AE%9E%E7%94%A8%E5%8A%9F%E8%83%BD%E6%8A%80%E5%B7%A7"><strong>五、实用功能技巧</strong></a></li>
+</ul>
+</li>
+<li><a href="#head-%E4%BB%A5%E5%8F%8A-tail-%E6%8C%87%E4%BB%A4">head 以及 tail 指令</a></li>
+<li><a href="#find">find</a></li>
+<li><a href="#grep">grep</a></li>
+</ul>
+<!-- tocstop -->
+
+<p>上一节命令讲解跳转：<a href="https://liujiaxuan69.github.io/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_basic/" title="跳转到上一节">Linux 最基础的命令</a></p>
 <p>接下来要讲解的命令都和上一节的 cat 命令息息相关</p>
 <h2><span id="echo">echo</span></h2><p>该命令主要用于在终端输出文本或变量的值</p>
 <p>下面是 echo 的基础用法示例：</p>
