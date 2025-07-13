@@ -1,0 +1,1288 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 权限管理 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+权限理解前置知识
+su 指令切换用户身份
+Linux 用户创建
+sudo 命令
+
+
+Linux 权限理解
+chmod
+rwx 对于普通文件的含义
+rwx 对于目录文件的含义
+粘滞位
+权限掩码
+,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 权限管理 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+权限理解前置知识
+su 指令切换用户身份
+Linux 用户创建
+sudo 命令
+
+
+Linux 权限理解
+chmod
+rwx 对于普通文件的含义
+rwx 对于目录文件的含义
+粘滞位
+权限掩码
+,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 权限管理 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+权限理解前置知识
+su 指令切换用户身份
+Linux 用户创建
+sudo 命令
+
+
+Linux 权限理解
+chmod
+rwx 对于普通文件的含义
+rwx 对于目录文件的含义
+粘滞位
+权限掩码
+,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 权限管理</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 权限管理</h1>
+        <div class="stuff">
+            <span>七月 13, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%9F%BA%E7%A1%80/" rel="tag">基础</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%8C%87%E4%BB%A4/" rel="tag">指令</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E6%9D%83%E9%99%90%E7%90%86%E8%A7%A3%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86">权限理解前置知识</a><ul>
+<li><a href="#su-%E6%8C%87%E4%BB%A4%E5%88%87%E6%8D%A2%E7%94%A8%E6%88%B7%E8%BA%AB%E4%BB%BD">su 指令切换用户身份</a></li>
+<li><a href="#linux-%E7%94%A8%E6%88%B7%E5%88%9B%E5%BB%BA">Linux 用户创建</a></li>
+<li><a href="#sudo-%E5%91%BD%E4%BB%A4">sudo 命令</a></li>
+</ul>
+</li>
+<li><a href="#linux-%E6%9D%83%E9%99%90%E7%90%86%E8%A7%A3">Linux 权限理解</a><ul>
+<li><a href="#chmod">chmod</a></li>
+<li><a href="#rwx-%E5%AF%B9%E4%BA%8E%E6%99%AE%E9%80%9A%E6%96%87%E4%BB%B6%E7%9A%84%E5%90%AB%E4%B9%89">rwx 对于普通文件的含义</a></li>
+<li><a href="#rwx-%E5%AF%B9%E4%BA%8E%E7%9B%AE%E5%BD%95%E6%96%87%E4%BB%B6%E7%9A%84%E5%90%AB%E4%B9%89">rwx 对于目录文件的含义</a></li>
+<li><a href="#%E7%B2%98%E6%BB%9E%E4%BD%8D">粘滞位</a></li>
+<li><a href="#%E6%9D%83%E9%99%90%E6%8E%A9%E7%A0%81">权限掩码</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<p>在 Linux 中，用户一般分为两大类，一类是超级管理员，即 root 用户（对标 windows 中的 管理员），另一类则是普通用户</p>
+<ul>
+<li>root 用户：除了一些系统级别的权限，谁都拦不住它，后面我将要讲到的权限，你会发现没有一个能管得住 root，正所谓规矩是 root 定的，那自然规矩是拦不住 root 的</li>
+<li>普通用户：如果 root 是掌权者的话，那普通用户就是百姓了，一切的权限都是对普通用户的管理</li>
+</ul>
+<p>在讲解权限之前，先要讲几个小小的知识点：</p>
+<h2><span id="权限理解前置知识">权限理解前置知识</span></h2><h3><span id="su-指令切换用户身份">su 指令切换用户身份</span></h3><p>su 指令是用于切换当前用户身份的，具体如下：</p>
+<table>
+<thead>
+<tr>
+<th>指令形式</th>
+<th>指令说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>su</td>
+<td>切换到超级管理员（root）</td>
+</tr>
+<tr>
+<td>su xxx</td>
+<td>切换到 xxx 用户身份（也可以是root用户）</td>
+</tr>
+</tbody></table>
+<hr>
+<p>示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">需要密码验证</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  su</span><br><span class="line">Password:</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不需要密码验证</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/linux_review/lesson1/dir1] - [630]</span><br><span class="line">└─[$] su ljx                                                                                                 [14:27:47]</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤</span><br></pre></td></tr></table></figure>
+
+<p>切换用户是需要密码的，在 Linux 当中，所有的用户都需要有密码，通过这个示例我们可以看到，普通用户切换身份的时候是需要输入密码的，但是<br>正如我前面所说，root 想要切换用户谁也拦不住，因此不需要输入密码就直接切换了</p>
+<h3><span id="linux-用户创建">Linux 用户创建</span></h3><p>创建用户非常简单，系统默认的用户创建命令用起来非常不爽，因此他需要你手动创建用户然后手动设置密码，且有一些必要的工作也得自己后期去处理，<br>下面以 debian&#x2F;ubuntu 系统为例，使用这俩系统自带的用户创建命令来创建一个新的用户：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">adduser [用户名]</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [~] - [660]</span><br><span class="line">└─[$] adduser liangfei                                                                                       [14:49:22]</span><br><span class="line">Adding user `liangfei&#x27; ...</span><br><span class="line">Adding new group `liangfei&#x27; (1006) ...</span><br><span class="line">Adding new user `liangfei&#x27; (1006) with group `liangfei (1006)&#x27; ...</span><br><span class="line">Creating home directory `/home/liangfei&#x27; ...</span><br><span class="line">Copying files from `/etc/skel&#x27; ...</span><br><span class="line">New password:</span><br><span class="line">Retype new password:</span><br><span class="line">passwd: password updated successfully</span><br><span class="line">Changing the user information for liangfei</span><br><span class="line">Enter the new value, or press ENTER for the default</span><br><span class="line">        Full Name []:</span><br><span class="line">        Room Number []:</span><br><span class="line">        Work Phone []:</span><br><span class="line">        Home Phone []:</span><br><span class="line">        Other []:</span><br><span class="line">Is the information correct? [Y/n] y</span><br><span class="line">Adding new user `liangfei&#x27; to supplemental / extra groups `users&#x27; ...</span><br><span class="line">Adding user `liangfei&#x27; to group `users&#x27; ...</span><br></pre></td></tr></table></figure>
+
+<p>adduser 命令采用交互式的方式一步步创建用户信息，用起来非常的方便，把这条命令输入进去后根据他的提示一步步操作即可</p>
+<p>对应的，删除用户可以使用 deluser 来完成，但需要注意的是，adduser 指令和 deluser 指令都需要 root 用户来操作，普通用户是操作不了的</p>
+<h3><span id="sudo-命令">sudo 命令</span></h3><p>有人可能就会问了，真的只能有 root 用户有这么强大的实力吗，其他普通用户有时候也需要拥有像 root 这样强大的能力，怎么办呢</p>
+<p>这里就需要讲到一个新的命令 sudo：</p>
+<p>有些命令对于普通用户来说会受到权限的约束，但我们有的时候确实需要访问这个权限怎么办呢？那就在你想要操作的命令最前面加上 sudo，在进行用户身份验证后（输入密码）<br>就可以使用该命令了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">我现在是一个普通用户，但我想删除刚刚我创建的这个用户，直接使用该指令删除会发现命令行提示只有 root 用户才具备此权限</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  deluser liangfei                                                                                               1 ↵</span><br><span class="line">deluser: Only root may remove a user or group from the system.</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">那么我们在该命令前面添加上 <span class="built_in">sudo</span> 选项，然后验证本人是 ljx 就可以使用该命令了</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  sudo deluser liangfei                                                                                          1 ↵</span><br><span class="line">[sudo] password for ljx:</span><br><span class="line">Removing crontab ...</span><br><span class="line">Removing user `liangfei&#x27; ...</span><br><span class="line">Done.</span><br></pre></td></tr></table></figure>
+
+<p>当然，sudo 指令的使用是得进过 root 同意的，只有 root 用户才可以给予用户 sudo 的使用权限</p>
+<p>下面我们利用创建好的 liangfei 来举例：</p>
+<p>普通的 liangfei 是无法直接使用 sudo 指令的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">liangfei@VM-16-15-debian:/home/ljx/linux_review/lesson1/dir1$ sudo su root</span><br><span class="line">[sudo] password for liangfei:</span><br><span class="line">liangfei is not in the sudoers file.</span><br></pre></td></tr></table></figure>
+
+<p>此时 root 通过修改文件的白名单将 liangfei 加入到 sudoer 组里面去 ，使得 liangfei 也具有使用 sudo 的权限：</p>
+<p>我们在&#x2F;etc&#x2F;sudoers 文件中加入如下语句</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">liangfei ALL=(ALL:ALL) ALL</span><br></pre></td></tr></table></figure>
+
+<p>保存并退出，会发现 liangfei 也可以使用 sudo 指令了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">liangfei@VM-16-15-debian:/etc$ sudo whoami</span><br><span class="line">root</span><br><span class="line">liangfei@VM-16-15-debian:/etc$ sudo su root</span><br><span class="line">┌─[root@VM-16-15-debian] - [/etc] - [735]</span><br><span class="line">└─[$]      </span><br></pre></td></tr></table></figure>
+
+<h2><span id="linux-权限理解">Linux 权限理解</span></h2><p>下面正式开始讲解 Linux 的权限：</p>
+<p>我们打开一个文件，通过 ll 指令查看文件的详细信息，会看到：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br></pre></td></tr></table></figure>
+
+<p>一共有三行信息，每一行都表示一个文件的各种属性，下面这张图是对每行属性的表述</p>
+<p><img src="/img/Linux/authority/authority.png" alt="authority"></p>
+<p>从右往左看，最右边的是文件名，其次是文件本创建或者修改的日期，再接着就是文件所消耗的内存大小，因此，我们需要讨论的是左边类似于 “drwxr-xr-x 2 ljx ljx” 这样<br>的信息</p>
+<p>首先，最左边的符号表示的是文件类型，d 表示目录文件，- 表示普通文件，目前暂时只需要了解这两个，在 Linux 中，系统是不认文件后缀的，系统只认文件信息最前面的这个文件标识，<br>因此，不能以 windows 的视角来看待 Linxu 中的文件，windows 中确实是通过文件后缀来分辨文件类型的，但 Linux 并非如此</p>
+<p>文件类型右边的东西就是我们要重点讨论的权限了，我们选取 dir 中的权限标志，截取出来后是这样的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rwxr-xr-x</span><br></pre></td></tr></table></figure>
+
+<p>让我们对这个标志三个一看：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rwx r-x r-x</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，这个权限标识是对三类用户进行约束的，第一个是对文件所有者的约束，第二个是对文件所属用户组的约束，第三个是对其他用户的约束（既不属于<br>文件所有者也不属于文件所属用户组）</p>
+<p>而右边的两个名字(ljx ljx)则表示的是文件所有者和文件所属用户组分别是谁,可以看到，默认每个文件的所有者和所属用户组均为文件创建者本身</p>
+<p>rwx 中的三个标识分别表示 read、write、execute，表示是否可读、可写、可操作，字母显示则表示对应权限有效，若为-则表示对应权限无效</p>
+<p>就拿上面这个权限标识（rwx r-x r-x）做比方，表示的是拥有者（rwx）可读可写可操作该文件，用户组和其他用户（r-x）可读，可操作，但是不能写，因为写位置对应的是-，而不是w</p>
+<p>权限是可以通过 chmod 指令来修改的，下面我们将隆重介绍一下 chmod 指令：</p>
+<h3><span id="chmod">chmod</span></h3><p>首先讲解一下文件权限的两种表示方法</p>
+<h4><span id="文件权限值的表示方法">文件权限值的表示方法</span></h4><h5><span id="a-字符表示方法">a) 字符表示方法</span></h5><table>
+<thead>
+<tr>
+<th>Linux表示</th>
+<th>说明</th>
+<th>Linux表示</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>r–</td>
+<td>只读</td>
+<td>-w-</td>
+<td>仅可写</td>
+</tr>
+<tr>
+<td>–x</td>
+<td>仅可执行</td>
+<td>rw-</td>
+<td>可读可写</td>
+</tr>
+<tr>
+<td>-wx</td>
+<td>可写和可执行</td>
+<td>r-x</td>
+<td>可读可执行</td>
+</tr>
+<tr>
+<td>rwx</td>
+<td>可读可写可执行</td>
+<td>—</td>
+<td>无权限</td>
+</tr>
+</tbody></table>
+<h5><span id="b-8进制数值表示方法">b) 8进制数值表示方法</span></h5><table>
+<thead>
+<tr>
+<th>权限符号（读写执行）</th>
+<th>八进制</th>
+<th>二进制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>r</td>
+<td>4</td>
+<td>100</td>
+</tr>
+<tr>
+<td>w</td>
+<td>2</td>
+<td>010</td>
+</tr>
+<tr>
+<td>x</td>
+<td>1</td>
+<td>001</td>
+</tr>
+<tr>
+<td>rw</td>
+<td>6</td>
+<td>110</td>
+</tr>
+<tr>
+<td>rx</td>
+<td>5</td>
+<td>101</td>
+</tr>
+<tr>
+<td>wx</td>
+<td>3</td>
+<td>011</td>
+</tr>
+<tr>
+<td>rwx</td>
+<td>7</td>
+<td>111</td>
+</tr>
+<tr>
+<td>—</td>
+<td>0</td>
+<td>000</td>
+</tr>
+</tbody></table>
+<p>该指令用于修改用户权限，依照的就是这两种表示方法来修改的，一种是通过对 rwx 三个字母进行加减，另一种则是通过八进制的方式直接修改文件权限属性，<br>只有文件的拥有者和root才可以改变文件的权限</p>
+<p><strong>指令格式</strong>：  </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">`chmod [参数] 权限 文件名` </span><br></pre></td></tr></table></figure>
+
+<p>下面是对 chmod 命令两种权限值修改方式的说明：</p>
+<h4><span id="chmod命令权限值的格式">chmod命令权限值的格式</span></h4><h5><span id="1-用户表示符x2f-权限字符">① 用户表示符+&#x2F;-权限字符</span></h5><table>
+<thead>
+<tr>
+<th>符号</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>+</code></td>
+<td>向权限范围增加权限代号所表示的权限</td>
+</tr>
+<tr>
+<td><code>-</code></td>
+<td>向权限范围取消权限代号所表示的权限</td>
+</tr>
+<tr>
+<td><code>=</code></td>
+<td>向权限范围赋予权限代号所表示的权限</td>
+</tr>
+</tbody></table>
+<p><strong>用户符号</strong>：</p>
+<ul>
+<li><code>u</code>：拥有者  </li>
+<li><code>g</code>：拥有者同组用户  </li>
+<li><code>o</code>：其它用户  </li>
+<li><code>a</code>：所有用户</li>
+</ul>
+<hr>
+<p>实例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">给文件拥有者添加写权限</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod u+w dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">取消其他用户的执行权限</span>  </span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod o-x dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-- 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-三位8进制数字表示法">② 三位8进制数字表示法</span></h5><p>使用数字表示权限组合，每位数字分别对应：</p>
+<ul>
+<li><strong>第一位</strong>：所有者（u）权限  </li>
+<li><strong>第二位</strong>：同组用户（g）权限  </li>
+<li><strong>第三位</strong>：其他用户（o）权限</li>
+</ul>
+<p>权限数值对照：  </p>
+<ul>
+<li><code>4</code>：读（r）  </li>
+<li><code>2</code>：写（w）  </li>
+<li><code>1</code>：执行（x）  </li>
+<li>组合权限为数值相加（如 <code>rw-</code> &#x3D; 4+2 &#x3D; <code>6</code>）</li>
+</ul>
+<hr>
+<p>实例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置权限：所有者可读可写（6），同组用户可读可写（6），其他用户仅可读（4）</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod 664 dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">drw-rw-r-- 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置权限：所有者可读可写（6），同组用户可读（4），其他用户无权限（0）</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod 640 dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">drw-r----- 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br></pre></td></tr></table></figure>
+
+<p>下面我们要重点讨论一下这三个标识对于普通文件和目录文件分别表示什么含义:</p>
+<h3><span id="rwx-对于普通文件的含义">rwx 对于普通文件的含义</span></h3><h4><span id="r读权限">r（读权限）</span></h4><p>当用户没有 r 权限时，就无法读取文件内的内容了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过 <span class="built_in">chmod</span> 使得文件所有者失去读权限</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod u-r test.txt        </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查是否失去读权限</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 8</span><br><span class="line">d---r----- 2 ljx ljx 4096 Jul 12 23:27 dir</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 11:11 dir1</span><br><span class="line">--w-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">用户无法读取文件数据了</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">cat: test.txt: Permission denied</span><br></pre></td></tr></table></figure>
+
+<h4><span id="w写权限">w（写权限）</span></h4><p>当用户没有 w 权限时，就无法写入数据到文件中了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod u-w test.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">用户无法写入数据了</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  echo 123 &gt;&gt; test.txt</span><br><span class="line">zsh: permission denied: test.txt</span><br></pre></td></tr></table></figure>
+
+<h4><span id="x操作权限">x（操作权限）</span></h4><p>操作权限在普通文件上一般体现不出来，我们拿可执行程序来看：</p>
+<p>可执行程序被编译出来后默认是由执行权限的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">test.o 文件为可执行程序</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 196</span><br><span class="line">-rw-r--r-- 1 ljx ljx     94 Jul 13 10:44 error.log</span><br><span class="line">-rw-r--r-- 1 ljx ljx    102 Jul 12 22:16 test.cc</span><br><span class="line">-rwxr-xr-x 1 ljx ljx  16544 Jul 13 17:02 test.o</span><br><span class="line">-rw-r--r-- 1 ljx ljx 168894 Jul 13 11:11 test.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">此时可以正常运行该程序</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./test.o</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们尝试关闭该可执行程序的操作权限：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  chmod u-x test.o</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./test.o</span><br><span class="line">zsh: permission denied: ./test.o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，没有执行权限后是无法执行该可执行程序的</p>
+<h3><span id="rwx-对于目录文件的含义">rwx 对于目录文件的含义</span></h3><p>这里我们又要提到一个非常经典的语句：Linux 中一切皆文件，因此 rwx 对于目录文件真正作用的是目录文件的内部数据</p>
+<h4><span id="r读权限">r（读权限）</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod u-r dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ll dir</span><br><span class="line">ls: cannot open directory &#x27;dir&#x27;: Permission denied</span><br></pre></td></tr></table></figure>
+
+<p>没有读权限，我们就无法通过 ll 指令读取目录中的具体数据了</p>
+<h4><span id="w写权限">w（写权限）</span></h4><p>没有写权限，我们就无法在文件中创建任何文件了，因为创建文件本质是往目录文件中写入数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cd dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  mkdir dir1                                                                                                     2 ↵</span><br><span class="line">mkdir: cannot create directory ‘dir1’: Permission denied</span><br></pre></td></tr></table></figure>
+
+<h4><span id="x操作权限">x（操作权限）</span></h4><p>没有操作权限，我们就无法进入该文件了，因为进入该文件的过程本质是访问目录文件，属于对目录文件的一种操作</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod u-x dir                                                                                                  1 ↵</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cd dir</span><br><span class="line">cd:cd:1: permission denied: dir</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>现在就有了一个新的问题，我作为非文件拥有者，因为权限设置，虽然我无法修改文件的信息，但我可以删除该文件，<br>这样看来是不是就非常不科学呢？因此我们需要引入一个新的标识叫做粘滞位</p>
+<h3><span id="粘滞位">粘滞位</span></h3><p>粘滞位是对目录文件属性的一种修改，当目录文件被加上粘滞位时，目录文件中的任何文件删除的权限就都属于该文件的创建者或者 root 了，<br>粘滞位添加方式如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  chmod +t dir1</span><br></pre></td></tr></table></figure>
+
+<p>最后我们再就可以理解为什么 Linux 中的家目录下属于每个人的目录只有自己和 root 可以进去，而其他人是没有访问权限了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian /home</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 20</span><br><span class="line">drwx------ 12 coconut    coconut    4096 Apr 19 12:26 coconut</span><br><span class="line">drwx------  2       1006       1006 4096 Jul 13 15:31 liangfei</span><br><span class="line">drwxr-xr-x  2 lighthouse lighthouse 4096 Sep 14  2024 lighthouse</span><br><span class="line">drwx------ 29 ljx        ljx        4096 Jul 13 17:19 ljx</span><br><span class="line">drwx------  7 zhang      zhang      4096 Nov  5  2024 zhang</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，home 下的每个目录文件操作权限只属于文件拥有者，因此其他人是无法进入该文件的</p>
+<h3><span id="权限掩码">权限掩码</span></h3><p>当我们创建普通文件的时候默认权限是666，而创建一个目录文件的时候默认权限是777，这是因为普通文件一般不需要操作权限（可执行程序除外），<br>而目录文件如果不给操作权限用户连进去都不可以，所以目录文件默认权限是666，但是我们会发现，我们创建普通文件和目录文件默认的权限并不是666和777：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 4</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 13 17:25 dir</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 13 17:25 test.cc</span><br></pre></td></tr></table></figure>
+
+<p>为什么它们的文件用户组和其他用户都失去了读权限？这就涉及到了权限掩码：</p>
+<p>我们可以查看到我们的权限掩码是多少：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  umask</span><br><span class="line">022</span><br></pre></td></tr></table></figure>
+
+<p>可以看到我们的权限掩码是 022，即000 010 010，可以看到，被屏蔽的两个读权限在权限掩码上正好对应<br>的是1，因此权限掩码的作用是使得自己所对应二进制位上为1的地方所对应权限被ban掉，如果我们想给<br>文件的用户组默认拥有读权限，可以通过修改umask为002来实现：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改掩码为 002</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  umask 002</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  touch test.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  mkdir dir</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">用户组默认拥有了读权限</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 4</span><br><span class="line">drwxrwxr-x 2 ljx ljx 4096 Jul 13 17:30 dir</span><br><span class="line">-rw-rw-r-- 1 ljx ljx    0 Jul 13 17:30 test.cc</span><br></pre></td></tr></table></figure>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
