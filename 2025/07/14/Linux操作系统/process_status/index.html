@@ -1,0 +1,1161 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 进程状态及优先级 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+进程状态
+运行状态 R
+休眠状态 S
+深度休眠状态 D
+暂停状态 T
+死亡状态 X
+僵尸状态 Z
+孤儿进程
+
+
+进程优先级
+
+
+
+进程状态进程在操作系统中是以双链表的方式连接起来的，而操作系统,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 进程状态及优先级 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+进程状态
+运行状态 R
+休眠状态 S
+深度休眠状态 D
+暂停状态 T
+死亡状态 X
+僵尸状态 Z
+孤儿进程
+
+
+进程优先级
+
+
+
+进程状态进程在操作系统中是以双链表的方式连接起来的，而操作系统,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 进程状态及优先级 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+进程状态
+运行状态 R
+休眠状态 S
+深度休眠状态 D
+暂停状态 T
+死亡状态 X
+僵尸状态 Z
+孤儿进程
+
+
+进程优先级
+
+
+
+进程状态进程在操作系统中是以双链表的方式连接起来的，而操作系统,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 进程状态及优先级</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 进程状态及优先级</h1>
+        <div class="stuff">
+            <span>七月 14, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%8A%B6%E6%80%81/" rel="tag">状态</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E8%BF%9B%E7%A8%8B%E7%8A%B6%E6%80%81">进程状态</a><ul>
+<li><a href="#%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81-r">运行状态 R</a></li>
+<li><a href="#%E4%BC%91%E7%9C%A0%E7%8A%B6%E6%80%81-s">休眠状态 S</a></li>
+<li><a href="#%E6%B7%B1%E5%BA%A6%E4%BC%91%E7%9C%A0%E7%8A%B6%E6%80%81-d">深度休眠状态 D</a></li>
+<li><a href="#%E6%9A%82%E5%81%9C%E7%8A%B6%E6%80%81-t">暂停状态 T</a></li>
+<li><a href="#%E6%AD%BB%E4%BA%A1%E7%8A%B6%E6%80%81-x">死亡状态 X</a></li>
+<li><a href="#%E5%83%B5%E5%B0%B8%E7%8A%B6%E6%80%81-z">僵尸状态 Z</a></li>
+<li><a href="#%E5%AD%A4%E5%84%BF%E8%BF%9B%E7%A8%8B">孤儿进程</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%9B%E7%A8%8B%E4%BC%98%E5%85%88%E7%BA%A7">进程优先级</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="进程状态">进程状态</span></h2><p>进程在操作系统中是以双链表的方式连接起来的，而操作系统管理进程本质上是对双链表的增删查改，因此，进程的状态也是由操作系统管理起来的，在操作系统中，<br>进程的状态转化图如下所示：</p>
+<p><img src="/img/Linux/process_status/status.png" alt="status"></p>
+<p>这个是在操作系统学科的教材里面对操作系统内进程状态的一般解释，下面我们再看看 Linux 中进程状态转化图：</p>
+<p><img src="/img/Linux/process_status/linux_status.png" alt="status"></p>
+<p>哇，这个图看着好复杂，但我想说的是，你完全没必要去理解这玩意，把下面这些搞懂，这张图自然就可以看懂了</p>
+<p>为了更加深入的理解 Linux 中进程状态，我们先看看 Linux 内核中进程状态结构体的定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="type">char</span> * <span class="type">const</span> task_state_array[] = &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* states in TASK_REPORT: */</span></span><br><span class="line">    <span class="string">&quot;R (running)&quot;</span>,        <span class="comment">/* 0x00 */</span></span><br><span class="line">    <span class="string">&quot;S (sleeping)&quot;</span>,        <span class="comment">/* 0x01 */</span></span><br><span class="line">    <span class="string">&quot;D (disk sleep)&quot;</span>,    <span class="comment">/* 0x02 */</span></span><br><span class="line">    <span class="string">&quot;T (stopped)&quot;</span>,        <span class="comment">/* 0x04 */</span></span><br><span class="line">    <span class="string">&quot;t (tracing stop)&quot;</span>,    <span class="comment">/* 0x08 */</span></span><br><span class="line">    <span class="string">&quot;X (dead)&quot;</span>,        <span class="comment">/* 0x10 */</span></span><br><span class="line">    <span class="string">&quot;Z (zombie)&quot;</span>,        <span class="comment">/* 0x20 */</span></span><br><span class="line">    <span class="string">&quot;P (parked)&quot;</span>,        <span class="comment">/* 0x40 */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/* states beyond TASK_REPORT: */</span></span><br><span class="line">    <span class="string">&quot;I (idle)&quot;</span>,        <span class="comment">/* 0x80 */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th><strong>状态标志</strong></th>
+<th><strong>十六进制值</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&quot;R (running)&quot;</code></td>
+<td><code>0x00</code></td>
+<td><strong>运行中</strong> 或 <strong>可运行</strong>：进程正在 CPU 执行，或在运行队列中等待调度。</td>
+</tr>
+<tr>
+<td><code>&quot;S (sleeping)&quot;</code></td>
+<td><code>0x01</code></td>
+<td><strong>可中断睡眠</strong>：进程在等待事件（如 I&#x2F;O 完成、信号），可被信号唤醒。</td>
+</tr>
+<tr>
+<td><code>&quot;D (disk sleep)&quot;</code></td>
+<td><code>0x02</code></td>
+<td><strong>不可中断睡眠</strong>：进程在等待不可中断的事件（如磁盘 I&#x2F;O），<strong>不会被信号唤醒</strong>。此状态通常由内核关键路径（如文件系统操作）触发，长时间阻塞可能引发系统问题。</td>
+</tr>
+<tr>
+<td><code>&quot;T (stopped)&quot;</code></td>
+<td><code>0x04</code></td>
+<td><strong>暂停状态</strong>：进程被信号（如 <code>SIGSTOP</code>、<code>SIGTSTP</code>）暂停，需 <code>SIGCONT</code> 恢复。</td>
+</tr>
+<tr>
+<td><code>&quot;t (tracing stop)&quot;</code></td>
+<td><code>0x08</code></td>
+<td><strong>跟踪暂停</strong>：进程被调试器（如 <code>gdb</code>）暂停，类似于 <code>T</code> 但专用于调试场景。</td>
+</tr>
+<tr>
+<td><code>&quot;X (dead)&quot;</code></td>
+<td><code>0x10</code></td>
+<td><strong>死亡状态</strong>：进程已终止，等待父进程回收。此状态用户态通常不可见。</td>
+</tr>
+<tr>
+<td><code>&quot;Z (zombie)&quot;</code></td>
+<td><code>0x20</code></td>
+<td><strong>僵尸状态</strong>：进程已退出，但父进程尚未通过 <code>wait()</code> 回收其资源。残留的 <code>task_struct</code> 会占用内核资源，过多僵尸进程可能导致 PID 耗尽。</td>
+</tr>
+<tr>
+<td><code>&quot;P (parked)&quot;</code></td>
+<td><code>0x40</code></td>
+<td><strong>停放状态</strong>：内核线程主动进入休眠，等待被唤醒（如 <code>kthreadd</code> 管理的线程）。</td>
+</tr>
+</tbody></table>
+<p>前面说过，操作系统通过队列的方式来管理进程，而进程又有这么写状态存在，因此在单 CPU 架构当中，CPU 内部会针对各种状态实现一个队列用于管理这些进程</p>
+<h3><span id="运行状态-r">运行状态 R</span></h3><p>好比说，当一个进程被唤醒后处于运行状态时，操作系统和就会把该进程放入运行队列当中，处在运行队列当中的进程的状态是 R 状态，但是这并不意味着这个<br>进程会一直处于运行状态直到运行完，因为一个进程运行的时间是不确定的，要是一直让他运行那你让运行队列中的其他进程怎么想，因此运行队列中的每一个 task_struct 都会<br>对应有一个东西叫做时间片，即每个进程只能运行固定的时间，而后会调用下一个进程，但因为 CPU 运行的速度非常快，所以你很难看出这些进程实际上是串行运行的，他们<br>被放到运行队列中以轮询的方式被均衡调度，所以你会有一种所有进程在并行运行的感觉</p>
+<p>而在多 CPU 的结构里，每个 CPU 会有一个独立的运行队列，而不是使用全局队列，若实例一个全局运行队列就会导致出现 CPU 竞争访问运行队列资源的现象，这是很耗时的，且<br>安全性也会很差，因此不如个每个 CPU 一个运行队列，这样每个 CPU 各管各的进程，就不存在竞争和冲突了</p>
+<p>运行状态如何查看呢？我们当然可以通过 ps 命令查看他：</p>
+<p>我们先跑一个死循环的程序，然后通过 ps 查看他的状态：</p>
+<p>cpp 程序如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) ;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>查看状态如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep run.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1962323 1962323 1961362 pts/4    1962323 R+    1003   0:21 ./run.o</span><br><span class="line">1962368 1962465 1962464 1962368 pts/5    1962464 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv run.o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，run.o 进程处于运行状态（R+），这说明该进程一直都在运行队列上面</p>
+<h3><span id="休眠状态-s">休眠状态 S</span></h3><p>我们对这个代码进行一个小小的改动：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们再查看该进程的状态：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep sleep.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1963227 1963227 1961362 pts/4    1963227 S+    1003   0:00 ./sleep.o</span><br><span class="line">1962368 1963288 1963287 1962368 pts/5    1963287 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv sleep.o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，该进程处于休眠状态，我们再改变一下代码形式：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> a;</span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) <span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;a);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，进程仍然处于休眠状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep sleep.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1963776 1963776 1961362 pts/4    1963776 S+    1003   0:00 ./sleep.o</span><br><span class="line">1962368 1963862 1963861 1962368 pts/5    1963861 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv sleep.o</span><br></pre></td></tr></table></figure>
+
+<p>第一个示例本身调用的就是 sleep 函数，就是让系统将自己休眠，在第二个示例中，scanf 操作属于阻塞操作，进程会等待标准输入输入数据，操作系统会将该进程挂载到<br>阻塞队列当中，在没有被回应前会一直处于休眠状态，而当监测到标准输入时则会被操作系统唤醒，将进程挂载到运行队列当中去</p>
+<h3><span id="深度休眠状态-d">深度休眠状态 D</span></h3><p>你肯定会有疑惑，休眠还不够吗，咋还需要深度休眠？</p>
+<p>我来举个例子吧，假如说一个进程正在执行磁盘写入操作，而写入的过程中操作系统发现 CPU 快要满了，于是就需要杀掉一些睡眠状态的进程，于是就把这个进程给杀掉了，<br>等 CPU 空闲的时候操作系统再回头发现这个进程被杀掉了，这就意味着这一次的磁盘写入操作失效了，假如说这个写入操作是一次银行的交易，那就有可能造成3亿资金的泄露，<br>一切磁盘写入的操作都是不允许丢失的，因此，为了防止 CPU “乱杀无辜”，就有了深度睡眠的概念</p>
+<p>对于一些因执行任务比较重要而不可被杀掉的进程在休眠的时候会给深度休眠的状态，<strong>深度休眠的进程是不可以被杀掉的</strong>，利用这一特性就可以解决这一问题</p>
+<h3><span id="暂停状态-t">暂停状态 T</span></h3><p>该状态一般是通过信号控制的，关于信号的具体使用等等将会在后面讲解，这里我们需要简单了解一下这个状态的意义所在</p>
+<p>举一个很简单的例子，gdb 是一个用来代码调试的工具，他的断点功能是怎么实现的呢？没错，就是通过给执行程序发送暂停信号来控制的，通过给进程发送暂停信号<br>来完成断点就是暂停状态的一个很好的使用案例</p>
+<h3><span id="死亡状态-x">死亡状态 X</span></h3><p>死亡状态（EXIT_DEAD 或 TASK_DEAD） 是进程生命周期中的最终状态，表示进程已完全终止且所有资源（包括 task_struct 结构体）已被内核回收。由于其存在时间极短（通常仅几微秒），普通用户无法直接观察到该状态，这里只需要简单理解一下即可</p>
+<h3><span id="僵尸状态-z">僵尸状态 Z</span></h3><p>僵尸状态指的是一个进程死亡后但还没有被父进程回收时所处的状态，若一个进程长期不被父进程回收就会导致进程长期处于僵尸状态，这种子进程死亡确一直占着内存<br>不放的现象我们称之为<strong>内存泄露</strong>，这种现象是不被允许发生的</p>
+<p>接下来我们制作一个让子进程短时间处于僵尸状态从而让我们可以察觉到的现象：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> ret = fork();</span><br><span class="line">    <span class="comment">// 子进程</span></span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;I am child process.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 休眠5秒</span></span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;I will die.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I will sleep for 10s.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">10</span>);</span><br><span class="line">    <span class="comment">// 回收子进程</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I will recycle the child process.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">waitpid</span>(ret, <span class="literal">nullptr</span>, WNOHANG);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I will exit.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据这个用例，刚开始我们会查看到两个进程都处于休眠状态（sleep 函数占大头），5s 后子进程退出死亡，但父进程此时还没有回收子进程，因此子进程会等待被回收，进入僵尸状态，<br>再过5s，父进程回收掉子进程，就只会看到父进程：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">二者都在休眠状态</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1972423 1972423 1961362 pts/4    1972423 S+    1003   0:00 ./zombie.o</span><br><span class="line">1972423 1972424 1972423 1961362 pts/4    1972423 S+    1003   0:00 ./zombie.o</span><br><span class="line">1962368 1972476 1972475 1962368 pts/5    1972475 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">子进程等待父进程回收自己</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1972423 1972423 1961362 pts/4    1972423 S+    1003   0:00 ./zombie.o</span><br><span class="line">1972423 1972424 1972423 1961362 pts/4    1972423 Z+    1003   0:00 [zombie.o] &lt;defunct&gt;</span><br><span class="line">1962368 1972502 1972501 1962368 pts/5    1972501 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">子进程被回收</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1972423 1972423 1961362 pts/4    1972423 S+    1003   0:00 ./zombie.o</span><br><span class="line">1962368 1972556 1972555 1962368 pts/5    1972555 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">父进程退出</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1962368 1972647 1972646 1962368 pts/5    1972646 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br></pre></td></tr></table></figure>
+
+<h3><span id="孤儿进程">孤儿进程</span></h3><p>进程如果提前退出，那么字进程后退出，进⼊Z之后，就会被1 号进程领养，没错，1 号进程就是操作系统本身，而操作系统会定期回收这些子进程，从而避免了<br>内存泄露等问题</p>
+<p>我们将例子改一下，使得父进程先退出：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> ret = fork();</span><br><span class="line">    <span class="comment">// 子进程</span></span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;I am child process.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;I will sleep for 10s.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">10</span>);</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;I will die.&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I will sleep for 5s.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I will exit.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1961362 1974897 1974897 1961362 pts/4    1974897 S+    1003   0:00 ./zombie.o</span><br><span class="line">1974897 1974898 1974897 1961362 pts/4    1974897 S+    1003   0:00 ./zombie.o</span><br><span class="line">1962368 1974955 1974954 1962368 pts/5    1974954 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">父进程退出，子进程 ppid 变成 1，表示被操作系统领养</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">      1 1974898 1974897 1961362 pts/4    1961362 S     1003   0:00 ./zombie.o</span><br><span class="line">1962368 1975026 1975025 1962368 pts/5    1975025 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">操作系统定期调用 <span class="built_in">wait</span> 函数回收子进程</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ps axj | head -1 &amp;&amp; ps axj | grep zombie.o</span><br><span class="line">   PPID     PID    PGID     SID TTY        TPGID STAT   UID   TIME COMMAND</span><br><span class="line">1962368 1975103 1975102 1962368 pts/5    1975102 S+    1003   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv zombie.o</span><br></pre></td></tr></table></figure>
+
+<h2><span id="进程优先级">进程优先级</span></h2><ul>
+<li><strong>CPU资源分配的先后顺序</strong>，就是指进程的优先权（priority）。  </li>
+<li>优先权高的进程有优先执行权利。配置进程优先权对多任务环境的Linux很有用，可以改善系统性能。  </li>
+<li>还可以把进程运行到指定的CPU上，这样一来，把不重要的进程安排到某个CPU，可以大大改善系统整体性能。</li>
+</ul>
+<p>为了方便看进程的优先级，我们可以利用指令 ps -l 来查看：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</span><br><span class="line">0 S  1003 1962368 1962367  0  80   0 -  2884 sigsus pts/5    00:00:01 zsh</span><br><span class="line">0 R  1003 1976685 1962368  0  80   0 -  2772 -      pts/5    00:00:00 ps</span><br></pre></td></tr></table></figure>
+
+<p>这里涉及到两个新的概念：</p>
+<p>• PRI ：代表这个进程可被执⾏的优先级，其值越⼩越早被执⾏<br>• NI ：代表这个进程的nice值</p>
+<p>优先级越高的进程被调度得就越频繁，高优先级进程就好比 vip 用户，享用的是 vip 专区服务，而低优先级的进程就是普通用户，必须严格遵循排队等待机制</p>
+<p>进程的优先级等于 pri + nice，我们可以通过 top 命令来修改一个进程的 nice 值从而修改一个进程的优先级，需要注意的是<br>输入 nice 值后进程的优先级等于80 + nice 值，比如说，我们修改一个进程的nice值为10：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输入 top 命令，而后输入 r 进入 <span class="built_in">nice</span> 值修改模式，输入当前进程号</span></span><br><span class="line">top - 15:22:09 up 65 days, 35 min,  2 users,  load average: 0.00, 0.03, 0.06</span><br><span class="line">Tasks: 121 total,   1 running, 120 sleeping,   0 stopped,   0 zombie</span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">Cpu(s):100.0 us,  0.0 sy,  0.0 ni,  0.0 <span class="built_in">id</span>,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span> </span><br><span class="line">MiB Mem :   1839.0 total,     72.2 free,   1405.4 used,    536.7 buff/cache     </span><br><span class="line">MiB Swap:   4096.0 total,   3342.4 free,    753.6 used.    433.6 avail Mem </span><br><span class="line">PID to renice [default pid = 1] 1980795</span><br><span class="line">    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND                                                                                                              </span><br><span class="line">      1 root      20   0  168960   9804   7308 S   0.0   0.5   0:58.86 systemd                                                                                                              </span><br><span class="line">      2 root      20   0       0      0      0 S   0.0   0.0   0:01.48 kthreadd                                                                                                             </span><br><span class="line">      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp                                                                                                               </span><br><span class="line">      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_par_gp          </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改优先级为 10</span></span><br><span class="line">top - 15:22:09 up 65 days, 35 min,  2 users,  load average: 0.00, 0.03, 0.06</span><br><span class="line">Tasks: 121 total,   1 running, 120 sleeping,   0 stopped,   0 zombie</span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">Cpu(s):100.0 us,  0.0 sy,  0.0 ni,  0.0 <span class="built_in">id</span>,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st</span> </span><br><span class="line">MiB Mem :   1839.0 total,     72.2 free,   1405.4 used,    536.7 buff/cache     </span><br><span class="line">MiB Swap:   4096.0 total,   3342.4 free,    753.6 used.    433.6 avail Mem </span><br><span class="line">Renice PID 1980795 to value 10</span><br><span class="line">    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND                                                                                                              </span><br><span class="line">      1 root      20   0  168960   9804   7308 S   0.0   0.5   0:58.86 systemd                                                                                                              </span><br><span class="line">      2 root      20   0       0      0      0 S   0.0   0.0   0:01.48 kthreadd                                                                                                             </span><br><span class="line">      3 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 rcu_gp                                                                                                               </span><br><span class="line">      4 root       0 -20       0      0      0 I   0.0   0.0   0:00.00 </span><br></pre></td></tr></table></figure>
+
+<p>再次查看，我们会发现该进程的优先级变成了90：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  </span><br><span class="line">╰─➤  ps -al</span><br><span class="line">F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD</span><br><span class="line">0 S  1003 1980795 1962368  0  90  10 -  1412 wait_w pts/5    00:00:00 sleep.o</span><br><span class="line">0 R  1003 1983196 1961362  0  80   0 -  2772 -      pts/4    00:00:00 ps</span><br></pre></td></tr></table></figure>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
