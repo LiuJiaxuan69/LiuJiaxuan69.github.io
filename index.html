@@ -215,17 +215,19 @@
             <div id="post0">
                 <p>七月 15, 2025</p>
                 <h2>
-                    <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/" title="Linux 进程地址空间第一讲" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程地址空间第一讲</a>
+                    <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_termination/" title="Linux 进程终止" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程终止</a>
                 </h2>
                 <p class="summary">
 
 
-高级语言地址划分复习
-进程地址空间
+代码运行完毕结果不正确
+_exit 函数
+exit 函数
+strerr 函数
 
 
-
-高级语言地址划分复习下面是一张进程地址空间的分布图，相信学过 C ...</p>
+代码异常终止
+1. 信号（...</p>
             </div>
             
 
@@ -234,10 +236,39 @@
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/" 
+       title="Linux 进程地址空间第一讲"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>七月 15, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/" title="Linux 进程地址空间第一讲" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程地址空间第一讲</a></h3>
+        
+        <p>
+
+
+高级语言地址划分复习
+进程地址空间
+
+
+
+高级语言地址划分复习下面是一张进程地址空间的分布图，相信学过 C 语言的各位肯定不会陌生：
+
+我们先验证一...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/" 
        title="Linux 命令行参数和环境变量"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -264,7 +295,7 @@ getenv...</p>
     <a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_status/" 
        title="Linux 进程状态及优先级"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg3.png" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -300,7 +331,7 @@ getenv...</p>
     <a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_concept/" 
        title="Linux 进程概念"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -365,7 +396,7 @@ r...</p>
     <a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_adv/" 
        title="Linux 其他基础命令"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -394,7 +425,7 @@ Linux 重定向详解（结合 echo 和 cat 实践）
     <a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_basic/" 
        title="Linux 最基础的命令"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -432,7 +463,7 @@ mv
     <a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/" 
        title="Redis 常见数据类型-Zset 类型"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -462,7 +493,7 @@ POPMIN、ZPOPMIN...</p>
     <a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/" 
        title="Redis 常见数据类型-Set 类型"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -488,38 +519,6 @@ srem
 集合间操作
 sinter
 sin...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/" 
-       title="Redis 常见数据类型-List 类型"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 09, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/" title="Redis 常见数据类型-List 类型" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 常见数据类型-List 类型</a></h3>
-        
-        <p>
-
-
-类型简介
-相关指令
-lpush
-lrange
-lpushx
-rpush、rpushx
-lpop、rpop
-lindex
-linsert
-lrem
-l...</p>
     </div>
 </div>
 
