@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tag: 基础 - 刘家炫的博客</title>
+    <title>Category: Linux - 刘家炫的博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
@@ -20,7 +20,7 @@
     
     
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="Tag: 基础 - 刘家炫的博客"/>
+    <meta name="twitter:title" content="Category: Linux - 刘家炫的博客"/>
     
     
     
@@ -28,7 +28,7 @@
     
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
-    <meta property="og:title" content="Tag: 基础 - 刘家炫的博客"/>
+    <meta property="og:title" content="Category: Linux - 刘家炫的博客"/>
     
     
 <link rel="stylesheet" href="/css/diaspora.css">
@@ -144,297 +144,68 @@
 
 
     <div id="loader"></div>
-    <style>
-/* 基础容器样式 */
-.single-tag-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
+    <!-- 分类页面模板 -->
+<div class="category-container">
+  <!-- 顶部留白区域 -->
+  <div class="category-header-space"></div>
 
-/* 标签头图区样式 */
-.tag-hero {
-  padding: 4rem 2rem;
-  margin-bottom: 3rem;
-  text-align: center;
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #98D8C8, #4ECDC4);
-}
-
-.tag-hero h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.tag-meta {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-/* 时间轴样式 */
-.tag-timeline {
-  position: relative;
-  padding-left: 30px;
-  margin: 3rem 0;
-}
-
-.timeline-node {
-  position: relative;
-  padding-bottom: 40px;
-}
-
-.node-dot {
-  position: absolute;
-  left: -21px;
-  top: 5px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #4ECDC4;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #4ECDC4;
-}
-
-.node-content {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  transition: transform 0.3s;
-}
-
-.node-content:hover {
-  transform: translateY(-3px);
-}
-
-.node-content time {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.node-content h3 {
-  margin: 0.5rem 0;
-}
-
-.post-excerpt {
-  color: #555;
-  margin: 0.8rem 0;
-  line-height: 1.6;
-}
-
-.post-cats {
-  margin-top: 1rem;
-}
-
-.cat-badge {
-  display: inline-block;
-  padding: 0.3rem 0.8rem;
-  background: rgba(0,0,0,0.05);
-  border-radius: 20px;
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-/* 相关标签样式 */
-.related-tags {
-  margin: 4rem 0;
-}
-
-.related-tags h3 {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #333;
-}
-
-.related-tag-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.related-tag {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.03);
-  color: #333;
-  text-decoration: none;
-  transition: all 0.3s;
-  font-size: var(--tag-size);
-}
-
-.related-tag:hover {
-  background: getRandomColor();
-  color: rgb(108, 174, 170);
-  transform: scale(1.05);
-}
-</style>
-
-
-<div class="single-tag-container" style="padding-top: 10%;">
-  <!-- 标签头图区 -->
-  <div class="tag-hero" style="background: linear-gradient(135deg, getRandomColor(), getRandomColor())">
-    <h1>#基础</h1>
-    <div class="tag-meta">
-      <span>5 篇探索记录</span>
-      <span>·</span>
-      <span>最后更新：2025-07-15</span>
-    </div>
+  <!-- 分类标题（带装饰性图标） -->
+  <div class="category-title-wrapper">
+    <h2 class="category-title">
+      <svg class="icon" viewBox="0 0 24 24" width="24" height="24">
+        <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+      </svg>
+      <span class="category-name">Linux</span>
+      <span class="post-count">1篇</span>
+    </h2>
+    <div class="title-decoration"></div>
   </div>
 
-  <!-- 时间轴式文章列表 -->
-  <div class="tag-timeline">
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/07/15</time>
-          <h3><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/">Linux 进程地址空间第一讲</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E9%AB%98%E7%BA%A7%E8%AF%AD%E8%A8%80%E5%9C%B0%E5%9D%80%E5%88%92%...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="cat-badge">📁 操作系统</a>
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" class="cat-badge">📁 Linux</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/07/14</time>
-          <h3><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/">Linux 命令行参数和环境变量</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F-environment-variables-%E6%A...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="cat-badge">📁 操作系统</a>
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" class="cat-badge">📁 Linux</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/07/13</time>
-          <h3><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E6%9D%83%E9%99%90%E7%90%86%E8%A7%A3%E5%89%8D%E7%BD%AE%E7%9F%A5%...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="cat-badge">📁 操作系统</a>
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" class="cat-badge">📁 Linux</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/07/13</time>
-          <h3><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_adv/">Linux 其他基础命令</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#echo&#34;&gt;echo&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#-n&#34;&gt;-n&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#-...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="cat-badge">📁 操作系统</a>
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" class="cat-badge">📁 Linux</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/07/12</time>
-          <h3><a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_basic/">Linux 最基础的命令</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#ls-%E6%8C%87%E4%BB%A4&#34;&gt;ls 指令&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;#pwd-%E6%8C%8...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" class="cat-badge">📁 操作系统</a>
-              
-                <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" class="cat-badge">📁 Linux</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-  </div>
-
-  <!-- 相关标签推荐 -->
-  <div class="related-tags">
-    <h3>🚀 关联维度</h3>
-    <div class="related-tag-cloud">
+  <!-- 文章列表容器（带悬浮效果） -->
+  <div class="post-list-container">
+    <ul class="category-post-list">
       
-        <a href="/tags/Hexo/" class="related-tag" 
-           style="--tag-size: 22px">
-          Hexo (1)
-        </a>
+        <li class="post-item">
+          <!-- 文章标题（带悬停动画） -->
+          <a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Common_commands_basic/" class="post-title">
+            <span class="title-text">Linux 最基础的命令</span>
+            <svg class="arrow-icon" viewBox="0 0 24 24" width="16" height="16">
+              <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+            </svg>
+          </a>
+          
+          <!-- 元信息（日期+标签） -->
+          <div class="post-meta">
+            <time class="post-date">
+              <svg class="icon" viewBox="0 0 24 24" width="14" height="14">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+              </svg>
+              2025-07-12
+            </time>
+            
+            
+              <div class="post-tags">
+                
+                  <a href="/tags/%E5%9F%BA%E7%A1%80/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    基础
+                  </a>
+                
+                  <a href="/tags/%E6%8C%87%E4%BB%A4/" class="tag">
+                    <svg class="icon" viewBox="0 0 24 24" width="12" height="12">
+                      <path d="M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z"/>
+                    </svg>
+                    指令
+                  </a>
+                
+              </div>
+            
+          </div>
+        </li>
       
-        <a href="/tags/%E6%95%99%E7%A8%8B/" class="related-tag" 
-           style="--tag-size: 22px">
-          教程 (1)
-        </a>
-      
-        <a href="/tags/Quartus2/" class="related-tag" 
-           style="--tag-size: 28px">
-          Quartus2 (4)
-        </a>
-      
-        <a href="/tags/ALU/" class="related-tag" 
-           style="--tag-size: 22px">
-          ALU (1)
-        </a>
-      
-        <a href="/tags/%E6%80%A7%E8%83%BD/" class="related-tag" 
-           style="--tag-size: 30px">
-          性能 (5)
-        </a>
-      
-        <a href="/tags/4bit/" class="related-tag" 
-           style="--tag-size: 22px">
-          4bit (1)
-        </a>
-      
-    </div>
+    </ul>
   </div>
 </div>
 
