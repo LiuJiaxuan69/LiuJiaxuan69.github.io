@@ -5,15 +5,27 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hello World - 刘家炫的博客</title>
+    <title>文件缓冲区 - 刘家炫的博客</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="google" content="notranslate" />
     <meta name="keywords" content="Fechin,"> 
-    <meta name="description" content="欢迎来到我的博客网站
+    <meta name="description" content="
 
 
-"> 
+理解文件缓冲区
+标准I&amp;#x2F;O的缓冲区类型
+再看开头代码
+标准输出行缓冲
+文件输出全缓冲
+
+
+文件缓冲区的作用
+
+
+
+首先来看一段代码：
+123456789101112131415161,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -23,22 +35,46 @@
     
     
     <meta name="twitter:card" content="summary"/>
-    <meta name="twitter:title" content="Hello World - 刘家炫的博客"/>
-    <meta name="twitter:description" content="欢迎来到我的博客网站
+    <meta name="twitter:title" content="文件缓冲区 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
 
 
-"/>
+理解文件缓冲区
+标准I&amp;#x2F;O的缓冲区类型
+再看开头代码
+标准输出行缓冲
+文件输出全缓冲
+
+
+文件缓冲区的作用
+
+
+
+首先来看一段代码：
+123456789101112131415161,"/>
     
     
     
     
     <meta property="og:site_name" content="刘家炫的博客"/>
     <meta property="og:type" content="object"/>
-    <meta property="og:title" content="Hello World - 刘家炫的博客"/>
-    <meta property="og:description" content="欢迎来到我的博客网站
+    <meta property="og:title" content="文件缓冲区 - 刘家炫的博客"/>
+    <meta property="og:description" content="
 
 
-"/>
+理解文件缓冲区
+标准I&amp;#x2F;O的缓冲区类型
+再看开头代码
+标准输出行缓冲
+文件输出全缓冲
+
+
+文件缓冲区的作用
+
+
+
+首先来看一段代码：
+123456789101112131415161,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -169,7 +205,7 @@
     <div class="bar" style="width: 0;"></div>
     <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
-    <h3 class="subtitle">Hello World</h3>
+    <h3 class="subtitle">文件缓冲区</h3>
     <div class="social">
         <div>
             <div class="share">
@@ -198,34 +234,190 @@
     border-radius: 12px; /* 可选圆角 */
     position: relative; /* 确保堆叠上下文 */
     z-index: 1;">
-        <h1 class="title">Hello World</h1>
+        <h1 class="title">文件缓冲区</h1>
         <div class="stuff">
-            <span>五月 29, 2025</span>
+            <span>七月 18, 2025</span>
             
-  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Hexo/" rel="tag">Hexo</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%99%E7%A8%8B/" rel="tag">教程</a></li></ul>
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
 
 
         </div>
         <div class="content markdown" 
              id="post-content" 
              style="color: var(--text-color, inherit);">
-            <p>欢迎来到我的博客网站</p>
-<!-- ## Quick Start
+            <!-- toc -->
 
-### Create a new post -->
+<ul>
+<li><a href="#%E7%90%86%E8%A7%A3%E6%96%87%E4%BB%B6%E7%BC%93%E5%86%B2%E5%8C%BA">理解文件缓冲区</a></li>
+<li><a href="#%E6%A0%87%E5%87%86io%E7%9A%84%E7%BC%93%E5%86%B2%E5%8C%BA%E7%B1%BB%E5%9E%8B">标准I&#x2F;O的缓冲区类型</a></li>
+<li><a href="#%E5%86%8D%E7%9C%8B%E5%BC%80%E5%A4%B4%E4%BB%A3%E7%A0%81">再看开头代码</a><ul>
+<li><a href="#%E6%A0%87%E5%87%86%E8%BE%93%E5%87%BA%E8%A1%8C%E7%BC%93%E5%86%B2">标准输出行缓冲</a></li>
+<li><a href="#%E6%96%87%E4%BB%B6%E8%BE%93%E5%87%BA%E5%85%A8%E7%BC%93%E5%86%B2">文件输出全缓冲</a></li>
+</ul>
+</li>
+<li><a href="#%E6%96%87%E4%BB%B6%E7%BC%93%E5%86%B2%E5%8C%BA%E7%9A%84%E4%BD%9C%E7%94%A8">文件缓冲区的作用</a></li>
+</ul>
+<!-- tocstop -->
 
-<!-- ``` bash
-$ hexo new "My New Post"
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">More info: [Writing](https://hexo.io/docs/writing.html)</span><br><span class="line"></span><br><span class="line">### Run server</span><br><span class="line"></span><br><span class="line">``` bash</span><br><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+<p>首先来看一段代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str1 = <span class="string">&quot;fwrite: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str2 = <span class="string">&quot;write: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="comment">// C/C++提供的文件接口</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(stdout, <span class="string">&quot;fprintf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fwrite</span>(str1, <span class="built_in">strlen</span>(str1), <span class="number">1</span>, stdout);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;cout: hello, linux!\n&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Linux 系统接口</span></span><br><span class="line">    <span class="built_in">write</span>(<span class="number">1</span>, str2, <span class="built_in">strlen</span>(str2));</span><br><span class="line">    fork();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+<p>当我们直接输出的时候结果是这样的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">write: hello, linux!</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+<p>但当我们将输出重定向到文件中去是这样的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat log.txt</span><br><span class="line">write: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br></pre></td></tr></table></figure>
 
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a> –&gt;</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>-->
+<p>我们会发现，有些数据不仅输出了两遍，而且 write 函数明明是后面才打印的，现在却变成了最先开始被打印出来</p>
+<p>如果你不是很清楚原因的话，这篇文章将会对你有帮助</p>
+<h2><span id="理解文件缓冲区">理解文件缓冲区</span></h2><p>什么是缓冲区？</p>
+<p>缓冲区是内存空间的⼀部分。也就是说，在内存空间中预留了⼀定的存储空间，这些存储空间用来缓冲输入或输出的数据，<br>这部分预留的空间就叫做缓冲区。缓冲区根据其对应的是输入设备还是输出设备，分为输入缓冲区和输出缓冲区</p>
+<p>那么，我们为什么要引入缓冲区机制呢？</p>
+<p>读写文件时，如果不会开辟对文件操作的缓冲区，直接通过系统调用对磁盘进⾏操作(读、写等)，那么每次对文件进行⼀次读写操作时，都需要使用读写系统调用来处理此操作，即需要执行⼀次系统调用，执行⼀次系统调用将涉及到CPU状态的切换，即从用户空间切换到内核空间，实现进程上下文的切换，这将损耗⼀定的CPU时间，频繁的磁盘访问对程序的执行效率造成很大的影响。</p>
+<p>为了减少使用系统调用的次数，提高效率，我们就可以采用缓冲机制。比如我们从磁盘里取信息，可以在磁盘文件进行操作时，可以⼀次从文件中读出大量的数据到缓冲区中，以后对这部分的访问就不需要再使用系统调用了，等缓冲区的数据取完后再去磁盘中读取，这样就可以减少磁盘的读写次数，再加上计算机对缓冲区的操作大大快于对磁盘的操作，故应用缓冲区可大大提⾼计算机的运行速度。</p>
+<p>又比如，我们使用打印机打印文档，由于打印机的打印速度相对较慢，我们先把文档输出到打印机相应的缓冲区，打印机再自行逐步打印，这时我们的CPU可以处理别的事情。可以看出，缓冲区就是⼀块内存区，它用在输⼊输出设备和CPU之间，用来缓存数据。它使得低速的输入输出设备和高速的CPU能够协调⼯作，避免低速的输⼊输出设备占用CPU，解放出CPU，使其能够高效率工作。</p>
+<p>不论是在语言层还是系统层都存在缓冲区，系统层的缓冲区是为了优化硬件交互和调度，因此即使应用层直接调用write()，数据也可能先被放入内核的页缓存，由内核决定何时写入磁盘。</p>
+<h2><span id="标准ix2fo的缓冲区类型">标准I&#x2F;O的缓冲区类型</span></h2><p>标准I&#x2F;O提供了3种类型的缓冲区：</p>
+<ol>
+<li><p><strong>全缓冲区</strong>  </p>
+<ul>
+<li>这种缓冲方式要求填满整个缓冲区后才进行I&#x2F;O系统调用操作。  </li>
+<li>对于磁盘文件的操作通常使用全缓冲的方式访问。</li>
+</ul>
+</li>
+<li><p><strong>行缓冲区</strong>  </p>
+<ul>
+<li>在行缓冲情况下，当在输入和输出中遇到换行符时，标准I&#x2F;O库函数将会执行系统调用操作。  </li>
+<li>当所操作的流涉及一个终端时（例如标准输入和标准输出），使用行缓冲方式。  </li>
+<li>因为标准I&#x2F;O库每行的缓冲区长度是固定的，所以只要填满了缓冲区，即使还没有遇到换行符，也会执行I&#x2F;O系统调用操作。  </li>
+<li>默认行缓冲区的大小为1024。</li>
+</ul>
+</li>
+<li><p><strong>无缓冲区</strong>  </p>
+<ul>
+<li>无缓冲区是指标准I&#x2F;O库不对字符进行缓存，直接调用系统调用。  </li>
+<li>标准出错流<code>stderr</code>通常是不带缓冲区的，这使得出错信息能够尽快地显示出来。</li>
+</ul>
+</li>
+</ol>
+<p>除此之外，当缓冲区满了，或执行 flush 语句，或进程结束的时候，C语言都会将缓冲区的内容利用 write 接口写入内存</p>
+<p>因此，如果我们不加换行符将数据输出到标准输出，而我们在进程退出前将标准输出文件关闭，就会导致数据无法被打印到显示屏上：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!&quot;</span>);</span><br><span class="line">    <span class="built_in">close</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而如果我们让数据打印时换行，但是将标准输出重定向到普通磁盘文件，就会发现结果无法被打印到文件当中，因为当我们选择输出到文件的时候，缓冲区刷新策略就是全缓冲区策略，<br>这意味着只有在缓冲区被写满或进程结束的时候数据才会被写入，而我们在保证数据足够短的条件下让重定向被关闭，就会发现数据无法被打印到文件当中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 仅仅多了个换行</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">close</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接打印会因为行刷新策略使得数据被打印到显示屏上：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br></pre></td></tr></table></figure>
+
+<p>将输出重定向到普通文件后，因为刷新策略为全缓冲，导致文件里没有被写入任何数据：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤</span><br></pre></td></tr></table></figure>
+
+<h2><span id="再看开头代码">再看开头代码</span></h2><p>开头的代码为什么会出现这种现象呢？</p>
+<p>情景再现：</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str1 = <span class="string">&quot;fwrite: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str2 = <span class="string">&quot;write: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="comment">// C/C++提供的文件接口</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(stdout, <span class="string">&quot;fprintf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fwrite</span>(str1, <span class="built_in">strlen</span>(str1), <span class="number">1</span>, stdout);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;cout: hello, linux!\n&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Linux 系统接口</span></span><br><span class="line">    <span class="built_in">write</span>(<span class="number">1</span>, str2, <span class="built_in">strlen</span>(str2));</span><br><span class="line">    fork();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当我们直接输出的时候结果是这样的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">write: hello, linux!</span><br></pre></td></tr></table></figure>
+
+<p>但当我们将输出重定向到文件中去是这样的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat log.txt</span><br><span class="line">write: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<h3><span id="标准输出行缓冲">标准输出行缓冲</span></h3><p>首先，当我们让直接让数据打印到标准输出的时候，C&#x2F;C++采用的是行刷新策略，因为数据打印都有空行，导致每次打印的数据会直接被语言刷新出去，因此现象符合你的预期</p>
+<h3><span id="文件输出全缓冲">文件输出全缓冲</span></h3><p>当我们将标准输出重定向到普通磁盘文件的时候，数据的缓冲方式由行缓冲变成了全缓冲，而我们放在缓冲区的数据就不会被立即刷新，即便是在 fork 之后，这些数据<br>会在进程退出之后统一被刷新写到文件当中</p>
+<p>但是 fork 的时候，父子数据会发生写时拷贝，所以当父进程或子进程任意一方刷新缓冲区（进程退出）的时候触发写时拷贝，另一方在退出进程的时候同样会刷新缓冲区（另一方<br>不会发生写时拷贝，因为这段缓冲区数据在页表当中引用计数为1），而 write 不会等进程退出时才刷新缓冲区，这样我们就会发现 write 先被写入，而用户层的接口在进程退出时<br>才依次被写入文件</p>
+<h4><span id="缓冲模式差异">缓冲模式差异</span></h4><table>
+<thead>
+<tr>
+<th>输出方式</th>
+<th>缓冲类型（终端）</th>
+<th>缓冲类型（重定向到文件）</th>
+<th>刷新时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>printf</code>&#x2F;<code>fprintf</code></td>
+<td>行缓冲</td>
+<td>全缓冲</td>
+<td>行缓冲：遇到 <code>\n</code> 或缓冲区满；全缓冲：缓冲区满或程序退出</td>
+</tr>
+<tr>
+<td><code>fwrite</code></td>
+<td>行缓冲</td>
+<td>全缓冲</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><code>cout</code></td>
+<td>行缓冲</td>
+<td>全缓冲</td>
+<td>同上（C++ 的 <code>ostream</code> 默认与 <code>stdout</code> 同步）</td>
+</tr>
+<tr>
+<td><code>write</code></td>
+<td>无缓冲</td>
+<td>无缓冲</td>
+<td>立即写入内核缓冲区</td>
+</tr>
+</tbody></table>
+<ul>
+<li><strong>终端设备</strong>：默认行缓冲（用户友好，逐行显示）。  </li>
+<li><strong>磁盘文件</strong>：默认全缓冲（减少频繁 I&#x2F;O，提升性能）。</li>
+</ul>
+<hr>
+<h4><span id="fork-对缓冲区的关键影响"><code>fork()</code> 对缓冲区的关键影响</span></h4><p>当程序调用 <code>fork()</code> 时：</p>
+<ol>
+<li><p>用户层缓冲区（C&#x2F;C++库维护）</p>
+<ul>
+<li>全缓冲模式下，数据仍在用户空间缓冲区中，未写入内核。  </li>
+<li><code>fork()</code> 会复制父进程的整个地址空间（包括缓冲区），触发 <strong>写时拷贝（Copy-On-Write）</strong>。  </li>
+<li><strong>父&#x2F;子进程退出时</strong>：各自刷新缓冲区，导致数据被写入文件两次。</li>
+</ul>
+</li>
+<li><p>系统调用 <code>write</code></p>
+<ul>
+<li>无缓冲，直接进入内核缓冲区，<code>fork()</code> 前已完成写入。  </li>
+<li>不受 <code>fork()</code> 影响，仅输出一次。</li>
+</ul>
+</li>
+<li><p><code>fork()</code> 后的初始状态  </p>
+<ul>
+<li>父进程和子进程共享相同的物理内存页（包括用户层缓冲区），内核将这些页标记为 <strong>写时拷贝</strong>（引用计数 &gt; 1）。  </li>
+<li>此时缓冲区数据（如 <code>printf</code> 的内容）尚未被修改，父子进程的页表指向同一物理内存。</li>
+</ul>
+</li>
+<li><p>某一方刷新缓冲区（如父进程退出）</p>
+<ul>
+<li>刷新操作（如 <code>exit()</code> 调用 <code>fflush()</code>）会 <strong>修改缓冲区</strong>（清空内容并写入文件）。  </li>
+<li>内核检测到该内存页是 COW 的，触发 <strong>写时拷贝</strong>：  <ul>
+<li>为父进程分配新的物理页，复制原数据。  </li>
+<li>父进程修改新页（清空缓冲区），子进程仍引用旧页（原数据）。  </li>
+<li><strong>旧页的引用计数降为 1</strong>（仅子进程持有）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>另一方退出时（如子进程退出）**</p>
+<ul>
+<li>子进程刷新缓冲区时，内核检查其引用的内存页：  <ul>
+<li>发现该页 <strong>引用计数 &#x3D; 1</strong>（无共享），无需 COW，直接修改并写入文件。</li>
+</ul>
+</li>
+<li>因此子进程的刷新操作不会重复触发写时拷贝。</li>
+</ul>
+</li>
+</ol>
+<h2><span id="文件缓冲区的作用">文件缓冲区的作用</span></h2><p>1.提高效率<br>就好比送快递，快递员不可能只送你一个人的快递，而是等库存足够多的时候再将快递送出去，语言层次的用户级缓冲区使得数据不会频繁交给内核区，避免了两态之间的频繁交换</p>
+<p>2.配合格式化<br>除了效率问题，因为 C&#x2F;C++ 需要对你的数据做格式化（如 %d，%s），因此可以利用缓冲区先将未格式化字符串存入缓冲区，再根据可变参数模板中的参数进行数据格式化</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
             <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
             <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
                 <source type="audio/mpeg" src="">
