@@ -1,0 +1,1269 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 文件软链接与硬链接 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是 inode
+Inode 的核心作用
+Inode 的底层结构
+Inode 如何关联到文件
+Inode 的分配与管理
+
+
+硬链接的实现
+软链接（符号链接）的实现
+关键区别的底层表现
+应用场,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 文件软链接与硬链接 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是 inode
+Inode 的核心作用
+Inode 的底层结构
+Inode 如何关联到文件
+Inode 的分配与管理
+
+
+硬链接的实现
+软链接（符号链接）的实现
+关键区别的底层表现
+应用场,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 文件软链接与硬链接 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是 inode
+Inode 的核心作用
+Inode 的底层结构
+Inode 如何关联到文件
+Inode 的分配与管理
+
+
+硬链接的实现
+软链接（符号链接）的实现
+关键区别的底层表现
+应用场,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 文件软链接与硬链接</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.5); /* 你的半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 文件软链接与硬链接</h1>
+        <div class="stuff">
+            <span>七月 19, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-inode">什么是 inode</a><ul>
+<li><a href="#inode-%E7%9A%84%E6%A0%B8%E5%BF%83%E4%BD%9C%E7%94%A8">Inode 的核心作用</a></li>
+<li><a href="#inode-%E7%9A%84%E5%BA%95%E5%B1%82%E7%BB%93%E6%9E%84">Inode 的底层结构</a></li>
+<li><a href="#inode-%E5%A6%82%E4%BD%95%E5%85%B3%E8%81%94%E5%88%B0%E6%96%87%E4%BB%B6">Inode 如何关联到文件</a></li>
+<li><a href="#inode-%E7%9A%84%E5%88%86%E9%85%8D%E4%B8%8E%E7%AE%A1%E7%90%86">Inode 的分配与管理</a></li>
+</ul>
+</li>
+<li><a href="#%E7%A1%AC%E9%93%BE%E6%8E%A5%E7%9A%84%E5%AE%9E%E7%8E%B0">硬链接的实现</a></li>
+<li><a href="#%E8%BD%AF%E9%93%BE%E6%8E%A5%E7%AC%A6%E5%8F%B7%E9%93%BE%E6%8E%A5%E7%9A%84%E5%AE%9E%E7%8E%B0">软链接（符号链接）的实现</a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E5%8C%BA%E5%88%AB%E7%9A%84%E5%BA%95%E5%B1%82%E8%A1%A8%E7%8E%B0">关键区别的底层表现</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">应用场景</a><ul>
+<li><a href="#%E8%BD%AF%E9%93%BE%E6%8E%A5%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">软链接应用场景</a></li>
+<li><a href="#%E7%A1%AC%E9%93%BE%E6%8E%A5%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF">硬链接应用场景</a></li>
+</ul>
+</li>
+<li><a href="#%E9%93%BE%E6%8E%A5%E7%9B%AE%E5%BD%95">链接目录</a></li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="什么是-inode">什么是 inode</span></h2><p><strong>Inode</strong>（Index Node，索引节点）是类 Unix 文件系统（如 ext4、XFS、Btrfs 等）中用于<strong>管理文件元数据和数据块指针的核心数据结构</strong>。它是操作系统在磁盘上定位和操作文件的真实凭据（而非文件名）。</p>
+<h3><span id="inode-的核心作用">Inode 的核心作用</span></h3><ol>
+<li>存储文件元数据**<ul>
+<li>不包含文件名，但包含所有其他文件属性：</li>
+</ul>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">文件类型（普通文件/目录/符号链接/设备文件等）</span><br><span class="line">权限（rwx）</span><br><span class="line">所有者（UID/GID）</span><br><span class="line">大小（字节数）</span><br><span class="line">时间戳（创建/修改/访问时间）</span><br><span class="line">链接计数（硬链接数）</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>指向文件数据块<ul>
+<li>记录文件内容在磁盘上的物理存储位置（数据块指针）。</li>
+</ul>
+</li>
+<li>唯一标识文件<ul>
+<li>每个 inode 有一个唯一的编号（inode number），操作系统通过 inode 号而非文件名访问文件。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3><span id="inode-的底层结构">Inode 的底层结构</span></h3><p>在 ext4 文件系统中，inode 是一个固定大小的结构（通常为 256 字节），其关键字段如下：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>i_mode</code></td>
+<td>文件类型 + 权限（如 <code>0o100644</code> 表示普通文件，权限 <code>rw-r--r--</code>）</td>
+</tr>
+<tr>
+<td><code>i_uid</code> &#x2F; <code>i_gid</code></td>
+<td>所有者用户 ID 和组 ID</td>
+</tr>
+<tr>
+<td><code>i_size</code></td>
+<td>文件大小（字节）</td>
+</tr>
+<tr>
+<td><code>i_atime</code></td>
+<td>最后访问时间</td>
+</tr>
+<tr>
+<td><code>i_mtime</code></td>
+<td>最后修改时间</td>
+</tr>
+<tr>
+<td><code>i_ctime</code></td>
+<td>inode 状态变更时间</td>
+</tr>
+<tr>
+<td><code>i_links_count</code></td>
+<td>硬链接计数（删除文件时仅当此值为 0 才释放数据块）</td>
+</tr>
+<tr>
+<td><code>i_block[15]</code></td>
+<td>数据块指针（直接&#x2F;间接指向磁盘块，符号链接时直接存储目标路径）</td>
+</tr>
+<tr>
+<td><code>i_flags</code></td>
+<td>标志位（如加密&#x2F;压缩&#x2F;内联数据等特性）</td>
+</tr>
+</tbody></table>
+<hr>
+<h3><span id="inode-如何关联到文件">Inode 如何关联到文件</span></h3><ol>
+<li><p>目录的作用</p>
+<ul>
+<li>目录本质是一个<strong>映射表</strong>，存储 <code>文件名 -&gt; inode 编号</code> 的对应关系。  </li>
+<li>例如目录 <code>/home</code> 的内容可能如下：</li>
+</ul>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.    -&gt; inode 1234  (当前目录)</span><br><span class="line">..   -&gt; inode 2     (父目录)</span><br><span class="line">alice -&gt; inode 5678 (用户目录)</span><br><span class="line">bob   -&gt; inode 9012</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>文件访问流程<br>当访问 <code>/home/alice/file.txt</code> 时：</p>
+<ul>
+<li>从根目录 <code>/</code>（inode 通常为 2）找到 <code>home</code> 的 inode 编号  </li>
+<li>读取 <code>home</code> 的 inode，定位其数据块，找到 <code>alice</code> 的 inode 编号  </li>
+<li>最终找到 <code>file.txt</code> 的 inode，进而访问文件内容。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h3><span id="inode-的分配与管理">Inode 的分配与管理</span></h3><ol>
+<li><p>inode Bitmap </p>
+<ul>
+<li>文件系统用位图（Bitmap）标记 inode 的使用状态（1&#x3D;已分配，0&#x3D;空闲）。  </li>
+<li>创建文件时扫描 Bitmap 分配空闲 inode。</li>
+</ul>
+</li>
+<li><p>inode 表（inode Table）</p>
+<ul>
+<li>磁盘上的固定区域，存储所有 inode 结构的数组。  </li>
+<li>通过 inode 编号可直接计算其物理位置：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inode 物理位置 = inode_table_start + (inode_number * inode_size)</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>链接计数（<code>i_links_count</code>）</p>
+<ul>
+<li>硬链接会增加该计数，删除文件时计数减 1。  </li>
+<li>当计数归零时，inode 和数据块被释放。</li>
+</ul>
+</li>
+</ol>
+<p>总结如下：</p>
+<ul>
+<li><strong>Inode 是文件的唯一身份证</strong>，文件名只是人类可读的别名。  </li>
+<li>通过 inode 可以高效管理文件元数据和数据存储位置。  </li>
+<li>理解 inode 是掌握文件系统工作原理（如软硬链接、文件删除恢复等）的基础。</li>
+</ul>
+<h2><span id="硬链接的实现">硬链接的实现</span></h2><ul>
+<li><strong>创建过程</strong>：当创建硬链接时，系统会在目标目录中添加一个新的文件名条目，这个条目指向与被链接文件相同的 inode。</li>
+<li><strong>inode 变化</strong>：inode 中的”链接计数”（link count）会加1。这个计数器记录有多少个目录项指向该 inode。</li>
+<li><strong>特点</strong>：<ul>
+<li>硬链接与原文件完全平等，无法区分谁是原始文件</li>
+<li>只有当链接计数降为0时，文件数据才会被真正删除</li>
+<li>不能跨文件系统（因为不同文件系统有独立的 inode 空间）</li>
+<li>不能链接目录（防止循环链接）</li>
+</ul>
+</li>
+</ul>
+<p>示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ln test.cc test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 2 ljx ljx 0 Jul 19 12:34 test1.cc</span><br><span class="line">-rw-r--r-- 2 ljx ljx 0 Jul 19 12:34 test.cc</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，硬链接会使得硬链接引用计数加一，而我们若删掉原来的硬链接原副本，会发现被硬链接的副本引用技术变为1，因此，一个文件真正被删除实际是引用计数从1变成0的时候：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  rm test.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 ljx ljx 0 Jul 19 12:28 test1.cc</span><br></pre></td></tr></table></figure>
+
+<h2><span id="软链接符号链接的实现">软链接（符号链接）的实现</span></h2><ul>
+<li><strong>创建过程</strong>：创建软链接时，系统会：<ol>
+<li>分配一个新的 inode 和新的文件（这个文件的内容是目标路径字符串）</li>
+<li>在目录中添加一个特殊标记的条目，表示这是一个符号链接</li>
+</ol>
+</li>
+<li><strong>inode 变化</strong>：<ul>
+<li>原始文件的 inode 不受影响</li>
+<li>新创建的符号链接有自己的 inode，其中存储了目标路径信息</li>
+</ul>
+</li>
+<li><strong>特点</strong>：<ul>
+<li>是一个独立的文件（有自己的 inode），只是内容存储了目标路径</li>
+<li>可以跨文件系统</li>
+<li>可以链接目录</li>
+<li>如果目标文件被删除，链接会”悬空”（dangling）</li>
+</ul>
+</li>
+</ul>
+<p>示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ln -s test1.cc test2.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 ljx ljx 0 Jul 19 12:34 test1.cc</span><br><span class="line">lrwxrwxrwx 1 ljx ljx 8 Jul 19 12:35 test2.cc -&gt; test1.cc</span><br></pre></td></tr></table></figure>
+
+<p>此时我们若删除原副本，将会导致链接失效：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  rm test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 ljx ljx 8 Jul 19 12:35 test2.cc -&gt; test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  cat test2.cc</span><br><span class="line">cat: test2.cc: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<h2><span id="关键区别的底层表现">关键区别的底层表现</span></h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>硬链接</th>
+<th>软链接</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>inode</td>
+<td>与原文件相同</td>
+<td>分配新的 inode</td>
+</tr>
+<tr>
+<td>存储内容</td>
+<td>直接指向文件数据</td>
+<td>存储目标文件的路径字符串</td>
+</tr>
+<tr>
+<td>跨文件系统</td>
+<td>不可能</td>
+<td>可能</td>
+</tr>
+<tr>
+<td>链接目录</td>
+<td>通常不允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>目标删除后</td>
+<td>仍可访问（直到链接计数为0）</td>
+<td>链接失效（”悬空”）</td>
+</tr>
+<tr>
+<td>文件大小</td>
+<td>与原文件相同</td>
+<td>等于路径字符串的长度</td>
+</tr>
+<tr>
+<td>权限</td>
+<td>与原文件相同</td>
+<td>通常是全开放（777）</td>
+</tr>
+</tbody></table>
+<p>##应用场景：</p>
+<h2><span id="应用场景">应用场景</span></h2><h3><span id="软链接应用场景">软链接应用场景</span></h3><p>在 Window 当中，软链接广泛应用于快捷方式，我们桌面上的图标之所以可以直接被打开，是因为这些图标本质上是将可执行程序的路径软链接到了桌面</p>
+<p><img src="/img/Linux/soft_hard_link/soft.png" alt="soft"></p>
+<h3><span id="硬链接应用场景">硬链接应用场景</span></h3><p>Linux 当中的文件管理就使用到了硬链接，每个目录下有两个隐藏文件：“.”，“..”分别代表当前路径和上一个目录的路径，因此，一个文件夹下每多一个目录，该文件夹就会多一个硬链接引用计数</p>
+<h2><span id="链接目录">链接目录</span></h2><p>硬链接是不允许链接目录的</p>
+<p>硬链接的本质是 <strong>多个文件名指向同一个 inode</strong>，而目录在文件系统中具有特殊结构，允许硬链接目录会导致以下问题：</p>
+<p>（1）目录树循环问题</p>
+<ul>
+<li>目录结构在文件系统中是一棵 <strong>有向无环图（DAG）</strong>，通过硬链接目录可能形成循环引用：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 假设允许硬链接目录：</span><br><span class="line">ln /home/user/dir /home/user/dir/link_to_self</span><br></pre></td></tr></table></figure>
+
+<p>  此时：</p>
+<ul>
+<li><code>/home/user/dir</code> 包含 <code>link_to_self</code>，而 <code>link_to_self</code> 又指向 <code>/home/user/dir</code>。</li>
+<li>遍历目录时会进入无限循环（如 <code>find</code>、<code>ls -R</code> 等命令会崩溃）。</li>
+</ul>
+<p>（2）父目录引用计数混乱</p>
+<ul>
+<li><p>每个目录的 inode 中都有一个 <code>..</code> 条目指向父目录。</p>
+</li>
+<li><p>如果允许硬链接目录，<code>..</code> 应该指向哪个父目录？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/dir1/subdir (硬链接到 /dir2/subdir)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>subdir</code> 的 <code>..</code> 应该是 <code>/dir1</code> 还是 <code>/dir2</code>？无法确定。</li>
+</ul>
+</li>
+</ul>
+<p>（3）文件系统一致性难以维护</p>
+<ul>
+<li>文件系统工具（如 <code>fsck</code>）依赖目录树的严格父子关系检测错误。</li>
+<li>硬链接目录会破坏这种关系，导致恢复困难。</li>
+</ul>
+<p>当然，<code>.</code> 和 <code>..</code> 是硬链接</p>
+<ul>
+<li>每个目录的 <code>.</code>（当前目录）和 <code>..</code>（父目录）是文件系统内部维护的硬链接：</li>
+<li>这是唯一合法的目录硬链接，由文件系统自身管理。</li>
+</ul>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
