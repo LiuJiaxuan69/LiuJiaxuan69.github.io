@@ -215,9 +215,43 @@
             <div id="post0">
                 <p>七月 20, 2025</p>
                 <h2>
-                    <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/pipe_communication/" title="Linux 进程间通信--匿名管道" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程间通信--匿名管道</a>
+                    <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/fifo_communication/" title="Linux 进程间通信--命名管道" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程间通信--命名管道</a>
                 </h2>
                 <p class="summary">
+
+
+mkfifo 命令
+基本语法
+主要选项
+使用示例
+工作原理
+实际应用场景
+注意事项
+
+
+mkfifo 函数
+...</p>
+            </div>
+            
+
+    </div>
+      <div id="primary">
+        
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/pipe_communication/" 
+       title="Linux 进程间通信--匿名管道"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>七月 20, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/pipe_communication/" title="Linux 进程间通信--匿名管道" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程间通信--匿名管道</a></h3>
+        
+        <p>
 
 
 管道通信定义
@@ -229,19 +263,19 @@
 
 
 异常情况
-（1）子进程疯狂写入，...</p>
-            </div>
-            
-
+（1）子进程疯狂写入，父进程延迟读取
+（2）父进程读取空管道
+...</p>
     </div>
-      <div id="primary">
-        
+</div>
+
+
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/a_so/" 
        title="Linux 动态库和静态库"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -269,7 +303,7 @@
     <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/soft_hard_link/" 
        title="Linux 文件软链接与硬链接"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -299,7 +333,7 @@ Inode 的分配与管理
     <a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/file_buffer/" 
        title="文件缓冲区"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -333,7 +367,7 @@ Inode 的分配与管理
     <a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/file_dup/" 
        title="文件重定向"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -366,7 +400,7 @@ dup2
     <a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/file_desc/" 
        title="文件读写及文件描述符"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg3.png" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -392,7 +426,7 @@ C语言文件操作回顾
     <a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_replacement/" 
        title="Linux 进程程序替换"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -425,7 +459,7 @@ execle 和 execve
     <a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_wait/" 
        title="Linux 进程等待"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -454,7 +488,7 @@ wait 和 waitpid 的 status 参数说...</p>
     <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_termination/" 
        title="Linux 进程终止"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg3.png" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -477,35 +511,6 @@ strerr 函数
 
 
 ...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/" 
-       title="Linux 进程地址空间第一讲"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 15, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/process_add1/" title="Linux 进程地址空间第一讲" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程地址空间第一讲</a></h3>
-        
-        <p>
-
-
-高级语言地址划分复习
-进程地址空间
-
-
-
-高级语言地址划分复习下面是一张进程地址空间的分布图，相信学过 C 语言的各位肯定不会陌生：
-
-我们先验证一...</p>
     </div>
 </div>
 
