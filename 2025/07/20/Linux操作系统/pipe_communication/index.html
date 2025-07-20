@@ -15,16 +15,17 @@
 
 管道通信定义
 管道通信使用
-1. 函数原型
-2. 基本使用流程
-4. 关键特性
+函数原型
+基本使用流程
+关键特性
 使用用例
 
 
 异常情况
 （1）子进程疯狂写入，父进程延迟读取
 （2）父进程读取空管道
-（3）子进程退出，父进程读,"> 
+（3）子进程退出，父进程读取
+（4）父进程退,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -40,16 +41,17 @@
 
 管道通信定义
 管道通信使用
-1. 函数原型
-2. 基本使用流程
-4. 关键特性
+函数原型
+基本使用流程
+关键特性
 使用用例
 
 
 异常情况
 （1）子进程疯狂写入，父进程延迟读取
 （2）父进程读取空管道
-（3）子进程退出，父进程读,"/>
+（3）子进程退出，父进程读取
+（4）父进程退,"/>
     
     
     
@@ -62,16 +64,17 @@
 
 管道通信定义
 管道通信使用
-1. 函数原型
-2. 基本使用流程
-4. 关键特性
+函数原型
+基本使用流程
+关键特性
 使用用例
 
 
 异常情况
 （1）子进程疯狂写入，父进程延迟读取
 （2）父进程读取空管道
-（3）子进程退出，父进程读,"/>
+（3）子进程退出，父进程读取
+（4）父进程退,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -247,9 +250,9 @@
 <ul>
 <li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E5%AE%9A%E4%B9%89">管道通信定义</a></li>
 <li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E4%BD%BF%E7%94%A8">管道通信使用</a><ul>
-<li><a href="#1-%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><strong>1. 函数原型</strong></a></li>
-<li><a href="#2-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><strong>2. 基本使用流程</strong></a></li>
-<li><a href="#4-%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><strong>4. 关键特性</strong></a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B">函数原型</a></li>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B">基本使用流程</a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7">关键特性</a></li>
 <li><a href="#%E4%BD%BF%E7%94%A8%E7%94%A8%E4%BE%8B">使用用例</a></li>
 </ul>
 </li>
@@ -301,7 +304,7 @@
 <p>管道通信不仅仅只局限于父子进程，只要是有血缘关系的进程都可以进行管道通信，例如，父进程创建两个子进程，随后父进程将读写端都关闭了，这时两个兄弟进程的读写段都和父进程一样，故他们直接也可以构成管道通信，父进程创建的子进程，子进程再创建一个子进程，那么由于父进程和它的孙子进程共享同一个<code>file_struct</code>，故也可以构成管道通信。</p>
 <h2><span id="管道通信使用">管道通信使用</span></h2><p><code>pipe</code> 是 Linux&#x2F;Unix 系统中用于创建<strong>匿名管道（Anonymous Pipe）<strong>的系统调用，主要用于</strong>父子进程或兄弟进程之间的单向通信</strong>。它创建一个内核缓冲区，并返回两个文件描述符（<code>fd</code>），一个用于<strong>读</strong>，一个用于<strong>写</strong>。</p>
 <hr>
-<h3><span id="1-函数原型"><strong>1. 函数原型</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pipe</span><span class="params">(<span class="type">int</span> pipefd[<span class="number">2</span>])</span>;</span><br></pre></td></tr></table></figure>
+<h3><span id="函数原型">函数原型</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pipe</span><span class="params">(<span class="type">int</span> pipefd[<span class="number">2</span>])</span>;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><strong>参数</strong>：<ul>
@@ -318,7 +321,7 @@
 </li>
 </ul>
 <hr>
-<h3><span id="2-基本使用流程"><strong>2. 基本使用流程</strong></span></h3><h4><span id="1创建管道"><strong>（1）创建管道</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="基本使用流程">基本使用流程</span></h3><h4><span id="1创建管道"><strong>（1）创建管道</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>此时：<ul>
@@ -349,7 +352,7 @@
 <li><strong>子进程只能 <code>write()</code></strong>（发送数据给父进程）。</li>
 </ul>
 <hr>
-<h3><span id="4-关键特性"><strong>4. 关键特性</strong></span></h3><table>
+<h3><span id="关键特性">关键特性</span></h3><table>
 <thead>
 <tr>
 <th><strong>特性</strong></th>
