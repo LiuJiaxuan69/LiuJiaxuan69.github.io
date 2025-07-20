@@ -16,18 +16,15 @@
 管道通信定义
 管道通信使用
 1. 函数原型
-
-
 2. 基本使用流程
-（1）创建管道
-（2）fork() 创建子进程
-（3）关闭不需要的文件描述符
 4. 关键特性
 使用用例
 
 
 异常情况
-（1）,"> 
+（1）子进程疯狂写入，父进程延迟读取
+（2）父进程读取空管道
+（3）子进程退出，父进程读,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -44,18 +41,15 @@
 管道通信定义
 管道通信使用
 1. 函数原型
-
-
 2. 基本使用流程
-（1）创建管道
-（2）fork() 创建子进程
-（3）关闭不需要的文件描述符
 4. 关键特性
 使用用例
 
 
 异常情况
-（1）,"/>
+（1）子进程疯狂写入，父进程延迟读取
+（2）父进程读取空管道
+（3）子进程退出，父进程读,"/>
     
     
     
@@ -69,18 +63,15 @@
 管道通信定义
 管道通信使用
 1. 函数原型
-
-
 2. 基本使用流程
-（1）创建管道
-（2）fork() 创建子进程
-（3）关闭不需要的文件描述符
 4. 关键特性
 使用用例
 
 
 异常情况
-（1）,"/>
+（1）子进程疯狂写入，父进程延迟读取
+（2）父进程读取空管道
+（3）子进程退出，父进程读,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -257,12 +248,7 @@
 <li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E5%AE%9A%E4%B9%89">管道通信定义</a></li>
 <li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E4%BD%BF%E7%94%A8">管道通信使用</a><ul>
 <li><a href="#1-%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><strong>1. 函数原型</strong></a></li>
-</ul>
-</li>
-<li><a href="#2-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><strong>2. 基本使用流程</strong></a><ul>
-<li><a href="#1%E5%88%9B%E5%BB%BA%E7%AE%A1%E9%81%93"><strong>（1）创建管道</strong></a></li>
-<li><a href="#2fork-%E5%88%9B%E5%BB%BA%E5%AD%90%E8%BF%9B%E7%A8%8B"><strong>（2）<code>fork()</code> 创建子进程</strong></a></li>
-<li><a href="#3%E5%85%B3%E9%97%AD%E4%B8%8D%E9%9C%80%E8%A6%81%E7%9A%84%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><strong>（3）关闭不需要的文件描述符</strong></a></li>
+<li><a href="#2-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><strong>2. 基本使用流程</strong></a></li>
 <li><a href="#4-%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><strong>4. 关键特性</strong></a></li>
 <li><a href="#%E4%BD%BF%E7%94%A8%E7%94%A8%E4%BE%8B">使用用例</a></li>
 </ul>
@@ -332,7 +318,7 @@
 </li>
 </ul>
 <hr>
-<h2><span id="2-基本使用流程"><strong>2. 基本使用流程</strong></span></h2><h3><span id="1创建管道"><strong>（1）创建管道</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="2-基本使用流程"><strong>2. 基本使用流程</strong></span></h3><h4><span id="1创建管道"><strong>（1）创建管道</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>此时：<ul>
@@ -341,12 +327,12 @@
 </ul>
 </li>
 </ul>
-<h3><span id="2fork-创建子进程"><strong>（2）<code>fork()</code> 创建子进程</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;fork&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4><span id="2fork-创建子进程"><strong>（2）<code>fork()</code> 创建子进程</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;fork&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li><strong>父进程和子进程都会继承 <code>pipefd</code></strong>，因此两者都可以读写管道。</li>
 </ul>
-<h3><span id="3关闭不需要的文件描述符"><strong>（3）关闭不需要的文件描述符</strong></span></h3><p>为了实现<strong>单向通信</strong>，通常：</p>
+<h4><span id="3关闭不需要的文件描述符"><strong>（3）关闭不需要的文件描述符</strong></span></h4><p>为了实现<strong>单向通信</strong>，通常：</p>
 <ul>
 <li><strong>父进程关闭写端，只读数据</strong>：</li>
 </ul>
