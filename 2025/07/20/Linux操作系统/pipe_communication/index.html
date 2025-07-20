@@ -1,0 +1,1261 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 进程间通信--匿名管道 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+管道通信定义
+管道通信使用
+1. 函数原型
+
+
+2. 基本使用流程
+（1）创建管道
+（2）fork() 创建子进程
+（3）关闭不需要的文件描述符
+4. 关键特性
+使用用例
+
+
+异常情况
+（1）,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 进程间通信--匿名管道 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+管道通信定义
+管道通信使用
+1. 函数原型
+
+
+2. 基本使用流程
+（1）创建管道
+（2）fork() 创建子进程
+（3）关闭不需要的文件描述符
+4. 关键特性
+使用用例
+
+
+异常情况
+（1）,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 进程间通信--匿名管道 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+管道通信定义
+管道通信使用
+1. 函数原型
+
+
+2. 基本使用流程
+（1）创建管道
+（2）fork() 创建子进程
+（3）关闭不需要的文件描述符
+4. 关键特性
+使用用例
+
+
+异常情况
+（1）,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 进程间通信--匿名管道</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 进程间通信--匿名管道</h1>
+        <div class="stuff">
+            <span>七月 20, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%BA%93/" rel="tag">库</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E5%AE%9A%E4%B9%89">管道通信定义</a></li>
+<li><a href="#%E7%AE%A1%E9%81%93%E9%80%9A%E4%BF%A1%E4%BD%BF%E7%94%A8">管道通信使用</a><ul>
+<li><a href="#1-%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><strong>1. 函数原型</strong></a></li>
+</ul>
+</li>
+<li><a href="#2-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><strong>2. 基本使用流程</strong></a><ul>
+<li><a href="#1%E5%88%9B%E5%BB%BA%E7%AE%A1%E9%81%93"><strong>（1）创建管道</strong></a></li>
+<li><a href="#2fork-%E5%88%9B%E5%BB%BA%E5%AD%90%E8%BF%9B%E7%A8%8B"><strong>（2）<code>fork()</code> 创建子进程</strong></a></li>
+<li><a href="#3%E5%85%B3%E9%97%AD%E4%B8%8D%E9%9C%80%E8%A6%81%E7%9A%84%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><strong>（3）关闭不需要的文件描述符</strong></a></li>
+<li><a href="#4-%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><strong>4. 关键特性</strong></a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8%E7%94%A8%E4%BE%8B">使用用例</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BC%82%E5%B8%B8%E6%83%85%E5%86%B5">异常情况</a><ul>
+<li><a href="#1%E5%AD%90%E8%BF%9B%E7%A8%8B%E7%96%AF%E7%8B%82%E5%86%99%E5%85%A5%E7%88%B6%E8%BF%9B%E7%A8%8B%E5%BB%B6%E8%BF%9F%E8%AF%BB%E5%8F%96"><strong>（1）子进程疯狂写入，父进程延迟读取</strong></a></li>
+<li><a href="#2%E7%88%B6%E8%BF%9B%E7%A8%8B%E8%AF%BB%E5%8F%96%E7%A9%BA%E7%AE%A1%E9%81%93"><strong>（2）父进程读取空管道</strong></a></li>
+<li><a href="#3%E5%AD%90%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%E7%88%B6%E8%BF%9B%E7%A8%8B%E8%AF%BB%E5%8F%96"><strong>（3）子进程退出，父进程读取</strong></a></li>
+<li><a href="#4%E7%88%B6%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%E5%AD%90%E8%BF%9B%E7%A8%8B%E5%86%99%E5%85%A5"><strong>（4）父进程退出，子进程写入</strong></a></li>
+<li><a href="#%E6%80%BB%E7%BB%93%E5%AF%B9%E6%AF%94"><strong>总结对比</strong></a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="管道通信定义">管道通信定义</span></h2><p>管道是Unix中最古老的进程间通信的形式，我们把从一个进程连接到另一个进程的一个数据流称为一个管道</p>
+<p>在Linux中，父进程通过 <code>fork()</code> 创建子进程时，子进程会继承父进程的文件描述符表（<code>files_struct</code>），这是一种<strong>浅拷贝</strong>——父子进程的文件描述符（如 <code>fd[0]</code>）指向同一个内核文件对象（<code>struct file</code>），包括共享文件偏移量、访问模式等状态。因此，父子进程可以通过相同的文件描述符<strong>并发读写同一个文件</strong>。</p>
+<p>若需要进程间共享数据，除了普通磁盘文件，还可以使用<strong>基于内存的通信媒介</strong>，主要包括以下两类机制：</p>
+<ol>
+<li><p><strong>内存文件系统（如 <code>tmpfs</code>&#x2F;<code>ramfs</code>）</strong>  </p>
+<ul>
+<li>数据完全驻留内存，拥有完整的文件系统抽象（<code>inode</code>、<code>file_operations</code>），但<strong>永不触盘</strong>。  </li>
+<li>适合作为临时文件的存储媒介，但并非最优的进程通信（IPC）方式，因文件操作需经过VFS层，存在额外开销。</li>
+</ul>
+</li>
+<li><p><strong>专用IPC机制</strong>  </p>
+<ul>
+<li><strong>匿名管道</strong>：通过 <code>pipe()</code> 创建，仅在内核缓冲区中流转数据，无文件系统关联（无 <code>inode</code>），适用于父子进程通信。  </li>
+<li><strong>共享内存</strong>：直接映射同一物理内存区域，完全绕过文件系统，性能最高。  </li>
+<li>其他：消息队列、信号量等。</li>
+</ul>
+</li>
+</ol>
+<p>那么，管道通信为什么需要通过内存级文件实现资源共享呢？</p>
+<ul>
+<li>性能：内存的访问速度远高于磁盘。使用内核缓冲区（如匿名管道或命名管道）可以避免磁盘I&#x2F;O，极大地提升数据传输的速度，减少延迟。</li>
+<li>临时性：管道通常用于进程间的短暂通信，数据是临时的，不需要持久化存储。使用内存级文件可以在进程完成通信后自动释放资源，而使用磁盘文件则需要显式清理。</li>
+<li>同步和并发性（最重要）：管道是一种同步通信机制，进程可以通过管道实现数据流的同步传递。使用内存级文件可以更好地管理并发和同步，而磁盘文件的使用可能导致额外的锁机制，增加复杂性和延迟。</li>
+<li>资源效率：管道的设计是为了实现轻量级的进程间通信，仅需维护一个固定大小的内核缓冲区，而磁盘文件通常需要更多的系统资源（如磁盘空间和I&#x2F;O操作）</li>
+</ul>
+<p>父进程在创建管道时，为了避免读写冲突，会创建**两个文件描述符（fd）**指向同一个管道对象（内核缓冲区），分别用于读和写。这两个fd会对应两个独立的<code>struct file</code>对象（一个设置读模式，一个设置写模式）。若不分离读写，共用一个<code>struct file</code>会导致文件偏移量（<code>f_pos</code>）竞争，引发读写混乱。</p>
+<p>当父进程<code>fork()</code>出子进程时，子进程会<strong>继承这两个fd及对应的<code>struct file</code>对象</strong>（引用计数+1），因此父子进程最初均持有读写两端。为实现单向通信：</p>
+<ol>
+<li>若子进程负责写，则关闭读端的fd（减少读端<code>struct file</code>的引用计数）；</li>
+<li>若父进程负责读，则关闭写端的fd（减少写端<code>struct file</code>的引用计数）。<br>最终，读端和写端的<code>struct file</code>引用计数均降为1，确保<strong>读写完全隔离</strong>，互不干扰。</li>
+</ol>
+<p><img src="/img/Linux/pipe_com/fork.png" alt="fork"></p>
+<p><img src="/img/Linux/pipe_com/pipe.png" alt="fork"></p>
+<p>因其<strong>单向数据流</strong>特性，这一机制（两个<code>struct file</code>对象+内核缓冲区）被命名为<strong>管道</strong>。由于它仅用于进程间通信，无需磁盘存储和文件路径，故称为<strong>匿名管道</strong>（无<code>inode</code>，不关联文件系统）。</p>
+<p>管道通信不仅仅只局限于父子进程，只要是有血缘关系的进程都可以进行管道通信，例如，父进程创建两个子进程，随后父进程将读写端都关闭了，这时两个兄弟进程的读写段都和父进程一样，故他们直接也可以构成管道通信，父进程创建的子进程，子进程再创建一个子进程，那么由于父进程和它的孙子进程共享同一个<code>file_struct</code>，故也可以构成管道通信。</p>
+<h2><span id="管道通信使用">管道通信使用</span></h2><p><code>pipe</code> 是 Linux&#x2F;Unix 系统中用于创建<strong>匿名管道（Anonymous Pipe）<strong>的系统调用，主要用于</strong>父子进程或兄弟进程之间的单向通信</strong>。它创建一个内核缓冲区，并返回两个文件描述符（<code>fd</code>），一个用于<strong>读</strong>，一个用于<strong>写</strong>。</p>
+<hr>
+<h3><span id="1-函数原型"><strong>1. 函数原型</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pipe</span><span class="params">(<span class="type">int</span> pipefd[<span class="number">2</span>])</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>参数</strong>：<ul>
+<li><code>pipefd[2]</code>：一个长度为 2 的整型数组，用于存储返回的文件描述符。<ul>
+<li><code>pipefd[0]</code>：<strong>读端</strong>（从管道读取数据）。</li>
+<li><code>pipefd[1]</code>：<strong>写端</strong>（向管道写入数据）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<ul>
+<li>成功时返回 <code>0</code>，失败返回 <code>-1</code> 并设置 <code>errno</code>。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2><span id="2-基本使用流程"><strong>2. 基本使用流程</strong></span></h2><h3><span id="1创建管道"><strong>（1）创建管道</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>此时：<ul>
+<li><code>pipefd[0]</code> 可用于 <code>read()</code>（读数据）。</li>
+<li><code>pipefd[1]</code> 可用于 <code>write()</code>（写数据）。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="2fork-创建子进程"><strong>（2）<code>fork()</code> 创建子进程</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;fork&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>父进程和子进程都会继承 <code>pipefd</code></strong>，因此两者都可以读写管道。</li>
+</ul>
+<h3><span id="3关闭不需要的文件描述符"><strong>（3）关闭不需要的文件描述符</strong></span></h3><p>为了实现<strong>单向通信</strong>，通常：</p>
+<ul>
+<li><strong>父进程关闭写端，只读数据</strong>：</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(pipefd[<span class="number">1</span>]);  <span class="comment">// 父进程关闭写端</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>子进程关闭读端，只写数据</strong>：</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(pipefd[<span class="number">0</span>]);  <span class="comment">// 子进程关闭读端</span></span><br></pre></td></tr></table></figure>
+
+<p>这样：</p>
+<ul>
+<li><strong>父进程只能 <code>read()</code></strong>（等待子进程写入）。</li>
+<li><strong>子进程只能 <code>write()</code></strong>（发送数据给父进程）。</li>
+</ul>
+<hr>
+<h3><span id="4-关键特性"><strong>4. 关键特性</strong></span></h3><table>
+<thead>
+<tr>
+<th><strong>特性</strong></th>
+<th><strong>说明</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>单向通信</strong></td>
+<td>通常一个进程读，另一个进程写。</td>
+</tr>
+<tr>
+<td><strong>阻塞机制</strong></td>
+<td>- 读空管道会阻塞，直到有数据写入。<br>- 写满管道会阻塞，直到有空间。</td>
+</tr>
+<tr>
+<td><strong>内核缓冲区</strong></td>
+<td>默认大小通常为 64KB（可通过 <code>fcntl</code> 修改）。</td>
+</tr>
+<tr>
+<td><strong>文件描述符继承</strong></td>
+<td><code>fork()</code> 后子进程继承 <code>pipefd</code>，需手动关闭不需要的端。</td>
+</tr>
+<tr>
+<td><strong>匿名管道</strong></td>
+<td>无文件名，仅用于相关进程（父子&#x2F;兄弟）通信。</td>
+</tr>
+</tbody></table>
+<h3><span id="使用用例">使用用例</span></h3><p>下面是一个综合测试用例，我们让父进程持续读取子进程的数据，而子进程每隔一秒写入一段数据到管道中</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SIZE 1024</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">global_ret</span>&#123;</span><br><span class="line">    pipe_error = <span class="number">1</span>,</span><br><span class="line">    write_error,</span><br><span class="line">    read_error,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Write</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">5</span>;</span><br><span class="line">    <span class="type">char</span> inbuffer[SIZE];</span><br><span class="line">    <span class="keyword">while</span>(cnt--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> pid = <span class="built_in">getpid</span>();</span><br><span class="line">        <span class="comment">// 告知此处将 inbuffer 作为字符串缓冲区使用</span></span><br><span class="line">        inbuffer[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">snprintf</span>(inbuffer, SIZE - <span class="number">1</span>, <span class="string">&quot;%s-%d: %s %d&quot;</span>, <span class="string">&quot;pid&quot;</span>, pid, <span class="string">&quot;hello, linux&quot;</span>, cnt);</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">write</span>(fd, inbuffer, <span class="built_in">strlen</span>(inbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;write error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::write_error);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Read</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">char</span> outbuffer[SIZE];</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">read</span>(fd, outbuffer, <span class="built_in">sizeof</span>(outbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 读取到了文件末尾，不再读取</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;read error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::read_error);</span><br><span class="line">        &#125;</span><br><span class="line">        outbuffer[n] = <span class="number">0</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;parent process get message: &quot;</span> &lt;&lt; outbuffer &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> fd[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">pipe</span>(fd) == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;pipe error&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> global_ret::pipe_error;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 子进程</span></span><br><span class="line">        <span class="comment">// 关闭读端口</span></span><br><span class="line">        <span class="built_in">close</span>(fd[<span class="number">0</span>]);</span><br><span class="line">        <span class="comment">// 执行写操作</span></span><br><span class="line">        <span class="built_in">Write</span>(fd[<span class="number">1</span>]);</span><br><span class="line">        <span class="comment">// 退出时关闭写端口（关闭所有端口）</span></span><br><span class="line">        <span class="built_in">close</span>(fd[<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    <span class="comment">// 关闭写端口</span></span><br><span class="line">    <span class="built_in">close</span>(fd[<span class="number">1</span>]);</span><br><span class="line">    <span class="comment">// 执行读操作</span></span><br><span class="line">    <span class="built_in">Read</span>(fd[<span class="number">0</span>]);</span><br><span class="line">    <span class="comment">// 退出时关闭读端口（关闭所有端口）</span></span><br><span class="line">    <span class="built_in">close</span>(fd[<span class="number">0</span>]);</span><br><span class="line">    <span class="type">int</span> status = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(id, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 正常退出</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">WIFEXITED</span>(status)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot; exited with code: &quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 异常退出</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot; killed by signal: &quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/pipe  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">parent process get message: pid-3873378: hello, linux 4</span><br><span class="line">parent process get message: pid-3873378: hello, linux 3</span><br><span class="line">parent process get message: pid-3873378: hello, linux 2</span><br><span class="line">parent process get message: pid-3873378: hello, linux 1</span><br><span class="line">parent process get message: pid-3873378: hello, linux 0</span><br><span class="line">Child process 3873378 exited with code: 0</span><br></pre></td></tr></table></figure>
+
+<p>父进程的“每隔一秒读取一次”是 <strong>管道阻塞特性</strong> 和 <strong>进程调度</strong> 的自然结果：</p>
+<p>(1) 管道的阻塞行为</p>
+<ul>
+<li><strong>当管道为空时</strong>，父进程的 <code>read()</code> 会<strong>阻塞</strong>（暂停执行），直到子进程写入数据。</li>
+<li><strong>当管道有数据时</strong>，父进程的 <code>read()</code> 会立即返回数据。</li>
+<li><strong>当所有写端关闭时</strong>，<code>read()</code> 返回 <code>0</code>（EOF）。</li>
+</ul>
+<p>(2) 子进程的写入节奏</p>
+<ul>
+<li>子进程每次写入后 <code>sleep(1)</code>，导致数据以 <strong>每秒一条</strong> 的速率进入管道。</li>
+<li>父进程的 <code>read()</code> 会<strong>被动等待</strong>子进程的数据，因此看起来像是“同步”读取。</li>
+</ul>
+<p>(3) 没有“乱码”风险</p>
+<ul>
+<li><strong>管道是内核管理的缓冲区</strong>，读写操作是原子的，不会出现“读一半”或“写一半”的乱码问题。<ul>
+<li>如果父进程尝试读取时子进程正在写入，内核会保证 <code>read()</code> 要么读到完整数据，要么阻塞等待。</li>
+</ul>
+</li>
+</ul>
+<h2><span id="异常情况">异常情况</span></h2><h3><span id="1子进程疯狂写入父进程延迟读取"><strong>（1）子进程疯狂写入，父进程延迟读取</strong></span></h3><ul>
+<li><strong>现象</strong>：<br>子进程持续写入数据，直到管道缓冲区满（默认大小通常为 <strong>64KB</strong>），此时子进程的 <code>write()</code> 会<strong>阻塞</strong>，直到父进程读取数据腾出空间。</li>
+<li><strong>原因</strong>：<br>管道是<strong>固定大小的内核缓冲区</strong>，当缓冲区满时，<code>write()</code> 会阻塞（除非设置为非阻塞模式）。</li>
+</ul>
+<p>阻塞是内核的<strong>流量控制机制</strong>，防止生产者（子进程）过快导致数据丢失。</p>
+<hr>
+<h3><span id="2父进程读取空管道"><strong>（2）父进程读取空管道</strong></span></h3><ul>
+<li><strong>现象</strong>：<br>父进程调用 <code>read()</code> 时，若管道无数据且<strong>写端未关闭</strong>，父进程会<strong>阻塞</strong>，直到子进程写入数据。</li>
+<li><strong>原因</strong>：<br>管道设计为<strong>同步通信</strong>，读操作默认阻塞等待数据。</li>
+</ul>
+<p>若需要非阻塞读取，可通过 <code>fcntl(fd, F_SETFL, O_NONBLOCK)</code> 设置，此时 <code>read()</code> 会返回 <code>-1</code> 并设置 <code>errno=EAGAIN</code>。</p>
+<hr>
+<h3><span id="3子进程退出父进程读取"><strong>（3）子进程退出，父进程读取</strong></span></h3><ul>
+<li><strong>现象</strong>：<br>子进程退出后关闭写端，父进程的 <code>read()</code> <strong>返回 0</strong>（EOF），表示无更多数据，<strong>不会阻塞</strong>。</li>
+<li><strong>原因</strong>：<br>当管道所有写端关闭时，<code>read()</code> 会立即返回 0，通知读端通信结束。</li>
+</ul>
+<p>返回 0 是合法的“文件结束”标志，<strong>不是错误</strong>。</p>
+<hr>
+<h3><span id="4父进程退出子进程写入"><strong>（4）父进程退出，子进程写入</strong></span></h3><ul>
+<li><strong>现象</strong>：<br>父进程关闭读端后退出，子进程继续写入会触发 <strong><code>SIGPIPE</code> 信号（默认终止进程）</strong>，错误码为 <code>EPIPE</code>。</li>
+<li><strong>原因</strong>：<br>当管道读端关闭时，写操作无意义，内核通过 <code>SIGPIPE</code> 终止子进程。</li>
+</ul>
+<p>若我们忽略 <code>SIGPIPE</code>（<code>signal(SIGPIPE, SIG_IGN)</code>），此时 <code>write()</code> 返回 <code>-1</code>，<code>errno=EPIPE</code>。</p>
+<hr>
+<h3><span id="总结对比"><strong>总结对比</strong></span></h3><table>
+<thead>
+<tr>
+<th><strong>场景</strong></th>
+<th><strong>子进程行为</strong></th>
+<th><strong>父进程行为</strong></th>
+<th><strong>结果</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>写端疯狂写入，缓冲区满</td>
+<td><code>write()</code> 阻塞</td>
+<td>正常读取</td>
+<td>子进程暂停，直到父进程读取</td>
+</tr>
+<tr>
+<td>读端读取空管道</td>
+<td>未写入数据</td>
+<td><code>read()</code> 阻塞</td>
+<td>父进程暂停，直到子进程写入</td>
+</tr>
+<tr>
+<td>写端关闭，读端尝试读取</td>
+<td>已退出</td>
+<td><code>read()</code> 返回 0</td>
+<td>父进程检测到 EOF</td>
+</tr>
+<tr>
+<td>读端关闭，写端尝试写入</td>
+<td><code>write()</code> 触发 <code>SIGPIPE</code></td>
+<td>已退出</td>
+<td>子进程被终止（信号 13）</td>
+</tr>
+</tbody></table>
+<ol>
+<li><strong>管道缓冲区大小</strong>：<br>可通过 <code>fcntl(fd, F_SETPIPE_SZ, size)</code> 修改（需权限）。</li>
+<li><strong>非阻塞模式</strong>：<br>设置 <code>O_NONBLOCK</code> 后，<code>read()</code> 和 <code>write()</code> 在无法立即完成时会返回 <code>-1</code>（<code>errno=EAGAIN</code>）。</li>
+<li><strong>原子性保证</strong>：<br>管道保证 <strong>≤PIPE_BUF</strong>（通常 4KB）的写入是原子的，避免多进程写入交织。</li>
+</ol>
+<p>下面我们来验证一下父进程退出，子进程写入的现象：</p>
+<p>父进程读取2秒后就退出，而子进程会持续写入5秒</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Read</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">char</span> outbuffer[SIZE];</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">while</span>(cnt--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">read</span>(fd, outbuffer, <span class="built_in">sizeof</span>(outbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 读取到了文件末尾，不再读取</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;read error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::read_error);</span><br><span class="line">        &#125;</span><br><span class="line">        outbuffer[n] = <span class="number">0</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;parent process get message: &quot;</span> &lt;&lt; outbuffer &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/pipe  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">parent process get message: pid-3876701: hello, linux 4</span><br><span class="line">parent process get message: pid-3876701: hello, linux 3</span><br><span class="line">Child process 3876701 killed by signal: 13</span><br></pre></td></tr></table></figure>
+
+<p>可以看到子进程被 13 号信号杀掉了</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
