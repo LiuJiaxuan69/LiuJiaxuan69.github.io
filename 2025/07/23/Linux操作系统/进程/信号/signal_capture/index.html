@@ -1,0 +1,1345 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 信号捕捉 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+信号捕捉流程
+sigaction 函数
+函数原型
+参数说明
+返回值
+struct sigaction 结构体
+关键字段说明
+
+
+信号捕捉底层细节
+3. 为什么要在调用处理函数前清零 pendi,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 信号捕捉 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+信号捕捉流程
+sigaction 函数
+函数原型
+参数说明
+返回值
+struct sigaction 结构体
+关键字段说明
+
+
+信号捕捉底层细节
+3. 为什么要在调用处理函数前清零 pendi,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 信号捕捉 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+信号捕捉流程
+sigaction 函数
+函数原型
+参数说明
+返回值
+struct sigaction 结构体
+关键字段说明
+
+
+信号捕捉底层细节
+3. 为什么要在调用处理函数前清零 pendi,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 信号捕捉</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 信号捕捉</h1>
+        <div class="stuff">
+            <span>七月 23, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E4%BF%A1%E5%8F%B7/" rel="tag">信号</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E6%B5%81%E7%A8%8B">信号捕捉流程</a></li>
+<li><a href="#sigaction-%E5%87%BD%E6%95%B0"><code>sigaction</code> 函数</a><ul>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><strong>函数原型</strong></a></li>
+<li><a href="#%E5%8F%82%E6%95%B0%E8%AF%B4%E6%98%8E"><strong>参数说明</strong></a></li>
+<li><a href="#%E8%BF%94%E5%9B%9E%E5%80%BC"><strong>返回值</strong></a></li>
+<li><a href="#struct-sigaction-%E7%BB%93%E6%9E%84%E4%BD%93"><strong><code>struct sigaction</code> 结构体</strong></a></li>
+<li><a href="#%E5%85%B3%E9%94%AE%E5%AD%97%E6%AE%B5%E8%AF%B4%E6%98%8E"><strong>关键字段说明</strong></a></li>
+</ul>
+</li>
+<li><a href="#%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E5%BA%95%E5%B1%82%E7%BB%86%E8%8A%82">信号捕捉底层细节</a><ul>
+<li><a href="#3-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%9C%A8%E8%B0%83%E7%94%A8%E5%A4%84%E7%90%86%E5%87%BD%E6%95%B0%E5%89%8D%E6%B8%85%E9%9B%B6-pending"><strong>3. 为什么要在调用处理函数前清零 pending？</strong></a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="信号捕捉流程">信号捕捉流程</span></h2><p>信号的捕捉流程图如下：</p>
+<p><img src="/img/Linux/signal/signal_capture.png" alt="signal_capture"></p>
+<p>信号捕捉是指当进程收到信号时，内核将控制流转交给用户自定义的信号处理函数，并在处理完成后恢复原始执行流程的过程。整个过程涉及<strong>多次用户态↔内核态切换</strong>，并确保信号不会丢失。以下是详细流程：  </p>
+<hr>
+<p><strong>1. 主程序在用户态执行（如 <code>main</code> 函数）</strong>  </p>
+<ul>
+<li>进程正常执行用户代码（如 <code>main</code> 函数的指令）。  </li>
+<li><strong>可能被中断</strong>：由于<strong>硬件中断（如时钟中断）、异常（如缺页异常）或系统调用</strong>，CPU 从用户态切换到内核态。</li>
+</ul>
+<hr>
+<p><strong>2. 进入内核态处理中断&#x2F;异常</strong>  </p>
+<ul>
+<li>内核完成中断或异常的处理（如系统调用执行完毕）。  </li>
+<li><strong>在返回用户态前，检查待处理信号（<code>do_signal</code>）</strong>：  <ul>
+<li>如果没有待处理信号，直接返回用户态，恢复 <code>main</code> 的执行。  </li>
+<li><strong>如果发现待处理信号（如 <code>SIGQUIT</code>），且该信号的处理方式是用户自定义函数</strong>，进入信号递送流程。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>3. 内核准备执行信号处理函数</strong>  </p>
+<ul>
+<li><strong>修改用户态返回地址</strong>：  <ul>
+<li>内核不会直接返回到 <code>main</code>，而是修改栈和寄存器，使得 CPU 返回用户态时<strong>跳转到信号处理函数（如 <code>sighandler</code>）</strong>。  </li>
+<li>信号处理函数运行在<strong>独立的栈帧</strong>（避免破坏 <code>main</code> 的栈）。</li>
+</ul>
+</li>
+<li><strong>记录原始上下文</strong>：  <ul>
+<li>内核保存 <code>main</code> 的完整执行现场（寄存器、栈指针等），以便后续恢复。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>4. 信号处理函数在用户态执行</strong>  </p>
+<ul>
+<li>信号处理函数（如 <code>sighandler</code>）开始执行，完成用户定义的逻辑（如打印日志、清理资源等）。  </li>
+<li><strong>信号处理函数执行完毕后，不会直接返回 <code>main</code>，而是自动调用 <code>sigreturn</code> 系统调用，再次进入内核态</strong>。</li>
+</ul>
+<hr>
+<p><strong>5. <code>sigreturn</code>：内核恢复主程序上下文</strong>  </p>
+<ul>
+<li><strong><code>sigreturn</code> 的作用</strong>：  <ul>
+<li>告诉内核“信号处理已完成”，并<strong>恢复之前保存的 <code>main</code> 的上下文</strong>。  </li>
+<li><strong>但在此之前，内核会再次检查是否有新的待处理信号</strong>（防止信号丢失）。  <ul>
+<li><strong>如果没有新信号</strong>：直接恢复 <code>main</code> 的执行现场，返回用户态继续执行。  </li>
+<li><strong>如果有新信号</strong>：重复信号递送流程（可能再次进入另一个信号处理函数）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>6. 最终返回主程序继续执行</strong>  </p>
+<ul>
+<li>如果没有更多信号需要处理，内核恢复 <code>main</code> 的寄存器、栈指针等，并返回到用户态。  </li>
+<li><strong>主程序从被中断的位置继续执行</strong>，就像信号从未发生过一样（除非信号处理函数修改了全局状态）。</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>总结</strong>  </p>
+<ol>
+<li><strong>信号是异步的</strong>，内核在每次<strong>返回用户态前</strong>（无论是从中断、异常还是 <code>sigreturn</code>）都会检查信号。  </li>
+<li><strong>信号处理函数和主程序是独立的控制流</strong>，它们使用不同的栈，没有直接的调用关系。</li>
+<li><strong><code>sigreturn</code> 是信号处理的关键</strong>：</li>
+</ol>
+<ul>
+<li>它不仅是恢复现场，还会<strong>再次检查信号</strong>，确保不会遗漏新到达的信号。</li>
+</ul>
+<ol start="4">
+<li><strong>递归信号处理</strong>：</li>
+</ol>
+<ul>
+<li>如果信号处理函数执行期间又收到同一信号，可能会导致递归调用（除非使用 <code>sigaction</code> 阻塞该信号）。</li>
+</ul>
+</blockquote>
+<h2><span id="sigaction-函数"><code>sigaction</code> 函数</span></h2><p><code>sigaction</code> 是比 <code>signal</code> 更强大、更灵活的信号处理函数，它允许<strong>精确控制信号的处理行为</strong>，包括：</p>
+<ul>
+<li>设置信号处理函数（<code>sa_handler</code> 或 <code>sa_sigaction</code>）</li>
+<li>指定在执行信号处理函数时<strong>自动阻塞哪些信号</strong>（<code>sa_mask</code>）</li>
+<li>配置额外的信号处理选项（<code>sa_flags</code>）</li>
+</ul>
+<hr>
+<h3><span id="函数原型"><strong>函数原型</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sigaction</span><span class="params">(<span class="type">int</span> signum, <span class="type">const</span> <span class="keyword">struct</span> sigaction *act, <span class="keyword">struct</span> sigaction *oldact)</span>;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="参数说明"><strong>参数说明</strong></span></h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>signum</code></strong></td>
+<td>要操作的信号编号（如 <code>SIGINT</code>、<code>SIGTERM</code>）</td>
+</tr>
+<tr>
+<td><strong><code>act</code></strong></td>
+<td>指向 <code>struct sigaction</code>，用于<strong>设置新的信号处理方式</strong>（若为 <code>NULL</code>，则仅读取旧设置）</td>
+</tr>
+<tr>
+<td><strong><code>oldact</code></strong></td>
+<td>用于<strong>保存旧的信号处理方式</strong>（若为 <code>NULL</code>，则不保存）</td>
+</tr>
+</tbody></table>
+<h3><span id="返回值"><strong>返回值</strong></span></h3><ul>
+<li><strong>成功</strong>：返回 <code>0</code></li>
+<li><strong>失败</strong>：返回 <code>-1</code>，并设置 <code>errno</code></li>
+</ul>
+<hr>
+<h3><span id="struct-sigaction-结构体"><strong><code>struct sigaction</code> 结构体</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> &#123;</span></span><br><span class="line">    <span class="type">void</span> (*sa_handler)(<span class="type">int</span>);                  <span class="comment">// 普通信号处理函数</span></span><br><span class="line">    <span class="type">void</span> (*sa_sigaction)(<span class="type">int</span>, <span class="type">siginfo_t</span> *, <span class="type">void</span> *);  <span class="comment">// 实时信号处理函数</span></span><br><span class="line">    <span class="type">sigset_t</span> sa_mask;                         <span class="comment">// 额外阻塞的信号集</span></span><br><span class="line">    <span class="type">int</span> sa_flags;                             <span class="comment">// 控制信号行为的标志位</span></span><br><span class="line">    <span class="type">void</span> (*sa_restorer)(<span class="type">void</span>);                <span class="comment">// 已废弃，通常置 NULL</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="关键字段说明"><strong>关键字段说明</strong></span></h3><ol>
+<li><p><strong><code>sa_handler</code></strong>  </p>
+<ul>
+<li>指定信号处理函数，可以是：<ul>
+<li><code>SIG_IGN</code>（忽略信号）</li>
+<li><code>SIG_DFL</code>（恢复默认行为）</li>
+<li><strong>自定义函数</strong>（格式：<code>void handler(int signo)</code>）</li>
+</ul>
+</li>
+<li>例如：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handler</span><span class="params">(<span class="type">int</span> sig)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Received signal %d\n&quot;</span>, sig);</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> <span class="title">act</span>;</span></span><br><span class="line">act.sa_handler = handler;  <span class="comment">// 设置自定义处理函数</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong><code>sa_sigaction</code></strong>  </p>
+<ul>
+<li>用于<strong>实时信号</strong>（如 <code>SIGRTMIN</code> 以后的信号），提供更多信息（<code>siginfo_t</code>）。</li>
+<li>需配合 <code>sa_flags = SA_SIGINFO</code> 使用。</li>
+</ul>
+</li>
+<li><p><strong><code>sa_mask</code></strong>  </p>
+<ul>
+<li><p>在执行信号处理函数时，<strong>自动阻塞的信号集</strong>（防止信号嵌套）。</p>
+</li>
+<li><p><strong>默认阻塞当前信号</strong>（无需手动添加）。</p>
+</li>
+<li><p>例如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sigemptyset(&amp;act.sa_mask);  <span class="comment">// 清空信号集</span></span><br><span class="line">sigaddset(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 阻塞 SIGQUIT</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><strong><code>sa_flags</code></strong>  </p>
+<ul>
+<li><p>控制信号行为的标志位，常见选项：</p>
+<ul>
+<li><code>SA_RESTART</code>：被信号中断的系统调用自动重启。</li>
+<li><code>SA_NOCLDSTOP</code>：仅对 <code>SIGCHLD</code> 有效，子进程停止时不通知父进程。</li>
+<li><code>SA_SIGINFO</code>：使用 <code>sa_sigaction</code> 而非 <code>sa_handler</code>。</li>
+</ul>
+</li>
+<li><p>例如：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">act.sa_flags = SA_RESTART;  <span class="comment">// 系统调用被中断后自动恢复</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ol>
+<hr>
+<blockquote>
+<p><strong>与 <code>signal</code> 函数的对比</strong></p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th><code>signal</code></th>
+<th><code>sigaction</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>可移植性</strong></td>
+<td>不同系统行为可能不同</td>
+<td>行为一致</td>
+</tr>
+<tr>
+<td><strong>信号屏蔽</strong></td>
+<td>无法指定额外阻塞的信号</td>
+<td>支持 <code>sa_mask</code></td>
+</tr>
+<tr>
+<td><strong>实时信号</strong></td>
+<td>不支持</td>
+<td>支持（<code>sa_sigaction</code>）</td>
+</tr>
+<tr>
+<td><strong>系统调用重启</strong></td>
+<td>依赖实现</td>
+<td>可通过 <code>SA_RESTART</code> 控制</td>
+</tr>
+</tbody></table>
+</blockquote>
+<h2><span id="信号捕捉底层细节">信号捕捉底层细节</span></h2><p>在信号捕捉的底层实现中，内核会在<strong>调用信号处理函数之前</strong>（而非之后）将 <code>pending</code> 表中对应信号的位置清零（即 <code>pending &amp;= ~(1 &lt;&lt; signo)</code>）。这一设计是为了正确处理信号的<strong>重复触发</strong>，同时结合**信号屏蔽字（blocking mask）**的自动管理机制。以下是详细解释：</p>
+<hr>
+<p><strong>步骤 1：信号到达，pending 位置 1</strong>  </p>
+<ul>
+<li>当信号（如 <code>SIGINT</code>）到达时，内核会：<ol>
+<li>检查该信号是否被阻塞（通过 <code>blocking mask</code>）：<ul>
+<li>如果未被阻塞，准备递送。</li>
+<li>如果被阻塞，仅将 <code>pending</code> 对应位置 <code>1</code>，暂不处理。</li>
+</ul>
+</li>
+<li>若信号未被阻塞，内核将其加入待处理队列。</li>
+</ol>
+</li>
+</ul>
+<p><strong>步骤 2：准备调用信号处理函数</strong>  </p>
+<ul>
+<li>在<strong>从内核态返回用户态执行信号处理函数前</strong>，内核会：<ol>
+<li><strong>清零 <code>pending</code> 表中的对应位</strong>（表示该信号正在被处理）。</li>
+<li><strong>自动阻塞该信号</strong>（将 <code>blocking mask</code> 中对应位置 <code>1</code>），防止嵌套调用。</li>
+</ol>
+</li>
+</ul>
+<p><strong>步骤 3：执行信号处理函数</strong>  </p>
+<ul>
+<li>信号处理函数（如 <code>handler</code>）在用户态执行：<ul>
+<li>如果在此期间<strong>同一信号再次到达</strong>：<ul>
+<li>由于该信号已被阻塞（<code>blocking mask</code> 置 <code>1</code>），内核不会立即递送。</li>
+<li>但会将 <code>pending</code> 表中对应位<strong>重新置 <code>1</code></strong>（记录信号到达）。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>步骤 4：信号处理函数返回</strong>  </p>
+<ul>
+<li>函数返回时，内核通过 <code>sigreturn</code> 系统调用恢复现场：<ol>
+<li><strong>恢复原来的 <code>blocking mask</code></strong>（取消对该信号的阻塞）。</li>
+<li><strong>再次检查 <code>pending</code> 表</strong>：<ul>
+<li>如果发现该信号位为 <code>1</code>（表示在处理期间信号又到达了），则<strong>重新递送</strong>。</li>
+<li>否则，正常恢复主程序执行。</li>
+</ul>
+</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h3><span id="3-为什么要在调用处理函数前清零-pending"><strong>3. 为什么要在调用处理函数前清零 pending？</strong></span></h3><h4><span id="原因-1避免信号丢失"><strong>原因 1：避免信号丢失</strong></span></h4><ul>
+<li>如果在处理函数<strong>执行后</strong>才清零 <code>pending</code>，可能会出现：<ul>
+<li>信号 A 正在处理时，同一信号 A 再次到达。</li>
+<li>如果第一次的 <code>pending</code> 未被清零，第二次到达的信号可能被忽略（内核认为“已在处理”）。</li>
+</ul>
+</li>
+<li><strong>提前清零</strong>确保后续到达的信号能正确记录在 <code>pending</code> 中。</li>
+</ul>
+<h4><span id="原因-2与阻塞机制配合"><strong>原因 2：与阻塞机制配合</strong></span></h4><ul>
+<li>内核通过<strong>自动阻塞当前信号</strong> + <strong>提前清零 <code>pending</code></strong>，实现以下行为：<ul>
+<li>信号处理期间，同一信号不会被嵌套调用（避免递归）。</li>
+<li>但后续到达的信号会被记录，并在处理完成后重新递送。</li>
+</ul>
+</li>
+</ul>
+<h4><span id="示例场景"><strong>示例场景</strong></span></h4><p>假设进程收到两次 <code>SIGINT</code>：</p>
+<ol>
+<li>第一次 <code>SIGINT</code>：<ul>
+<li><code>pending</code> 置 <code>1</code> → 内核调用处理函数前清零 <code>pending</code> 并阻塞 <code>SIGINT</code>。</li>
+</ul>
+</li>
+<li>处理函数执行期间，第二次 <code>SIGINT</code> 到达：<ul>
+<li>由于 <code>SIGINT</code> 被阻塞，内核仅将 <code>pending</code> 置 <code>1</code>，不立即处理。</li>
+</ul>
+</li>
+<li>处理函数返回后：<ul>
+<li>内核发现 <code>pending</code> 为 <code>1</code>，重新递送 <code>SIGINT</code>，再次触发处理函数。</li>
+</ul>
+</li>
+</ol>
+<p>下面是验证示例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印当前进程的未决信号集(pending signals)</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_pending_map</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">sigset_t</span> sigset;</span><br><span class="line">    <span class="built_in">sigpending</span>(&amp;sigset);  <span class="comment">// 获取当前未决信号集</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 从31到1遍历所有可能的信号</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">31</span>; i &gt;= <span class="number">1</span>; --i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sigismember</span>(&amp;sigset, i)) </span><br><span class="line">            cout &lt;&lt; <span class="number">1</span> &lt;&lt; <span class="string">&quot; &quot;</span>;  <span class="comment">// 该信号处于未决状态</span></span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">            cout &lt;&lt; <span class="number">0</span> &lt;&lt; <span class="string">&quot; &quot;</span>;   <span class="comment">// 该信号未产生</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 信号处理函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> sign)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 打印收到的信号信息</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;signal &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; <span class="string">&quot; begin&quot;</span> &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 无限循环打印信号状态</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">print_pending_map</span>();  <span class="comment">// 打印当前未决信号集</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Processing signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);  <span class="comment">// 每秒打印一次</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 设置SIGINT的信号处理</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">sigaction</span> act, oact;</span><br><span class="line">    <span class="built_in">sigemptyset</span>(&amp;act.sa_mask);  <span class="comment">// 初始化信号屏蔽字</span></span><br><span class="line">    <span class="built_in">sigemptyset</span>(&amp;oact.sa_mask);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 关键设置：在执行SIGINT处理函数时阻塞SIGQUIT</span></span><br><span class="line">    <span class="built_in">sigaddset</span>(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 将SIGQUIT加入阻塞集</span></span><br><span class="line">    </span><br><span class="line">    act.sa_handler = myhandler;  <span class="comment">// 设置信号处理函数</span></span><br><span class="line">    <span class="built_in">sigaction</span>(SIGINT, &amp;act, &amp;oact);  <span class="comment">// 注册SIGINT的处理方式</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 为SIGQUIT设置相同的处理函数(用于演示)</span></span><br><span class="line">    <span class="built_in">signal</span>(SIGQUIT, myhandler);  <span class="comment">// 注意：这里使用signal而不是sigaction</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建子进程</span></span><br><span class="line">    <span class="type">pid_t</span> ret = fork();</span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">0</span>)  <span class="comment">// 子进程代码</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 子进程无限循环打印自己的PID</span></span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; running...&quot;</span> &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 父进程代码</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒让子进程启动</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 第一次向子进程发送SIGINT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGINT to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGINT);  <span class="comment">// 发送SIGINT信号</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 第二次向子进程发送SIGINT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGINT to child process again&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGINT);</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 向子进程发送SIGQUIT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGQUIT to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGQUIT);  <span class="comment">// 发送SIGQUIT信号</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 向子进程发送SIGKILL(无法被捕获或忽略)</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGKILL to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGKILL);  <span class="comment">// 发送SIGKILL信号强制终止子进程</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">wait</span>(<span class="literal">nullptr</span>);  <span class="comment">// 等待子进程结束</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="代码设计目标">代码设计目标</span></h5><p>本实验通过父子进程模型，演示以下Linux信号处理核心机制：</p>
+<ul>
+<li>信号处理函数的注册方式差异（<code>signal</code> vs <code>sigaction</code>）</li>
+<li>信号阻塞掩码（sa_mask）的实际效果</li>
+<li>未决信号集（pending signals）的动态变化</li>
+<li>不可阻塞信号（SIGKILL）的特殊性</li>
+</ul>
+<h5><span id="核心组件说明">核心组件说明</span></h5><p>信号监控函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_pending_map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">sigset_t</span> sigset;</span><br><span class="line">    <span class="built_in">sigpending</span>(&amp;sigset);  <span class="comment">// 获取当前未决信号集</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">31</span>; i &gt;= <span class="number">1</span>; --i) &#123;</span><br><span class="line">        cout &lt;&lt; (<span class="built_in">sigismember</span>(&amp;sigset, i) ? <span class="number">1</span> : <span class="number">0</span>) &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>功能</strong>：实时打印信号未决状态，每个bit代表对应信号是否处于未决状态。</p>
+<p>信号处理函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> sign)</span> </span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Handler executing for: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;  <span class="comment">// 用于保持处理状态便于观察</span></span><br><span class="line">        <span class="built_in">print_pending_map</span>();</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>设计意图</strong>：通过无限循环模拟长时间信号处理，便于观察信号阻塞效果。</p>
+<h5><span id="关键配置">关键配置</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 配置SIGINT处理</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">sigaction</span> act;</span><br><span class="line"><span class="built_in">sigemptyset</span>(&amp;act.sa_mask);</span><br><span class="line"><span class="built_in">sigaddset</span>(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 关键设置！</span></span><br><span class="line">act.sa_handler = myhandler;</span><br><span class="line"><span class="built_in">sigaction</span>(SIGINT, &amp;act, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 配置SIGQUIT处理（对比组）</span></span><br><span class="line"><span class="built_in">signal</span>(SIGQUIT, myhandler);</span><br></pre></td></tr></table></figure>
+
+<p><strong>核心设置</strong>：当处理SIGINT时，自动阻塞SIGQUIT信号。</p>
+<h5><span id="实验流程">实验流程</span></h5><pre class="mermaid">sequenceDiagram
+    participant Parent
+    participant Child
+    Parent->>Child: fork()
+    loop 子进程运行
+        Child->>Child: 打印运行状态
+    end
+    Parent->>Child: kill(SIGINT)
+    Child->>Child: 执行myhandler
+    Parent->>Child: kill(SIGINT) 
+    Parent->>Child: kill(SIGQUIT)
+    Note right of Child: SIGQUIT被阻塞<br>保持pending状态
+    Parent->>Child: kill(SIGKILL)</pre>
+
+<p>结果输出如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign</span><br><span class="line">╰─➤  ./signal_cap.o</span><br><span class="line">Child process 703969 running...</span><br><span class="line">Parent sending SIGINT to child process</span><br><span class="line">signal Interrupt begin</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGINT to child process again</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGQUIT to child process</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGKILL to child process</span><br></pre></td></tr></table></figure>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: transparent  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 1.2s ease-in-out;
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
+      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
+    ];
+    // 预加载所有图片
+    function preloadImages(urls) {
+      urls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+      });
+    }
+    // 页面加载时执行
+    window.addEventListener('load', () => {
+      preloadImages(bgImages);
+    })
+    let bgInterval = null;
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    function createUniverse() {
+      if (universeCanvas) {
+        bgContainer.removeChild(universeCanvas);
+        cancelAnimationFrame(animationId);
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'universe-canvas';
+      canvas.style.position = 'fixed';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 800; // 增加星星数量
+
+      // 星空颜色配置
+      const colors = {
+        spaceGradient: [
+          '#0b0e23', // 深蓝黑
+          '#1a1b3a', // 宇宙紫
+          '#0f1120'  // 太空黑
+        ],
+        starColors: [
+          'rgba(255, 255, 255, {alpha})',  // 纯白
+          'rgba(200, 220, 255, {alpha})',  // 冷白
+          'rgba(180, 200, 255, {alpha})',   // 淡蓝
+          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
+        ]
+      };
+
+      // 初始化星星
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.0 + 0.4,
+          originalRadius: Math.random() * 0.8 + 0.6,
+          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
+          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
+          colorType: Math.floor(Math.random() * colors.starColors.length),
+          orbitRadius: Math.random() * 2,    // 减小轨道半径
+          angle: Math.random() * Math.PI * 2
+        });
+      }
+
+
+      // 动态背景参数
+      let bgPulsePhase = 0;
+
+      // 主渲染函数
+      function render() {
+        // 动态宇宙渐变背景
+        bgPulsePhase += 0.002;
+        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
+
+        const gradient = ctx.createRadialGradient(
+          canvas.width * 0.3, canvas.height * 0.7, 0,
+          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
+        );
+
+        // 动态变化的渐变颜色
+        gradient.addColorStop(0, blendColors(
+          colors.spaceGradient[0],
+          colors.spaceGradient[1],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(0.7, blendColors(
+          colors.spaceGradient[1],
+          colors.spaceGradient[2],
+          pulseFactor
+        ));
+
+        gradient.addColorStop(1, colors.spaceGradient[2]);
+
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制星星
+        const now = Date.now() / 5;
+        stars.forEach(star => {
+          // 自然闪烁效果
+          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
+          star.radius = star.originalRadius * blinkFactor;
+          star.alpha = 0.3 + blinkFactor * 0.5;
+
+          // 轻微轨道运动
+          star.angle += 0.0003;
+          const offsetX = Math.cos(star.angle) * star.orbitRadius;
+          const offsetY = Math.sin(star.angle) * star.orbitRadius;
+
+          // 绘制星星
+          ctx.beginPath();
+          ctx.arc(
+            star.x + offsetX,
+            star.y + offsetY,
+            star.radius,
+            0,
+            Math.PI * 2
+          );
+
+          // 使用随机颜色
+          const color = colors.starColors[star.colorType]
+            .replace('{alpha}', star.alpha.toFixed(2));
+          ctx.fillStyle = color;
+          ctx.fill();
+
+          // 大星星添加光晕
+          if (star.originalRadius > 1.5) {
+            ctx.beginPath();
+            ctx.arc(
+              star.x + offsetX,
+              star.y + offsetY,
+              star.radius * 3,
+              0,
+              Math.PI * 2
+            );
+            ctx.fillStyle = color.replace(')', ', 0.15)');
+            ctx.fill();
+          }
+        });
+
+        animationId = requestAnimationFrame(render);
+      }
+
+      // 颜色混合函数
+      function blendColors(color1, color2, ratio) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+
+        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      animationId = requestAnimationFrame(render);
+
+      // 响应式调整
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      universeCanvas = canvas;
+      return canvas;
+    }
+
+    // ================ 其余保持不变的代码 ================
+    function changeBackground() {
+      if (document.documentElement.classList.contains('dark-mode')) return;
+      const randomIndex = Math.floor(Math.random() * bgImages.length);
+      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    bgImages.forEach(img => new Image().src = img);
+
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    function setDarkMode(enable) {
+      if (enable) {
+        clearInterval(bgInterval);
+        bgContainer.style.backgroundImage = 'none';
+        bgContainer.appendChild(createUniverse());
+      } else {
+        if (universeCanvas) {
+          cancelAnimationFrame(animationId);
+          bgContainer.removeChild(universeCanvas);
+          universeCanvas = null;
+        }
+        changeBackground();
+        bgInterval = setInterval(changeBackground, 30000);
+      }
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      changeBackground();
+      bgInterval = setInterval(changeBackground, 30000);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
