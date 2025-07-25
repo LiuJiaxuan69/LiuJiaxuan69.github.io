@@ -727,7 +727,7 @@ C语言文件操作回顾
 
 <style>
     .dark-mode .main{
-        background-color: transparent  !important;
+        background-color: rgb(0, 0, 0, 0.3)  !important;
         backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
     }
@@ -824,7 +824,7 @@ C语言文件操作回顾
 
   /* 新增：背景图平滑过渡 */
   #custom-bg {
-    transition: background-image 1.2s ease-in-out;
+    
   }
 
   /* 原有按钮样式保持不变 */
@@ -921,212 +921,29 @@ C语言文件操作回顾
   (function () {
     // ================ 共享变量 ================
     const bgContainer = document.getElementById('custom-bg');
-    const bgImages = ['/img/welcome.jpg', '/img/bg1.jpg', '/img/bg2.jpg', '/img/bg3.png', '/img/bg4.jpg', '/img/bg5.jpg', '/img/bg6.jpg', '/img/bg7.jpg'
-      , '/img/bg8.jpg', '/img/bg9.jpg', '/img/bg10.jpg', '/img/bg11.jpg'
-    ];
-    // 预加载所有图片
-    function preloadImages(urls) {
-      urls.forEach(url => {
-        const img = new Image();
-        img.src = url;
-      });
-    }
-    // 页面加载时执行
-    window.addEventListener('load', () => {
-      preloadImages(bgImages);
-    })
-    let bgInterval = null;
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
     let universeCanvas = null;
     let animationId = null;
 
     // ================ 宇宙星空背景系统 ================
-    function createUniverse() {
-      if (universeCanvas) {
-        bgContainer.removeChild(universeCanvas);
-        cancelAnimationFrame(animationId);
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.id = 'universe-canvas';
-      canvas.style.position = 'fixed';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
-      canvas.style.width = '100vw';
-      canvas.style.height = '100vh';
-      canvas.style.zIndex = '0';
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-
-      const ctx = canvas.getContext('2d');
-      const stars = [];
-      const starCount = 800; // 增加星星数量
-
-      // 星空颜色配置
-      const colors = {
-        spaceGradient: [
-          '#0b0e23', // 深蓝黑
-          '#1a1b3a', // 宇宙紫
-          '#0f1120'  // 太空黑
-        ],
-        starColors: [
-          'rgba(255, 255, 255, {alpha})',  // 纯白
-          'rgba(200, 220, 255, {alpha})',  // 冷白
-          'rgba(180, 200, 255, {alpha})',   // 淡蓝
-          'rgba(255, 230, 200, {alpha})',  // 暖白(少量)
-        ]
-      };
-
-      // 初始化星星
-      for (let i = 0; i < starCount; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 1.0 + 0.4,
-          originalRadius: Math.random() * 0.8 + 0.6,
-          alpha: Math.random() * 0.5 + 0.2,  // 适当亮度
-          blinkSpeed: Math.random() * 0.01 + 0.005, // 中等闪烁速度
-          colorType: Math.floor(Math.random() * colors.starColors.length),
-          orbitRadius: Math.random() * 2,    // 减小轨道半径
-          angle: Math.random() * Math.PI * 2
-        });
-      }
-
-
-      // 动态背景参数
-      let bgPulsePhase = 0;
-
-      // 主渲染函数
-      function render() {
-        // 动态宇宙渐变背景
-        bgPulsePhase += 0.002;
-        const pulseFactor = 0.5 + Math.sin(bgPulsePhase) * 0.5;
-
-        const gradient = ctx.createRadialGradient(
-          canvas.width * 0.3, canvas.height * 0.7, 0,
-          canvas.width * 0.7, canvas.height * 0.3, canvas.width * 1.5
-        );
-
-        // 动态变化的渐变颜色
-        gradient.addColorStop(0, blendColors(
-          colors.spaceGradient[0],
-          colors.spaceGradient[1],
-          pulseFactor
-        ));
-
-        gradient.addColorStop(0.7, blendColors(
-          colors.spaceGradient[1],
-          colors.spaceGradient[2],
-          pulseFactor
-        ));
-
-        gradient.addColorStop(1, colors.spaceGradient[2]);
-
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 绘制星星
-        const now = Date.now() / 5;
-        stars.forEach(star => {
-          // 自然闪烁效果
-          const blinkFactor = 0.5 + Math.sin(now * star.blinkSpeed) * 0.5;
-          star.radius = star.originalRadius * blinkFactor;
-          star.alpha = 0.3 + blinkFactor * 0.5;
-
-          // 轻微轨道运动
-          star.angle += 0.0003;
-          const offsetX = Math.cos(star.angle) * star.orbitRadius;
-          const offsetY = Math.sin(star.angle) * star.orbitRadius;
-
-          // 绘制星星
-          ctx.beginPath();
-          ctx.arc(
-            star.x + offsetX,
-            star.y + offsetY,
-            star.radius,
-            0,
-            Math.PI * 2
-          );
-
-          // 使用随机颜色
-          const color = colors.starColors[star.colorType]
-            .replace('{alpha}', star.alpha.toFixed(2));
-          ctx.fillStyle = color;
-          ctx.fill();
-
-          // 大星星添加光晕
-          if (star.originalRadius > 1.5) {
-            ctx.beginPath();
-            ctx.arc(
-              star.x + offsetX,
-              star.y + offsetY,
-              star.radius * 3,
-              0,
-              Math.PI * 2
-            );
-            ctx.fillStyle = color.replace(')', ', 0.15)');
-            ctx.fill();
-          }
-        });
-
-        animationId = requestAnimationFrame(render);
-      }
-
-      // 颜色混合函数
-      function blendColors(color1, color2, ratio) {
-        const r1 = parseInt(color1.substring(1, 3), 16);
-        const g1 = parseInt(color1.substring(3, 5), 16);
-        const b1 = parseInt(color1.substring(5, 7), 16);
-
-        const r2 = parseInt(color2.substring(1, 3), 16);
-        const g2 = parseInt(color2.substring(3, 5), 16);
-        const b2 = parseInt(color2.substring(5, 7), 16);
-
-        const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
-        const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
-        const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
-
-        return `rgb(${r}, ${g}, ${b})`;
-      }
-
-      animationId = requestAnimationFrame(render);
-
-      // 响应式调整
-      window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      });
-
-      universeCanvas = canvas;
-      return canvas;
-    }
-
-    // ================ 其余保持不变的代码 ================
-    function changeBackground() {
-      if (document.documentElement.classList.contains('dark-mode')) return;
-      const randomIndex = Math.floor(Math.random() * bgImages.length);
-      bgContainer.style.backgroundImage = `url('${bgImages[randomIndex]}')`;
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
       bgContainer.style.backgroundColor = 'transparent';
     }
-
-    bgImages.forEach(img => new Image().src = img);
-
-    const themeToggle = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
-
+ 
+    // ================ 主题切换逻辑 ================
     function setDarkMode(enable) {
-      if (enable) {
-        clearInterval(bgInterval);
-        bgContainer.style.backgroundImage = 'none';
-        bgContainer.appendChild(createUniverse());
-      } else {
-        if (universeCanvas) {
-          cancelAnimationFrame(animationId);
-          bgContainer.removeChild(universeCanvas);
-          universeCanvas = null;
-        }
-        changeBackground();
-        bgInterval = setInterval(changeBackground, 30000);
-      }
+      setBackground(enable);
       localStorage.setItem('darkMode', enable);
     }
 
@@ -1134,8 +951,7 @@ C语言文件操作回顾
       htmlElement.classList.add('dark-mode');
       setDarkMode(true);
     } else {
-      changeBackground();
-      bgInterval = setInterval(changeBackground, 30000);
+      setDarkMode(false);
     }
 
     themeToggle.addEventListener('click', () => {
