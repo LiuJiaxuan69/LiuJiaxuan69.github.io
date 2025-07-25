@@ -213,19 +213,23 @@
         </div>
         
             <div id="post0">
-                <p>七月 24, 2025</p>
+                <p>七月 25, 2025</p>
                 <h2>
-                    <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" title="Linux 线程控制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程控制</a>
+                    <a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/" title="Linux 线程互斥" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程互斥</a>
                 </h2>
                 <p class="summary">
 
 
-POSIX 线程库
-使用 pthread 注意事项
+进程线程间的互斥相关概念详解
+共享资源
+临界资源
+临界区
+互斥
+原子性
+互斥的实现方式
 
 
-pthread_create 函数：线程创建
-函数原...</p>
+互斥锁 Mute...</p>
             </div>
             
 
@@ -234,10 +238,41 @@ pthread_create 函数：线程创建
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" 
+       title="Linux 线程控制"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>七月 24, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" title="Linux 线程控制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程控制</a></h3>
+        
+        <p>
+
+
+POSIX 线程库
+使用 pthread 注意事项
+
+
+pthread_create 函数：线程创建
+函数原型
+参数说明
+返回值
+使用示例
+注意事项...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" 
        title="Linux 线程概念"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -271,7 +306,7 @@ pthread_create 函数：线程创建
     <a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/" 
        title="Linux SIGCHLD信号处理与僵尸进程清理实验"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -301,7 +336,7 @@ pthread_create 函数：线程创建
     <a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/" 
        title="Linux 信号捕捉"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -333,7 +368,7 @@ struct sigaction 结构体
     <a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/" 
        title="Linux 信号管理"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -363,7 +398,7 @@ struct sigaction 结构体
     <a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/" 
        title="Linux 信号产生"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -387,7 +422,7 @@ Linux 信号分类：普通信号 vs 实时信号
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/" 
        title="Linux 进程间通信--system V 共享内存"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg3.png" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -424,7 +459,7 @@ shmctl 函数
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/" 
        title="Linux 进程间通信--命名管道"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -459,7 +494,7 @@ mkfifo 函数
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/" 
        title="Linux 进程间通信--匿名管道"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -483,34 +518,6 @@ mkfifo 函数
 （1）子进程疯狂写入，父进程延迟读取
 （2）父进程读取空管道
 ...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" 
-       title="Linux 动态库和静态库"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 19, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" title="Linux 动态库和静态库" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 动态库和静态库</a></h3>
-        
-        <p>
-
-
-静态库创建
-动态库创建
-
-
-
-静态库创建我们先设计一个简单的头文件及实现方法：
-1234567891011121314151617181920212...</p>
     </div>
 </div>
 

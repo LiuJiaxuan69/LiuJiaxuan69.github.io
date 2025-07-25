@@ -1,0 +1,1305 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 线程互斥 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+进程线程间的互斥相关概念详解
+共享资源
+临界资源
+临界区
+互斥
+原子性
+互斥的实现方式
+
+
+互斥锁 Mutex
+背景引入
+PTHREAD_MUTEX_INITIALIZER 静态初始化方式
+p,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 线程互斥 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+进程线程间的互斥相关概念详解
+共享资源
+临界资源
+临界区
+互斥
+原子性
+互斥的实现方式
+
+
+互斥锁 Mutex
+背景引入
+PTHREAD_MUTEX_INITIALIZER 静态初始化方式
+p,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 线程互斥 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+进程线程间的互斥相关概念详解
+共享资源
+临界资源
+临界区
+互斥
+原子性
+互斥的实现方式
+
+
+互斥锁 Mutex
+背景引入
+PTHREAD_MUTEX_INITIALIZER 静态初始化方式
+p,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 线程互斥</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 线程互斥</h1>
+        <div class="stuff">
+            <span>七月 25, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E4%BA%92%E6%96%A5/" rel="tag">互斥</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BA%BF%E7%A8%8B/" rel="tag">线程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E4%BA%92%E6%96%A5%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E8%AF%A6%E8%A7%A3">进程线程间的互斥相关概念详解</a><ul>
+<li><a href="#%E5%85%B1%E4%BA%AB%E8%B5%84%E6%BA%90">共享资源</a></li>
+<li><a href="#%E4%B8%B4%E7%95%8C%E8%B5%84%E6%BA%90">临界资源</a></li>
+<li><a href="#%E4%B8%B4%E7%95%8C%E5%8C%BA">临界区</a></li>
+<li><a href="#%E4%BA%92%E6%96%A5">互斥</a></li>
+<li><a href="#%E5%8E%9F%E5%AD%90%E6%80%A7">原子性</a></li>
+<li><a href="#%E4%BA%92%E6%96%A5%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F">互斥的实现方式</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%92%E6%96%A5%E9%94%81-mutex">互斥锁 Mutex</a><ul>
+<li><a href="#%E8%83%8C%E6%99%AF%E5%BC%95%E5%85%A5">背景引入</a></li>
+<li><a href="#pthread_mutex_initializer-%E9%9D%99%E6%80%81%E5%88%9D%E5%A7%8B%E5%8C%96%E6%96%B9%E5%BC%8F">PTHREAD_MUTEX_INITIALIZER 静态初始化方式</a></li>
+<li><a href="#pthread_mutex_init-%E5%87%BD%E6%95%B0%E5%88%9D%E5%A7%8B%E5%8C%96%E4%BA%92%E6%96%A5%E9%94%81">pthread_mutex_init 函数：初始化互斥锁</a></li>
+<li><a href="#pthread_mutex_destroy-%E5%87%BD%E6%95%B0%E9%94%80%E6%AF%81%E4%BA%92%E6%96%A5%E9%94%81">pthread_mutex_destroy 函数：销毁互斥锁</a></li>
+<li><a href="#pthread_mutex_lock-%E5%87%BD%E6%95%B0%E5%8A%A0%E9%94%81">pthread_mutex_lock 函数：加锁</a></li>
+<li><a href="#pthread_mutex_unlock-%E5%87%BD%E6%95%B0%E8%A7%A3%E9%94%81">pthread_mutex_unlock 函数：解锁</a></li>
+<li><a href="#pthread_mutex_trylock-%E5%87%BD%E6%95%B0%E9%9D%9E%E9%98%BB%E5%A1%9E%E5%8A%A0%E9%94%81">pthread_mutex_trylock 函数：非阻塞加锁</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%92%E6%96%A5%E9%94%81%E7%9A%84%E5%BA%94%E7%94%A8">互斥锁的应用</a><ul>
+<li><a href="#%E6%8A%A2%E7%A5%A8%E9%97%AE%E9%A2%98">抢票问题</a></li>
+<li><a href="#%E4%BA%92%E6%96%A5%E9%94%81%E7%9A%84%E5%B0%81%E8%A3%85">互斥锁的封装</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="进程线程间的互斥相关概念详解">进程线程间的互斥相关概念详解</span></h2><h3><span id="共享资源">共享资源</span></h3><p>共享资源是指在多线程或多进程环境下，可以被多个执行流（线程或进程）共同访问的系统资源。这些资源可以是：</p>
+<ul>
+<li>内存区域</li>
+<li>文件</li>
+<li>硬件设备</li>
+<li>数据库记录</li>
+<li>变量或数据结构</li>
+</ul>
+<h3><span id="临界资源">临界资源</span></h3><p>临界资源是指那些在多线程执行流中需要被保护的共享资源。它们具有以下特点：</p>
+<ol>
+<li><strong>共享性</strong>：可以被多个线程访问</li>
+<li><strong>排他性</strong>：在某一时刻只能被一个线程使用</li>
+<li><strong>重要性</strong>：对这些资源的并发访问可能导致数据不一致或其他问题</li>
+</ol>
+<p><strong>例子</strong>：</p>
+<ul>
+<li>共享内存中的计数器变量</li>
+<li>打印机设备</li>
+<li>数据库中的某条记录</li>
+</ul>
+<h3><span id="临界区">临界区</span></h3><p>临界区是指每个线程内部访问临界资源的代码段。关键点包括：</p>
+<ol>
+<li><strong>位置</strong>：是代码的一部分，不是数据</li>
+<li><strong>功能</strong>：包含对临界资源的访问或修改操作</li>
+<li><strong>要求</strong>：需要确保同一时间只有一个线程能执行这段代码</li>
+</ol>
+<p><strong>例子</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 临界区开始</span></span><br><span class="line">pthread_mutex_lock(&amp;mutex);</span><br><span class="line">balance += amount;  <span class="comment">// 访问共享变量balance</span></span><br><span class="line">pthread_mutex_unlock(&amp;mutex);</span><br><span class="line"><span class="comment">// 临界区结束</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="互斥">互斥</span></h3><p>互斥是一种保证机制，确保在任何时刻只有一个执行流能够进入临界区并访问临界资源。互斥的特性包括：</p>
+<ol>
+<li><strong>排他性</strong>：一次只允许一个线程访问</li>
+<li><strong>必要性</strong>：防止竞态条件(race condition)</li>
+<li><strong>实现方式</strong>：通常通过锁机制实现</li>
+</ol>
+<p><strong>互斥的基本原则</strong>：</p>
+<ul>
+<li>空闲让进：当没有线程在临界区时，应允许一个请求进入的线程进入</li>
+<li>忙则等待：当已有线程在临界区时，其他试图进入的线程必须等待</li>
+<li>有限等待：等待进入临界区的线程应该在有限时间内获得机会</li>
+<li>让权等待（可选）：等待的线程应释放CPU，避免忙等待</li>
+</ul>
+<h3><span id="原子性">原子性</span></h3><p>原子性是指操作不可被中断的特性，即一个操作要么完全执行，要么完全不执行，不会出现执行到一半被中断的情况。关键点：</p>
+<ol>
+<li><strong>不可分割</strong>：操作作为一个不可分割的单元执行</li>
+<li><strong>状态二元</strong>：只有”完成”或”未完成”两种状态，没有中间状态</li>
+<li><strong>重要性</strong>：是保证线程安全的基础</li>
+</ol>
+<p><strong>实现原子性的方法</strong>：</p>
+<ul>
+<li>硬件支持的原子指令（如x86的<code>LOCK</code>前缀指令）</li>
+<li>使用互斥锁（mutex）保护非原子操作</li>
+<li>事务内存（某些高级语言支持）</li>
+</ul>
+<p><strong>例子</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 非原子操作（在多线程环境下可能出问题）</span></span><br><span class="line">counter++; </span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用原子操作（C11标准）</span></span><br><span class="line">atomic_fetch_add(&amp;counter, <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="互斥的实现方式">互斥的实现方式</span></h3><p>在实际编程中，实现互斥的常见方法包括：</p>
+<ol>
+<li><strong>互斥锁(Mutex)</strong>：最基本的互斥机制</li>
+<li><strong>信号量(Semaphore)</strong>：更通用的同步机制</li>
+<li><strong>自旋锁(Spinlock)</strong>：适用于短时间等待的场景</li>
+<li><strong>读写锁(Read-Write Lock)</strong>：区分读写操作</li>
+<li><strong>条件变量(Condition Variable)</strong>：配合互斥锁使用</li>
+</ol>
+<h2><span id="互斥锁-mutex">互斥锁 Mutex</span></h2><h3><span id="背景引入">背景引入</span></h3><h4><span id="线程数据的天然隔离">线程数据的天然隔离</span></h4><p>在大多数情况下，线程使用的数据都是<strong>局部变量</strong>，这些变量的地址空间位于线程的私有栈空间中。就像每个人都有自己的私人笔记本一样，这些局部变量：</p>
+<ul>
+<li>完全归属于创建它的线程</li>
+<li>生命周期与线程执行周期绑定</li>
+<li>其他线程根本无法直接访问</li>
+<li>天然具备线程安全性</li>
+</ul>
+<p>这种隔离性是线程独立运作的基础，也是多线程编程中最理想的数据使用方式。</p>
+<p>我们引入一个示例：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;      <span class="comment">// 使用标准命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> thread_num = <span class="number">10</span>; <span class="comment">// 定义线程数量为10</span></span><br><span class="line"><span class="type">int</span> tickets = <span class="number">1000</span>;        <span class="comment">// 共享变量：总票数1000张</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程数据结构体，用于传递线程信息</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span> &#123;</span><br><span class="line">    <span class="type">pthread_t</span> tid;        <span class="comment">// 线程ID</span></span><br><span class="line">    string name;          <span class="comment">// 线程名称</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程执行函数</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">thread_routine</span><span class="params">(<span class="type">void</span>* data)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 将void*参数转换为thread_data*类型</span></span><br><span class="line">    thread_data* td = <span class="built_in">static_cast</span>&lt;thread_data*&gt;(data);</span><br><span class="line">    <span class="comment">// 获取当前线程ID</span></span><br><span class="line">    td-&gt;tid = <span class="built_in">pthread_self</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 循环抢票</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// 检查是否还有票</span></span><br><span class="line">        <span class="keyword">if</span> (tickets &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">usleep</span>(<span class="number">1000</span>);  <span class="comment">// 模拟业务处理延迟(1毫秒)</span></span><br><span class="line">            tickets--;     <span class="comment">// 票数减1（临界区操作）</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 输出抢票信息</span></span><br><span class="line">            cout &lt;&lt; td-&gt;name &lt;&lt; <span class="string">&quot; get a ticket, &quot;</span> </span><br><span class="line">                 &lt;&lt; <span class="string">&quot;remaining tickets: &quot;</span> &lt;&lt; tickets &lt;&lt; endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;  <span class="comment">// 没有票了，退出循环</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">delete</span> td;      <span class="comment">// 释放线程数据内存</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;  <span class="comment">// 线程返回空指针</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids;  <span class="comment">// 存储线程ID</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建10个线程</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= thread_num; ++i) &#123;</span><br><span class="line">        string thread_name = <span class="string">&quot;thread-&quot;</span> + <span class="built_in">to_string</span>(i);  <span class="comment">// 生成线程名称</span></span><br><span class="line">        <span class="type">pthread_t</span> tid;                                  <span class="comment">// 线程ID变量</span></span><br><span class="line">        <span class="comment">// 创建线程数据对象</span></span><br><span class="line">        thread_data* td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: thread_name  <span class="comment">// 初始化线程名称</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 创建线程</span></span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, thread_routine, td);</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);  <span class="comment">// 将线程ID加入向量</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 等待所有线程结束</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> tid : tids) &#123;</span><br><span class="line">        <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// 主线程退出</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="共享变量的现实需求">共享变量的现实需求</span></h4><p>然而，纯粹的隔离无法满足现实编程需求。想象一个团队协作的场景：我们需要多个线程共同处理同一批数据，或者需要线程间传递处理结果。这时就必须引入<strong>共享变量</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 共享的票务资源</span></span><br><span class="line"><span class="type">int</span> tickets = <span class="number">1000</span>;  </span><br></pre></td></tr></table></figure>
+
+<p>共享变量就像办公室里的公共白板：</p>
+<ul>
+<li>所有团队成员（线程）都能看到并修改</li>
+<li>是线程间通信的重要渠道</li>
+<li>可以实现数据共享和协作处理</li>
+</ul>
+<h4><span id="并发操作引发的混乱">并发操作引发的混乱</span></h4><p>但当我们允许多个线程同时操作共享变量时，问题开始显现。以票务系统为例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(tickets &gt; <span class="number">0</span>)&#123;      <span class="comment">// 检查票数</span></span><br><span class="line">    <span class="built_in">usleep</span>(<span class="number">1000</span>);     <span class="comment">// 模拟业务处理延迟</span></span><br><span class="line">    tickets--;        <span class="comment">// 修改票数</span></span><br><span class="line">    cout &lt;&lt; td-&gt;name &lt;&lt; <span class="string">&quot; get a ticket, &quot;</span> </span><br><span class="line">                 &lt;&lt; <span class="string">&quot;remaining tickets: &quot;</span> &lt;&lt; tickets &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段看似简单的代码在多线程环境下会引发多种问题：</p>
+<ol>
+<li><strong>检查-修改的非原子性</strong>：判断<code>tickets&gt;0</code>和实际<code>tickets--</code>不是原子操作</li>
+<li><strong>线程调度的不确定性</strong>：线程可能在任意步骤被中断</li>
+<li><strong>数据竞争的幽灵</strong>：多个线程可能同时认为自己抢到了最后一张票</li>
+</ol>
+<h4><span id="一个令人不安的实验结果">一个令人不安的实验结果</span></h4><p>当我运行这个票务程序时，观察到了这些异常现象：</p>
+<ul>
+<li><strong>票数超卖</strong>：剩余票数显示为负数</li>
+<li><strong>数据不一致</strong>：控制台输出的剩余票数出现跳变</li>
+<li><strong>结果不可复现</strong>：每次运行得到的最终结果都不相同</li>
+</ul>
+<p>这些现象正是并发编程中典型的**竞态条件(Race Condition)**症状，它们暴露了多线程环境下共享数据访问的根本问题：<strong>非受控的并发访问会导致不确定的行为和数据损坏</strong>。</p>
+<p>结果展示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">thread-6 get a ticket, remaining tickets: 3</span><br><span class="line">thread-8 get a ticket, remaining tickets: 3</span><br><span class="line">thread-3 get a ticket, remaining tickets: 3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果出现跳变</span></span><br><span class="line">thread-2 get a ticket, remaining tickets: 0</span><br><span class="line">thread-1 get a ticket, remaining tickets: 0</span><br><span class="line">thread-9 get a ticket, remaining tickets: 0</span><br><span class="line">thread-5 get a ticket, remaining tickets: 0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">票数超卖（票数变为负数）</span></span><br><span class="line">thread-7 get a ticket, remaining tickets: -1</span><br><span class="line">thread-10 get a ticket, remaining tickets: -2</span><br><span class="line">thread-4 get a ticket, remaining tickets: -3</span><br><span class="line">thread-6 get a ticket, remaining tickets: -5</span><br><span class="line">thread-8 get a ticket, remaining tickets: -5</span><br></pre></td></tr></table></figure>
+
+<h4><span id="问题本质的思考">问题本质的思考</span></h4><p>为什么单线程下运行良好的代码，在多线程环境下就会出现各种异常？核心原因在于：</p>
+<ol>
+<li><strong>操作的非原子性</strong>：高级语言的简单语句可能对应多条机器指令</li>
+<li><strong>内存可见性问题</strong>：线程可能看到过期的数据副本</li>
+<li><strong>编译器&#x2F;处理器的优化</strong>：指令重排等优化可能改变程序语义</li>
+</ol>
+<p>这些底层细节在单线程环境下被完美隐藏，但在多线程环境下却成为必须面对的挑战。我们需要一种机制来规范线程对共享资源的访问，这就是我们接下来要探讨的**互斥锁(Mutex)**解决方案。</p>
+<h3><span id="pthread_mutex_initializer-静态初始化方式">PTHREAD_MUTEX_INITIALIZER 静态初始化方式</span></h3><h4><span id="基本语法格式">基本语法格式</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心特性">核心特性</span></h4><ol>
+<li><strong>编译时初始化</strong>：在程序加载时由编译器自动完成初始化</li>
+<li><strong>零成本抽象</strong>：不产生运行时初始化开销</li>
+<li><strong>默认属性</strong>：使用所有属性为默认值的互斥锁<ul>
+<li>类型：普通锁（PTHREAD_MUTEX_NORMAL）</li>
+<li>进程共享：仅限同一进程内（PTHREAD_PROCESS_PRIVATE）</li>
+<li>不具递归性</li>
+</ul>
+</li>
+</ol>
+<h4><span id="适用场景">适用场景</span></h4><ol>
+<li><p><strong>全局&#x2F;静态互斥锁</strong>：在文件作用域或static存储期变量</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 全局范围的静态初始化</span></span><br><span class="line"><span class="type">static</span> <span class="type">pthread_mutex_t</span> global_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">func</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 函数内的静态变量</span></span><br><span class="line">    <span class="type">static</span> <span class="type">pthread_mutex_t</span> local_static_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>简单用例</strong>：不需要特殊属性的快速初始化</p>
+</li>
+<li><p><strong>单次初始化</strong>：生命周期与程序相同的锁</p>
+</li>
+</ol>
+<h4><span id="典型使用示例">典型使用示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 静态初始化全局互斥锁</span></span><br><span class="line"><span class="type">pthread_mutex_t</span> counter_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"><span class="type">int</span> shared_counter = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span>* <span class="title function_">increment</span><span class="params">(<span class="type">void</span>* arg)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; ++i) &#123;</span><br><span class="line">        pthread_mutex_lock(&amp;counter_mutex);</span><br><span class="line">        shared_counter++;</span><br><span class="line">        pthread_mutex_unlock(&amp;counter_mutex);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">pthread_t</span> t1, t2;</span><br><span class="line">    </span><br><span class="line">    pthread_create(&amp;t1, <span class="literal">NULL</span>, increment, <span class="literal">NULL</span>);</span><br><span class="line">    pthread_create(&amp;t2, <span class="literal">NULL</span>, increment, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    pthread_join(t1, <span class="literal">NULL</span>);</span><br><span class="line">    pthread_join(t2, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Final counter value: %d\n&quot;</span>, shared_counter);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="使用限制">使用限制</span></h4><ol>
+<li><p><strong>不可用于堆内存</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误用法！</span></span><br><span class="line"><span class="type">pthread_mutex_t</span> *mutex = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="type">pthread_mutex_t</span>));</span><br><span class="line">*mutex = PTHREAD_MUTEX_INITIALIZER;  <span class="comment">// 未定义行为！</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>不可重复初始化</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line">pthread_mutex_init(&amp;mutex, <span class="literal">NULL</span>);  <span class="comment">// 错误！</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>不可跨模块依赖</strong>：不同编译单元间的初始化顺序不确定</p>
+</li>
+</ol>
+<h4><span id="底层实现原理">底层实现原理</span></h4><p>在Linux glibc中的典型实现：</p>
+<ol>
+<li>宏展开为结构体初始化表达式</li>
+<li>各字段被设置为表示”未锁定”状态的初始值</li>
+<li>属性字段设为默认值</li>
+</ol>
+<h4><span id="特殊注意事项">特殊注意事项</span></h4><ol>
+<li><p><strong>C++中的使用</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 必须放在全局/命名空间作用域</span></span><br><span class="line"><span class="keyword">namespace</span> &#123;</span><br><span class="line">    <span class="type">pthread_mutex_t</span> class_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 类静态成员(C++17后可用inline)</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClass</span> &#123;</span><br><span class="line">    <span class="type">static</span> <span class="type">pthread_mutex_t</span> s_mutex;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">pthread_mutex_t</span> MyClass::s_mutex = PTHREAD_MUTEX_INITIALIZER;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>与动态销毁的配合</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 合法但不必要的操作</span></span><br><span class="line">pthread_mutex_destroy(&amp;mutex); </span><br><span class="line"><span class="comment">// 之后不能再使用该mutex</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="静态初始化的设计哲学">静态初始化的设计哲学</span></h4><ol>
+<li><strong>RAII原则</strong>：利用语言特性自动管理资源</li>
+<li><strong>零开销原则</strong>：不引入不必要的运行时成本</li>
+<li><strong>简单性原则</strong>：为常见场景提供最简使用方式</li>
+</ol>
+<h3><span id="pthread_mutex_init-函数初始化互斥锁">pthread_mutex_init 函数：初始化互斥锁</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_init</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex, <span class="type">const</span> <span class="type">pthread_mutexattr_t</span> *attr)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="功能说明">功能说明</span></h4><p><code>pthread_mutex_init</code> 用于动态初始化一个互斥锁。与静态初始化（<code>PTHREAD_MUTEX_INITIALIZER</code>）不同，它允许：</p>
+<ol>
+<li>对互斥锁属性进行更精细的控制</li>
+<li>在运行时动态创建互斥锁</li>
+<li>初始化非全局&#x2F;静态存储期的互斥锁</li>
+</ol>
+<h4><span id="参数解析">参数解析</span></h4><ol>
+<li><strong>mutex</strong>：指向要初始化的互斥锁对象的指针</li>
+<li><strong>attr</strong>：指向互斥锁属性对象的指针，通常为：<ul>
+<li><code>NULL</code>：使用默认属性</li>
+<li>自定义属性对象：通过<code>pthread_mutexattr_init</code>创建</li>
+</ul>
+</li>
+</ol>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li>成功：返回0</li>
+<li>失败：返回错误编号（非零值）</li>
+</ul>
+<h4><span id="基础使用示例">基础使用示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex;</span><br><span class="line"><span class="comment">// 使用默认属性初始化</span></span><br><span class="line"><span class="keyword">if</span> (pthread_mutex_init(&amp;mutex, <span class="literal">NULL</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;Mutex initialization failed&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="带属性的初始化示例">带属性的初始化示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex;</span><br><span class="line"><span class="type">pthread_mutexattr_t</span> attr;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化属性对象</span></span><br><span class="line">pthread_mutexattr_init(&amp;attr);</span><br><span class="line"><span class="comment">// 设置互斥锁类型（如设置为递归锁）</span></span><br><span class="line">pthread_mutexattr_settype(&amp;attr, PTHREAD_MUTEX_RECURSIVE);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用自定义属性初始化互斥锁</span></span><br><span class="line"><span class="keyword">if</span> (pthread_mutex_init(&amp;mutex, &amp;attr) != <span class="number">0</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;Mutex initialization failed&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 销毁属性对象（初始化后不再需要）</span></span><br><span class="line">pthread_mutexattr_destroy(&amp;attr);</span><br></pre></td></tr></table></figure>
+
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li><strong>一对一原则</strong>：每个<code>pthread_mutex_init</code>必须对应一个<code>pthread_mutex_destroy</code></li>
+<li><strong>避免重复初始化</strong>：不要对已初始化的互斥锁再次初始化</li>
+<li><strong>作用域管理</strong>：确保互斥锁在需要时已初始化，在不再使用时销毁</li>
+<li><strong>错误检查</strong>：总是检查返回值以确保初始化成功</li>
+</ol>
+<h4><span id="典型应用场景">典型应用场景</span></h4><ol>
+<li>动态创建的互斥锁（如堆分配的互斥锁）</li>
+<li>需要非默认属性的互斥锁（如递归锁、进程共享锁等）</li>
+<li>C++类中封装的互斥锁成员变量</li>
+</ol>
+<h4><span id="与静态初始化的对比">与静态初始化的对比</span></h4><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>pthread_mutex_init</th>
+<th>PTHREAD_MUTEX_INITIALIZER</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>初始化时机</td>
+<td>运行时动态初始化</td>
+<td>编译时静态初始化</td>
+</tr>
+<tr>
+<td>属性配置</td>
+<td>支持自定义属性</td>
+<td>仅默认属性</td>
+</tr>
+<tr>
+<td>适用对象</td>
+<td>任意存储期的对象</td>
+<td>仅全局&#x2F;静态对象</td>
+</tr>
+<tr>
+<td>错误检查</td>
+<td>可检查返回值</td>
+<td>无错误检查</td>
+</tr>
+</tbody></table>
+<h4><span id="配套销毁函数">配套销毁函数</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_destroy</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>应在互斥锁不再使用时调用，释放相关资源。注意：</p>
+<ul>
+<li>确保没有线程持有或等待该锁</li>
+<li>销毁后不应再使用该互斥锁</li>
+<li>栈上的互斥锁在销毁前不能离开作用域</li>
+</ul>
+<h3><span id="pthread_mutex_destroy-函数销毁互斥锁">pthread_mutex_destroy 函数：销毁互斥锁</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_destroy</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="功能说明">功能说明</span></h4><p><code>pthread_mutex_destroy</code> 用于销毁一个互斥锁，释放其占用的资源。</p>
+<h4><span id="参数解析">参数解析</span></h4><ol>
+<li><strong>mutex</strong>：指向要销毁的互斥锁对象的指针</li>
+</ol>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li>成功：返回0</li>
+<li>失败：返回错误编号（非零值）</li>
+</ul>
+<p>该函数较为简单，故不做过多赘述。</p>
+<h3><span id="pthread_mutex_lock-函数加锁">pthread_mutex_lock 函数：加锁</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_lock</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心功能">核心功能</span></h4><ol>
+<li><strong>阻塞式获取锁</strong>：如果互斥锁已被其他线程持有，调用线程将进入阻塞状态</li>
+<li><strong>原子性保证</strong>：确保锁的获取操作是原子的，不会出现竞争条件</li>
+<li><strong>临界区保护</strong>：成功获取锁后，线程可以安全执行临界区代码</li>
+</ol>
+<h4><span id="参数说明">参数说明</span></h4><ul>
+<li><code>mutex</code>：指向已初始化的互斥锁对象的指针</li>
+</ul>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li>成功：返回0</li>
+<li>失败：返回错误编号（非零值），常见错误：<ul>
+<li><code>EINVAL</code>：互斥锁未初始化</li>
+<li><code>EDEADLK</code>：检测到死锁（某些实现）</li>
+</ul>
+</li>
+</ul>
+<h4><span id="基础使用模式">基础使用模式</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">critical_section</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 进入临界区前加锁</span></span><br><span class="line">    <span class="type">int</span> ret = pthread_mutex_lock(&amp;mutex);</span><br><span class="line">    <span class="keyword">if</span> (ret != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 错误处理</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* 临界区代码 */</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 离开临界区后解锁</span></span><br><span class="line">    pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="底层工作原理">底层工作原理</span></h4><ol>
+<li><strong>快速路径</strong>（无竞争时）：<ul>
+<li>通过原子操作尝试获取锁</li>
+<li>成功则立即返回</li>
+</ul>
+</li>
+<li><strong>慢速路径</strong>（有竞争时）：<ul>
+<li>线程进入等待队列</li>
+<li>内核调度器将线程置为睡眠状态</li>
+<li>当锁释放时唤醒等待线程</li>
+</ul>
+</li>
+</ol>
+<h4><span id="重要特性说明">重要特性说明</span></h4><ol>
+<li><p><strong>线程阻塞行为</strong>：</p>
+<ul>
+<li>默认情况下会使调用线程进入睡眠状态</li>
+<li>不消耗CPU资源等待</li>
+<li>被唤醒后会自动重新尝试获取锁</li>
+</ul>
+</li>
+<li><p><strong>锁的归属</strong>：</p>
+<ul>
+<li>锁与获取它的线程关联（某些类型）</li>
+<li>同一线程重复加锁可能导致死锁（普通锁）</li>
+</ul>
+</li>
+<li><p><strong>内存屏障作用</strong>：</p>
+<ul>
+<li>包含隐式的内存屏障（memory barrier）</li>
+<li>保证临界区内的内存操作不会被重排序到锁外部</li>
+</ul>
+</li>
+</ol>
+<h4><span id="错误处理">错误处理</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> result = pthread_mutex_lock(&amp;mutex);</span><br><span class="line"><span class="keyword">if</span> (result != <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">switch</span>(result) &#123;</span><br><span class="line">        <span class="keyword">case</span> EINVAL:</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Mutex not initialized\n&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> EDEADLK:</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Deadlock detected\n&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;Lock failed with error %d\n&quot;</span>, result);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 适当的错误恢复处理</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="性能考量">性能考量</span></h4><ol>
+<li><p><strong>临界区长度</strong>：</p>
+<ul>
+<li>应保持临界区尽可能短</li>
+<li>只保护真正需要同步的操作</li>
+</ul>
+</li>
+<li><p><strong>锁竞争</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 不良实践：在临界区内执行耗时操作</span></span><br><span class="line">pthread_mutex_lock(&amp;mutex);</span><br><span class="line">process_large_file();  <span class="comment">// 长时间操作</span></span><br><span class="line">pthread_mutex_unlock(&amp;mutex);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 改进方案</span></span><br><span class="line">pthread_mutex_lock(&amp;mutex);</span><br><span class="line"><span class="type">int</span> value = shared_value;  <span class="comment">// 快速获取值</span></span><br><span class="line">pthread_mutex_unlock(&amp;mutex);</span><br><span class="line"></span><br><span class="line">process_value(value);  <span class="comment">// 耗时操作放在锁外</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="递归锁特殊行为">递归锁特殊行为</span></h4><p>当互斥锁被初始化为递归锁（PTHREAD_MUTEX_RECURSIVE）时：</p>
+<ul>
+<li><p>同一线程可以多次加锁</p>
+</li>
+<li><p>必须有相同次数的解锁操作</p>
+</li>
+<li><p>示例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pthread_mutex_lock(&amp;mutex);  <span class="comment">// 第一次加锁</span></span><br><span class="line">pthread_mutex_lock(&amp;mutex);  <span class="comment">// 第二次加锁（仅递归锁允许）</span></span><br><span class="line"><span class="comment">/* 临界区代码 */</span></span><br><span class="line">pthread_mutex_unlock(&amp;mutex);  <span class="comment">// 第一次解锁</span></span><br><span class="line">pthread_mutex_unlock(&amp;mutex);  <span class="comment">// 第二次解锁</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="系统级影响">系统级影响</span></h4><ol>
+<li><strong>上下文切换</strong>：可能导致线程上下文切换开销</li>
+<li><strong>调度延迟</strong>：高竞争时可能增加线程调度延迟</li>
+<li><strong>优先级反转</strong>：可能引发优先级反转问题（需配合优先级继承机制）</li>
+</ol>
+<h3><span id="pthread_mutex_unlock-函数解锁">pthread_mutex_unlock 函数：解锁</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_unlock</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心功能">核心功能</span></h4><ol>
+<li><strong>释放锁</strong>：允许其他线程获取互斥锁</li>
+<li><strong>唤醒等待线程</strong>：如果有线程在等待该锁，唤醒其中一个</li>
+<li><strong>线程调度</strong>：被唤醒的线程可能立即运行</li>
+</ol>
+<h4><span id="参数说明">参数说明</span></h4><ul>
+<li><code>mutex</code>：指向已初始化的互斥锁对象的指针</li>
+</ul>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li>成功：返回0</li>
+<li>失败：返回错误编号（非零值），常见错误：<ul>
+<li><code>EINVAL</code>：互斥锁未初始化</li>
+<li><code>EPERM</code>：线程未持有该锁</li>
+</ul>
+</li>
+</ul>
+<p>与 <code>pthread_mutex_lock</code> 配套使用，不做过多赘述。</p>
+<h3><span id="pthread_mutex_trylock-函数非阻塞加锁">pthread_mutex_trylock 函数：非阻塞加锁</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">pthread_mutex_trylock</span><span class="params">(<span class="type">pthread_mutex_t</span> *mutex)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心特性">核心特性</span></h4><ol>
+<li><strong>非阻塞尝试</strong>：立即返回结果，不会使线程进入等待状态</li>
+<li><strong>快速失败</strong>：当锁不可用时直接返回错误而非阻塞</li>
+<li><strong>轻量级检查</strong>：比pthread_mutex_lock有更低的性能开销</li>
+</ol>
+<h4><span id="参数说明">参数说明</span></h4><ul>
+<li><code>mutex</code>：指向已初始化的互斥锁对象的指针</li>
+</ul>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li>成功获取锁：返回0</li>
+<li>锁已被占用：返回EBUSY（某些系统返回EAGAIN）</li>
+<li>其他错误：返回对应错误码（如EINVAL表示未初始化）</li>
+</ul>
+<h4><span id="典型使用场景">典型使用场景</span></h4><ol>
+<li><strong>避免死锁</strong>：在已持有某锁时尝试获取其他锁</li>
+<li><strong>优化性能</strong>：非关键路径的优化尝试</li>
+<li><strong>实时系统</strong>：不能接受阻塞的实时应用</li>
+</ol>
+<h4><span id="基础使用示例">基础使用示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">non_blocking_access</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> ret = pthread_mutex_trylock(&amp;mutex);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (ret == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">/* 成功获取锁，执行临界区代码 */</span></span><br><span class="line">        pthread_mutex_unlock(&amp;mutex);</span><br><span class="line">    &#125; </span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (ret == EBUSY) &#123;</span><br><span class="line">        <span class="comment">/* 锁被占用，执行替代逻辑 */</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Resource busy, executing fallback\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* 处理其他错误 */</span></span><br><span class="line">        perror(<span class="string">&quot;trylock failed&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="与lock的对比分析">与lock的对比分析</span></h4><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>trylock</th>
+<th>lock</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>阻塞行为</td>
+<td>永不阻塞</td>
+<td>可能阻塞</td>
+</tr>
+<tr>
+<td>返回值</td>
+<td>成功&#x2F;忙&#x2F;错误</td>
+<td>成功&#x2F;错误</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>较低</td>
+<td>较高（可能涉及上下文切换）</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>非必须成功的访问</td>
+<td>必须成功的访问</td>
+</tr>
+</tbody></table>
+<h2><span id="互斥锁的应用">互斥锁的应用</span></h2><h3><span id="抢票问题">抢票问题</span></h3><p>下面我们针对前面那个抢票的例子使用互斥锁避免临界区被冲突访问：</p>
+<p>情景再现：</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;      <span class="comment">// 使用标准命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> thread_num = <span class="number">10</span>; <span class="comment">// 定义线程数量为10</span></span><br><span class="line"><span class="type">int</span> tickets = <span class="number">1000</span>;        <span class="comment">// 共享变量：总票数1000张</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程数据结构体，用于传递线程信息</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span> &#123;</span><br><span class="line">    <span class="type">pthread_t</span> tid;        <span class="comment">// 线程ID</span></span><br><span class="line">    string name;          <span class="comment">// 线程名称</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程执行函数</span></span><br><span class="line"><span class="function"><span class="type">void</span>* <span class="title">thread_routine</span><span class="params">(<span class="type">void</span>* data)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 将void*参数转换为thread_data*类型</span></span><br><span class="line">    thread_data* td = <span class="built_in">static_cast</span>&lt;thread_data*&gt;(data);</span><br><span class="line">    <span class="comment">// 获取当前线程ID</span></span><br><span class="line">    td-&gt;tid = <span class="built_in">pthread_self</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 循环抢票</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// 检查是否还有票</span></span><br><span class="line">        <span class="keyword">if</span> (tickets &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">usleep</span>(<span class="number">1000</span>);  <span class="comment">// 模拟业务处理延迟(1毫秒)</span></span><br><span class="line">            tickets--;     <span class="comment">// 票数减1（临界区操作）</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 输出抢票信息</span></span><br><span class="line">            cout &lt;&lt; td-&gt;name &lt;&lt; <span class="string">&quot; get a ticket, &quot;</span> </span><br><span class="line">                 &lt;&lt; <span class="string">&quot;remaining tickets: &quot;</span> &lt;&lt; tickets &lt;&lt; endl;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;  <span class="comment">// 没有票了，退出循环</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">delete</span> td;      <span class="comment">// 释放线程数据内存</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;  <span class="comment">// 线程返回空指针</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids;  <span class="comment">// 存储线程ID</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建10个线程</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= thread_num; ++i) &#123;</span><br><span class="line">        string thread_name = <span class="string">&quot;thread-&quot;</span> + <span class="built_in">to_string</span>(i);  <span class="comment">// 生成线程名称</span></span><br><span class="line">        <span class="type">pthread_t</span> tid;                                  <span class="comment">// 线程ID变量</span></span><br><span class="line">        <span class="comment">// 创建线程数据对象</span></span><br><span class="line">        thread_data* td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: thread_name  <span class="comment">// 初始化线程名称</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 创建线程</span></span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, thread_routine, td);</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);  <span class="comment">// 将线程ID加入向量</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 等待所有线程结束</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> tid : tids) &#123;</span><br><span class="line">        <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// 主线程退出</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<p>接下来我们通过加锁来解决问题：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std; <span class="comment">// 使用标准命名空间</span></span><br><span class="line"></span><br><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER; <span class="comment">// 初始化全局互斥锁</span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> thread_num = <span class="number">10</span>; <span class="comment">// 定义线程数量为10</span></span><br><span class="line"><span class="type">int</span> tickets = <span class="number">1000</span>;        <span class="comment">// 共享变量：总票数1000张</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程数据结构体，用于传递线程信息</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">pthread_t</span> tid; <span class="comment">// 线程ID</span></span><br><span class="line">    string name;   <span class="comment">// 线程名称</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 计时器</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; start_time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">start</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        start_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="built_in">elapsed</span>() &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的毫秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsed</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> end_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">        <span class="keyword">return</span> std::chrono::<span class="built_in">duration</span>&lt;<span class="type">double</span>, std::milli&gt;(end_time - start_time).<span class="built_in">count</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsedSeconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">elapsed</span>() / <span class="number">1000.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程执行函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">thread_routine</span><span class="params">(<span class="type">void</span> *data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 将void*参数转换为thread_data*类型</span></span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(data);</span><br><span class="line">    <span class="comment">// 获取当前线程ID</span></span><br><span class="line">    td-&gt;tid = <span class="built_in">pthread_self</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 循环抢票</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 检查是否还有票</span></span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;mutex);</span><br><span class="line">        <span class="keyword">if</span> (tickets &gt; <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">usleep</span>(<span class="number">1000</span>); <span class="comment">// 模拟业务处理延迟(1毫秒)</span></span><br><span class="line">            tickets--;    <span class="comment">// 票数减1（临界区操作）</span></span><br><span class="line">            <span class="comment">// 输出抢票信息</span></span><br><span class="line">            cout &lt;&lt; td-&gt;name &lt;&lt; <span class="string">&quot; get a ticket, &quot;</span></span><br><span class="line">                 &lt;&lt; <span class="string">&quot;remaining tickets: &quot;</span> &lt;&lt; tickets &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">pthread_mutex_unlock</span>(&amp;mutex);</span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">// 没有票了，退出循环</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;mutex);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">delete</span> td;      <span class="comment">// 释放线程数据内存</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>; <span class="comment">// 线程返回空指针</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids; <span class="comment">// 存储线程ID</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建10个线程</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= thread_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string thread_name = <span class="string">&quot;thread-&quot;</span> + <span class="built_in">to_string</span>(i); <span class="comment">// 生成线程名称</span></span><br><span class="line">        <span class="type">pthread_t</span> tid;                                 <span class="comment">// 线程ID变量</span></span><br><span class="line">        <span class="comment">// 创建线程数据对象</span></span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name : thread_name <span class="comment">// 初始化线程名称</span></span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建线程</span></span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, thread_routine, td);</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid); <span class="comment">// 将线程ID加入向量</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待所有线程结束</span></span><br><span class="line">    &#123;</span><br><span class="line">        Timer timer;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> tid : tids)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">// 主线程退出</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们会发现程序运行没有任何问题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">thread-1 get a ticket, remaining tickets: 3</span><br><span class="line">thread-1 get a ticket, remaining tickets: 2</span><br><span class="line">thread-1 get a ticket, remaining tickets: 1</span><br><span class="line">thread-1 get a ticket, remaining tickets: 0</span><br><span class="line">1084.92</span><br></pre></td></tr></table></figure>
+
+<p>若不加锁，结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">thread-8thread-2 get a ticket, remaining tickets: -4</span><br><span class="line">thread-5 get a ticket, remaining tickets: -6</span><br><span class="line">thread-3 get a ticket, remaining tickets: -7</span><br><span class="line">thread-6 get a ticket, remaining tickets: -8</span><br><span class="line">thread-9 get a ticket, remaining tickets: -8</span><br><span class="line"> get a ticket, remaining tickets: -8</span><br><span class="line">thread-10 get a ticket, remaining tickets: -9</span><br><span class="line">110.501</span><br></pre></td></tr></table></figure>
+
+<p>可以发现，通过加互斥锁，结果变得正确，不过代价就是会消耗更多的时间，这也正是为什么在保证数据安全的前提下，临界区越小越好的原因</p>
+<h3><span id="互斥锁的封装">互斥锁的封装</span></h3><p>接下来，我们尝试对 Linux 的锁进行封装：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LOCK_H_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _LOCK_H_</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span>  <span class="comment">// POSIX线程库头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;exception&gt;</span>  <span class="comment">// 标准异常处理头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span>   <span class="comment">// 标准输入输出头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @class Mutex</span></span><br><span class="line"><span class="comment"> * @brief 封装POSIX互斥锁的线程安全互斥量类</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 该类提供了基本的互斥锁功能，包括加锁、解锁和尝试加锁操作。</span></span><br><span class="line"><span class="comment"> * 使用RAII模式管理锁资源，确保锁的正确初始化和释放。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Mutex</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 构造函数，初始化互斥锁</span></span><br><span class="line"><span class="comment">     * @throw std::exception 如果互斥锁初始化失败</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">Mutex</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 初始化互斥锁，使用默认属性(nullptr)</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">pthread_mutex_init</span>(&amp;mutex_, <span class="literal">nullptr</span>) != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">throw</span> std::<span class="built_in">exception</span>();  <span class="comment">// 初始化失败抛出异常</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 析构函数，销毁互斥锁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ~<span class="built_in">Mutex</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;mutex_);  <span class="comment">// 销毁互斥锁</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 禁用拷贝构造函数和赋值运算符</span></span><br><span class="line">    <span class="built_in">Mutex</span>(<span class="type">const</span> Mutex&amp;) = <span class="keyword">delete</span>;            <span class="comment">// 拷贝构造禁用</span></span><br><span class="line">    Mutex&amp; <span class="keyword">operator</span>=(<span class="type">const</span> Mutex&amp;) = <span class="keyword">delete</span>; <span class="comment">// 赋值操作禁用</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 加锁操作（阻塞式）</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * 如果锁已被其他线程持有，调用线程将被阻塞直到获得锁。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">lock</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;mutex_);  <span class="comment">// POSIX加锁操作</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 尝试加锁（非阻塞式）</span></span><br><span class="line"><span class="comment">     * @return bool 加锁成功返回true，失败返回false</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">try_lock</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">pthread_mutex_trylock</span>(&amp;mutex_) == <span class="number">0</span>;  <span class="comment">// 尝试加锁，不阻塞</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 解锁操作</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">unlock</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;mutex_);  <span class="comment">// POSIX解锁操作</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 获取原生互斥锁句柄</span></span><br><span class="line"><span class="comment">     * @return pthread_mutex_t* 指向底层POSIX互斥锁的指针</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * 用于需要与POSIX线程API直接交互的场景。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">pthread_mutex_t</span>* <span class="title">native_handle</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &amp;mutex_;  <span class="comment">// 返回底层互斥锁指针</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">pthread_mutex_t</span> mutex_;  <span class="comment">// POSIX互斥锁对象</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @class LockGuard</span></span><br><span class="line"><span class="comment"> * @brief 互斥锁守卫类，实现RAII风格的锁管理</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 在构造时自动加锁，析构时自动解锁，确保锁的释放，</span></span><br><span class="line"><span class="comment"> * 即使在异常发生时也能保证锁被正确释放。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LockGuard</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 构造函数，自动加锁</span></span><br><span class="line"><span class="comment">     * @param mutex 要管理的互斥锁引用</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * @note explicit关键字防止隐式转换</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">LockGuard</span><span class="params">(Mutex &amp;mutex)</span> : mutex_(mutex)</span></span><br><span class="line"><span class="function">    &#123;</span></span><br><span class="line">        mutex_.<span class="built_in">lock</span>();  <span class="comment">// 构造时自动加锁</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 析构函数，自动解锁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ~<span class="built_in">LockGuard</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        mutex_.<span class="built_in">unlock</span>();  <span class="comment">// 析构时自动解锁</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 禁用拷贝构造函数和赋值运算符</span></span><br><span class="line">    <span class="built_in">LockGuard</span>(<span class="type">const</span> LockGuard&amp;) = <span class="keyword">delete</span>;            <span class="comment">// 拷贝构造禁用</span></span><br><span class="line">    LockGuard&amp; <span class="keyword">operator</span>=(<span class="type">const</span> LockGuard&amp;) = <span class="keyword">delete</span>; <span class="comment">// 赋值操作禁用</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    Mutex &amp;mutex_;  <span class="comment">// 管理的互斥锁引用（使用引用避免空指针问题）</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">// _LOCK_H_</span></span></span><br></pre></td></tr></table></figure>
+
+<p>我们将这个基于 RAII 自动化管理的锁运用到我们的抢票程序中：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 循环抢票</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 检查是否还有票</span></span><br><span class="line">        <span class="comment">// pthread_mutex_lock(&amp;mutex);</span></span><br><span class="line">        <span class="function">LockGuard <span class="title">lg</span><span class="params">(*td-&gt;mutex)</span></span>;</span><br><span class="line">        <span class="keyword">if</span> (tickets &gt; <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">usleep</span>(<span class="number">1000</span>); <span class="comment">// 模拟业务处理延迟(1毫秒)</span></span><br><span class="line">            tickets--;    <span class="comment">// 票数减1（临界区操作）</span></span><br><span class="line">            <span class="comment">// 输出抢票信息</span></span><br><span class="line">            cout &lt;&lt; td-&gt;name &lt;&lt; <span class="string">&quot; get a ticket, &quot;</span></span><br><span class="line">                 &lt;&lt; <span class="string">&quot;remaining tickets: &quot;</span> &lt;&lt; tickets &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">            <span class="keyword">break</span>; <span class="comment">// 没有票了，退出循环</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，RAII 自动化管理只需要我们再循环开始处初始化变量即可，只要退出当前循环就一定会解锁，原先我们若在循环内部进行加锁和解锁操作，我们还需要关心 else 执行流中 break，因此需要额外在 else 分支中加上解锁操作。合理地利用 C++ 的特性来简化代码和增加代码健壮性是一个程序员的基本素养</p>
+<p>结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">thread-2 get a ticket, remaining tickets: 3</span><br><span class="line">thread-2 get a ticket, remaining tickets: 2</span><br><span class="line">thread-2 get a ticket, remaining tickets: 1</span><br><span class="line">thread-2 get a ticket, remaining tickets: 0</span><br><span class="line">1086.37</span><br></pre></td></tr></table></figure>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
