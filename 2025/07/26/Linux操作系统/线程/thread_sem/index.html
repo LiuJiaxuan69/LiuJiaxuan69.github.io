@@ -1,0 +1,1017 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 线程信号量（POSIX）--优化多生产者-消费者框架 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="POSIX线程信号量（Semaphore）基本概念POSIX信号量是一种用于线程同步的机制，主要用于控制对共享资源的访问。它维护一个计数器，提供两种基本操作：
+
+P操作（wait）：计数器减1，如果,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 线程信号量（POSIX）--优化多生产者-消费者框架 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="POSIX线程信号量（Semaphore）基本概念POSIX信号量是一种用于线程同步的机制，主要用于控制对共享资源的访问。它维护一个计数器，提供两种基本操作：
+
+P操作（wait）：计数器减1，如果,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 线程信号量（POSIX）--优化多生产者-消费者框架 - 刘家炫的博客"/>
+    <meta property="og:description" content="POSIX线程信号量（Semaphore）基本概念POSIX信号量是一种用于线程同步的机制，主要用于控制对共享资源的访问。它维护一个计数器，提供两种基本操作：
+
+P操作（wait）：计数器减1，如果,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</h1>
+        <div class="stuff">
+            <span>七月 26, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%90%8C%E6%AD%A5/" rel="tag">同步</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BA%BF%E7%A8%8B/" rel="tag">线程</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <h2><span id="posix线程信号量semaphore">POSIX线程信号量（Semaphore）</span></h2><h3><span id="基本概念">基本概念</span></h3><p>POSIX信号量是一种用于线程同步的机制，主要用于控制对共享资源的访问。它维护一个计数器，提供两种基本操作：</p>
+<ul>
+<li><strong>P操作（wait）</strong>：计数器减1，如果计数器为0则阻塞</li>
+<li><strong>V操作（post）</strong>：计数器加1，唤醒等待的线程</li>
+</ul>
+<h3><span id="核心函数">核心函数</span></h3><h4><span id="sem_init-初始化信号量"><code>sem_init()</code> - 初始化信号量</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sem_init</span><span class="params">(<span class="type">sem_t</span> *sem, <span class="type">int</span> pshared, <span class="type">unsigned</span> <span class="type">int</span> value)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>sem</code>：信号量指针</li>
+<li><code>pshared</code>：0表示线程间共享（进程间使用设为非零）</li>
+<li><code>value</code>：信号量初始值</li>
+</ul>
+<h4><span id="sem_wait-p操作获取资源"><code>sem_wait()</code> - P操作（获取资源）</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sem_wait</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>原子地减少信号量值</li>
+<li>如果值为0则阻塞，直到信号量变为正数</li>
+</ul>
+<h4><span id="sem_post-v操作释放资源"><code>sem_post()</code> - V操作（释放资源）</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sem_post</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>原子地增加信号量值</li>
+<li>如果有线程在等待，唤醒其中一个</li>
+</ul>
+<h4><span id="sem_destroy-销毁信号量"><code>sem_destroy()</code> - 销毁信号量</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sem_destroy</span><span class="params">(<span class="type">sem_t</span> *sem)</span>;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="典型使用场景">典型使用场景</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span> sem;  <span class="comment">// 声明信号量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化信号量（初始值为1）</span></span><br><span class="line">sem_init(&amp;sem, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程1</span></span><br><span class="line"><span class="type">void</span>* <span class="title function_">thread_func1</span><span class="params">(<span class="type">void</span>* arg)</span> &#123;</span><br><span class="line">    sem_wait(&amp;sem);  <span class="comment">// P操作</span></span><br><span class="line">    <span class="comment">// 临界区代码</span></span><br><span class="line">    sem_post(&amp;sem);  <span class="comment">// V操作</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程2</span></span><br><span class="line"><span class="type">void</span>* <span class="title function_">thread_func2</span><span class="params">(<span class="type">void</span>* arg)</span> &#123;</span><br><span class="line">    sem_wait(&amp;sem);  <span class="comment">// P操作</span></span><br><span class="line">    <span class="comment">// 临界区代码</span></span><br><span class="line">    sem_post(&amp;sem);  <span class="comment">// V操作</span></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 销毁信号量</span></span><br><span class="line">sem_destroy(&amp;sem);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="信号量-vs-互斥锁">信号量 vs 互斥锁</span></h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>信号量</th>
+<th>互斥锁</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>初始值</td>
+<td>可设为任意非负整数</td>
+<td>通常初始为1（解锁状态）</td>
+</tr>
+<tr>
+<td>所有者</td>
+<td>无所有者概念</td>
+<td>有所有者（哪个线程锁定）</td>
+</tr>
+<tr>
+<td>操作</td>
+<td>post&#x2F;wait</td>
+<td>lock&#x2F;unlock</td>
+</tr>
+<tr>
+<td>主要用途</td>
+<td>资源计数&#x2F;同步</td>
+<td>保护临界区</td>
+</tr>
+</tbody></table>
+<h3><span id="注意事项">注意事项</span></h3><ol>
+<li>必须正确初始化信号量</li>
+<li>避免死锁（特别是多个信号量使用时）</li>
+<li>信号量没有自动释放机制（不像互斥锁的pthread_mutex_trylock）</li>
+<li>销毁正在被等待的信号量会导致未定义行为</li>
+</ol>
+<p>POSIX信号量为线程同步提供了灵活的计数机制，特别适合需要控制多个线程访问多个资源实例的场景。</p>
+<p>下面我们基于 POSIX 线程信号量设计一个环形队列来处理生产者消费者问题：</p>
+<p>环形队列采用数组模拟，用模运算来模拟环状特性</p>
+<p><img src="/img/Linux/thread/ring_queue.png" alt="ring_queue"></p>
+<p>环形结构起始状态和结束状态都是⼀样的，不好判断为空或者为满，所以可以通过加计数器或者标记位来判断满或者空。另外也可以预留⼀个空的位置，作为满的状态</p>
+<p><img src="/img/Linux/thread/ring_queue2.png" alt="ring_queue"></p>
+<h2><span id="生产者-消费者问题">生产者-消费者问题</span></h2><p>下面我将详细讲解基于环形队列(RingQueue)实现的生产者-消费者模型，并对代码进行完整注释和分析。</p>
+<h3><span id="1-核心组件解析">1. 核心组件解析</span></h3><h4><span id="11-lockguard-raii锁守卫类">1.1 LockGuard - RAII锁守卫类</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LockGuard</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">LockGuard</span><span class="params">(<span class="type">pthread_mutex_t</span> &amp;mtx)</span> : mtx_(mtx) &#123;</span></span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;mtx_);  <span class="comment">// 构造时自动加锁</span></span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">LockGuard</span>() &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;mtx_); <span class="comment">// 析构时自动解锁</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值操作</span></span><br><span class="line">    <span class="built_in">LockGuard</span>(<span class="type">const</span> LockGuard&amp;) = <span class="keyword">delete</span>;            </span><br><span class="line">    LockGuard&amp; <span class="keyword">operator</span>=(<span class="type">const</span> LockGuard&amp;) = <span class="keyword">delete</span>; </span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">pthread_mutex_t</span> &amp;mtx_;  <span class="comment">// 引用外部互斥锁</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>采用RAII(资源获取即初始化)技术管理互斥锁</li>
+<li>构造时自动加锁，析构时自动解锁，避免忘记解锁</li>
+<li>禁用拷贝构造和赋值，确保锁管理的唯一性</li>
+</ul>
+<h4><span id="12-ringqueue-环形队列模板类">1.2 RingQueue - 环形队列模板类</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RingQueue</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 封装信号量P操作(等待)</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">P</span><span class="params">(<span class="type">sem_t</span> &amp;sem)</span> </span>&#123; <span class="built_in">sem_wait</span>(&amp;sem); &#125;  </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 封装信号量V操作(释放)  </span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">V</span><span class="params">(<span class="type">sem_t</span> &amp;sem)</span> </span>&#123; <span class="built_in">sem_post</span>(&amp;sem); &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">RingQueue</span>(<span class="type">size_t</span> cap = <span class="number">10</span>) </span><br><span class="line">        : <span class="built_in">cap_</span>(cap), <span class="built_in">c_index_</span>(<span class="number">0</span>), <span class="built_in">p_index_</span>(<span class="number">0</span>), <span class="built_in">queue</span>(cap) </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_init</span>(&amp;p_mutex_, <span class="literal">nullptr</span>);  <span class="comment">// 生产者互斥锁</span></span><br><span class="line">        <span class="built_in">pthread_mutex_init</span>(&amp;c_mutex_, <span class="literal">nullptr</span>);  <span class="comment">// 消费者互斥锁</span></span><br><span class="line">        <span class="built_in">sem_init</span>(&amp;space_sem_, <span class="number">0</span>, cap_);          <span class="comment">// 空间信号量(初始=容量)</span></span><br><span class="line">        <span class="built_in">sem_init</span>(&amp;data_sem_, <span class="number">0</span>, <span class="number">0</span>);              <span class="comment">// 数据信号量(初始=0)</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 析构函数</span></span><br><span class="line">    ~<span class="built_in">RingQueue</span>() &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;p_mutex_);</span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;c_mutex_);</span><br><span class="line">        <span class="built_in">sem_destroy</span>(&amp;space_sem_);</span><br><span class="line">        <span class="built_in">sem_destroy</span>(&amp;data_sem_);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 生产者接口：添加任务</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Push</span><span class="params">(<span class="type">const</span> T &amp; task)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">P</span>(space_sem_);  <span class="comment">// 等待有空闲空间</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">lg</span><span class="params">(p_mutex_)</span></span>;  <span class="comment">// 加生产者锁</span></span><br><span class="line">            queue[p_index_] = task;  <span class="comment">// 放入任务</span></span><br><span class="line">            p_index_ = (p_index_ + <span class="number">1</span>) % cap_;  <span class="comment">// 更新生产者索引</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">V</span>(data_sem_);  <span class="comment">// 增加数据信号量</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 消费者接口：获取任务</span></span><br><span class="line">    <span class="function">T <span class="title">Pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        T task;</span><br><span class="line">        <span class="built_in">P</span>(data_sem_);  <span class="comment">// 等待有数据</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">lg</span><span class="params">(c_mutex_)</span></span>;  <span class="comment">// 加消费者锁</span></span><br><span class="line">            task = queue[c_index_];  <span class="comment">// 取出任务</span></span><br><span class="line">            c_index_ = (c_index_ + <span class="number">1</span>) % cap_;  <span class="comment">// 更新消费者索引</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">V</span>(space_sem_);  <span class="comment">// 增加空间信号量</span></span><br><span class="line">        <span class="keyword">return</span> task;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">sem_t</span> space_sem_;        <span class="comment">// 空间信号量(剩余可生产空间)</span></span><br><span class="line">    <span class="type">sem_t</span> data_sem_;         <span class="comment">// 数据信号量(现有可消费数据)</span></span><br><span class="line">    <span class="type">pthread_mutex_t</span> p_mutex_; <span class="comment">// 生产者互斥锁</span></span><br><span class="line">    <span class="type">pthread_mutex_t</span> c_mutex_; <span class="comment">// 消费者互斥锁</span></span><br><span class="line">    <span class="type">size_t</span> cap_;             <span class="comment">// 队列容量</span></span><br><span class="line">    <span class="type">size_t</span> c_index_;         <span class="comment">// 消费者索引</span></span><br><span class="line">    <span class="type">size_t</span> p_index_;         <span class="comment">// 生产者索引</span></span><br><span class="line">    std::vector&lt;T&gt; queue;    <span class="comment">// 底层存储容器</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-工作原理详解">2. 工作原理详解</span></h3><h4><span id="21-同步机制设计">2.1 同步机制设计</span></h4><ol>
+<li><p><strong>双信号量控制</strong>：</p>
+<ul>
+<li><code>space_sem_</code>：表示剩余可生产空间，初始值为队列容量</li>
+<li><code>data_sem_</code>：表示现有可消费数据，初始值为0</li>
+</ul>
+</li>
+<li><p><strong>双互斥锁设计</strong>：</p>
+<ul>
+<li><code>p_mutex_</code>：保护生产者端的队列操作</li>
+<li><code>c_mutex_</code>：保护消费者端的队列操作</li>
+<li>生产者和消费者使用不同的锁，提高并发性能</li>
+</ul>
+</li>
+</ol>
+<h4><span id="22-生产者流程push">2.2 生产者流程(Push)</span></h4><ol>
+<li><code>P(space_sem_)</code>：等待有空闲位置(信号量&gt;0)</li>
+<li>获取生产者锁<code>p_mutex_</code></li>
+<li>将任务放入队列<code>p_index_</code>位置</li>
+<li>更新生产者索引(环形计算)</li>
+<li>释放生产者锁</li>
+<li><code>V(data_sem_)</code>：增加可消费数据计数</li>
+</ol>
+<h4><span id="23-消费者流程pop">2.3 消费者流程(Pop)</span></h4><ol>
+<li><code>P(data_sem_)</code>：等待有可消费数据(信号量&gt;0)</li>
+<li>获取消费者锁<code>c_mutex_</code></li>
+<li>从队列<code>c_index_</code>位置取出任务</li>
+<li>更新消费者索引(环形计算)</li>
+<li>释放消费者锁</li>
+<li><code>V(space_sem_)</code>：增加可用空间计数</li>
+</ol>
+<h3><span id="3-环形队列特性">3. 环形队列特性</span></h3><ol>
+<li><p><strong>索引计算</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p_index_ = (p_index_ + <span class="number">1</span>) % cap_;  <span class="comment">// 生产者索引更新</span></span><br><span class="line">c_index_ = (c_index_ + <span class="number">1</span>) % cap_;  <span class="comment">// 消费者索引更新</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过取模运算实现环形缓冲区</li>
+<li>当索引到达末尾时自动回到开头</li>
+</ul>
+</li>
+<li><p><strong>读写分离</strong>：</p>
+<ul>
+<li>生产者和消费者使用不同的索引</li>
+<li>读写操作不会互相干扰</li>
+</ul>
+</li>
+</ol>
+<h3><span id="4-性能优化点">4. 性能优化点</span></h3><ol>
+<li><p><strong>锁分离</strong>：</p>
+<ul>
+<li>生产者和消费者使用不同的互斥锁</li>
+<li>减少锁竞争，提高并发性能</li>
+</ul>
+</li>
+<li><p><strong>RAII锁管理</strong>：</p>
+<ul>
+<li>使用LockGuard自动管理锁的生命周期</li>
+<li>避免忘记解锁导致的死锁</li>
+</ul>
+</li>
+<li><p><strong>信号量先行</strong>：</p>
+<ul>
+<li>先检查信号量再获取锁</li>
+<li>减少持有锁时的等待时间</li>
+</ul>
+</li>
+</ol>
+<p>我们来测试一下修改后的模型和原先基于阻塞队列的模型相比哪一个更快一些：</p>
+<p>基于阻塞队列的模型测试用例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Task.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;block_queue.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ring_queue.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> consumer_num = <span class="number">20</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> producer_num = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> total_task = <span class="number">100000</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span> sem_cons;</span><br><span class="line"><span class="type">sem_t</span> sem_pro;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> opers[] = &#123;<span class="string">&#x27;+&#x27;</span>, <span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;*&#x27;</span>, <span class="string">&#x27;/&#x27;</span>, <span class="string">&#x27;%&#x27;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span>&#123;</span><br><span class="line">    string name;</span><br><span class="line">    BlockQueue&lt;Task&gt; *bq;</span><br><span class="line">    <span class="type">sem_t</span> sem;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; start_time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">start</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        start_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="built_in">elapsed</span>() &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的毫秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsed</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> end_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">        <span class="keyword">return</span> std::chrono::<span class="built_in">duration</span>&lt;<span class="type">double</span>, std::milli&gt;(end_time - start_time).<span class="built_in">count</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsedSeconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">elapsed</span>() / <span class="number">1000.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">Producer</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">    string name = td-&gt;name;</span><br><span class="line">    BlockQueue&lt;Task&gt; *bq = td-&gt;bq;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sem_trywait</span>(&amp;sem_pro)) <span class="keyword">break</span>;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">        <span class="type">int</span> num1 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">int</span> num2 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">char</span> op = opers[<span class="built_in">rand</span>() % <span class="number">5</span>];</span><br><span class="line">        Task task&#123;num1, num2, op&#125;;</span><br><span class="line">        <span class="comment">// pthread_mutex_lock(&amp;mutex);</span></span><br><span class="line">        <span class="comment">// cout &lt;&lt; name &lt;&lt; &quot;: &quot; &lt;&lt; task.GetTask() &lt;&lt; endl;</span></span><br><span class="line">        <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">        bq-&gt;<span class="built_in">Push</span>(task);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">Consumer</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">    string name = td-&gt;name;</span><br><span class="line">    BlockQueue&lt;Task&gt; *bq = td-&gt;bq;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sem_trywait</span>(&amp;sem_cons)) <span class="keyword">break</span>;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">        Task task = bq-&gt;<span class="built_in">Pop</span>();</span><br><span class="line">        <span class="built_in">task</span>();</span><br><span class="line">        <span class="comment">// pthread_mutex_lock(&amp;mutex);</span></span><br><span class="line">        <span class="comment">// cout &lt;&lt; name &lt;&lt; &quot;: &quot; &lt;&lt; task.GetResult() &lt;&lt; endl;</span></span><br><span class="line">        <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="literal">nullptr</span>));</span><br><span class="line">    <span class="function">BlockQueue&lt;Task&gt; <span class="title">bq</span><span class="params">(<span class="number">30</span>)</span></span>;</span><br><span class="line">    <span class="function">RingQueue&lt;Task&gt; <span class="title">rq</span><span class="params">(<span class="number">30</span>)</span></span>;</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids;</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_cons, <span class="number">0</span>, total_task);</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_pro, <span class="number">0</span>, total_task);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= consumer_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string name = <span class="string">&quot;producer-&quot;</span> + <span class="built_in">to_string</span>(i);</span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: name,</span><br><span class="line">            bq: &amp;bq</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">pthread_t</span> tid;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, Producer, (<span class="type">void</span>*)(td));</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= producer_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string name = <span class="string">&quot;consumer-&quot;</span> + <span class="built_in">to_string</span>(i);</span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: name,</span><br><span class="line">            bq: &amp;bq</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">pthread_t</span> tid;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, Consumer, (<span class="type">void</span>*)(td));</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        Timer time;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> tid: tids) <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">755.378</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第二次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">935.271</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第三次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">1158.35</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第四次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">925.125</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第五次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">1100.93</span><br></pre></td></tr></table></figure>
+
+<p>平均用时：755.378 + 935.271 + 1158.35 + 925.125 + 1100.93 &#x3D; 5870.05 &#x2F; 5 &#x3D; 1174.01</p>
+<p>基于环形队列的模型测试用例：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Task.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;block_queue.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ring_queue.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> consumer_num = <span class="number">20</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> producer_num = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> total_task = <span class="number">100000</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span> sem_cons;</span><br><span class="line"><span class="type">sem_t</span> sem_pro;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> opers[] = &#123;<span class="string">&#x27;+&#x27;</span>, <span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;*&#x27;</span>, <span class="string">&#x27;/&#x27;</span>, <span class="string">&#x27;%&#x27;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span>&#123;</span><br><span class="line">    string name;</span><br><span class="line">    RingQueue&lt;Task&gt; *rq;</span><br><span class="line">    <span class="type">sem_t</span> sem;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; start_time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">start</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        start_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="built_in">elapsed</span>() &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的毫秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsed</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> end_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">        <span class="keyword">return</span> std::chrono::<span class="built_in">duration</span>&lt;<span class="type">double</span>, std::milli&gt;(end_time - start_time).<span class="built_in">count</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsedSeconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">elapsed</span>() / <span class="number">1000.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">Producer</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">    string name = td-&gt;name;</span><br><span class="line">    RingQueue&lt;Task&gt; *rq = td-&gt;rq;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sem_trywait</span>(&amp;sem_pro)) <span class="keyword">break</span>;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">        <span class="type">int</span> num1 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">int</span> num2 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">char</span> op = opers[<span class="built_in">rand</span>() % <span class="number">5</span>];</span><br><span class="line">        Task task&#123;num1, num2, op&#125;;</span><br><span class="line">        <span class="comment">// pthread_mutex_lock(&amp;mutex);</span></span><br><span class="line">        <span class="comment">// cout &lt;&lt; name &lt;&lt; &quot;: &quot; &lt;&lt; task.GetTask() &lt;&lt; endl;</span></span><br><span class="line">        <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">        rq-&gt;<span class="built_in">Push</span>(task);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">Consumer</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">    string name = td-&gt;name;</span><br><span class="line">    RingQueue&lt;Task&gt; *rq = td-&gt;rq;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sem_trywait</span>(&amp;sem_cons)) <span class="keyword">break</span>;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">        Task task = rq-&gt;<span class="built_in">Pop</span>();</span><br><span class="line">        <span class="built_in">task</span>();</span><br><span class="line">        <span class="comment">// pthread_mutex_lock(&amp;mutex);</span></span><br><span class="line">        <span class="comment">// cout &lt;&lt; name &lt;&lt; &quot;: &quot; &lt;&lt; task.GetResult() &lt;&lt; endl;</span></span><br><span class="line">        <span class="comment">// pthread_mutex_unlock(&amp;mutex);</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="literal">nullptr</span>));</span><br><span class="line">    <span class="function">BlockQueue&lt;Task&gt; <span class="title">bq</span><span class="params">(<span class="number">30</span>)</span></span>;</span><br><span class="line">    <span class="function">RingQueue&lt;Task&gt; <span class="title">rq</span><span class="params">(<span class="number">30</span>)</span></span>;</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids;</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_cons, <span class="number">0</span>, total_task);</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_pro, <span class="number">0</span>, total_task);</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= consumer_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string name = <span class="string">&quot;producer-&quot;</span> + <span class="built_in">to_string</span>(i);</span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: name,</span><br><span class="line">            rq: &amp;rq</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">pthread_t</span> tid;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, Producer, (<span class="type">void</span>*)(td));</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= producer_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string name = <span class="string">&quot;consumer-&quot;</span> + <span class="built_in">to_string</span>(i);</span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: name,</span><br><span class="line">            rq: &amp;rq</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">pthread_t</span> tid;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, Consumer, (<span class="type">void</span>*)(td));</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        Timer time;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> tid: tids) <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">685.519</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第二次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">688.496</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第三次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">655.452</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第四次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">684.919</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第五次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./cp.o</span><br><span class="line">665.94</span><br></pre></td></tr></table></figure>
+
+<p>平均用时：685.519 + 688.496 + 655.452 + 684.919 + 665.94 &#x3D; 3380.326 &#x2F; 5 &#x3D; 676.0652</p>
+<p>由此可见，在多生产者多消费者场景下，基于信号量的环形队列（RingQueue）通常比传统阻塞队列（BlockingQueue）有更好的性能表现，具体比较如下：</p>
+<ol>
+<li><strong>锁粒度差异</strong></li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>队列类型</th>
+<th>锁机制</th>
+<th>并发度影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>传统阻塞队列</td>
+<td>全局单一互斥锁</td>
+<td>所有操作串行化，竞争激烈</td>
+</tr>
+<tr>
+<td>环形队列</td>
+<td>生产者&#x2F;消费者双锁分离</td>
+<td>生产消费可并行</td>
+</tr>
+</tbody></table>
+<ol start="2">
+<li><strong>系统调用开销</strong></li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>阻塞队列</th>
+<th>环形队列</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入队&#x2F;出队</td>
+<td>可能触发线程调度</td>
+<td>纯用户态操作(信号量)</td>
+</tr>
+<tr>
+<td>临界区执行时间</td>
+<td>较长(含动态内存分配)</td>
+<td>极短(仅索引计算)</td>
+</tr>
+</tbody></table>
+<p>因此，在大多数的多生产者多消费者场景下，更推荐使用基于信号量的环形队列模型。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 修改节点背景色 */
+.mermaid rect, .mermaid polygon {
+    fill: #f0f0f0 !important; /* 背景 */
+    stroke: #333 !important;   /* 边框颜色 */
+}
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
