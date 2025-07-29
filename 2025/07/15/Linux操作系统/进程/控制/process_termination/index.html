@@ -20,13 +20,13 @@ strerr 函数
 
 
 代码异常终止
-1. 信号（Signal）是异常终止的直接原因
-
-
 
 
 
 一个进程退出一般分为以下这三种情况：
+
+代码运行完毕，结果正确
+代码运行完毕，结果不正确
 ,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
@@ -48,13 +48,13 @@ strerr 函数
 
 
 代码异常终止
-1. 信号（Signal）是异常终止的直接原因
-
-
 
 
 
 一个进程退出一般分为以下这三种情况：
+
+代码运行完毕，结果正确
+代码运行完毕，结果不正确
 ,"/>
     
     
@@ -73,13 +73,13 @@ strerr 函数
 
 
 代码异常终止
-1. 信号（Signal）是异常终止的直接原因
-
-
 
 
 
 一个进程退出一般分为以下这三种情况：
+
+代码运行完毕，结果正确
+代码运行完毕，结果不正确
 ,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
@@ -260,10 +260,7 @@ strerr 函数
 <li><a href="#strerr-%E5%87%BD%E6%95%B0">strerr 函数</a></li>
 </ul>
 </li>
-<li><a href="#%E4%BB%A3%E7%A0%81%E5%BC%82%E5%B8%B8%E7%BB%88%E6%AD%A2">代码异常终止</a><ul>
-<li><a href="#1-%E4%BF%A1%E5%8F%B7signal%E6%98%AF%E5%BC%82%E5%B8%B8%E7%BB%88%E6%AD%A2%E7%9A%84%E7%9B%B4%E6%8E%A5%E5%8E%9F%E5%9B%A0"><strong>1. 信号（Signal）是异常终止的直接原因</strong></a></li>
-</ul>
-</li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E5%BC%82%E5%B8%B8%E7%BB%88%E6%AD%A2">代码异常终止</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -311,7 +308,8 @@ strerr 函数
 
 <h2><span id="代码异常终止">代码异常终止</span></h2><p>代码异常终止通常是因为进程执行了某些非法操作，触发了操作系统发送的 <strong>信号（Signal）</strong>，导致进程被强制终止。</p>
 <hr>
-<h3><span id="1-信号signal是异常终止的直接原因"><strong>1. 信号（Signal）是异常终止的直接原因</strong></span></h3><p>当进程执行了不被允许的操作（如访问非法内存、除零、执行非法指令等），操作系统会向该进程发送一个信号，默认行为可能是终止进程（甚至产生核心转储 <code>core dump</code>）。常见信号包括：</p>
+<p><strong>1. 信号（Signal）是异常终止的直接原因</strong></p>
+<p>当进程执行了不被允许的操作（如访问非法内存、除零、执行非法指令等），操作系统会向该进程发送一个信号，默认行为可能是终止进程（甚至产生核心转储 <code>core dump</code>）。常见信号包括：</p>
 <table>
 <thead>
 <tr>
