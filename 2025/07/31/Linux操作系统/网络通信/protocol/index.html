@@ -1,0 +1,1152 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自定义协议 &amp;&amp; 序列化与反序列化 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+网络通信中的自定义协议
+什么是自定义协议
+自定义协议的设计要素
+自定义协议的实现方式
+
+
+自定义协议中的序列化和反序列化
+序列化的概念与作用
+反序列化的概念与作用
+常见的序列化方式
+
+
+简单自,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="自定义协议 &amp;&amp; 序列化与反序列化 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+网络通信中的自定义协议
+什么是自定义协议
+自定义协议的设计要素
+自定义协议的实现方式
+
+
+自定义协议中的序列化和反序列化
+序列化的概念与作用
+反序列化的概念与作用
+常见的序列化方式
+
+
+简单自,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="自定义协议 &amp;&amp; 序列化与反序列化 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+网络通信中的自定义协议
+什么是自定义协议
+自定义协议的设计要素
+自定义协议的实现方式
+
+
+自定义协议中的序列化和反序列化
+序列化的概念与作用
+反序列化的概念与作用
+常见的序列化方式
+
+
+简单自,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">自定义协议 && 序列化与反序列化</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">自定义协议 && 序列化与反序列化</h1>
+        <div class="stuff">
+            <span>七月 31, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/TCP/" rel="tag">TCP</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E4%B8%AD%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE">网络通信中的自定义协议</a><ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE">什么是自定义协议</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE%E7%9A%84%E8%AE%BE%E8%AE%A1%E8%A6%81%E7%B4%A0">自定义协议的设计要素</a></li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F">自定义协议的实现方式</a></li>
+</ul>
+</li>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE%E4%B8%AD%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E5%92%8C%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96">自定义协议中的序列化和反序列化</a><ul>
+<li><a href="#%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E4%BD%9C%E7%94%A8">序列化的概念与作用</a></li>
+<li><a href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E6%A6%82%E5%BF%B5%E4%B8%8E%E4%BD%9C%E7%94%A8">反序列化的概念与作用</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E6%96%B9%E5%BC%8F">常见的序列化方式</a></li>
+</ul>
+</li>
+<li><a href="#%E7%AE%80%E5%8D%95%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0">简单自定义协议实现</a><ul>
+<li><a href="#tcphpp">tcp.hpp</a></li>
+<li><a href="#protocolhpp">protocol.hpp</a></li>
+<li><a href="#server_calhpp">server_cal.hpp</a></li>
+<li><a href="#%E6%B7%BB%E5%8A%A0%E6%B3%A8%E9%87%8A%E5%90%8E%E7%9A%84%E4%BB%A3%E7%A0%81">添加注释后的代码</a></li>
+<li><a href="#%E5%AE%A2%E6%88%B7%E7%AB%AF">客户端</a></li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF">服务端</a></li>
+<li><a href="#json%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AE%9E%E7%8E%B0">JSON格式化实现</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="网络通信中的自定义协议">网络通信中的自定义协议</span></h2><h3><span id="什么是自定义协议">什么是自定义协议</span></h3><p>自定义协议是指在网络通信中，开发者根据特定应用需求自行设计的数据交换规则和格式。与HTTP、FTP等标准协议不同，自定义协议通常针对特定场景优化，具有更高的灵活性和效率。</p>
+<p>自定义协议的主要特点包括：</p>
+<ol>
+<li>专为特定应用场景设计</li>
+<li>通常比通用协议更高效</li>
+<li>可以根据需求自由定义数据格式</li>
+<li>需要通信双方都实现协议解析逻辑</li>
+</ol>
+<h3><span id="自定义协议的设计要素">自定义协议的设计要素</span></h3><p>设计一个良好的自定义协议需要考虑以下要素：</p>
+<ol>
+<li><strong>消息边界</strong>：如何确定一个完整消息的开始和结束</li>
+<li><strong>消息格式</strong>：消息头(Header)和消息体(Body)的结构</li>
+<li><strong>编解码方式</strong>：数据如何编码传输和解码读取</li>
+<li><strong>错误处理</strong>：如何处理不完整或错误的消息</li>
+<li><strong>扩展性</strong>：如何支持未来可能的协议升级</li>
+</ol>
+<h3><span id="自定义协议的实现方式">自定义协议的实现方式</span></h3><p>常见的自定义协议实现方式包括：</p>
+<ol>
+<li><strong>基于TCP的二进制协议</strong>：如游戏、即时通讯等高性能场景</li>
+<li><strong>基于文本的协议</strong>：如SMTP等人类可读的协议</li>
+<li><strong>混合型协议</strong>：头部使用二进制，正文使用文本或二进制</li>
+</ol>
+<h2><span id="自定义协议中的序列化和反序列化">自定义协议中的序列化和反序列化</span></h2><h3><span id="序列化的概念与作用">序列化的概念与作用</span></h3><p>序列化(Serialization)是指将数据结构或对象状态转换为可以存储或传输的格式的过程。在网络通信中，序列化主要用于：</p>
+<ol>
+<li>将内存中的对象转换为字节流以便网络传输</li>
+<li>保持数据的完整性和结构</li>
+<li>实现跨平台、跨语言的数据交换</li>
+</ol>
+<h3><span id="反序列化的概念与作用">反序列化的概念与作用</span></h3><p>反序列化(Deserialization)是序列化的逆过程，将字节流转换回原始的数据结构或对象。其主要作用包括：</p>
+<ol>
+<li>重建发送端的数据结构</li>
+<li>验证数据的完整性和正确性</li>
+<li>恢复对象的完整状态</li>
+</ol>
+<h3><span id="常见的序列化方式">常见的序列化方式</span></h3><p>自定义协议中常用的序列化方式包括：</p>
+<ol>
+<li><p><strong>二进制序列化</strong>：</p>
+<ul>
+<li>直接内存拷贝</li>
+<li>Protocol Buffers</li>
+<li>Thrift</li>
+<li>FlatBuffers</li>
+</ul>
+</li>
+<li><p><strong>文本序列化</strong>：</p>
+<ul>
+<li>JSON</li>
+<li>XML</li>
+<li>YAML</li>
+</ul>
+</li>
+<li><p><strong>混合序列化</strong>：</p>
+<ul>
+<li>MessagePack</li>
+<li>BSON</li>
+</ul>
+</li>
+</ol>
+<h2><span id="简单自定义协议实现">简单自定义协议实现</span></h2><p>该自定义协议中同样采用了序列化和反序列化的手段处理数据，实现了远程计算器功能，我们首先使用纯手搓的序列化及反序列化手段来实现：</p>
+<p>首先我们实现一个 <code>TCP</code> 接口包装：</p>
+<h3><span id="tcphpp">tcp.hpp</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tcp.hpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TCP_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TCP_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span>  <span class="comment">// sockaddr_in结构体定义</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span>   <span class="comment">// 网络地址转换函数</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span>       <span class="comment">// bzero函数</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span>       <span class="comment">// 自定义日志头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误码枚举定义</span></span><br><span class="line"><span class="keyword">enum</span></span><br><span class="line">&#123;</span><br><span class="line">    socket_error = <span class="number">1</span>,  <span class="comment">// socket创建失败</span></span><br><span class="line">    bind_error,       <span class="comment">// bind失败</span></span><br><span class="line">    listen_error,      <span class="comment">// listen失败</span></span><br><span class="line">    connect_error,     <span class="comment">// connect失败</span></span><br><span class="line">    accept_error,      <span class="comment">// accept失败</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程本地存储的地址缓冲区，用于IP地址转换</span></span><br><span class="line"><span class="keyword">inline</span> <span class="keyword">thread_local</span> <span class="type">char</span> addr_buffer[<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// TCP网络操作命名空间</span></span><br><span class="line"><span class="keyword">namespace</span> tcp</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 创建TCP socket</span></span><br><span class="line">    <span class="comment">// 返回值: 成功返回socket文件描述符，失败退出程序</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Socket</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 创建IPv4 TCP socket</span></span><br><span class="line">        <span class="type">int</span> sockfd = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (sockfd == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;socket&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(socket_error);  <span class="comment">// 创建失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sockfd;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 绑定socket到指定端口</span></span><br><span class="line">    <span class="comment">// 参数: sockfd - socket文件描述符</span></span><br><span class="line">    <span class="comment">//       port - 要绑定的端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Bind</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">int</span> port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> local;  <span class="comment">// IPv4地址结构</span></span><br><span class="line">        <span class="built_in">bzero</span>(&amp;local, <span class="built_in">sizeof</span>(local));  <span class="comment">// 清空结构体</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置地址族、IP地址和端口</span></span><br><span class="line">        local.sin_family = AF_INET;           <span class="comment">// IPv4</span></span><br><span class="line">        local.sin_addr.s_addr = INADDR_ANY;   <span class="comment">// 监听所有网络接口</span></span><br><span class="line">        local.sin_port = <span class="built_in">htons</span>(port);         <span class="comment">// 主机字节序转网络字节序</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 绑定socket</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">bind</span>(sockfd, (<span class="keyword">struct</span> sockaddr *)(&amp;local), <span class="built_in">sizeof</span>(local));</span><br><span class="line">        <span class="keyword">if</span> (n != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;bind&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(bind_error);  <span class="comment">// 绑定失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从sockaddr_in结构体中提取IP和端口</span></span><br><span class="line">    <span class="comment">// 参数: addr_in - 网络地址结构体</span></span><br><span class="line">    <span class="comment">//       ip - 输出参数，存储IP地址字符串</span></span><br><span class="line">    <span class="comment">//       port - 输出参数，存储端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">GetAddrAndPort</span><span class="params">(<span class="keyword">struct</span> sockaddr_in &amp;addr_in, std::string &amp;ip, <span class="type">uint16_t</span> &amp;port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        port = <span class="built_in">ntohs</span>(addr_in.sin_port);  <span class="comment">// 网络字节序转主机字节序</span></span><br><span class="line">        <span class="comment">// 将IP地址转换为点分十进制字符串</span></span><br><span class="line">        <span class="built_in">inet_ntop</span>(AF_INET, &amp;addr_in.sin_addr, addr_buffer, <span class="built_in">sizeof</span>(addr_buffer) - <span class="number">1</span>);</span><br><span class="line">        ip = addr_buffer;  <span class="comment">// 存储到输出参数</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始监听socket连接</span></span><br><span class="line">    <span class="comment">// 参数: listen_sock - 监听socket</span></span><br><span class="line">    <span class="comment">//       backlog - 最大挂起连接数，默认为10</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Listen</span><span class="params">(<span class="type">int</span> listen_sock, <span class="type">int</span> backlog = <span class="number">10</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">listen</span>(listen_sock, backlog);</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;listen&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(listen_error);  <span class="comment">// 监听失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接到服务器</span></span><br><span class="line">    <span class="comment">// 参数: sockfd - 客户端socket</span></span><br><span class="line">    <span class="comment">//       server_ip - 服务器IP地址</span></span><br><span class="line">    <span class="comment">//       server_port - 服务器端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Connect</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> std::string &amp;server_ip, <span class="type">const</span> <span class="type">u_int16_t</span> &amp;server_port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> server;  <span class="comment">// 服务器地址结构</span></span><br><span class="line">        <span class="built_in">bzero</span>(&amp;server, <span class="built_in">sizeof</span>(server));  <span class="comment">// 清空结构体</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置服务器地址信息</span></span><br><span class="line">        server.sin_port = <span class="built_in">htons</span>(server_port);        <span class="comment">// 端口号转网络字节序</span></span><br><span class="line">        server.sin_family = AF_INET;                  <span class="comment">// IPv4</span></span><br><span class="line">        server.sin_addr.s_addr = <span class="built_in">inet_addr</span>(server_ip.<span class="built_in">c_str</span>());  <span class="comment">// IP地址转换</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 发起连接</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">connect</span>(sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;server, <span class="built_in">sizeof</span>(server));</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;connect&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(connect_error);  <span class="comment">// 连接失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接受客户端连接</span></span><br><span class="line">    <span class="comment">// 参数: listen_sockfd - 监听socket</span></span><br><span class="line">    <span class="comment">//       client_addr - 输出参数，存储客户端地址信息</span></span><br><span class="line">    <span class="comment">// 返回值: 成功返回连接socket文件描述符，失败退出程序</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Accept</span><span class="params">(<span class="type">int</span> listen_sockfd, sockaddr_in &amp;client_addr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">socklen_t</span> len = <span class="built_in">sizeof</span>(client_addr);  <span class="comment">// 地址结构长度</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 接受连接</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">accept</span>(listen_sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;client_addr, &amp;len);</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;accept&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(accept_error);  <span class="comment">// 接受失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> n;  <span class="comment">// 返回新连接的socket描述符</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>然后是我们的重头戏：自定义协议实现：</p>
+<h3><span id="protocolhpp">protocol.hpp</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _PROTOCOL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _PROTOCOL_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 协议分隔符定义</span></span><br><span class="line"><span class="type">const</span> std::string blank_space_sep = <span class="string">&quot; &quot;</span>;  <span class="comment">// 字段间分隔符（空格）</span></span><br><span class="line"><span class="type">const</span> std::string protocol_sep = <span class="string">&quot;\n&quot;</span>;    <span class="comment">// 协议分隔符（换行）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误码枚举</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    divide_by_zero_error = <span class="number">1</span>,  <span class="comment">// 除零错误</span></span><br><span class="line">    operator_identify,         <span class="comment">// 操作符识别错误</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 协议解码函数</span></span><br><span class="line"><span class="comment">// 格式: &quot;长度\n内容\n&quot;</span></span><br><span class="line"><span class="comment">// 参数: package - 输入的网络数据包</span></span><br><span class="line"><span class="comment">//       content - 输出的解码后内容</span></span><br><span class="line"><span class="comment">// 返回值: 解码成功返回true，失败返回false</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Decode</span><span class="params">(std::string &amp;package, std::string &amp;content)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 查找第一个分隔符位置</span></span><br><span class="line">    <span class="type">size_t</span> pos = package.<span class="built_in">find</span>(protocol_sep);</span><br><span class="line">    <span class="keyword">if</span>(pos == std::string::npos) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取内容长度</span></span><br><span class="line">    <span class="type">size_t</span> size = std::<span class="built_in">stoi</span>(package.<span class="built_in">substr</span>(<span class="number">0</span>, pos));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 查找第二个分隔符位置</span></span><br><span class="line">    <span class="type">size_t</span> n_pos = package.<span class="built_in">find</span>(protocol_sep, pos + <span class="number">1</span>);</span><br><span class="line">    <span class="type">size_t</span> total_len = pos + size + <span class="number">2</span>;  <span class="comment">// 计算完整消息长度</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 验证消息格式是否正确</span></span><br><span class="line">    <span class="keyword">if</span>(n_pos + <span class="number">1</span> != total_len) &#123;</span><br><span class="line">        <span class="comment">// 格式错误，清空数据包</span></span><br><span class="line">        package.<span class="built_in">clear</span>();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 提取消息内容</span></span><br><span class="line">    content = package.<span class="built_in">substr</span>(pos + <span class="number">1</span>, size);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 删除已处理的部分</span></span><br><span class="line">    package.<span class="built_in">erase</span>(<span class="number">0</span>, total_len);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 协议编码函数</span></span><br><span class="line"><span class="comment">// 格式: &quot;长度\n内容\n&quot;</span></span><br><span class="line"><span class="comment">// 参数: content - 要编码的内容</span></span><br><span class="line"><span class="comment">// 返回值: 编码后的字符串</span></span><br><span class="line"><span class="function">std::string <span class="title">Encode</span><span class="params">(std::string &amp;content)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::string ret = std::<span class="built_in">to_string</span>(content.<span class="built_in">size</span>());  <span class="comment">// 添加长度</span></span><br><span class="line">    ret += protocol_sep;                               <span class="comment">// 添加分隔符</span></span><br><span class="line">    ret += content;                                    <span class="comment">// 添加内容</span></span><br><span class="line">    ret += protocol_sep;                               <span class="comment">// 添加结束分隔符</span></span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求类（客户端→服务端）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Request</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数，默认值表示无效请求</span></span><br><span class="line">    <span class="built_in">Request</span>(<span class="type">int</span> x = <span class="number">0</span>, <span class="type">int</span> y = <span class="number">0</span>, <span class="type">char</span> op = <span class="string">&#x27;?&#x27;</span>)</span><br><span class="line">    :<span class="built_in">x_</span>(x),</span><br><span class="line">    <span class="built_in">y_</span>(y),</span><br><span class="line">    <span class="built_in">op_</span>(op)&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 序列化方法：将对象转换为字符串</span></span><br><span class="line">    <span class="comment">// 格式: &quot;x op y&quot;（如 &quot;10 + 20&quot;）</span></span><br><span class="line">    <span class="function">std::string <span class="title">Serialize</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::string ret = std::<span class="built_in">to_string</span>(x_);</span><br><span class="line">        ret += blank_space_sep;</span><br><span class="line">        ret += op_;</span><br><span class="line">        ret += blank_space_sep;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(y_);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 反序列化方法：从字符串解析对象</span></span><br><span class="line">    <span class="comment">// 参数: in - 输入字符串（格式必须为 &quot;x op y&quot;）</span></span><br><span class="line">    <span class="comment">// 返回值: 解析成功返回true，失败返回false</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">Deserialize</span><span class="params">(std::string &amp;in)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 查找第一个空格位置</span></span><br><span class="line">        <span class="type">size_t</span> pos = in.<span class="built_in">find</span>(blank_space_sep);</span><br><span class="line">        <span class="keyword">if</span>(pos == std::string::npos) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解析第一个操作数</span></span><br><span class="line">        x_ = std::<span class="built_in">stoi</span>(in.<span class="built_in">substr</span>(<span class="number">0</span>, pos));</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 查找第二个空格位置</span></span><br><span class="line">        <span class="type">size_t</span> npos = in.<span class="built_in">find</span>(blank_space_sep, pos + <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span>(npos == std::string::npos) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解析操作符</span></span><br><span class="line">        op_ = in[pos + <span class="number">1</span>];</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解析第二个操作数</span></span><br><span class="line">        y_ = std::<span class="built_in">stoi</span>(in.<span class="built_in">substr</span>(npos + <span class="number">1</span>));</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> x_;     <span class="comment">// 第一个操作数</span></span><br><span class="line">    <span class="type">int</span> y_;     <span class="comment">// 第二个操作数</span></span><br><span class="line">    <span class="type">char</span> op_;   <span class="comment">// 操作符（+,-,*,/等）</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 响应类（服务端→客户端）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Response</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">Response</span>(<span class="type">int</span> res = <span class="number">0</span>, <span class="type">int</span> code = <span class="number">0</span>)</span><br><span class="line">    :<span class="built_in">res_</span>(res),</span><br><span class="line">    <span class="built_in">code_</span>(code)&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 序列化方法：将对象转换为字符串</span></span><br><span class="line">    <span class="comment">// 格式: &quot;result code&quot;（如 &quot;30 0&quot;）</span></span><br><span class="line">    <span class="function">std::string <span class="title">Serialize</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::string ret = std::<span class="built_in">to_string</span>(res_);</span><br><span class="line">        ret += blank_space_sep;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(code_);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 反序列化方法：从字符串解析对象</span></span><br><span class="line">    <span class="comment">// 参数: in - 输入字符串（格式必须为 &quot;result code&quot;）</span></span><br><span class="line">    <span class="comment">// 返回值: 解析成功返回true，失败返回false</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">Deserialize</span><span class="params">(std::string &amp;in)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 查找空格位置</span></span><br><span class="line">        <span class="type">size_t</span> pos = in.<span class="built_in">find</span>(blank_space_sep);</span><br><span class="line">        <span class="keyword">if</span>(pos == std::string::npos) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解析计算结果</span></span><br><span class="line">        res_ = std::<span class="built_in">stoi</span>(in.<span class="built_in">substr</span>(<span class="number">0</span>, pos));</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解析状态码</span></span><br><span class="line">        code_ = std::<span class="built_in">stoi</span>(in.<span class="built_in">substr</span>(pos + <span class="number">1</span>));</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> res_;    <span class="comment">// 计算结果</span></span><br><span class="line">    <span class="type">int</span> code_;   <span class="comment">// 状态码（0表示成功，非0表示错误）</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="代码概述">代码概述</span></h4><ol>
+<li><p><strong>协议格式</strong>：</p>
+<ul>
+<li>外层协议格式：<code>&quot;长度\n内容\n&quot;</code>（如 <code>&quot;7\n10 + 20\n&quot;</code>）</li>
+<li>请求格式：<code>&quot;x op y&quot;</code>（如 <code>&quot;10 + 20&quot;</code>）</li>
+<li>响应格式：<code>&quot;result code&quot;</code>（如 <code>&quot;30 0&quot;</code>）</li>
+</ul>
+</li>
+<li><p><strong>主要功能</strong>：</p>
+<ul>
+<li><code>Encode/Decode</code>：处理网络传输层面的封包&#x2F;解包</li>
+<li><code>Request</code>：表示客户端请求，包含两个操作数和一个运算符</li>
+<li><code>Response</code>：表示服务端响应，包含计算结果和状态码</li>
+</ul>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>使用简单的文本协议，便于调试</li>
+<li>包含基本的错误检测机制</li>
+<li>支持序列化和反序列化操作</li>
+<li>使用空格和换行符作为分隔符</li>
+</ul>
+</li>
+</ol>
+<h3><span id="server_calhpp">server_cal.hpp</span></h3><p>以下是添加了详细注释的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _SERVER_CAL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _SERVER_CAL_HPP_ 1;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;protocol.hpp&quot;</span>  <span class="comment">// 包含之前定义的自定义协议头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 计算器服务端类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ServerCal</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 辅助计算函数，处理具体运算逻辑</span></span><br><span class="line">    <span class="comment">// 参数: req - 包含计算请求的Request对象</span></span><br><span class="line">    <span class="comment">// 返回值: 包含计算结果和状态的Response对象</span></span><br><span class="line">    <span class="function">Response <span class="title">CalculatorHelper</span><span class="params">(<span class="type">const</span> Request &amp;req)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="function">Response <span class="title">resp</span><span class="params">(<span class="number">0</span>, <span class="number">0</span>)</span></span>;  <span class="comment">// 初始化响应对象，默认结果0，状态码0(成功)</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 根据操作符执行不同运算</span></span><br><span class="line">        <span class="keyword">switch</span> (req.op_)</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;+&#x27;</span>:</span><br><span class="line">            resp.res_ = req.x_ + req.y_;  <span class="comment">// 加法运算</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;-&#x27;</span>:</span><br><span class="line">            resp.res_ = req.x_ - req.y_;  <span class="comment">// 减法运算</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;*&#x27;</span>:</span><br><span class="line">            resp.res_ = req.x_ * req.y_;  <span class="comment">// 乘法运算</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;/&#x27;</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 除法运算，检查除数是否为0</span></span><br><span class="line">            <span class="keyword">if</span> (req.y_ == <span class="number">0</span>)</span><br><span class="line">                resp.code_ = divide_by_zero_error;  <span class="comment">// 除零错误</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                resp.res_ = req.x_ / req.y_;  <span class="comment">// 正常除法</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;%&#x27;</span>:</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 取模运算，检查模数是否为0</span></span><br><span class="line">            <span class="keyword">if</span> (req.y_ == <span class="number">0</span>)</span><br><span class="line">                resp.code_ = divide_by_zero_error;  <span class="comment">// 除零错误</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">                resp.res_ = req.x_ % req.y_;  <span class="comment">// 正常取模</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            resp.code_ = operator_identify;  <span class="comment">// 未知操作符错误</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> resp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主计算函数，处理协议解码和编码</span></span><br><span class="line">    <span class="comment">// 参数: package - 网络接收到的原始数据包</span></span><br><span class="line">    <span class="comment">// 返回值: 编码后的响应字符串，出错返回空字符串</span></span><br><span class="line">    <span class="function">std::string <span class="title">Calculator</span><span class="params">(std::string &amp;package)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::string content;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 1. 解码网络数据包</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">Decode</span>(package, content))&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;  <span class="comment">// 解码失败返回空字符串</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 2. 反序列化请求内容</span></span><br><span class="line">        Request req;</span><br><span class="line">        <span class="keyword">if</span>(!req.<span class="built_in">Deserialize</span>(content)) <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;  <span class="comment">// 反序列化失败返回空字符串</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 3. 执行计算逻辑</span></span><br><span class="line">        Response resp = <span class="built_in">CalculatorHelper</span>(req);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 序列化响应结果</span></span><br><span class="line">        content = resp.<span class="built_in">Serialize</span>();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 5. 编码为网络协议格式</span></span><br><span class="line">        content = <span class="built_in">Encode</span>(content);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> content;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="代码功能概述">代码功能概述</span></h4><p>这段代码实现了一个简单的网络计算器服务端，主要功能包括：</p>
+<ol>
+<li><p><strong>核心计算功能</strong>：</p>
+<ul>
+<li>支持加(+)、减(-)、乘(*)、除(&#x2F;)、取模(%)五种运算</li>
+<li>处理除零错误和无效操作符等异常情况</li>
+</ul>
+</li>
+<li><p><strong>协议处理流程</strong>：</p>
+<ul>
+<li>接收网络数据包 → 解码 → 反序列化为请求对象 → 执行计算 → 序列化响应 → 编码为网络格式</li>
+<li>使用之前定义的<code>protocol.hpp</code>中的协议格式</li>
+</ul>
+</li>
+<li><p><strong>错误处理</strong>：</p>
+<ul>
+<li>解码失败时返回空字符串</li>
+<li>反序列化失败时返回空字符串</li>
+<li>运算错误通过Response的状态码返回</li>
+</ul>
+</li>
+<li><p><strong>设计特点</strong>：</p>
+<ul>
+<li>将协议处理和业务逻辑分离（Calculator和CalculatorHelper分工明确）</li>
+<li>使用状态码表示运算结果状态</li>
+<li>严格遵循自定义协议的格式要求</li>
+</ul>
+</li>
+</ol>
+<p>这样后，我们就可以通过将 <code>std::string ServerCal::Calculator(std::string &amp;package)</code> 包装起来传递给 <code>TCP</code> 服务器从而使得服务器与协议功能解耦合</p>
+<h3><span id></span></h3><h3><span id="添加注释后的代码">添加注释后的代码</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TCPSERVERHPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TCPSERVERHPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span>    <span class="comment">// TCP基础操作封装</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span>    <span class="comment">// 日志模块</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span> <span class="comment">// 函数对象支持</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">u_int16_t</span> default_port = <span class="number">7777</span>; <span class="comment">// 默认服务端口</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义协议处理函数类型（输入请求包，返回响应包）</span></span><br><span class="line"><span class="keyword">using</span> <span class="type">func_t</span> = std::function&lt;std::<span class="built_in">string</span> (std::string &amp;)&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TcpServer</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数：初始化端口和协议处理回调</span></span><br><span class="line">    <span class="built_in">TcpServer</span>(<span class="type">int</span> port = default_port, <span class="type">func_t</span> cal = <span class="literal">nullptr</span>)</span><br><span class="line">    :<span class="built_in">port_</span>(port),</span><br><span class="line">    <span class="built_in">cal_</span>(cal)</span><br><span class="line">    &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化服务器：创建监听socket</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Init</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        listen_sockfd_ = tcp::<span class="built_in">Socket</span>();  <span class="comment">// 创建socket</span></span><br><span class="line">        tcp::<span class="built_in">Bind</span>(listen_sockfd_, port_); <span class="comment">// 绑定端口</span></span><br><span class="line">        tcp::<span class="built_in">Listen</span>(listen_sockfd_);      <span class="comment">// 开始监听</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动服务主循环</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> client; <span class="comment">// 客户端地址信息</span></span><br><span class="line">        <span class="type">int</span> client_sockfd = tcp::<span class="built_in">Accept</span>(listen_sockfd_, client); <span class="comment">// 接受连接</span></span><br><span class="line">        </span><br><span class="line">        <span class="type">char</span> buffer[<span class="number">1024</span>]; <span class="comment">// 接收缓冲区</span></span><br><span class="line">        std::string ip;    <span class="comment">// 客户端IP</span></span><br><span class="line">        <span class="type">u_int16_t</span> port;    <span class="comment">// 客户端端口</span></span><br><span class="line">        tcp::<span class="built_in">GetAddrAndPort</span>(client, ip, port); <span class="comment">// 获取客户端地址</span></span><br><span class="line">        </span><br><span class="line">        std::string package; <span class="comment">// 累积接收的数据包</span></span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 接收客户端数据</span></span><br><span class="line">            <span class="type">int</span> n = <span class="built_in">recv</span>(client_sockfd, buffer, <span class="built_in">sizeof</span>(buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span>(n == <span class="number">-1</span>) &#123;</span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;recv data failed. client [%s: %d]&quot;</span>, ip.<span class="built_in">c_str</span>(), port);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">0</span>)&#123; <span class="comment">// 客户端断开连接</span></span><br><span class="line">                <span class="built_in">lg</span>(Info, <span class="string">&quot;client [%s: %d] quit&quot;</span>, ip.<span class="built_in">c_str</span>(), port);</span><br><span class="line">                <span class="built_in">close</span>(client_sockfd);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                buffer[n] = <span class="number">0</span>; <span class="comment">// 添加字符串结束符</span></span><br><span class="line">                package += buffer; <span class="comment">// 累积数据</span></span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 处理完整数据包（可能包含多个请求）</span></span><br><span class="line">                <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    std::string resp = <span class="built_in">cal_</span>(package); <span class="comment">// 调用协议处理回调</span></span><br><span class="line">                    <span class="keyword">if</span>(resp.<span class="built_in">empty</span>()) <span class="keyword">break</span>; <span class="comment">// 无完整包可处理时退出</span></span><br><span class="line">                    </span><br><span class="line">                    <span class="comment">// 发送响应</span></span><br><span class="line">                    <span class="keyword">if</span>(<span class="built_in">send</span>(client_sockfd, resp.<span class="built_in">c_str</span>(), resp.<span class="built_in">size</span>(), <span class="number">0</span>) == <span class="number">-1</span>)&#123;</span><br><span class="line">                        <span class="built_in">lg</span>(Error, <span class="string">&quot;send failed. client [%s: %d]&quot;</span>, ip.<span class="built_in">c_str</span>(), port);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> listen_sockfd_; <span class="comment">// 监听socket描述符</span></span><br><span class="line">    <span class="type">u_int16_t</span> port_;    <span class="comment">// 服务端口</span></span><br><span class="line">    <span class="type">func_t</span> cal_;        <span class="comment">// 协议处理回调函数</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="服务器解耦合设计特点">服务器解耦合设计特点</span></h4><ol>
+<li><p><strong>回调机制设计</strong>：</p>
+<ul>
+<li>通过<code>func_t</code>函数对象类型定义协议处理接口</li>
+<li>构造函数接收外部传入的<code>std::string (std::string&amp;)</code>类型函数</li>
+<li>实际处理时调用<code>cal_(package)</code>触发业务逻辑</li>
+</ul>
+</li>
+<li><p><strong>与ServerCal的协作</strong>：</p>
+<ul>
+<li>使用时将<code>ServerCal::Calculator</code>方法绑定给<code>cal_</code>成员</li>
+<li>服务器仅负责：接收原始数据 → 累积数据包 → 调用回调 → 返回响应</li>
+<li>协议解析和业务处理完全由外部<code>Calculator</code>实现</li>
+</ul>
+</li>
+<li><p><strong>优势体现</strong>：</p>
+<ul>
+<li>服务器不感知具体协议格式（如换行分隔符等）</li>
+<li>可灵活更换不同的协议处理器（只需符合函数签名）</li>
+<li>业务逻辑变更不影响网络通信层</li>
+<li>便于单元测试（可mock协议处理器）</li>
+</ul>
+</li>
+<li><p><strong>数据处理流程</strong>：</p>
+<pre class="mermaid">   flowchart TD
+ A[网络层 TcpServer] -->|接收原始字节流| B[协议层 Decode]
+ B -->|完整数据包| C[协议解析 Deserialize]
+ C -->|Request对象| D[业务逻辑 CalculatorHelper]
+ D -->|Response对象| E[协议组装 Serialize]
+ E -->|响应字节流| F[协议层 Encode]
+ F -->|发送数据| A</pre></li>
+</ol>
+<p>这种设计遵循了单一职责原则，使网络IO处理与协议解析分离，提高了代码的可维护性和扩展性。</p>
+<h3><span id="客户端">客户端</span></h3><p>以下是添加了详细注释的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;protocol.hpp&quot;</span>  <span class="comment">// 自定义协议头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span>      <span class="comment">// TCP网络操作头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 参数校验：需要服务器IP和端口</span></span><br><span class="line">    <span class="keyword">if</span>(argc != <span class="number">3</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cerr &lt;&lt; <span class="string">&quot;\nUsage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; server_ip server_port\n&quot;</span></span><br><span class="line">              &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析命令行参数</span></span><br><span class="line">    std::string serverip = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="type">uint16_t</span> serverport = std::<span class="built_in">stoi</span>(argv[<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建TCP socket并连接服务器</span></span><br><span class="line">    <span class="type">int</span> sockfd = tcp::<span class="built_in">Socket</span>();</span><br><span class="line">    tcp::<span class="built_in">Connect</span>(sockfd, serverip, serverport);</span><br><span class="line"></span><br><span class="line">    std::string recv_str;  <span class="comment">// 接收数据缓冲区</span></span><br><span class="line">    <span class="type">char</span> buffer[<span class="number">1024</span>];     <span class="comment">// 临时接收缓冲区</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主循环：持续与服务器交互</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 1. 获取用户输入</span></span><br><span class="line">        <span class="type">int</span> x, y; </span><br><span class="line">        <span class="type">char</span> op;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Please Enter x: &quot;</span>;</span><br><span class="line">        cin &gt;&gt; x;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Please Enter y: &quot;</span>;</span><br><span class="line">        cin &gt;&gt; y;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Please Enter op: &quot;</span>;</span><br><span class="line">        cin &gt;&gt; op;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 构造请求并序列化</span></span><br><span class="line">        <span class="function">Request <span class="title">req</span><span class="params">(x, y, op)</span></span>;</span><br><span class="line">        string content = req.<span class="built_in">Serialize</span>();  <span class="comment">// 序列化为&quot;x op y&quot;格式</span></span><br><span class="line">        content = <span class="built_in">Encode</span>(content);        <span class="comment">// 添加协议头尾</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 发送请求到服务器</span></span><br><span class="line">        <span class="built_in">send</span>(sockfd, content.<span class="built_in">c_str</span>(), content.<span class="built_in">size</span>(), <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 接收服务器响应</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">recv</span>(sockfd, buffer, <span class="built_in">sizeof</span>(buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)&#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;recv&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        buffer[n] = <span class="number">0</span>;          <span class="comment">// 添加字符串结束符</span></span><br><span class="line">        recv_str += buffer;      <span class="comment">// 累积接收的数据</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5. 解析并处理响应</span></span><br><span class="line">        Response resp;</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            std::string content;</span><br><span class="line">            <span class="keyword">if</span>(!<span class="built_in">Decode</span>(recv_str, content)) <span class="keyword">break</span>;  <span class="comment">// 解码协议</span></span><br><span class="line">            </span><br><span class="line">            resp.<span class="built_in">Deserialize</span>(content);  <span class="comment">// 反序列化响应数据</span></span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;result: &quot;</span> &lt;&lt; resp.res_ &lt;&lt; <span class="string">&quot;, code: &quot;</span> &lt;&lt; resp.code_ &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="代码实现思路说明">代码实现思路说明</span></h4><ol>
+<li><p><strong>基本流程</strong>：</p>
+<ul>
+<li>接收用户输入的两个数字和运算符</li>
+<li>将输入序列化为协议格式并发送给服务器</li>
+<li>接收服务器响应并解析显示结果</li>
+<li>循环这个过程实现持续计算</li>
+</ul>
+</li>
+<li><p><strong>协议处理</strong>：</p>
+<ul>
+<li>使用<code>Request</code>类序列化用户输入（格式：”x op y”）</li>
+<li>通过<code>Encode</code>添加协议头尾（长度前缀和分隔符）</li>
+<li>接收时使用<code>Decode</code>解析完整数据包</li>
+<li>用<code>Response</code>类解析服务器返回的结果和状态码</li>
+</ul>
+</li>
+<li><p><strong>网络通信</strong>：</p>
+<ul>
+<li>使用TCP socket连接服务器</li>
+<li>发送序列化后的请求数据</li>
+<li>接收响应数据并累积（处理可能的分包情况）</li>
+</ul>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>遵循严格的协议格式</li>
+<li>支持持续交互（不退出）</li>
+<li>基本的错误处理（接收错误退出）</li>
+<li>显示完整的计算结果和状态码</li>
+</ul>
+</li>
+</ol>
+<h3><span id="服务端">服务端</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span>           <span class="comment">// 智能指针头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;server_cal.hpp&quot;</span>   <span class="comment">// 计算器服务实现</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcpserver.hpp&quot;</span>    <span class="comment">// TCP服务器实现</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 参数检查：需要指定服务端口</span></span><br><span class="line">    <span class="keyword">if</span>(argc != <span class="number">2</span>)&#123;</span><br><span class="line">        cerr &lt;&lt; <span class="string">&quot;\nUsage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; server_port\n&quot;</span></span><br><span class="line">              &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建计算器服务实例</span></span><br><span class="line">    ServerCal sc;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建TCP服务器实例：</span></span><br><span class="line">    <span class="comment">// 1. 使用unique_ptr管理资源</span></span><br><span class="line">    <span class="comment">// 2. 端口号从命令行参数获取</span></span><br><span class="line">    <span class="comment">// 3. 绑定ServerCal::Calculator方法作为协议处理器</span></span><br><span class="line">    <span class="function">unique_ptr&lt;TcpServer&gt; <span class="title">ts</span><span class="params">(<span class="keyword">new</span> TcpServer(</span></span></span><br><span class="line"><span class="params"><span class="function">        stoi(argv[<span class="number">1</span>]),                      <span class="comment">// 服务端口</span></span></span></span><br><span class="line"><span class="params"><span class="function">        bind(&amp;ServerCal::Calculator,        <span class="comment">// 绑定成员函数</span></span></span></span><br><span class="line"><span class="params"><span class="function">             &amp;sc,                          <span class="comment">// 对象指针</span></span></span></span><br><span class="line"><span class="params"><span class="function">             placeholders::_1)             <span class="comment">// 占位符表示参数</span></span></span></span><br><span class="line"><span class="params"><span class="function">    ))</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化服务器（创建socket+绑定端口+监听）</span></span><br><span class="line">    ts-&gt;<span class="built_in">Init</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动服务器主循环</span></span><br><span class="line">    ts-&gt;<span class="built_in">Start</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，我们就讲自定义协议的计算服务实现了，下面我们来测试一下这段代码：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/protocol</span><br><span class="line">╰─➤  ./client_cal.o 82.156.255.140 7788</span><br><span class="line">Please Enter x: 1</span><br><span class="line">Please Enter y: 2</span><br><span class="line">Please Enter op: +</span><br><span class="line">result: 3, code: 0</span><br><span class="line">Please Enter x: 3</span><br><span class="line">Please Enter y: 2</span><br><span class="line">Please Enter op: -</span><br><span class="line">result: 1, code: 0</span><br><span class="line">Please Enter x: 1</span><br><span class="line">Please Enter y: 4</span><br><span class="line">Please Enter op: /</span><br><span class="line">result: 0, code: 0</span><br><span class="line">Please Enter x: 3</span><br><span class="line">Please Enter y: 0</span><br><span class="line">Please Enter op: /</span><br><span class="line">result: 0, code: 1</span><br><span class="line">Please Enter x: 2</span><br><span class="line">Please Enter y: 3</span><br><span class="line">Please Enter op: %</span><br><span class="line">result: 2, code: 0</span><br><span class="line">Please Enter x: 2</span><br><span class="line">Please Enter y: 0</span><br><span class="line">Please Enter op: %</span><br><span class="line">result: 0, code: 1</span><br><span class="line">Please Enter x: 2</span><br><span class="line">Please Enter y: 1</span><br><span class="line">Please Enter op: &amp;</span><br><span class="line">result: 0, code: 2</span><br></pre></td></tr></table></figure>
+
+<p>客户端若输入的不是数字，就会导致未定义行为，因为我们对 <code>x</code> 和 <code>y</code> 的类型定义的是 <code>int</code> 类型，因此我们可以将 <code>x</code> 和 <code>y</code> 的类型定义为 <code>string</code> 类型，然后通过 <code>std::stoi()</code> 函数来转换为 <code>int</code> 类型，如果转换失败，就说明输入的不是数字，我们就可以提示用户重新输入：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">string x_str, y_str;</span><br><span class="line"><span class="type">char</span> op;</span><br><span class="line"><span class="type">int</span> x = <span class="number">0</span>, y = <span class="number">0</span>;</span><br><span class="line"><span class="comment">// 输入x并验证</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Please Enter x: &quot;</span>;</span><br><span class="line">    cin &gt;&gt; x_str;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        x = <span class="built_in">stoi</span>(x_str);</span><br><span class="line">                <span class="keyword">break</span>; <span class="comment">// 转换成功则退出循环</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (<span class="type">const</span> exception &amp;e)</span><br><span class="line">    &#123;</span><br><span class="line">       cout &lt;&lt; <span class="string">&quot;Invalid number! Please enter an integer.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 输入y并验证</span></span><br><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Please Enter y: &quot;</span>;</span><br><span class="line">    cin &gt;&gt; y_str;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">        y = <span class="built_in">stoi</span>(y_str);</span><br><span class="line">        <span class="keyword">break</span>; <span class="comment">// 转换成功则退出循环</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">catch</span> (<span class="type">const</span> exception &amp;e)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Invalid number! Please enter an integer.&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而后，我们就可以正确处理客户端的输入错误了，而且这些检查都是在客户端做的，而不是让数据传递带服务端再做检查，一举两得</p>
+<p>测试结果：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/protocol</span><br><span class="line">╰─➤  ./client_cal.o 82.156.255.140 7788</span><br><span class="line">Please Enter x: 1</span><br><span class="line">Please Enter y: +</span><br><span class="line">Invalid number! Please enter an integer.</span><br><span class="line">Please Enter y: %</span><br><span class="line">Invalid number! Please enter an integer.</span><br><span class="line">Please Enter y: 3</span><br><span class="line">Please Enter op: (</span><br><span class="line">result: 0, code: 2</span><br><span class="line">Please Enter x: 3</span><br><span class="line">Please Enter y: 2</span><br><span class="line">Please Enter op: +</span><br><span class="line">result: 5, code: 0</span><br></pre></td></tr></table></figure>
+
+<p>当然，序列化和反序列化是可以通过更简单的方式来处理的，我们可以利用一些比较成熟的序列化技术来更简单地实现序列化：</p>
+<p>下面我们使用 <code>JSON</code> 来对数据进行序列化和反序列化：</p>
+<h3><span id="json格式化实现">JSON格式化实现</span></h3><p>以下是添加了详细注释的代码：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _PROTOCOL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _PROTOCOL_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;jsoncpp/json/json.h&gt;</span>  <span class="comment">// JSON库头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 分隔符定义（虽然改用JSON后部分不再需要，但保留协议兼容性）</span></span><br><span class="line"><span class="type">const</span> std::string blank_space_sep = <span class="string">&quot; &quot;</span>;  <span class="comment">// 空格分隔符</span></span><br><span class="line"><span class="type">const</span> std::string protocol_sep = <span class="string">&quot;\n&quot;</span>;    <span class="comment">// 协议分隔符</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误码枚举</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    divide_by_zero_error = <span class="number">1</span>,  <span class="comment">// 除零错误</span></span><br><span class="line">    operator_identify,         <span class="comment">// 操作符识别错误</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 协议解码函数（兼容旧协议）</span></span><br><span class="line"><span class="comment"> * 参数: package - 输入的数据包</span></span><br><span class="line"><span class="comment"> *       content - 输出的解码后内容</span></span><br><span class="line"><span class="comment"> * 返回值: 解码成功返回true，失败返回false</span></span><br><span class="line"><span class="comment"> * 注意: 改用JSON后不再严格检查格式，但仍保留长度前缀机制</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Decode</span><span class="params">(std::string &amp;package, std::string &amp;content)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 查找第一个分隔符位置</span></span><br><span class="line">    <span class="type">size_t</span> pos = package.<span class="built_in">find</span>(protocol_sep);</span><br><span class="line">    <span class="keyword">if</span>(pos == std::string::npos) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取JSON内容长度</span></span><br><span class="line">    <span class="type">size_t</span> size = std::<span class="built_in">stoi</span>(package.<span class="built_in">substr</span>(<span class="number">0</span>, pos));</span><br><span class="line">    <span class="type">size_t</span> total_len = pos + size + <span class="number">2</span>;  <span class="comment">// 计算总长度(长度+分隔符+内容+分隔符)</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 提取JSON内容</span></span><br><span class="line">    content = package.<span class="built_in">substr</span>(pos + <span class="number">1</span>, size);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 删除已处理的数据</span></span><br><span class="line">    package.<span class="built_in">erase</span>(<span class="number">0</span>, total_len);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 协议编码函数</span></span><br><span class="line"><span class="comment"> * 参数: content - 要编码的JSON内容</span></span><br><span class="line"><span class="comment"> * 返回值: 添加长度前缀的协议字符串</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">std::string <span class="title">Encode</span><span class="params">(std::string &amp;content)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::string ret = std::<span class="built_in">to_string</span>(content.<span class="built_in">size</span>());  <span class="comment">// 添加长度前缀</span></span><br><span class="line">    ret += protocol_sep;                               <span class="comment">// 添加分隔符</span></span><br><span class="line">    ret += content;                                    <span class="comment">// 添加JSON内容</span></span><br><span class="line">    ret += protocol_sep;                               <span class="comment">// 添加结束分隔符</span></span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 请求类（客户端→服务端）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Request</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数（默认值表示无效请求）</span></span><br><span class="line">    <span class="built_in">Request</span>(<span class="type">int</span> x = <span class="number">0</span>, <span class="type">int</span> y = <span class="number">0</span>, <span class="type">char</span> op = <span class="string">&#x27;?&#x27;</span>)</span><br><span class="line">    :<span class="built_in">x_</span>(x), <span class="built_in">y_</span>(y), <span class="built_in">op_</span>(op)&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* 序列化为JSON字符串</span></span><br><span class="line"><span class="comment">     * 格式: &#123;&quot;x&quot;:数值, &quot;y&quot;:数值, &quot;op&quot;:操作符&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">std::string <span class="title">Serialize</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Json::Value root;          <span class="comment">// 创建JSON根节点</span></span><br><span class="line">        root[<span class="string">&quot;x&quot;</span>] = x_;           <span class="comment">// 添加x字段</span></span><br><span class="line">        root[<span class="string">&quot;y&quot;</span>] = y_;           <span class="comment">// 添加y字段</span></span><br><span class="line">        root[<span class="string">&quot;op&quot;</span>] = op_;         <span class="comment">// 添加op字段</span></span><br><span class="line">        Json::StyledWriter w;      <span class="comment">// 使用格式化写入器</span></span><br><span class="line">        <span class="keyword">return</span> w.<span class="built_in">write</span>(root);      <span class="comment">// 生成JSON字符串</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 从JSON字符串反序列化</span></span><br><span class="line"><span class="comment">     * 参数: in - 输入的JSON字符串</span></span><br><span class="line"><span class="comment">     * 返回值: 解析成功返回true</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">Deserialize</span><span class="params">(std::string &amp;in)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Json::Value root;         <span class="comment">// 创建JSON根节点</span></span><br><span class="line">        Json::Reader r;          <span class="comment">// JSON解析器</span></span><br><span class="line">        <span class="keyword">if</span>(!r.<span class="built_in">parse</span>(in, root))   <span class="comment">// 解析JSON</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            </span><br><span class="line">        x_ = root[<span class="string">&quot;x&quot;</span>].<span class="built_in">asInt</span>();   <span class="comment">// 读取x值</span></span><br><span class="line">        y_ = root[<span class="string">&quot;y&quot;</span>].<span class="built_in">asInt</span>();   <span class="comment">// 读取y值</span></span><br><span class="line">        op_ = root[<span class="string">&quot;op&quot;</span>].<span class="built_in">asInt</span>(); <span class="comment">// 读取op值(注意: 这里可能有类型问题)</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> x_;     <span class="comment">// 第一个操作数</span></span><br><span class="line">    <span class="type">int</span> y_;     <span class="comment">// 第二个操作数</span></span><br><span class="line">    <span class="type">char</span> op_;   <span class="comment">// 操作符</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 响应类（服务端→客户端）</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Response</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">Response</span>(<span class="type">int</span> res = <span class="number">0</span>, <span class="type">int</span> code = <span class="number">0</span>)</span><br><span class="line">    :<span class="built_in">res_</span>(res), <span class="built_in">code_</span>(code)&#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* 序列化为JSON字符串</span></span><br><span class="line"><span class="comment">     * 格式: &#123;&quot;res&quot;:结果, &quot;code&quot;:状态码&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function">std::string <span class="title">Serialize</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Json::Value root;</span><br><span class="line">        root[<span class="string">&quot;res&quot;</span>] = res_;       <span class="comment">// 添加结果字段</span></span><br><span class="line">        root[<span class="string">&quot;code&quot;</span>] = code_;     <span class="comment">// 添加状态码字段</span></span><br><span class="line">        Json::StyledWriter w;</span><br><span class="line">        <span class="keyword">return</span> w.<span class="built_in">write</span>(root);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 从JSON字符串反序列化</span></span><br><span class="line"><span class="comment">     * 参数: in - 输入的JSON字符串</span></span><br><span class="line"><span class="comment">     * 返回值: 解析成功返回true</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">Deserialize</span><span class="params">(std::string &amp;in)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        Json::Value root;</span><br><span class="line">        Json::Reader r;</span><br><span class="line">        <span class="keyword">if</span>(!r.<span class="built_in">parse</span>(in, root))</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            </span><br><span class="line">        res_ = root[<span class="string">&quot;res&quot;</span>].<span class="built_in">asInt</span>();    <span class="comment">// 读取结果值</span></span><br><span class="line">        code_ = root[<span class="string">&quot;code&quot;</span>].<span class="built_in">asInt</span>();  <span class="comment">// 读取状态码</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="type">int</span> res_;    <span class="comment">// 计算结果</span></span><br><span class="line">    <span class="type">int</span> code_;   <span class="comment">// 状态码</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><strong>JSON序列化</strong>：</p>
+<ul>
+<li>使用<code>Json::Value</code>作为数据容器</li>
+<li><code>StyledWriter</code>生成格式化的JSON字符串</li>
+<li><code>Reader</code>解析JSON字符串</li>
+</ul>
+</li>
+<li><p><strong>协议兼容性</strong>：</p>
+<ul>
+<li>保留原有的长度前缀机制</li>
+<li>外层协议格式不变，仅内容改为JSON</li>
+</ul>
+</li>
+<li><p><strong>优势</strong>：</p>
+<ul>
+<li>更易扩展新字段</li>
+<li>数据结构更清晰</li>
+<li>支持嵌套复杂数据结构</li>
+<li>跨语言兼容性更好</li>
+</ul>
+</li>
+</ol>
+<p>学会合理地使用外部工具，是一个程序员的必备技能</p>
+<p>下面是整个服务器客户端的数据处理流程图，希望对你有帮助：</p>
+<pre class="mermaid">flowchart LR
+    subgraph 客户端
+        A[启动客户端] --> B[建立TCP连接]
+        B --> C[输入x,y,op]
+        subgraph 接收循环[接收响应循环]
+        C --> D[序列化Request为JSON]
+        D --> E[添加长度前缀协议封装]
+        E --> F[发送数据]
+        F --> G{接收数据}
+        G -->|成功| H[累积到recv_buffer]
+        
+            H --> I{尝试解码}
+            I -->|完整包| J[解析JSON响应]
+            I -->|不完整| C
+            J --> K[显示结果]
+            K --> I
+        end
+    end
+
+    subgraph 服务端
+        M[启动服务] --> N[监听端口]
+        N --> O[接受连接]
+        
+        subgraph 处理循环[请求处理循环]
+            O --> P{接收数据}
+            P -->|成功| Q[累积到recv_buffer]
+            Q --> R{尝试解码}
+            R -->|完整包| S[解析JSON请求]
+            R -->|不完整| P
+            S --> T[执行计算逻辑]
+            T --> U[序列化Response为JSON]
+            U --> V[添加长度前缀协议封装]
+            V --> W[发送响应]
+            W --> R
+            P -->|失败| X[关闭连接]
+        end
+    end
+
+    客户端 -- 请求 --> 服务端
+    服务端 -- 响应 --> 客户端</pre>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>

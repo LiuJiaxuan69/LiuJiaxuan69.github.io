@@ -908,11 +908,11 @@ a[href^="#"] {
 .mermaid path, .mermaid line {
     stroke: #f0f0f0 !important; /* 线条 */
 }
-/* 修改节点背景色 */
-.mermaid rect, .mermaid polygon {
-    fill: #f0f0f0 !important; /* 背景 */
-    stroke: #333 !important;   /* 边框颜色 */
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
 }
+
 /* 修改文本颜色 */
 .mermaid text {
     fill: #4a8ecd !important; /* 文字 */
