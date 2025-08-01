@@ -1,0 +1,1062 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IO 多路转接--Poll - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+poll 函数
+poll 函数原型
+struct pollfd 结构体
+poll 的工作流程
+poll 示例代码（监控多个 FD）
+
+
+服务端实现
+tcp.hpp
+poll_server.hp,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="IO 多路转接--Poll - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+poll 函数
+poll 函数原型
+struct pollfd 结构体
+poll 的工作流程
+poll 示例代码（监控多个 FD）
+
+
+服务端实现
+tcp.hpp
+poll_server.hp,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="IO 多路转接--Poll - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+poll 函数
+poll 函数原型
+struct pollfd 结构体
+poll 的工作流程
+poll 示例代码（监控多个 FD）
+
+
+服务端实现
+tcp.hpp
+poll_server.hp,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">IO 多路转接--Poll</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">IO 多路转接--Poll</h1>
+        <div class="stuff">
+            <span>八月 01, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/TCP/" rel="tag">TCP</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#poll-%E5%87%BD%E6%95%B0"><code>poll</code> 函数</a><ul>
+<li><a href="#poll-%E5%87%BD%E6%95%B0%E5%8E%9F%E5%9E%8B"><code>poll</code> 函数原型</a></li>
+<li><a href="#struct-pollfd-%E7%BB%93%E6%9E%84%E4%BD%93"><code>struct pollfd</code> 结构体</a></li>
+<li><a href="#poll-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><code>poll</code> 的工作流程</a></li>
+<li><a href="#poll-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81%E7%9B%91%E6%8E%A7%E5%A4%9A%E4%B8%AA-fd"><code>poll</code> 示例代码（监控多个 FD）</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%AE%9E%E7%8E%B0">服务端实现</a><ul>
+<li><a href="#tcphpp">tcp.hpp</a></li>
+<li><a href="#poll_serverhpp">poll_server.hpp</a></li>
+<li><a href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%BB%A3%E7%A0%81">客户端代码</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E6%B5%8B%E8%AF%95">代码测试</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="poll-函数"><code>poll</code> 函数</span></h2><p><code>poll</code> 是 Linux&#x2F;Unix 系统中的一种 <strong>I&#x2F;O 多路复用</strong> 机制，用于同时监控多个文件描述符（FD）的 <strong>可读、可写、错误等事件</strong>。相比 <code>select</code>，<code>poll</code> 没有 FD 数量限制（<code>select</code> 默认限制为 1024），并且使用更灵活的结构体数组管理 FD。</p>
+<hr>
+<h3><span id="poll-函数原型"><code>poll</code> 函数原型</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;poll.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">poll</span><span class="params">(<span class="keyword">struct</span> pollfd *fds, <span class="type">nfds_t</span> nfds, <span class="type">int</span> timeout)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="参数说明">参数说明</span></h4><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>fds</code></strong></td>
+<td><code>struct pollfd *</code></td>
+<td><strong>结构体数组</strong>，每个元素描述一个 FD 及其关注的事件</td>
+</tr>
+<tr>
+<td><strong><code>nfds</code></strong></td>
+<td><code>nfds_t</code></td>
+<td>指定 <code>fds</code> 数组中 <strong>有效元素的数量</strong>（即监控的 FD 数量）</td>
+</tr>
+<tr>
+<td><strong><code>timeout</code></strong></td>
+<td><code>int</code></td>
+<td><strong>超时时间（毫秒）</strong>：<br> - <code>-1</code>：阻塞等待，直到有事件发生<br> - <code>0</code>：立即返回（非阻塞轮询）<br> - <code>&gt;0</code>：等待指定毫秒后返回</td>
+</tr>
+</tbody></table>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li><strong><code>&gt;0</code></strong>：返回 <strong>就绪的 FD 数量</strong>（即 <code>revents</code> 被设置的 FD 数量）。</li>
+<li><strong><code>0</code></strong>：超时且无事件发生。</li>
+<li><strong><code>-1</code></strong>：出错，并设置 <code>errno</code>（如 <code>EINTR</code> 被信号中断）。</li>
+</ul>
+<hr>
+<h3><span id="struct-pollfd-结构体"><code>struct pollfd</code> 结构体</span></h3><p><code>poll</code> 的核心是 <strong><code>struct pollfd</code></strong> 数组，每个结构体描述一个 FD 及其关注的事件。</p>
+<h4><span id="结构体定义">结构体定义</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> &#123;</span></span><br><span class="line">    <span class="type">int</span>   fd;         <span class="comment">/* 文件描述符 */</span></span><br><span class="line">    <span class="type">short</span> events;     <span class="comment">/* 要监控的事件（输入） */</span></span><br><span class="line">    <span class="type">short</span> revents;    <span class="comment">/* 实际发生的事件（输出） */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="字段说明">字段说明</span></h4><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>fd</code></strong></td>
+<td><code>int</code></td>
+<td><strong>文件描述符</strong>（如 socket、pipe 等）<br> - 如果 <code>fd = -1</code>，<code>poll</code> 会忽略该结构体</td>
+</tr>
+<tr>
+<td><strong><code>events</code></strong></td>
+<td><code>short</code></td>
+<td><strong>要监控的事件</strong>（用户设置）<br> - 使用 <code>POLLIN</code>、<code>POLLOUT</code> 等宏组合</td>
+</tr>
+<tr>
+<td><strong><code>revents</code></strong></td>
+<td><code>short</code></td>
+<td><strong>实际发生的事件</strong>（内核返回）<br> - 由 <code>poll</code> 填充，表示哪些事件已就绪</td>
+</tr>
+</tbody></table>
+<hr>
+<h4><span id="events-和-revents-的可用事件"><code>events</code> 和 <code>revents</code> 的可用事件</span></h4><p><code>events</code> 和 <code>revents</code> 使用相同的宏定义，但：</p>
+<ul>
+<li><code>events</code> 是 <strong>输入参数</strong>（告诉 <code>poll</code> 要监控哪些事件）。</li>
+<li><code>revents</code> 是 <strong>输出参数</strong>（<code>poll</code> 返回时填充哪些事件真正发生）。</li>
+</ul>
+<p>他们都是通过位图管理的，每个事件对应一个位，多个事件通过位运算组合。</p>
+<h4><span id="常用事件宏">常用事件宏</span></h4><table>
+<thead>
+<tr>
+<th>宏</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>POLLIN</code></strong></td>
+<td>数据可读（如 TCP 接收缓冲区非空）</td>
+</tr>
+<tr>
+<td><strong><code>POLLOUT</code></strong></td>
+<td>数据可写（如 TCP 发送缓冲区未满）</td>
+</tr>
+<tr>
+<td><strong><code>POLLERR</code></strong></td>
+<td>发生错误（仅 <code>revents</code> 可用）</td>
+</tr>
+<tr>
+<td><strong><code>POLLHUP</code></strong></td>
+<td>连接挂断（如对端关闭）</td>
+</tr>
+<tr>
+<td><strong><code>POLLNVAL</code></strong></td>
+<td>FD 未打开（<code>fd</code> 无效，仅 <code>revents</code> 可用）</td>
+</tr>
+</tbody></table>
+<h4><span id="示例">示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">fds</span>[1];</span></span><br><span class="line">fds[<span class="number">0</span>].fd = sockfd;</span><br><span class="line">fds[<span class="number">0</span>].events = POLLIN | POLLOUT;  <span class="comment">// 监控可读和可写</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> ret = poll(fds, <span class="number">1</span>, <span class="number">1000</span>);      <span class="comment">// 等待 1 秒</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (fds[<span class="number">0</span>].revents &amp; POLLIN) &#123;</span><br><span class="line">    <span class="comment">// sockfd 可读，调用 recv()</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (fds[<span class="number">0</span>].revents &amp; POLLOUT) &#123;</span><br><span class="line">    <span class="comment">// sockfd 可写，调用 send()</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> (fds[<span class="number">0</span>].revents &amp; POLLERR) &#123;</span><br><span class="line">    <span class="comment">// 发生错误</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3><span id="poll-的工作流程"><code>poll</code> 的工作流程</span></h3><ol>
+<li><strong>初始化 <code>struct pollfd</code> 数组</strong>，设置 <code>fd</code> 和 <code>events</code>。</li>
+<li><strong>调用 <code>poll</code></strong>，传入数组、FD 数量和超时时间。</li>
+<li><strong><code>poll</code> 阻塞</strong>，直到：<ul>
+<li>有 FD 就绪。</li>
+<li>超时（<code>timeout</code> 毫秒）。</li>
+<li>被信号中断（返回 <code>-1</code>，<code>errno = EINTR</code>）。</li>
+</ul>
+</li>
+<li><strong>检查 <code>revents</code></strong>，处理就绪的 FD。</li>
+<li><strong>循环调用 <code>poll</code></strong>，继续监控。</li>
+</ol>
+<hr>
+<h3><span id="poll-示例代码监控多个-fd"><code>poll</code> 示例代码（监控多个 FD）</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;poll.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">fds</span>[2];</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监控 stdin（文件描述符 0）</span></span><br><span class="line">    fds[<span class="number">0</span>].fd = STDIN_FILENO;</span><br><span class="line">    fds[<span class="number">0</span>].events = POLLIN;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监控 stdout（文件描述符 1）</span></span><br><span class="line">    fds[<span class="number">1</span>].fd = STDOUT_FILENO;</span><br><span class="line">    fds[<span class="number">1</span>].events = POLLOUT;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="type">int</span> ret = poll(fds, <span class="number">2</span>, <span class="number">3000</span>); <span class="comment">// 3 秒超时</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (ret == <span class="number">-1</span>) &#123;</span><br><span class="line">            perror(<span class="string">&quot;poll&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ret == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;Timeout!\n&quot;</span>);</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 检查 stdin 是否可读</span></span><br><span class="line">        <span class="keyword">if</span> (fds[<span class="number">0</span>].revents &amp; POLLIN) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;stdin is readable!\n&quot;</span>);</span><br><span class="line">            <span class="type">char</span> buf[<span class="number">1024</span>];</span><br><span class="line">            read(STDIN_FILENO, buf, <span class="keyword">sizeof</span>(buf));</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 检查 stdout 是否可写</span></span><br><span class="line">        <span class="keyword">if</span> (fds[<span class="number">1</span>].revents &amp; POLLOUT) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;stdout is writable!\n&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面我们利用<code>poll</code>来实现一个简单的 <code>TCP</code> 多用户通信服务器程序</p>
+<h2><span id="服务端实现">服务端实现</span></h2><h3><span id="tcphpp">tcp.hpp</span></h3><p>这里的 <code>TCP</code> 接口封装和之前的接口想同，没有影响的可以展开看看</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// tcp.hpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TCP_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TCP_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;netinet/in.h&gt;</span>  <span class="comment">// sockaddr_in结构体定义</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;arpa/inet.h&gt;</span>   <span class="comment">// 网络地址转换函数</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span>       <span class="comment">// bzero函数</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span>       <span class="comment">// 自定义日志头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误码枚举定义</span></span><br><span class="line"><span class="keyword">enum</span></span><br><span class="line">&#123;</span><br><span class="line">    socket_error = <span class="number">1</span>,  <span class="comment">// socket创建失败</span></span><br><span class="line">    bind_error,       <span class="comment">// bind失败</span></span><br><span class="line">    listen_error,      <span class="comment">// listen失败</span></span><br><span class="line">    connect_error,     <span class="comment">// connect失败</span></span><br><span class="line">    accept_error,      <span class="comment">// accept失败</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程本地存储的地址缓冲区，用于IP地址转换</span></span><br><span class="line"><span class="keyword">inline</span> <span class="keyword">thread_local</span> <span class="type">char</span> addr_buffer[<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">// TCP网络操作命名空间</span></span><br><span class="line"><span class="keyword">namespace</span> tcp</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 创建TCP socket</span></span><br><span class="line">    <span class="comment">// 返回值: 成功返回socket文件描述符，失败退出程序</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Socket</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 创建IPv4 TCP socket</span></span><br><span class="line">        <span class="type">int</span> sockfd = <span class="built_in">socket</span>(AF_INET, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (sockfd == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;socket&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(socket_error);  <span class="comment">// 创建失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sockfd;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 绑定socket到指定端口</span></span><br><span class="line">    <span class="comment">// 参数: sockfd - socket文件描述符</span></span><br><span class="line">    <span class="comment">//       port - 要绑定的端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Bind</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">int</span> port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> local;  <span class="comment">// IPv4地址结构</span></span><br><span class="line">        <span class="built_in">bzero</span>(&amp;local, <span class="built_in">sizeof</span>(local));  <span class="comment">// 清空结构体</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置地址族、IP地址和端口</span></span><br><span class="line">        local.sin_family = AF_INET;           <span class="comment">// IPv4</span></span><br><span class="line">        local.sin_addr.s_addr = INADDR_ANY;   <span class="comment">// 监听所有网络接口</span></span><br><span class="line">        local.sin_port = <span class="built_in">htons</span>(port);         <span class="comment">// 主机字节序转网络字节序</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 绑定socket</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">bind</span>(sockfd, (<span class="keyword">struct</span> sockaddr *)(&amp;local), <span class="built_in">sizeof</span>(local));</span><br><span class="line">        <span class="keyword">if</span> (n != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;bind&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(bind_error);  <span class="comment">// 绑定失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从sockaddr_in结构体中提取IP和端口</span></span><br><span class="line">    <span class="comment">// 参数: addr_in - 网络地址结构体</span></span><br><span class="line">    <span class="comment">//       ip - 输出参数，存储IP地址字符串</span></span><br><span class="line">    <span class="comment">//       port - 输出参数，存储端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">GetAddrAndPort</span><span class="params">(<span class="keyword">struct</span> sockaddr_in &amp;addr_in, std::string &amp;ip, <span class="type">uint16_t</span> &amp;port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        port = <span class="built_in">ntohs</span>(addr_in.sin_port);  <span class="comment">// 网络字节序转主机字节序</span></span><br><span class="line">        <span class="comment">// 将IP地址转换为点分十进制字符串</span></span><br><span class="line">        <span class="built_in">inet_ntop</span>(AF_INET, &amp;addr_in.sin_addr, addr_buffer, <span class="built_in">sizeof</span>(addr_buffer) - <span class="number">1</span>);</span><br><span class="line">        ip = addr_buffer;  <span class="comment">// 存储到输出参数</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 开始监听socket连接</span></span><br><span class="line">    <span class="comment">// 参数: listen_sock - 监听socket</span></span><br><span class="line">    <span class="comment">//       backlog - 最大挂起连接数，默认为10</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Listen</span><span class="params">(<span class="type">int</span> listen_sock, <span class="type">int</span> backlog = <span class="number">10</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">listen</span>(listen_sock, backlog);</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;listen&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(listen_error);  <span class="comment">// 监听失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 连接到服务器</span></span><br><span class="line">    <span class="comment">// 参数: sockfd - 客户端socket</span></span><br><span class="line">    <span class="comment">//       server_ip - 服务器IP地址</span></span><br><span class="line">    <span class="comment">//       server_port - 服务器端口号</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Connect</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> std::string &amp;server_ip, <span class="type">const</span> <span class="type">u_int16_t</span> &amp;server_port)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> server;  <span class="comment">// 服务器地址结构</span></span><br><span class="line">        <span class="built_in">bzero</span>(&amp;server, <span class="built_in">sizeof</span>(server));  <span class="comment">// 清空结构体</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 设置服务器地址信息</span></span><br><span class="line">        server.sin_port = <span class="built_in">htons</span>(server_port);        <span class="comment">// 端口号转网络字节序</span></span><br><span class="line">        server.sin_family = AF_INET;                  <span class="comment">// IPv4</span></span><br><span class="line">        server.sin_addr.s_addr = <span class="built_in">inet_addr</span>(server_ip.<span class="built_in">c_str</span>());  <span class="comment">// IP地址转换</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 发起连接</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">connect</span>(sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;server, <span class="built_in">sizeof</span>(server));</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;connect&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(connect_error);  <span class="comment">// 连接失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接受客户端连接</span></span><br><span class="line">    <span class="comment">// 参数: listen_sockfd - 监听socket</span></span><br><span class="line">    <span class="comment">//       client_addr - 输出参数，存储客户端地址信息</span></span><br><span class="line">    <span class="comment">// 返回值: 成功返回连接socket文件描述符，失败退出程序</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Accept</span><span class="params">(<span class="type">int</span> listen_sockfd, sockaddr_in &amp;client_addr)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">socklen_t</span> len = <span class="built_in">sizeof</span>(client_addr);  <span class="comment">// 地址结构长度</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 接受连接</span></span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">accept</span>(listen_sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;client_addr, &amp;len);</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;accept&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(accept_error);  <span class="comment">// 接受失败退出程序</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> n;  <span class="comment">// 返回新连接的socket描述符</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<h3><span id="poll_serverhpp">poll_server.hpp</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _POLL_SERVER_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _POLL_SERVER_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;poll.h&gt;</span>          <span class="comment">// poll函数相关头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span>    <span class="comment">// socket相关操作头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span>         <span class="comment">// 自定义TCP工具函数头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 服务器配置常量</span></span><br><span class="line"><span class="keyword">constexpr</span> <span class="type">const</span> <span class="type">size_t</span> max_fd_sz = <span class="number">1</span> &lt;&lt; <span class="number">10</span>;  <span class="comment">// 最大监控文件描述符数量(1024)</span></span><br><span class="line"><span class="type">const</span> <span class="type">u_int16_t</span> default_port = <span class="number">8888</span>;         <span class="comment">// 默认服务端口号</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> default_fd = <span class="number">-1</span>;                   <span class="comment">// 无效文件描述符标识</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> none_event = <span class="number">0</span>;                    <span class="comment">// 无事件标志</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端信息结构体</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">client_inf</span> &#123;</span><br><span class="line">    std::string client_addr;  <span class="comment">// 客户端IP地址</span></span><br><span class="line">    <span class="type">u_int16_t</span> client_port;    <span class="comment">// 客户端端口号</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 基于poll的TCP聊天服务器类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PollServer</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数，可指定端口号(默认8888)</span></span><br><span class="line">    <span class="built_in">PollServer</span>(<span class="type">u_int16_t</span> port = default_port)</span><br><span class="line">        : <span class="built_in">cur_sz</span>(<span class="number">0</span>),          <span class="comment">// 初始化当前监控数量为0</span></span><br><span class="line">          <span class="built_in">port_</span>(port)         <span class="comment">// 设置服务端口号</span></span><br><span class="line">    &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化服务器</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 1. 创建监听套接字</span></span><br><span class="line">        listen_sockfd = tcp::<span class="built_in">Socket</span>();</span><br><span class="line">        <span class="built_in">lg</span>(Info, <span class="string">&quot;listening sock create success, sockfd: %d&quot;</span>, listen_sockfd);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 2. 绑定端口</span></span><br><span class="line">        tcp::<span class="built_in">Bind</span>(listen_sockfd, port_);</span><br><span class="line">        <span class="built_in">lg</span>(Info, <span class="string">&quot;listening sock bind success&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 3. 开始监听连接</span></span><br><span class="line">        tcp::<span class="built_in">Listen</span>(listen_sockfd);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 初始化poll监控数组</span></span><br><span class="line">        event_fds[<span class="number">0</span>].fd = listen_sockfd;  <span class="comment">// 监听套接字放在数组首位</span></span><br><span class="line">        event_fds[<span class="number">0</span>].events = POLLIN;      <span class="comment">// 监听读事件(新连接)</span></span><br><span class="line">        ++cur_sz;                          <span class="comment">// 监控数量增加</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 初始化其余位置为无效状态</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; max_fd_sz; ++i) &#123;</span><br><span class="line">            event_fds[i].fd = default_fd;    <span class="comment">// 标记为无效fd</span></span><br><span class="line">            event_fds[i].events = none_event; <span class="comment">// 不监听任何事件</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动服务器主循环</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="comment">// 调用poll监控所有文件描述符，超时时间3秒</span></span><br><span class="line">            <span class="type">int</span> n = <span class="built_in">poll</span>(event_fds, cur_sz, <span class="number">3000</span>);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> (n == <span class="number">-1</span>) &#123;  <span class="comment">// poll出错</span></span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;poll false, errno: %d, errstr: %s&quot;</span>, errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">            &#125; </span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;  <span class="comment">// 超时，无事件发生</span></span><br><span class="line">                <span class="built_in">lg</span>(Info, <span class="string">&quot;None client join and no client send message&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> &#123;  <span class="comment">// 有事件发生</span></span><br><span class="line">                <span class="built_in">lg</span>(Info, <span class="string">&quot;Get a new link&quot;</span>);</span><br><span class="line">                <span class="built_in">Dispatcher</span>();  <span class="comment">// 处理事件</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 事件分发处理函数</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Dispatcher</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 遍历所有监控的文件描述符</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; cur_sz; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (event_fds[i].fd == default_fd)  <span class="comment">// 跳过无效fd</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="comment">// 检查是否有读事件发生</span></span><br><span class="line">            <span class="keyword">if</span> (event_fds[i].revents &amp; POLLIN) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i == <span class="number">0</span>) &#123;    <span class="comment">// 监听套接字有事件(新连接)</span></span><br><span class="line">                    <span class="built_in">Accept</span>();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> &#123;           <span class="comment">// 客户端套接字有事件(数据到达)</span></span><br><span class="line">                    <span class="built_in">Recv</span>(i);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接受新客户端连接</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Accept</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 检查是否达到最大连接数</span></span><br><span class="line">        <span class="keyword">if</span> (cur_sz == max_fd_sz) &#123;</span><br><span class="line">            <span class="built_in">lg</span>(Warning, <span class="string">&quot;The client is full, the connection is refused&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 接受新连接</span></span><br><span class="line">        <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> client;</span><br><span class="line">        <span class="type">socklen_t</span> len = <span class="built_in">sizeof</span>(client);</span><br><span class="line">        <span class="type">int</span> client_sockfd = <span class="built_in">accept</span>(listen_sockfd, (sockaddr*)&amp;client, &amp;len);</span><br><span class="line">        <span class="keyword">if</span> (client_sockfd == <span class="number">-1</span>) &#123;  <span class="comment">// 接受连接失败</span></span><br><span class="line">            <span class="built_in">lg</span>(Error, <span class="string">&quot;listening sock accept false, [%d]: %s&quot;</span>, errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 获取客户端地址信息</span></span><br><span class="line">        std::string client_addr;</span><br><span class="line">        <span class="type">u_int16_t</span> client_port;</span><br><span class="line">        tcp::<span class="built_in">GetAddrAndPort</span>(client, client_addr, client_port);</span><br><span class="line">        <span class="built_in">lg</span>(Info, <span class="string">&quot;accept a new client [%s: %d]&quot;</span>, client_addr.<span class="built_in">c_str</span>(), client_port);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 在poll数组中寻找空闲位置存放新连接</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= cur_sz; ++i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (i == cur_sz)  <span class="comment">// 需要扩容监控数组</span></span><br><span class="line">                ++cur_sz;</span><br><span class="line">            <span class="keyword">if</span> (event_fds[i].fd == default_fd) &#123;  <span class="comment">// 找到空闲位置</span></span><br><span class="line">                event_fds[i].fd = client_sockfd;   <span class="comment">// 设置客户端fd</span></span><br><span class="line">                event_fds[i].events = POLLIN;     <span class="comment">// 监听读事件</span></span><br><span class="line">                event_fds[i].revents = none_event; <span class="comment">// 重置事件标志</span></span><br><span class="line">                clients[i].client_addr = client_addr;    <span class="comment">// 保存客户端地址</span></span><br><span class="line">                clients[i].client_port = client_port;    <span class="comment">// 保存客户端端口</span></span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接收客户端数据并广播</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Recv</span><span class="params">(<span class="type">int</span> client_pos)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> sockfd = event_fds[client_pos].fd;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 接收客户端数据</span></span><br><span class="line">        <span class="type">ssize_t</span> n = <span class="built_in">recv</span>(sockfd, client_buffer, <span class="built_in">sizeof</span>(client_buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>) &#123;  <span class="comment">// 接收出错</span></span><br><span class="line">            <span class="built_in">lg</span>(Error, <span class="string">&quot;recv false, errno: %d, errstr: %s&quot;</span>, errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (n == <span class="number">0</span>) &#123;  <span class="comment">// 客户端关闭连接</span></span><br><span class="line">            <span class="built_in">lg</span>(Info, <span class="string">&quot;client [%s: %d] quit, bye!&quot;</span>, </span><br><span class="line">                clients[client_pos].client_addr.<span class="built_in">c_str</span>(), </span><br><span class="line">                clients[client_pos].client_port);</span><br><span class="line">            event_fds[client_pos].fd = default_fd;  <span class="comment">// 标记为无效</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;  <span class="comment">// 成功接收数据</span></span><br><span class="line">            client_buffer[n] = <span class="number">0</span>;  <span class="comment">// 添加字符串结束符</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 广播给所有客户端(简单群聊功能)</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; cur_sz; ++i) &#123;</span><br><span class="line">                <span class="keyword">if</span> (event_fds[i].fd != default_fd) &#123;  <span class="comment">// 只发给有效客户端</span></span><br><span class="line">                    <span class="keyword">if</span> (<span class="built_in">send</span>(event_fds[i].fd, client_buffer, n, <span class="number">0</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">                        <span class="built_in">lg</span>(Error, <span class="string">&quot;send data to client [%s: %d] false&quot;</span>, </span><br><span class="line">                            clients[i].client_addr.<span class="built_in">c_str</span>(), </span><br><span class="line">                            clients[i].client_port);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">size_t</span> cur_sz;                   <span class="comment">// 当前监控的文件描述符数量</span></span><br><span class="line">    <span class="type">int</span> listen_sockfd;               <span class="comment">// 监听套接字文件描述符</span></span><br><span class="line">    <span class="type">u_int16_t</span> port_;                 <span class="comment">// 服务端口号</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">pollfd</span> event_fds[max_fd_sz];  <span class="comment">// poll监控的文件描述符数组</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">client_inf</span> clients[max_fd_sz]; <span class="comment">// 客户端信息数组</span></span><br><span class="line">    <span class="type">char</span> client_buffer[<span class="number">1024</span>];        <span class="comment">// 数据接收缓冲区</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<p>代码整体结构</p>
+<ol>
+<li><p><strong>基础架构</strong>：</p>
+<ul>
+<li>使用poll I&#x2F;O多路复用技术实现TCP聊天服务器</li>
+<li>支持同时处理多个客户端连接</li>
+<li>实现简单的群聊功能(一个客户端发消息，所有客户端都能收到)</li>
+</ul>
+</li>
+<li><p><strong>核心机制</strong>：</p>
+<ul>
+<li>使用固定大小的数组管理所有客户端连接(max_fd_sz&#x3D;1024)</li>
+<li>主循环通过poll监控所有活跃连接</li>
+<li>采用事件驱动模型，只有发生实际I&#x2F;O时才进行处理</li>
+</ul>
+</li>
+<li><p><strong>关键数据结构</strong>：</p>
+<ul>
+<li><code>pollfd</code>数组：监控所有socket的文件描述符和事件状态</li>
+<li><code>client_inf</code>数组：存储每个客户端的地址信息</li>
+<li>环形缓冲区：用于临时存储接收到的消息</li>
+</ul>
+</li>
+<li><p><strong>工作流程</strong>：</p>
+<ul>
+<li>初始化监听socket并加入poll监控</li>
+<li>主循环中调用poll等待事件</li>
+<li>有新连接时accept并加入监控</li>
+<li>有数据到达时读取并广播给所有客户端</li>
+<li>客户端断开时清理资源</li>
+</ul>
+</li>
+</ol>
+<h3><span id="客户端代码">客户端代码</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * TCP客户端实现 - 支持断线重连的简易聊天客户端</span></span><br><span class="line"><span class="comment"> * 功能：连接服务器，发送消息并接收服务器回显</span></span><br><span class="line"><span class="comment"> * 编译：g++ client.cpp -o client -lpthread</span></span><br><span class="line"><span class="comment"> * 使用：./client &lt;server_ip&gt; &lt;server_port&gt;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 带重试机制的连接函数</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">Connect</span><span class="params">(<span class="type">int</span> sockfd, <span class="type">const</span> <span class="keyword">struct</span> sockaddr_in &amp;server)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">5</span>;  <span class="comment">// 最大重试次数</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 尝试连接服务器，失败时自动重试</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">connect</span>(sockfd, (<span class="keyword">struct</span> sockaddr *)&amp;server, <span class="built_in">sizeof</span>(server)) == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (cnt == <span class="number">0</span>) &#123;  <span class="comment">// 重试次数耗尽</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;Sorry, I am unable to connect to the designated server\n&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        --cnt;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Try to reconnect..., %d chances remaining\n&quot;</span>, cnt);</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 间隔2秒重试</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// 连接成功</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 消息接收处理线程函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Handler</span><span class="params">(<span class="type">const</span> <span class="type">int</span> sockfd, <span class="type">const</span> std::string server_ip, <span class="type">const</span> <span class="type">u_int16_t</span> server_port)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="type">char</span> buffer[<span class="number">1024</span>];</span><br><span class="line">        <span class="comment">// 接收服务器消息(不关心发送方信息)</span></span><br><span class="line">        <span class="type">ssize_t</span> m = <span class="built_in">recv</span>(sockfd, buffer, <span class="built_in">sizeof</span>(buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (m &gt; <span class="number">0</span>) &#123;  <span class="comment">// 收到有效消息</span></span><br><span class="line">            buffer[m] = <span class="number">0</span>;  <span class="comment">// 添加字符串结束符</span></span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;server echo# &quot;</span> &lt;&lt; buffer &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (m == <span class="number">0</span>) &#123;  <span class="comment">// 服务器关闭连接</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;server [%s: %d] quit\n&quot;</span>, server_ip.<span class="built_in">c_str</span>(), server_port);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 尝试重新连接</span></span><br><span class="line">            <span class="type">int</span> sockfd = tcp::<span class="built_in">Socket</span>();</span><br><span class="line">            sockaddr_in server_addr&#123;&#125;;</span><br><span class="line">            server_addr.sin_family = AF_INET;</span><br><span class="line">            server_addr.sin_port = <span class="built_in">htons</span>(server_port);</span><br><span class="line">            <span class="built_in">inet_pton</span>(AF_INET, server_ip.<span class="built_in">c_str</span>(), &amp;server_addr.sin_addr); </span><br><span class="line">            </span><br><span class="line">            <span class="built_in">sleep</span>(<span class="number">1</span>); <span class="comment">// 等待1秒后再试</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">Connect</span>(sockfd, server_addr) == <span class="number">0</span>) </span><br><span class="line">                <span class="keyword">continue</span>;  <span class="comment">// 重连成功则继续</span></span><br><span class="line">                </span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);  <span class="comment">// 重连失败退出</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;  <span class="comment">// 接收出错</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 参数校验</span></span><br><span class="line">    <span class="keyword">if</span> (argc != <span class="number">3</span>) &#123;</span><br><span class="line">        cerr &lt;&lt; <span class="string">&quot;Usage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; server_ip server_port&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 解析参数</span></span><br><span class="line">    string server_ip = argv[<span class="number">1</span>];</span><br><span class="line">    <span class="type">uint16_t</span> server_port = <span class="built_in">stoi</span>(argv[<span class="number">2</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化服务器地址结构</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> server;</span><br><span class="line">    <span class="built_in">bzero</span>(&amp;server, <span class="built_in">sizeof</span>(server));</span><br><span class="line">    server.sin_port = <span class="built_in">htons</span>(server_port);      <span class="comment">// 设置端口</span></span><br><span class="line">    server.sin_family = AF_INET;               <span class="comment">// IPv4协议</span></span><br><span class="line">    server.sin_addr.s_addr = <span class="built_in">inet_addr</span>(server_ip.<span class="built_in">c_str</span>());  <span class="comment">// IP地址转换</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建套接字并连接服务器</span></span><br><span class="line">    <span class="type">int</span> sockfd = tcp::<span class="built_in">Socket</span>();</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">Connect</span>(sockfd, server) == <span class="number">-1</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动接收线程</span></span><br><span class="line">    <span class="function">thread <span class="title">receiver</span><span class="params">(Handler, sockfd, server_ip, server_port)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 主线程处理用户输入和发送</span></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        string inbuffer;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">100</span>);  <span class="comment">// 微小延迟避免CPU占用过高</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Please Enter# &quot;</span>;</span><br><span class="line">        <span class="built_in">getline</span>(cin, inbuffer);  <span class="comment">// 获取用户输入</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 发送消息到服务器</span></span><br><span class="line">        <span class="type">ssize_t</span> n = <span class="built_in">send</span>(sockfd, inbuffer.<span class="built_in">c_str</span>(), inbuffer.<span class="built_in">size</span>(), <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (n == <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;send&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    receiver.<span class="built_in">join</span>();  <span class="comment">// 等待接收线程结束(实际不会执行到这里)</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>功能说明</p>
+<ol>
+<li><p><strong>核心功能</strong>：</p>
+<ul>
+<li>实现了一个支持断线自动重连的TCP聊天客户端</li>
+<li>采用多线程架构：主线程处理用户输入，子线程接收服务器消息</li>
+<li>支持基本的命令行参数配置（服务器IP和端口）</li>
+</ul>
+</li>
+<li><p><strong>关键特性</strong>：</p>
+<ul>
+<li>自动重连机制：连接失败时自动重试5次（间隔2秒）</li>
+<li>断线恢复：检测到服务器断开后自动尝试重新连接</li>
+<li>简单交互界面：显示输入提示和服务器回显</li>
+</ul>
+</li>
+<li><p><strong>工作流程</strong>：</p>
+<ul>
+<li>启动时连接指定服务器</li>
+<li>成功连接后：<ul>
+<li>主线程：循环读取用户输入并发送到服务器</li>
+<li>子线程：循环接收服务器消息并显示</li>
+</ul>
+</li>
+<li>连接断开时：<ul>
+<li>自动尝试重新建立连接</li>
+<li>重连失败则退出程序</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3><span id="代码测试">代码测试</span></h3><p>而后，我们将服务端和客户端启动后即可实现双方的通信了，服务端创建和调用实现如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;poll_server.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> port;</span><br><span class="line">    <span class="keyword">if</span>(argc == <span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        port = <span class="number">7777</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(argc == <span class="number">2</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        port = <span class="built_in">stoi</span>(argv[<span class="number">1</span>]);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        cerr &lt;&lt; <span class="string">&quot;Usage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot;(default port: 8080)&quot;</span> &lt;&lt; endl &lt;&lt; </span><br><span class="line">        <span class="string">&quot;OR&quot;</span> &lt;&lt; endl &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; port&quot;</span> &lt;&lt; endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function">unique_ptr&lt;PollServer&gt; <span class="title">ps</span><span class="params">(<span class="keyword">new</span> PollServer(port))</span></span>;</span><br><span class="line">    ps-&gt;<span class="built_in">Init</span>();</span><br><span class="line">    ps-&gt;<span class="built_in">Start</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后，我们对代码进行测试：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端1</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/web_io/Poll</span><br><span class="line">╰─➤  ./poll_client.o 127.0.0.1 7777</span><br><span class="line">Please Enter# 123</span><br><span class="line">server echo# 123Please Enter#</span><br><span class="line">hello</span><br><span class="line">Please Enter# server echo# hello</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端2</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/web_io/Poll</span><br><span class="line">╰─➤  ./poll_client.o 127.0.0.1 7777</span><br><span class="line">Please Enter# server echo# 123</span><br><span class="line">server echo# hello</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端3</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/web_io/Poll</span><br><span class="line">╰─➤  ./poll_client.o 127.0.0.1 7777</span><br><span class="line">Please Enter# server echo# 123</span><br><span class="line">server echo# hello</span><br></pre></td></tr></table></figure>
+
+<p>客户端1 的数据可以顺利发送给其他两个客户端</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
