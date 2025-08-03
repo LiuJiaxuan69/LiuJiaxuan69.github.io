@@ -1,0 +1,1206 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Linux 基于 Epoll 的主从 Reactor 多线程模型 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是 Reactor 模型
+核心概念
+模型分类
+工作流程
+
+
+基于 Epoll 的主从 Reactor 多线程模型
+核心组件
+工作流程
+注意事项
+
+
+代码实现
+Connection.hpp ,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Linux 基于 Epoll 的主从 Reactor 多线程模型 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是 Reactor 模型
+核心概念
+模型分类
+工作流程
+
+
+基于 Epoll 的主从 Reactor 多线程模型
+核心组件
+工作流程
+注意事项
+
+
+代码实现
+Connection.hpp ,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Linux 基于 Epoll 的主从 Reactor 多线程模型 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是 Reactor 模型
+核心概念
+模型分类
+工作流程
+
+
+基于 Epoll 的主从 Reactor 多线程模型
+核心组件
+工作流程
+注意事项
+
+
+代码实现
+Connection.hpp ,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Linux 基于 Epoll 的主从 Reactor 多线程模型</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Linux 基于 Epoll 的主从 Reactor 多线程模型</h1>
+        <div class="stuff">
+            <span>八月 02, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/IO/" rel="tag">IO</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Reactor/" rel="tag">Reactor</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-reactor-%E6%A8%A1%E5%9E%8B">什么是 <code>Reactor</code> 模型</a><ul>
+<li><a href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5">核心概念</a></li>
+<li><a href="#%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB">模型分类</a></li>
+<li><a href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">工作流程</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9F%BA%E4%BA%8E-epoll-%E7%9A%84%E4%B8%BB%E4%BB%8E-reactor-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B">基于 Epoll 的主从 Reactor 多线程模型</a><ul>
+<li><a href="#%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6">核心组件</a></li>
+<li><a href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B-1">工作流程</a></li>
+<li><a href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">注意事项</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0">代码实现</a><ul>
+<li><a href="#connectionhpp-%E8%BF%9E%E6%8E%A5%E7%B1%BB%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90"><code>Connection.hpp</code> 连接类实现解析</a></li>
+<li><a href="#epollhpp-%E5%B0%81%E8%A3%85%E7%B1%BB%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90"><code>Epoll.hpp</code> 封装类实现解析</a></li>
+<li><a href="#%E5%AE%9A%E6%97%B6%E5%99%A8%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F%E8%AE%BE%E8%AE%A1%E8%A7%A3%E6%9E%90">定时器管理系统设计解析</a></li>
+<li><a href="#%E7%9B%91%E5%90%AC%E5%99%A8listener%E7%B1%BB%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90">监听器(Listener)类实现解析</a></li>
+<li><a href="#%E4%BA%8B%E4%BB%B6%E5%BE%AA%E7%8E%AF%E5%99%A8eventloop%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90">事件循环器(EventLoop)核心实现解析</a></li>
+<li><a href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E4%B8%BB%E7%A8%8B%E5%BA%8F%E5%AE%9E%E7%8E%B0%E8%A7%A3%E6%9E%90">服务端主程序实现解析</a></li>
+<li><a href="#%E6%A0%B8%E5%BF%83%E6%9E%B6%E6%9E%84%E8%AF%B4%E6%98%8E">核心架构说明</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="什么是-reactor-模型">什么是 <code>Reactor</code> 模型</span></h2><p><code>Reactor 模型</code> 是一种基于事件驱动的高性能网络编程模型，广泛应用于高并发场景中。其核心思想是通过I&#x2F;O多路复用和事件分发机制，高效地处理网络请求，避免线程阻塞和资源浪费。</p>
+<h3><span id="核心概念">核心概念</span></h3><p><code>Reactor 模型</code> 的核心是事件驱动机制，通过监听 I&#x2F;O 事件（如连接建立、数据读写等），将事件分发给相应的处理器（Handler）进行处理。它主要由以下两个角色组成：</p>
+<p>1.Reactor（反应器）：负责监听和分发事件。它通过 I&#x2F;O 多路复用（如 select、poll 或 epoll）监听多个连接的事件，并将事件分发给对应的处理器。</p>
+<p>2.Handler（处理器）：负责具体的事件处理逻辑，如数据读取、业务处理和响应发送。</p>
+<h3><span id="模型分类">模型分类</span></h3><p><code>Reactor 模型</code> 根据线程和资源的分配方式，分为以下三种实现方式：</p>
+<ul>
+<li><p>单 Reactor 单线程模型： Reactor 和所有 Handler 都运行在同一个线程中。 优点：模型简单，无需处理多线程同步问题。 缺点：性能有限，无法充分利用多核 CPU，且单线程阻塞会导致整个系统不可用。</p>
+</li>
+<li><p>单 Reactor 多线程模型： Reactor 负责事件监听和分发，具体的业务处理交由线程池完成。 优点：充分利用多核 CPU，提升并发处理能力。 缺点：Reactor 仍是单线程运行，高并发场景下可能成为瓶颈。</p>
+</li>
+<li><p>主从 Reactor 多线程模型： 主 Reactor 负责监听新连接并将其分配给从 Reactor。 从 Reactor 负责具体的 I&#x2F;O 事件处理，并将任务交给线程池完成。 优点：主从分离，职责明确，适合高并发场景，充分利用多核资源。</p>
+</li>
+</ul>
+<h3><span id="工作流程">工作流程</span></h3><p>以主从 Reactor 多线程模型为例，其工作流程如下：</p>
+<p>1.主 Reactor 监听新连接事件，通过 Acceptor 接收连接。</p>
+<p>2.新连接被分配给从 Reactor，从 Reactor 负责监听该连接的 I&#x2F;O 事件。</p>
+<p>3.当有 I&#x2F;O 事件发生时，从 Reactor 调用对应的 Handler 进行处理。</p>
+<p>4.Handler 读取数据后，将任务交给线程池处理业务逻辑。</p>
+<p>5.线程池完成业务处理后，将结果返回给 Handler，Handler 再通过网络发送响应。</p>
+<h2><span id="基于-epoll-的主从-reactor-多线程模型">基于 Epoll 的主从 Reactor 多线程模型</span></h2><p><code>Epoll</code> 是 Linux 下的一种 I&#x2F;O 多路复用机制，它提供了高效的事件通知机制。基于 Epoll 的主从 Reactor 多线程模型，可以充分利用多核 CPU，实现高并发处理。</p>
+<h3><span id="核心组件">核心组件</span></h3><p>1.主 Reactor：监听新连接事件，通过 Acceptor 接收连接，并将其分配给从 Reactor。</p>
+<p>2.从 Reactor：监听已连接的 I&#x2F;O 事件，调用 Handler 进行处理。</p>
+<p>3.Handler：负责具体的事件处理逻辑，如数据读取、业务处理和响应发送。</p>
+<p>4.TimerManager：链接管理器，根据用户的活跃状态决定是否关闭链接。</p>
+<p>而我们的主从 <code>Reactor</code> 处理的是简单的计算器任务，因此暂不需将任务交给线程池处理业务逻辑。</p>
+<h3><span id="工作流程">工作流程</span></h3><p>1.主 Reactor 监听新连接事件，通过 Acceptor 接收连接。</p>
+<p>2.新连接被分配给从 Reactor，从 Reactor 负责监听该连接的 I&#x2F;O 事件。</p>
+<p>3.当有 I&#x2F;O 事件发生时，从 Reactor 调用对应的 Handler 进行处理。</p>
+<p>4.Handler 读取数据后，进行业务逻辑处理，并通过网络发送响应。</p>
+<h3><span id="注意事项">注意事项</span></h3><p>1.主 Reactor 和从 Reactor 应该运行在不同的线程中，以充分利用多核 CPU。</p>
+<p>2.从 Reactor 应该使用非阻塞 I&#x2F;O，因为 Epoll 使用的是边缘触发模式，我们需要对数据进行完整读取。</p>
+<p>3.一般在读取到用户的数据后处理完直接将数据发送给用户，但是若发送给用户后用户缓冲区仍然有数据，说明用户未读取完，我们需要对用户的写事件 <code>EPOLLOUT</code> 进行监听，直到用户读取完数据。</p>
+<h2><span id="代码实现">代码实现</span></h2><h3><span id="connectionhpp-连接类实现解析"><code>Connection.hpp</code> 连接类实现解析</span></h3><h4><span id="1-头文件保护与基本包含">1. 头文件保护与基本包含</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _CONNECTION_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _CONNECTION_HPP_ 1</span></span><br><span class="line"><span class="comment">// 防止头文件重复包含的标准保护措施</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span>       <span class="comment">// 智能指针支持</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span>   <span class="comment">// 函数对象支持</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;common.hpp&quot;</span>   <span class="comment">// 项目通用头文件</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-前向声明与类型定义">2. 前向声明与类型定义</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Connection</span>;</span><br><span class="line"><span class="comment">// Connection类的前向声明，用于func_t类型定义</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="type">func_t</span> = std::function&lt;<span class="built_in">void</span>(std::weak_ptr&lt;Connection&gt;)&gt;;</span><br><span class="line"><span class="comment">// 定义回调函数类型：</span></span><br><span class="line"><span class="comment">// 参数为Connection的弱指针，无返回值</span></span><br><span class="line"><span class="comment">// 使用weak_ptr避免循环引用</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>; </span><br><span class="line"><span class="comment">// EventLoop类的前向声明</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-connection类定义">3. Connection类定义</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Connection</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数：初始化socket描述符，默认不关注写事件</span></span><br><span class="line">    <span class="built_in">Connection</span>(<span class="type">int</span> sock)</span><br><span class="line">    :<span class="built_in">sock_</span>(sock),</span><br><span class="line">    <span class="built_in">write_care_</span>(<span class="literal">false</span>)&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取socket文件描述符</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Sockfd</span><span class="params">()</span></span>&#123; <span class="keyword">return</span> sock_; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 追加数据到输入缓冲区</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">AppendInBuffer</span><span class="params">(<span class="type">const</span> std::string &amp;info)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        inbuffer_ += info;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 追加数据到输出缓冲区</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">AppendOutBuffer</span><span class="params">(<span class="type">const</span> std::string &amp;info)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        outbuffer_ += info;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取输入缓冲区引用</span></span><br><span class="line">    <span class="function">std::string &amp;<span class="title">Inbuffer</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> inbuffer_;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取输出缓冲区引用</span></span><br><span class="line">    <span class="function">std::string &amp;<span class="title">OutBuffer</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> outbuffer_;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="4-成员变量详解">4. 成员变量详解</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> sock_;              <span class="comment">// 套接字文件描述符</span></span><br><span class="line">    std::string inbuffer_;  <span class="comment">// 输入数据缓冲区</span></span><br><span class="line">    std::string outbuffer_; <span class="comment">// 输出数据缓冲区</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 所属EventLoop的弱引用（避免循环引用）</span></span><br><span class="line">    std::weak_ptr&lt;EventLoop&gt; el;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 三个核心回调函数：</span></span><br><span class="line">    <span class="type">func_t</span> recv_cb;    <span class="comment">// 读事件回调</span></span><br><span class="line">    <span class="type">func_t</span> send_cb;    <span class="comment">// 写事件回调 </span></span><br><span class="line">    <span class="type">func_t</span> except_cb;  <span class="comment">// 异常事件回调</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 客户端信息</span></span><br><span class="line">    std::string ip_;     <span class="comment">// 客户端IP地址</span></span><br><span class="line">    <span class="type">uint16_t</span> port_;      <span class="comment">// 客户端端口号</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 写事件关注标志</span></span><br><span class="line">    <span class="comment">// true表示需要监听EPOLLOUT事件</span></span><br><span class="line">    <span class="type">bool</span> write_care_;  </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-设计要点说明">5. 设计要点说明</span></h4><h5><span id="51-缓冲区管理">5.1 缓冲区管理</span></h5><ul>
+<li>使用<code>std::string</code>作为缓冲区容器</li>
+<li>提供<code>Append</code>方法追加数据</li>
+<li>返回引用避免不必要的拷贝</li>
+</ul>
+<h5><span id="52-回调机制">5.2 回调机制</span></h5><ul>
+<li>三个关键回调函数通过<code>std::function</code>封装</li>
+<li>使用<code>weak_ptr</code>传递自身引用，防止循环引用</li>
+<li>回调由EventLoop事件循环触发</li>
+</ul>
+<h5><span id="53-资源管理">5.3 资源管理</span></h5><ul>
+<li>原始socket描述符由RAII管理</li>
+<li><code>weak_ptr</code>关联EventLoop避免内存泄漏</li>
+<li>写事件标志实现动态EPOLLOUT注册</li>
+</ul>
+<h3><span id="epollhpp-封装类实现解析"><code>Epoll.hpp</code> 封装类实现解析</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _EPOLL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _EPOLL_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/epoll.h&gt;</span>  <span class="comment">// epoll系统调用头文件</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;nocopy.hpp&quot;</span>   <span class="comment">// 禁止拷贝的基类</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span>      <span class="comment">// 日志系统头文件</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 默认epoll_wait超时时间(毫秒)</span></span><br><span class="line"><span class="keyword">inline</span> <span class="type">const</span> <span class="type">int</span> default_time_out = <span class="number">3000</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 错误码枚举</span></span><br><span class="line"><span class="keyword">enum</span> &#123;</span><br><span class="line">    epoll_create_error = <span class="number">1</span>,  <span class="comment">// epoll创建失败错误码</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief Epoll封装类，继承nocopy禁止拷贝构造</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Epoll</span>: <span class="keyword">public</span> nocopy</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 构造函数：创建epoll实例</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">Epoll</span>()</span><br><span class="line">    :<span class="built_in">timeout</span>(default_time_out)  <span class="comment">// 初始化超时时间</span></span><br><span class="line">    &#123;</span><br><span class="line">        epfd = <span class="built_in">epoll_create1</span>(<span class="number">0</span>);  <span class="comment">// 创建epoll实例</span></span><br><span class="line">        <span class="keyword">if</span>(epfd == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 记录创建失败日志（线程ID、错误码、错误信息）</span></span><br><span class="line">            <span class="built_in">lg</span>(Error, <span class="string">&quot;thread-%d, epoll_create false, errno: %d, errstr: %s&quot;</span>, </span><br><span class="line">               <span class="built_in">pthread_self</span>(), errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">            <span class="built_in">exit</span>(epoll_create_error);  <span class="comment">// 创建失败直接退出</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 记录创建成功日志</span></span><br><span class="line">        <span class="built_in">lg</span>(Info, <span class="string">&quot;thread-%d, epoll create success, epoll fd: %d&quot;</span>, <span class="built_in">pthread_self</span>(), epfd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 等待epoll事件</span></span><br><span class="line"><span class="comment">     * @param events 输出参数，用于接收事件数组</span></span><br><span class="line"><span class="comment">     * @param num 最大事件数量</span></span><br><span class="line"><span class="comment">     * @return 就绪的事件数量，-1表示错误</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">EpollWait</span><span class="params">(<span class="keyword">struct</span> epoll_event events[], <span class="type">int</span> num)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">epoll_wait</span>(epfd, events, num, timeout);</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)&#123;</span><br><span class="line">            <span class="built_in">lg</span>(Error, <span class="string">&quot;epoll_wait false, errno: %d, errstr: %s&quot;</span>, errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> n;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 控制epoll监控的文件描述符</span></span><br><span class="line"><span class="comment">     * @param op 操作类型 (EPOLL_CTL_ADD/MOD/DEL)</span></span><br><span class="line"><span class="comment">     * @param fd 要操作的文件描述符</span></span><br><span class="line"><span class="comment">     * @param event 要监控的事件标志</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">EpollCtl</span><span class="params">(<span class="type">int</span> op, <span class="type">int</span> fd, <span class="type">uint32_t</span> event)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(op == EPOLL_CTL_DEL)&#123;</span><br><span class="line">            <span class="comment">// 删除操作不需要event参数</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">epoll_ctl</span>(epfd, op, fd, <span class="literal">nullptr</span>) == <span class="number">-1</span>)&#123;</span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;epoll control false, errno: %d, errstr: %s&quot;</span>, </span><br><span class="line">                   errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">struct</span> epoll_event ev;</span><br><span class="line">            ev.data.fd = fd;    <span class="comment">// 关联文件描述符</span></span><br><span class="line">            ev.events = event;    <span class="comment">// 设置监听事件</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">epoll_ctl</span>(epfd, op, fd, &amp;ev))&#123;</span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;epoll control false, errno: %d, errstr: %s&quot;</span>, </span><br><span class="line">                   errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 析构函数：关闭epoll文件描述符</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ~<span class="built_in">Epoll</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">close</span>(epfd);  <span class="comment">// 确保资源释放</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> epfd;      <span class="comment">// epoll文件描述符</span></span><br><span class="line">    <span class="type">int</span> timeout;   <span class="comment">// epoll_wait超时时间(毫秒)</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="设计说明">设计说明</span></h4><ol>
+<li><p><strong>资源管理</strong>：</p>
+<ul>
+<li>遵循RAII原则，构造函数创建epoll实例，析构函数自动释放</li>
+<li>继承<code>nocopy</code>禁止拷贝构造和赋值，避免文件描述符重复关闭</li>
+</ul>
+</li>
+<li><p><strong>错误处理</strong>：</p>
+<ul>
+<li>所有epoll系统调用都有错误日志记录</li>
+<li>创建失败直接退出程序（生产环境可改为异常）</li>
+</ul>
+</li>
+<li><p><strong>线程安全</strong>：</p>
+<ul>
+<li>日志中包含线程ID，便于多线程调试</li>
+<li>类本身无状态依赖，可在多线程环境使用不同实例</li>
+</ul>
+</li>
+<li><p><strong>接口设计</strong>：</p>
+<ul>
+<li><code>EpollWait()</code>：封装epoll_wait，返回就绪事件数</li>
+<li><code>EpollCtl()</code>：统一处理三种控制操作，自动处理DEL特殊情况</li>
+</ul>
+</li>
+</ol>
+<p>该接口封装在前面章节已经讲解过，主要用于管理事件监听和处理。</p>
+<h3><span id="定时器管理系统设计解析">定时器管理系统设计解析</span></h3><h4><span id="timer定时器结构设计">Timer定时器结构设计</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TIMER_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TIMER_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;queue&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ctime&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;connection.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 前向声明避免循环依赖</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Connection</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 定时器节点结构体</span></span><br><span class="line"><span class="comment"> * @note 存储连接的生命周期状态信息</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Timer</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 构造函数初始化连接状态</span></span><br><span class="line">    <span class="built_in">Timer</span>(<span class="type">int</span> expired_time_, <span class="type">int</span> cnt_, std::shared_ptr&lt;Connection&gt; connect_)</span><br><span class="line">    :<span class="built_in">expired_time</span>(expired_time_),  <span class="comment">// 绝对过期时间戳</span></span><br><span class="line">    <span class="built_in">cnt</span>(cnt_),                     <span class="comment">// 连续活跃次数计数器</span></span><br><span class="line">    <span class="built_in">connect</span>(connect_)&#123;&#125;            <span class="comment">// 管理的连接对象</span></span><br><span class="line">    </span><br><span class="line">    <span class="type">int</span> expired_time;              <span class="comment">// Unix时间戳格式的过期时间</span></span><br><span class="line">    <span class="type">int</span> cnt;                       <span class="comment">// 累计活跃次数（用于奖励机制）</span></span><br><span class="line">    std::shared_ptr&lt;Connection&gt; connect; <span class="comment">// 关联的连接智能指针</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 定时器比较仿函数</span></span><br><span class="line"><span class="comment"> * @note 用于构建最小堆（最早过期时间在堆顶）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">time_cmp</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="type">const</span> std::shared_ptr&lt;Timer&gt; t1, <span class="type">const</span> std::shared_ptr&lt;Timer&gt; t2)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 注意：通过大于号实现最小堆</span></span><br><span class="line">        <span class="keyword">return</span> t1-&gt;expired_time &gt; t2-&gt;expired_time;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="timermanager定时器管理器设计">TimerManager定时器管理器设计</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TIMER_MANAGER_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TIMER_MANAGER_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;timer.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 默认配置常量</span></span><br><span class="line"><span class="keyword">inline</span> <span class="type">const</span> <span class="type">int</span> default_alive_gap = <span class="number">10</span>;  <span class="comment">// 默认存活周期（秒）</span></span><br><span class="line"><span class="keyword">inline</span> <span class="type">const</span> <span class="type">int</span> default_alive_cnt = <span class="number">5</span>;   <span class="comment">// 重置阈值（次）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 定时器管理核心类</span></span><br><span class="line"><span class="comment"> * @note 采用最小堆+哈希表双结构实现高效管理</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TimerManager</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 初始化存活周期和计数阈值</span></span><br><span class="line">    <span class="built_in">TimerManager</span>(<span class="type">int</span> gap = default_alive_gap, <span class="type">int</span> cnt = default_alive_cnt)</span><br><span class="line">        : <span class="built_in">alive_gap</span>(gap),</span><br><span class="line">          <span class="built_in">alive_cnt</span>(cnt) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 添加新连接定时器</span></span><br><span class="line"><span class="comment">     * @param connect 要管理的连接对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Push</span><span class="params">(std::shared_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 创建新定时器（当前时间+存活周期）</span></span><br><span class="line">        <span class="function">std::shared_ptr&lt;Timer&gt; <span class="title">timer</span><span class="params">(<span class="keyword">new</span> Timer(std::time(<span class="literal">nullptr</span>) + alive_gap, <span class="number">0</span>, connect))</span></span>;</span><br><span class="line">        timers.<span class="built_in">emplace</span>(timer);                <span class="comment">// 插入最小堆</span></span><br><span class="line">        timer_map[connect-&gt;<span class="built_in">Sockfd</span>()] = timer; <span class="comment">// 建立socket到定时器的映射</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 检查堆顶是否过期</span></span><br><span class="line"><span class="comment">     * @return true表示存在过期连接需要处理</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">IsTopExpired</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (!timers.<span class="built_in">empty</span>() &amp;&amp; timers.<span class="built_in">top</span>()-&gt;expired_time &lt;= std::<span class="built_in">time</span>(<span class="literal">nullptr</span>))</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> sockfd = (timers.<span class="built_in">top</span>()-&gt;connect)-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 活跃度达标触发重置</span></span><br><span class="line">            <span class="keyword">if</span> (timers.<span class="built_in">top</span>()-&gt;cnt &gt;= alive_cnt)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">auto</span> timer = timers.<span class="built_in">top</span>();</span><br><span class="line">                <span class="built_in">DeleteTop</span>();</span><br><span class="line">                <span class="comment">// 重置为初始状态</span></span><br><span class="line">                timer-&gt;expired_time = std::<span class="built_in">time</span>(<span class="literal">nullptr</span>) + alive_gap;</span><br><span class="line">                timer-&gt;cnt = <span class="number">0</span>;</span><br><span class="line">                <span class="comment">// 重新插入堆</span></span><br><span class="line">                timers.<span class="built_in">emplace</span>(timer);</span><br><span class="line">                timer_map[sockfd] = timer;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 状态不一致说明有更新</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(timers.<span class="built_in">top</span>()-&gt;cnt != timer_map[sockfd]-&gt;cnt || </span><br><span class="line">                   timers.<span class="built_in">top</span>()-&gt;expired_time != timer_map[sockfd]-&gt;expired_time)</span><br><span class="line">            &#123;</span><br><span class="line">                timers.<span class="built_in">pop</span>();</span><br><span class="line">                timers.<span class="built_in">emplace</span>(timer_map[sockfd]);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;  <span class="comment">// 找到真正过期的连接</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 删除堆顶元素（配合哈希表同步删除）</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">DeleteTop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        timer_map.<span class="built_in">erase</span>(timers.<span class="built_in">top</span>()-&gt;connect-&gt;<span class="built_in">Sockfd</span>());</span><br><span class="line">        timers.<span class="built_in">pop</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 获取堆顶定时器（不弹出）</span></span><br><span class="line">    <span class="function">std::shared_ptr&lt;Timer&gt; <span class="title">GetTop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> timers.<span class="built_in">top</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 更新连接活跃时间</span></span><br><span class="line"><span class="comment">     * @param sockfd 要更新的socket描述符</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">UpdateTime</span><span class="params">(<span class="type">int</span> sockfd)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(timers.<span class="built_in">empty</span>()) <span class="keyword">return</span>;</span><br><span class="line">        timer_map[sockfd]-&gt;cnt++;  <span class="comment">// 增加活跃计数</span></span><br><span class="line">        timer_map[sockfd]-&gt;expired_time = <span class="built_in">time</span>(<span class="literal">nullptr</span>) + alive_gap; <span class="comment">// 延长过期时间</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 数据结构</span></span><br><span class="line">    std::priority_queue&lt;std::shared_ptr&lt;Timer&gt;, </span><br><span class="line">                       std::vector&lt;std::shared_ptr&lt;Timer&gt;&gt;, </span><br><span class="line">                       time_cmp&gt; timers;  <span class="comment">// 最小堆</span></span><br><span class="line">    std::unordered_map&lt;<span class="type">int</span>, std::shared_ptr&lt;Timer&gt;&gt; timer_map;  <span class="comment">// 哈希表</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 配置参数</span></span><br><span class="line">    <span class="type">int</span> alive_gap;  <span class="comment">// 存活周期（秒）</span></span><br><span class="line">    <span class="type">int</span> alive_cnt;  <span class="comment">// 重置阈值（次）</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="惰性处理机制详解">惰性处理机制详解</span></h5><ol>
+<li><p><strong>延迟验证设计</strong>：</p>
+<ul>
+<li>只在检查堆顶时处理过期（<code>IsTopExpired</code>）</li>
+<li>非堆顶元素即使过期也暂不处理</li>
+<li>降低频繁检查带来的CPU开销</li>
+</ul>
+</li>
+<li><p><strong>状态同步策略</strong>：</p>
+<ul>
+<li>哈希表存储最新状态</li>
+<li>堆中元素可能滞后（通过<code>cnt/expired_time</code>比较检测）</li>
+<li>发现状态不一致时重新入堆</li>
+</ul>
+</li>
+<li><p><strong>奖励机制实现</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (timers.<span class="built_in">top</span>()-&gt;cnt &gt;= alive_cnt) &#123;</span><br><span class="line">    <span class="comment">//...重置计数器</span></span><br><span class="line">    timer-&gt;expired_time = std::<span class="built_in">time</span>(<span class="literal">nullptr</span>) + alive_gap;</span><br><span class="line">    timer-&gt;cnt = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>活跃连接获得生命周期重置</li>
+<li>避免健康连接被误清理</li>
+</ul>
+</li>
+</ol>
+<h5><span id="堆处理精妙设计">堆处理精妙设计</span></h5><ol>
+<li><p><strong>双数据结构配合</strong>：</p>
+<ul>
+<li>最小堆：快速获取最早过期连接（O(1)）</li>
+<li>哈希表：快速查找特定连接（O(1)）</li>
+</ul>
+</li>
+<li><p><strong>堆更新优化</strong>：</p>
+<ul>
+<li>不直接修改堆元素，而是重新插入</li>
+<li>通过状态比较发现过期版本</li>
+<li>摊还时间复杂度为O(logN)</li>
+</ul>
+</li>
+<li><p><strong>批量处理能力</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (!timers.<span class="built_in">empty</span>() &amp;&amp; timers.<span class="built_in">top</span>()-&gt;expired_time &lt;= curr_time) &#123;</span><br><span class="line">    <span class="comment">// 批量处理所有过期连接</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<ul>
+<li>单次操作可处理多个过期连接</li>
+</ul>
+<p>该设计完美平衡了精度和效率，特别适合高频网络通信场景，其中：</p>
+<ul>
+<li>健康连接通过奖励机制长期保持</li>
+<li>僵尸连接被快速识别清理</li>
+<li>系统开销随活跃连接数线性增长</li>
+</ul>
+<h3><span id="监听器listener类实现解析">监听器(Listener)类实现解析</span></h3><h4><span id="类功能概述">类功能概述</span></h4><p>Listener类封装了TCP服务端的监听逻辑，主要职责包括：</p>
+<ol>
+<li>初始化监听socket（非阻塞模式）</li>
+<li>持续接受客户端连接</li>
+<li>将新连接信息通过环形队列传递给I&#x2F;O线程</li>
+<li>通过Connection弱引用实现与EventLoop的低耦合交互</li>
+</ol>
+<h4><span id="代码详细注释">代码详细注释</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _LISTENER_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _LISTENER_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span>         <span class="comment">// TCP socket封装</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;event_loop.hpp&quot;</span>  <span class="comment">// 事件循环</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span>         <span class="comment">// 日志系统</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="type">const</span> <span class="type">uint16_t</span> default_listen_port = <span class="number">6349</span>; <span class="comment">// 默认监听端口</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief TCP监听器类</span></span><br><span class="line"><span class="comment"> * @note 通过环形队列实现与I/O线程的解耦</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Listener</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 构造函数</span></span><br><span class="line"><span class="comment">     * @param port 监听端口号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">Listener</span>(<span class="type">uint16_t</span> port = default_listen_port)</span><br><span class="line">        : <span class="built_in">port_</span>(port),</span><br><span class="line">        <span class="built_in">sock_</span>(<span class="keyword">new</span> <span class="built_in">Sock</span>()) <span class="comment">// 创建TCP socket封装对象</span></span><br><span class="line">    &#123;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 初始化监听socket</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Init</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        sock_-&gt;<span class="built_in">Socket</span>();  <span class="comment">// 创建socket</span></span><br><span class="line">        sock_-&gt;<span class="built_in">Bind</span>(port_); <span class="comment">// 绑定端口</span></span><br><span class="line">        sock_-&gt;<span class="built_in">Listen</span>();    <span class="comment">// 开始监听</span></span><br><span class="line">        <span class="built_in">SetNonBlockOrDie</span>(sock_-&gt;<span class="built_in">GetSockfd</span>()); <span class="comment">// 设置为非阻塞模式</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * @brief 接受客户端连接的主循环</span></span><br><span class="line"><span class="comment">     * @param conn 持有EventLoop引用的Connection对象</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Accepter</span><span class="params">(std::weak_ptr&lt;Connection&gt; conn)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> connection = conn.<span class="built_in">lock</span>();</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">int</span> listen_sockfd = sock_-&gt;<span class="built_in">GetSockfd</span>();</span><br><span class="line">            <span class="keyword">struct</span> <span class="title class_">sockaddr_in</span> client;</span><br><span class="line">            <span class="type">socklen_t</span> len = <span class="built_in">sizeof</span>(client);</span><br><span class="line">            <span class="comment">// 非阻塞accept</span></span><br><span class="line">            <span class="type">int</span> client_sockfd = <span class="built_in">accept</span>(listen_sockfd, (sockaddr *)&amp;client, &amp;len);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span> (client_sockfd == <span class="number">-1</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (errno == EWOULDBLOCK)</span><br><span class="line">                    <span class="keyword">break</span>;  <span class="comment">// 无新连接时退出循环</span></span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (errno == EINTR)</span><br><span class="line">                    <span class="keyword">continue</span>; <span class="comment">// 被信号中断则重试</span></span><br><span class="line">                <span class="keyword">else</span></span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="comment">// 记录accept错误日志</span></span><br><span class="line">                    <span class="built_in">lg</span>(Error, <span class="string">&quot;listening sock accept false, [%d]: %s&quot;</span>, errno, <span class="built_in">strerror</span>(errno));</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 获取客户端地址信息</span></span><br><span class="line">            std::string client_ip;</span><br><span class="line">            <span class="type">uint16_t</span> client_port;</span><br><span class="line">            Sock::<span class="built_in">GetAddrAndPort</span>(client, client_ip, client_port);</span><br><span class="line">            <span class="built_in">lg</span>(Info, <span class="string">&quot;accept a new client [%s: %d]&quot;</span>, client_ip.<span class="built_in">c_str</span>(), client_port);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 设置客户端socket为非阻塞</span></span><br><span class="line">            <span class="built_in">SetNonBlockOrDie</span>(client_sockfd);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 通过EventLoop的环形队列传递连接信息</span></span><br><span class="line">            <span class="keyword">auto</span> event_loop = connection-&gt;el.<span class="built_in">lock</span>();</span><br><span class="line">            ClientInf ci&#123;</span><br><span class="line">                .sockfd = client_sockfd,</span><br><span class="line">                .client_ip = client_ip,</span><br><span class="line">                .client_port = client_port</span><br><span class="line">            &#125;;</span><br><span class="line">            event_loop-&gt;rq_-&gt;<span class="built_in">Push</span>(ci); <span class="comment">// 入队操作</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/// 获取监听socket文件描述符</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">Fd</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> sock_-&gt;<span class="built_in">GetSockfd</span>(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">uint16_t</span> port_;             <span class="comment">// 监听端口</span></span><br><span class="line">    std::shared_ptr&lt;Sock&gt; sock_; <span class="comment">// TCP socket封装对象</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="关键设计亮点">关键设计亮点</span></h4><h5><span id="低耦合实现方式">低耦合实现方式</span></h5><ol>
+<li><p><strong>弱引用传递</strong>：</p>
+<ul>
+<li>通过<code>std::weak_ptr&lt;Connection&gt;</code>获取EventLoop引用</li>
+<li>避免循环依赖，不增加引用计数</li>
+</ul>
+</li>
+<li><p><strong>环形队列中介</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">event_loop-&gt;rq_-&gt;<span class="built_in">Push</span>(ci);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>新连接信息通过环形队列传递</li>
+<li>监听线程与I&#x2F;O线程完全解耦</li>
+</ul>
+</li>
+<li><p><strong>非阻塞设计</strong>：</p>
+<ul>
+<li>监听socket设置为非阻塞模式</li>
+<li>批量接受连接后立即退出循环</li>
+</ul>
+</li>
+</ol>
+<h5><span id="异常处理机制">异常处理机制</span></h5><ol>
+<li><strong>EWOULDBLOCK处理</strong>：<ul>
+<li>非阻塞模式下正常情况处理</li>
+</ul>
+</li>
+<li><strong>EINTR处理</strong>：<ul>
+<li>系统调用被信号中断时自动重试</li>
+</ul>
+</li>
+<li><strong>错误隔离</strong>：<ul>
+<li>单个accept失败不影响后续连接</li>
+</ul>
+</li>
+</ol>
+<h5><span id="性能优化点">性能优化点</span></h5><ol>
+<li><p><strong>批量接受连接</strong>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    <span class="type">int</span> client_sockfd = <span class="built_in">accept</span>(...);</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>单次调用处理多个等待连接</li>
+</ul>
+</li>
+<li><p><strong>零拷贝传递</strong>：</p>
+<ul>
+<li>仅传递socket fd和地址信息</li>
+<li>避免数据复制开销</li>
+</ul>
+</li>
+</ol>
+<p>该实现完美体现了Reactor模式的精髓，通过：</p>
+<ul>
+<li>非阻塞I&#x2F;O提高吞吐量</li>
+<li>队列缓冲实现生产消费者模式</li>
+<li>弱引用保持组件独立性</li>
+</ul>
+<p>使得监听器可以高效稳定地处理海量连接请求。</p>
+<h3><span id="事件循环器eventloop核心实现解析">事件循环器(EventLoop)核心实现解析</span></h3><h4><span id="类功能概述">类功能概述</span></h4><p>EventLoop是Reactor模式的核心组件，主要职责包括：</p>
+<ol>
+<li>管理所有连接的生命周期</li>
+<li>处理epoll事件分发</li>
+<li>集成定时器管理</li>
+<li>提供协议处理接口(OnMessage)</li>
+<li>支持任务队列集成(TaskPush)</li>
+</ol>
+<h4><span id="数据结构定义">数据结构定义</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 客户端信息结构</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ClientInf</span>&#123;</span><br><span class="line">    <span class="type">int</span> sockfd;            <span class="comment">// 客户端socket描述符</span></span><br><span class="line">    std::string client_ip; <span class="comment">// 客户端IP地址</span></span><br><span class="line">    <span class="type">uint16_t</span> client_port;  <span class="comment">// 客户端端口号</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 任务回调类型定义</span></span><br><span class="line"><span class="keyword">using</span> <span class="type">task_t</span> = std::function&lt;<span class="built_in">void</span>(std::weak_ptr&lt;RingQueue&lt;ClientInf&gt;&gt;, </span><br><span class="line">                                std::weak_ptr&lt;EventLoop&gt;)&gt;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心方法实现">核心方法实现</span></h4><h5><span id="1-连接管理">1. 连接管理</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 添加新连接并注册事件回调</span></span><br><span class="line"><span class="comment"> * @param sock 套接字描述符</span></span><br><span class="line"><span class="comment"> * @param event 监听事件类型(EPOLLIN/OUT等)</span></span><br><span class="line"><span class="comment"> * @param recv_cb 读事件回调</span></span><br><span class="line"><span class="comment"> * @param send_cb 写事件回调</span></span><br><span class="line"><span class="comment"> * @param except_cb 异常回调</span></span><br><span class="line"><span class="comment"> * @param ip 客户端IP(可选)</span></span><br><span class="line"><span class="comment"> * @param port 客户端端口(可选)</span></span><br><span class="line"><span class="comment"> * @param is_listensock 是否监听socket(不加入定时器)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">AddConnection</span><span class="params">(<span class="type">int</span> sock, <span class="type">uint32_t</span> event, <span class="type">func_t</span> recv_cb, </span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="type">func_t</span> send_cb, <span class="type">func_t</span> except_cb,</span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="type">const</span> std::string &amp;ip = <span class="string">&quot;0.0.0.0&quot;</span>, </span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="type">uint16_t</span> port = <span class="number">0</span>, </span></span></span><br><span class="line"><span class="params"><span class="function">                  <span class="type">bool</span> is_listensock = <span class="literal">false</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 创建新连接对象</span></span><br><span class="line">    <span class="function">std::shared_ptr&lt;Connection&gt; <span class="title">new_connect</span><span class="params">(<span class="keyword">new</span> Connection(sock))</span></span>;</span><br><span class="line">    <span class="comment">// 设置反向引用</span></span><br><span class="line">    new_connect-&gt;el = <span class="built_in">shared_from_this</span>(); </span><br><span class="line">    <span class="comment">// 注册回调函数</span></span><br><span class="line">    new_connect-&gt;recv_cb = recv_cb;</span><br><span class="line">    new_connect-&gt;send_cb = send_cb;</span><br><span class="line">    new_connect-&gt;except_cb = except_cb;</span><br><span class="line">    <span class="comment">// 记录客户端信息</span></span><br><span class="line">    new_connect-&gt;ip_ = ip;</span><br><span class="line">    new_connect-&gt;port_ = port;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 非监听socket加入定时管理</span></span><br><span class="line">    <span class="keyword">if</span>(!is_listensock) tm_-&gt;<span class="built_in">Push</span>(new_connect);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 添加到连接表</span></span><br><span class="line">    connections_[sock] = new_connect;</span><br><span class="line">    <span class="comment">// 注册epoll事件</span></span><br><span class="line">    epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_ADD, sock, event);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-网络ix2fo处理">2. 网络I&#x2F;O处理</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 读取客户端数据(非阻塞模式)</span></span><br><span class="line"><span class="comment"> * @param connect 连接弱引用</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Recv</span><span class="params">(std::weak_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> connection = connect.<span class="built_in">lock</span>();</span><br><span class="line">    <span class="type">int</span> sock = connection-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="type">ssize_t</span> n = <span class="built_in">recv</span>(sock, buffer, <span class="built_in">sizeof</span>(buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span>(n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            buffer[n] = <span class="number">0</span>;</span><br><span class="line">            connection-&gt;<span class="built_in">AppendInBuffer</span>(buffer); <span class="comment">// 追加到输入缓冲区</span></span><br><span class="line">            <span class="built_in">lg</span>(Debug, <span class="string">&quot;thread-%d, recv message from client: %s&quot;</span>, </span><br><span class="line">               <span class="built_in">pthread_self</span>(), buffer);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">0</span>) &#123; <span class="comment">// 客户端关闭连接</span></span><br><span class="line">            <span class="built_in">lg</span>(Info, <span class="string">&quot;client [%s: %d] quit&quot;</span>, </span><br><span class="line">               connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">            connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123; <span class="comment">// 错误处理</span></span><br><span class="line">            <span class="keyword">if</span>(errno == EWOULDBLOCK) <span class="keyword">break</span>; <span class="comment">// 无数据可读</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(errno == EINTR) <span class="keyword">continue</span>; <span class="comment">// 被信号中断</span></span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;recv from client [%s: %d] false&quot;</span>, </span><br><span class="line">                   connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">                connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 触发上层协议处理</span></span><br><span class="line">    <span class="keyword">if</span>(OnMessage_) <span class="built_in">OnMessage_</span>(connection);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 发送数据到客户端(非阻塞模式)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Send</span><span class="params">(std::weak_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> connection = connect.<span class="built_in">lock</span>();</span><br><span class="line">    std::string &amp;outbuffer = connection-&gt;<span class="built_in">OutBuffer</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="type">ssize_t</span> n = <span class="built_in">send</span>(connection-&gt;<span class="built_in">Sockfd</span>(), </span><br><span class="line">                         outbuffer.<span class="built_in">c_str</span>(), </span><br><span class="line">                         outbuffer.<span class="built_in">size</span>(), <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span>(n &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            outbuffer.<span class="built_in">erase</span>(<span class="number">0</span>, n); <span class="comment">// 移除已发送数据</span></span><br><span class="line">            <span class="keyword">if</span>(outbuffer.<span class="built_in">empty</span>()) <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">0</span>) <span class="keyword">return</span>; <span class="comment">// 不应发生的情况</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span>(errno == EWOULDBLOCK) <span class="keyword">break</span>; <span class="comment">// 写缓冲区满</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(errno == EINTR) <span class="keyword">continue</span>; <span class="comment">// 被信号中断</span></span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="built_in">lg</span>(Error, <span class="string">&quot;send to client [%s: %d] false&quot;</span>,</span><br><span class="line">                   connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">                connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 动态调整EPOLLOUT事件监听</span></span><br><span class="line">    <span class="keyword">if</span>(!outbuffer.<span class="built_in">empty</span>() &amp;&amp; !connection-&gt;write_care_) &#123;</span><br><span class="line">        <span class="comment">// 开启写事件监听(当缓冲区有数据时)</span></span><br><span class="line">        epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_MOD,</span><br><span class="line">                          connection-&gt;<span class="built_in">Sockfd</span>(), </span><br><span class="line">                          EPOLLIN | EPOLLOUT | EPOLLET);</span><br><span class="line">        connection-&gt;write_care_ = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(outbuffer.<span class="built_in">empty</span>() &amp;&amp; connection-&gt;write_care_) &#123;</span><br><span class="line">        <span class="comment">// 关闭写事件监听(当缓冲区空时)</span></span><br><span class="line">        epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_MOD,</span><br><span class="line">                          connection-&gt;<span class="built_in">Sockfd</span>(), </span><br><span class="line">                          EPOLLIN | EPOLLET);</span><br><span class="line">        connection-&gt;write_care_ = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="3-事件分发核心">3. 事件分发核心</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 事件分发处理(核心方法)</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">DisPatcher</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 等待epoll事件(阻塞调用)</span></span><br><span class="line">    <span class="type">int</span> n = epoller_-&gt;<span class="built_in">EpollWait</span>(recvs, max_fd);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">        <span class="type">uint32_t</span> events = recvs[i].events;</span><br><span class="line">        <span class="type">int</span> sockfd = recvs[i].data.fd;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 异常事件转化为读写事件处理</span></span><br><span class="line">        <span class="keyword">if</span>(events &amp; (EPOLLERR | EPOLLHUP)) </span><br><span class="line">            events |= (EPOLLIN | EPOLLOUT);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 处理读事件</span></span><br><span class="line">        <span class="keyword">if</span>(events &amp; EPOLLIN &amp;&amp; connections_[sockfd]-&gt;recv_cb) &#123;</span><br><span class="line">            connections_[sockfd]-&gt;<span class="built_in">recv_cb</span>(connections_[sockfd]);</span><br><span class="line">            tm_-&gt;<span class="built_in">UpdateTime</span>(sockfd); <span class="comment">// 更新活跃时间</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 处理写事件</span></span><br><span class="line">        <span class="keyword">if</span>(events &amp; EPOLLOUT &amp;&amp; connections_[sockfd]-&gt;send_cb) &#123;</span><br><span class="line">            connections_[sockfd]-&gt;<span class="built_in">send_cb</span>(connections_[sockfd]);</span><br><span class="line">            tm_-&gt;<span class="built_in">UpdateTime</span>(sockfd); <span class="comment">// 更新活跃时间</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="4-定时器集成">4. 定时器集成</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 检查并处理过期连接</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Expired_check</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(tm_-&gt;<span class="built_in">IsTopExpired</span>()) &#123; <span class="comment">// 检查堆顶是否过期</span></span><br><span class="line">        <span class="keyword">auto</span> top_time = tm_-&gt;<span class="built_in">GetTop</span>()-&gt;connect;</span><br><span class="line">        <span class="type">int</span> sockfd = top_time-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">        tm_-&gt;<span class="built_in">DeleteTop</span>();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 如果连接仍存在则触发异常关闭</span></span><br><span class="line">        <span class="keyword">if</span>(connections_.<span class="built_in">find</span>(sockfd) != connections_.<span class="built_in">end</span>())</span><br><span class="line">            connections_[sockfd]-&gt;<span class="built_in">except_cb</span>(top_time);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="5-主事件循环">5. 主事件循环</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 事件主循环</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Loop</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// 从任务队列获取新连接(如果有TaskPush回调)</span></span><br><span class="line">        <span class="keyword">if</span>(TaskPush_) <span class="built_in">TaskPush_</span>(rq_, <span class="built_in">shared_from_this</span>());</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 处理epoll事件</span></span><br><span class="line">        <span class="built_in">DisPatcher</span>();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检查过期连接</span></span><br><span class="line">        <span class="built_in">Expired_check</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="关键设计解析">关键设计解析</span></h4><h5><span id="双回调接口设计">双回调接口设计</span></h5><ol>
+<li><p><strong>OnMessage回调</strong>：</p>
+<ul>
+<li>由上层协议提供</li>
+<li>在数据接收完成后触发</li>
+<li>处理协议解析和业务逻辑</li>
+</ul>
+</li>
+<li><p><strong>TaskPush回调</strong>：</p>
+<ul>
+<li>用户自定义实现</li>
+<li>从环形队列获取新连接</li>
+<li>示例实现：</li>
+</ul>
+</li>
+</ol>
+<h5><span id="定时器集成策略">定时器集成策略</span></h5><ol>
+<li><p><strong>活跃度更新</strong>：</p>
+<ul>
+<li>每次I&#x2F;O操作后调用<code>tm_-&gt;UpdateTime()</code></li>
+<li>重置连接的过期时间</li>
+</ul>
+</li>
+<li><p><strong>惰性检查</strong>：</p>
+<ul>
+<li>只在事件循环间隙检查</li>
+<li>避免频繁的定时器操作影响I&#x2F;O性能</li>
+</ul>
+</li>
+<li><p><strong>异常统一处理</strong>：</p>
+<ul>
+<li>过期连接通过<code>except_cb</code>统一清理</li>
+<li>保证资源释放的一致性</li>
+</ul>
+</li>
+</ol>
+<h5><span id="性能优化点">性能优化点</span></h5><ol>
+<li><p><strong>边缘触发(EPOLLET)</strong>：</p>
+<ul>
+<li>减少epoll事件触发次数</li>
+<li>需要配合非阻塞I&#x2F;O</li>
+</ul>
+</li>
+<li><p><strong>动态事件注册</strong>：</p>
+<ul>
+<li>只在需要时监听EPOLLOUT</li>
+<li>减少不必要的epoll事件</li>
+</ul>
+</li>
+<li><p><strong>批量事件处理</strong>：</p>
+<ul>
+<li>单次epoll_wait处理多个事件</li>
+<li>减少系统调用次数</li>
+</ul>
+</li>
+</ol>
+<p>该实现通过清晰的接口划分和高效的事件处理机制，完美支持了高并发网络编程的需求，同时保持了良好的扩展性和可维护性。</p>
+<h4><span id="完整代码">完整代码</span></h4><div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _EVENT_LOOP_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _EVENT_LOOP_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;tcp.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;epoll.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;common.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ring_queue.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;timer_manager.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;connection.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Connection</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ClientInf</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span>;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TimerManager</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="type">task_t</span> = std::function&lt;<span class="built_in">void</span>(std::weak_ptr&lt;RingQueue&lt;ClientInf&gt;&gt;, std::weak_ptr&lt;EventLoop&gt;)&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="keyword">constexpr</span> <span class="type">size_t</span> max_fd = <span class="number">1</span> &lt;&lt; <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="type">const</span> <span class="type">uint16_t</span> default_port = <span class="number">7777</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">inline</span> <span class="keyword">thread_local</span> <span class="type">char</span> buffer[<span class="number">1024</span>];</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">ClientInf</span>&#123;</span><br><span class="line">    <span class="type">int</span> sockfd;</span><br><span class="line">    std::string client_ip;</span><br><span class="line">    <span class="type">uint16_t</span> client_port;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EventLoop</span>: <span class="keyword">public</span> std::enable_shared_from_this&lt;EventLoop&gt;</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 当 Task_Push 为空时，即代表不从上层循环队列当中获取任务，即主任务循环器的选择，因为主任务循环器只负责任务 Push，不参与 Pop</span></span><br><span class="line">    <span class="built_in">EventLoop</span>(std::shared_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; rq = <span class="literal">nullptr</span>, <span class="type">func_t</span> OnMessage = <span class="literal">nullptr</span>, <span class="type">task_t</span> TaskPush = <span class="literal">nullptr</span>)</span><br><span class="line">    :<span class="built_in">epoller_</span>(<span class="keyword">new</span> <span class="built_in">Epoll</span>()),</span><br><span class="line">    <span class="built_in">OnMessage_</span>(OnMessage),</span><br><span class="line">    <span class="built_in">TaskPush_</span>(TaskPush),</span><br><span class="line">    <span class="built_in">rq_</span>(rq),</span><br><span class="line">    <span class="built_in">tm_</span>(<span class="keyword">new</span> <span class="built_in">TimerManager</span>())</span><br><span class="line">    &#123;&#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">AddConnection</span><span class="params">(<span class="type">int</span> sock, <span class="type">uint32_t</span> event, <span class="type">func_t</span> recv_cb, <span class="type">func_t</span> send_cb, <span class="type">func_t</span> except_cb,</span></span></span><br><span class="line"><span class="params"><span class="function">                       <span class="type">const</span> std::string &amp;ip = <span class="string">&quot;0.0.0.0&quot;</span>, <span class="type">uint16_t</span> port = <span class="number">0</span>, <span class="type">bool</span> is_listensock = <span class="literal">false</span>)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="function">std::shared_ptr&lt;Connection&gt; <span class="title">new_connect</span><span class="params">(<span class="keyword">new</span> Connection(sock))</span></span>;</span><br><span class="line">        new_connect-&gt;el = <span class="built_in">shared_from_this</span>();</span><br><span class="line">        new_connect-&gt;recv_cb = recv_cb;</span><br><span class="line">        new_connect-&gt;send_cb = send_cb;</span><br><span class="line">        new_connect-&gt;except_cb = except_cb;</span><br><span class="line">        new_connect-&gt;ip_ = ip;</span><br><span class="line">        new_connect-&gt;port_ = port;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(!is_listensock) tm_-&gt;<span class="built_in">Push</span>(new_connect);</span><br><span class="line">        connections_[sock] = new_connect;</span><br><span class="line"></span><br><span class="line">        </span><br><span class="line">        epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_ADD, sock, event);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Recv</span><span class="params">(std::weak_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> connection = connect.<span class="built_in">lock</span>();</span><br><span class="line">        <span class="type">int</span> sock = connection-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">ssize_t</span> n = <span class="built_in">recv</span>(sock, buffer, <span class="built_in">sizeof</span>(buffer) - <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span>(n &gt; <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                buffer[n] = <span class="number">0</span>;</span><br><span class="line">                connection-&gt;<span class="built_in">AppendInBuffer</span>(buffer);</span><br><span class="line">                <span class="built_in">lg</span>(Debug, <span class="string">&quot;thread-%d, recv message from client: %s&quot;</span>, <span class="built_in">pthread_self</span>(),buffer);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">0</span>)&#123;</span><br><span class="line">                <span class="built_in">lg</span>(Info, <span class="string">&quot;client [%s: %d] quit&quot;</span>, connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">                connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(errno == EWOULDBLOCK) <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span>(errno == EINTR) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="built_in">lg</span>(Error, <span class="string">&quot;recv from client [%s: %d] false&quot;</span>, connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">                    connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(OnMessage_)</span><br><span class="line">        <span class="built_in">OnMessage_</span>(connection);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Send</span><span class="params">(std::weak_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> connection = connect.<span class="built_in">lock</span>();</span><br><span class="line"></span><br><span class="line">        std::string &amp;outbuffer = connection-&gt;<span class="built_in">OutBuffer</span>();</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">ssize_t</span> n = <span class="built_in">send</span>(connection-&gt;<span class="built_in">Sockfd</span>(), outbuffer.<span class="built_in">c_str</span>(), outbuffer.<span class="built_in">size</span>(), <span class="number">0</span>);</span><br><span class="line">            <span class="keyword">if</span>(n &gt; <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                outbuffer.<span class="built_in">erase</span>(<span class="number">0</span>, n);</span><br><span class="line">                <span class="keyword">if</span>(outbuffer.<span class="built_in">empty</span>()) <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">            <span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="keyword">if</span>(errno == EWOULDBLOCK) <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span>(errno == EINTR) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">else</span>&#123;</span><br><span class="line">                    <span class="built_in">lg</span>(Error, <span class="string">&quot;send to client [%s: %d] false&quot;</span>, connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">                    connection-&gt;<span class="built_in">except_cb</span>(connection);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 写缓冲满</span></span><br><span class="line">            <span class="keyword">if</span>(!outbuffer.<span class="built_in">empty</span>() &amp;&amp; !connection-&gt;write_care_)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">// 开启写时间关心</span></span><br><span class="line">                epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_MOD,connection-&gt;<span class="built_in">Sockfd</span>(), EPOLLIN | EPOLLOUT | EPOLLET);</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(outbuffer.<span class="built_in">empty</span>() &amp;&amp; connection-&gt;write_care_)&#123;</span><br><span class="line">                <span class="comment">// 关闭写事件特别关心</span></span><br><span class="line">                epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_MOD,connection-&gt;<span class="built_in">Sockfd</span>(), EPOLLIN | EPOLLET);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Except</span><span class="params">(std::weak_ptr&lt;Connection&gt; connect)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> connection = connect.<span class="built_in">lock</span>();</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> fd = connection-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">        <span class="built_in">lg</span>(Warning, <span class="string">&quot;client [%s: %d] handler exception&quot;</span>, connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line"></span><br><span class="line">        epoller_-&gt;<span class="built_in">EpollCtl</span>(EPOLL_CTL_DEL, fd, <span class="number">0</span>);</span><br><span class="line">        <span class="built_in">lg</span>(Debug, <span class="string">&quot;client [%s: %d] close done&quot;</span>, connection-&gt;ip_.<span class="built_in">c_str</span>(), connection-&gt;port_);</span><br><span class="line">        <span class="built_in">close</span>(fd);</span><br><span class="line">        connections_.<span class="built_in">erase</span>(fd);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">DisPatcher</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="type">int</span> n = epoller_-&gt;<span class="built_in">EpollWait</span>(recvs, max_fd);</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="type">uint32_t</span> events = recvs[i].events;</span><br><span class="line">            <span class="type">int</span> sockfd = recvs[i].data.fd;</span><br><span class="line">            <span class="comment">// 异常事件转化为读写问题处理</span></span><br><span class="line">            <span class="keyword">if</span>(events &amp; (EPOLLERR | EPOLLHUP)) events |= (EPOLLIN | EPOLLOUT);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(events &amp; EPOLLIN &amp;&amp; connections_[sockfd]-&gt;recv_cb) &#123;</span><br><span class="line">                connections_[sockfd]-&gt;<span class="built_in">recv_cb</span>(connections_[sockfd]);</span><br><span class="line">                tm_-&gt;<span class="built_in">UpdateTime</span>(sockfd);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span>(events &amp; EPOLLOUT &amp;&amp; connections_[sockfd]-&gt;send_cb) &#123;</span><br><span class="line">                connections_[sockfd]-&gt;<span class="built_in">send_cb</span>(connections_[sockfd]);</span><br><span class="line">                tm_-&gt;<span class="built_in">UpdateTime</span>(sockfd);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Expired_check</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">while</span>(tm_-&gt;<span class="built_in">IsTopExpired</span>())&#123;</span><br><span class="line">            <span class="keyword">auto</span> top_time = tm_-&gt;<span class="built_in">GetTop</span>()-&gt;connect;</span><br><span class="line">            <span class="type">int</span> sockfd = top_time-&gt;<span class="built_in">Sockfd</span>();</span><br><span class="line">            tm_-&gt;<span class="built_in">DeleteTop</span>();</span><br><span class="line">            <span class="comment">// 找不到说明是客户端主动释放的</span></span><br><span class="line">            <span class="keyword">if</span>(connections_.<span class="built_in">find</span>(sockfd) != connections_.<span class="built_in">end</span>())</span><br><span class="line">            connections_[sockfd]-&gt;<span class="built_in">except_cb</span>(top_time);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Loop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span>(TaskPush_) <span class="built_in">TaskPush_</span>(rq_, <span class="built_in">shared_from_this</span>());</span><br><span class="line">            <span class="built_in">DisPatcher</span>();</span><br><span class="line">            <span class="built_in">Expired_check</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    std::shared_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; rq_;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unordered_map&lt;<span class="type">int</span>, std::shared_ptr&lt;Connection&gt;&gt; connections_;</span><br><span class="line">    std::shared_ptr&lt;Epoll&gt; epoller_;</span><br><span class="line">    std::shared_ptr&lt;TimerManager&gt; tm_;</span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">epoll_event</span> recvs[max_fd];</span><br><span class="line">    <span class="type">func_t</span> OnMessage_;</span><br><span class="line">    <span class="type">task_t</span> TaskPush_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+
+    </div>
+</div>
+
+<p>而后，我们将之前的计算服务协议以及基于信号量的循环队列集成到该EventLoop中，形成一个完整的网络服务框架。</p>
+<p>计算服务协议讲解链接跳转：<a href="https://liujiaxuan69.github.io/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/">计算服务协议</a></p>
+<p>基于信号量的环形队列讲解链接跳转：<a href="https://liujiaxuan69.github.io/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">基于信号量的环形队列</a></p>
+<p>下面我们将这些组合起来，就是实现了完整的Reactor模式的网络服务框架：</p>
+<h3><span id="服务端主程序实现解析">服务端主程序实现解析</span></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;thread&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;log.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;event_loop.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ring_queue.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;listener.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;server_cal.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">size_t</span> default_thread_num = <span class="number">5</span>;  <span class="comment">// 默认工作线程数</span></span><br><span class="line"></span><br><span class="line">ServerCal sc;  <span class="comment">// 业务逻辑处理器实例</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 消息处理回调函数</span></span><br><span class="line"><span class="comment"> * @param wconnectiion 客户端连接弱引用</span></span><br><span class="line"><span class="comment"> * @note 处理客户端输入并返回计算结果</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">MessageHandler</span><span class="params">(std::weak_ptr&lt;Connection&gt; wconnectiion)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> connection = wconnectiion.<span class="built_in">lock</span>();</span><br><span class="line">    std::string &amp;inf = connection-&gt;<span class="built_in">Inbuffer</span>();  <span class="comment">// 获取输入缓冲区</span></span><br><span class="line">    std::string outinf;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        outinf = sc.<span class="built_in">Calculator</span>(inf);  <span class="comment">// 调用业务逻辑处理</span></span><br><span class="line">        <span class="keyword">if</span> (outinf.<span class="built_in">empty</span>()) <span class="keyword">return</span>;   <span class="comment">// 无输出则结束</span></span><br><span class="line">        </span><br><span class="line">        connection-&gt;<span class="built_in">AppendOutBuffer</span>(outinf);  <span class="comment">// 写入输出缓冲区</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 通过EventLoop发送响应</span></span><br><span class="line">        <span class="keyword">auto</span> wsender = connection-&gt;el;</span><br><span class="line">        <span class="keyword">auto</span> sender = wsender.<span class="built_in">lock</span>();</span><br><span class="line">        sender-&gt;<span class="built_in">Send</span>(connection);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 任务获取回调函数</span></span><br><span class="line"><span class="comment"> * @param wrq 环形队列弱引用</span></span><br><span class="line"><span class="comment"> * @param wel 事件循环弱引用</span></span><br><span class="line"><span class="comment"> * @note 从队列获取新连接并注册到EventLoop</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">TaskPush</span><span class="params">(std::weak_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; wrq, std::weak_ptr&lt;EventLoop&gt; wel)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> rq = wrq.<span class="built_in">lock</span>();</span><br><span class="line">    <span class="keyword">auto</span> el = wel.<span class="built_in">lock</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> client_inf = rq-&gt;<span class="built_in">Pop</span>()) &#123;  <span class="comment">// 从队列获取新连接</span></span><br><span class="line">        el-&gt;<span class="built_in">AddConnection</span>(</span><br><span class="line">            client_inf-&gt;sockfd, </span><br><span class="line">            EPOLLIN | EPOLLET,  <span class="comment">// 边缘触发模式</span></span><br><span class="line">            std::<span class="built_in">bind</span>(&amp;EventLoop::Recv, el, std::placeholders::_1),  <span class="comment">// 读回调</span></span><br><span class="line">            std::<span class="built_in">bind</span>(&amp;EventLoop::Send, el, std::placeholders::_1),  <span class="comment">// 写回调</span></span><br><span class="line">            std::<span class="built_in">bind</span>(&amp;EventLoop::Except, el, std::placeholders::_1), <span class="comment">// 异常回调</span></span><br><span class="line">            client_inf-&gt;client_ip, </span><br><span class="line">            client_inf-&gt;client_port</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 监听线程处理函数</span></span><br><span class="line"><span class="comment"> * @param rq 环形队列</span></span><br><span class="line"><span class="comment"> * @param port 监听端口</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ListenHandler</span><span class="params">(std::shared_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; rq, <span class="type">uint16_t</span> port)</span> </span>&#123;</span><br><span class="line">    <span class="function">std::shared_ptr&lt;Listener&gt; <span class="title">lt</span><span class="params">(<span class="keyword">new</span> Listener(port))</span></span>;  <span class="comment">// 创建监听器</span></span><br><span class="line">    lt-&gt;<span class="built_in">Init</span>();  <span class="comment">// 初始化监听socket</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 主EventLoop只负责监听</span></span><br><span class="line">    <span class="function">std::shared_ptr&lt;EventLoop&gt; <span class="title">baser</span><span class="params">(<span class="keyword">new</span> EventLoop(rq))</span></span>;</span><br><span class="line">    baser-&gt;<span class="built_in">AddConnection</span>(</span><br><span class="line">        lt-&gt;<span class="built_in">Fd</span>(), </span><br><span class="line">        EPOLLIN | EPOLLET, </span><br><span class="line">        std::<span class="built_in">bind</span>(&amp;Listener::Accepter, lt, std::placeholders::_1),  <span class="comment">// 接受新连接</span></span><br><span class="line">        <span class="literal">nullptr</span>,  <span class="comment">// 无需写回调</span></span><br><span class="line">        <span class="literal">nullptr</span>,  <span class="comment">// 无需异常回调</span></span><br><span class="line">        <span class="string">&quot;0.0.0.0&quot;</span>, </span><br><span class="line">        <span class="number">0</span>, </span><br><span class="line">        <span class="literal">true</span>  <span class="comment">// 标记为监听socket</span></span><br><span class="line">    );</span><br><span class="line">    baser-&gt;<span class="built_in">Loop</span>();  <span class="comment">// 启动事件循环</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief 工作线程处理函数</span></span><br><span class="line"><span class="comment"> * @param rq 环形队列</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">EventHandler</span><span class="params">(std::shared_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; rq)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建工作EventLoop，设置消息处理和任务获取回调</span></span><br><span class="line">    <span class="function">std::shared_ptr&lt;EventLoop&gt; <span class="title">task_handler</span><span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="keyword">new</span> EventLoop(rq, MessageHandler, TaskPush)</span></span></span><br><span class="line"><span class="params"><span class="function">    )</span></span>;</span><br><span class="line">    task_handler-&gt;<span class="built_in">Loop</span>();  <span class="comment">// 启动事件循环</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 参数处理</span></span><br><span class="line">    <span class="type">uint16_t</span> port;</span><br><span class="line">    <span class="keyword">if</span>(argc == <span class="number">1</span>) port = <span class="number">6667</span>;  <span class="comment">// 默认端口</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(argc == <span class="number">2</span>) port = std::<span class="built_in">stoi</span>(argv[<span class="number">1</span>]);</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        std::cerr &lt;&lt; <span class="string">&quot;Usage: &quot;</span> &lt;&lt; argv[<span class="number">0</span>] &lt;&lt; <span class="string">&quot; [port]&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建环形队列</span></span><br><span class="line">    std::shared_ptr&lt;RingQueue&lt;ClientInf&gt;&gt; <span class="built_in">rq</span>(<span class="keyword">new</span> RingQueue&lt;ClientInf&gt;);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动监听线程</span></span><br><span class="line">    <span class="function">std::thread <span class="title">base_thread</span><span class="params">(ListenHandler, rq, port)</span></span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建工作线程池</span></span><br><span class="line">    std::vector&lt;std::thread&gt; threads;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; default_thread_num; ++i) &#123;</span><br><span class="line">        threads.<span class="built_in">emplace_back</span>(std::<span class="built_in">thread</span>(EventHandler, rq));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 等待所有线程结束</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;thread : threads) &#123;</span><br><span class="line">        <span class="keyword">if</span> (thread.<span class="built_in">joinable</span>()) thread.<span class="built_in">join</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    base_thread.<span class="built_in">join</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="核心架构说明">核心架构说明</span></h3><ol>
+<li><p><strong>线程分工</strong>：</p>
+<ul>
+<li><strong>监听线程</strong>：专门处理新连接接入，通过<code>Listener</code>将连接信息放入环形队列</li>
+<li><strong>工作线程</strong>：从队列获取连接，通过<code>EventLoop</code>处理具体业务</li>
+</ul>
+</li>
+<li><p><strong>回调机制</strong>：</p>
+<ul>
+<li><code>MessageHandler</code>：处理客户端请求并返回计算结果</li>
+<li><code>TaskPush</code>：将新连接注册到工作线程的EventLoop</li>
+</ul>
+</li>
+<li><p><strong>关键组件</strong>：</p>
+<ul>
+<li><code>RingQueue</code>：线程安全的环形队列，连接监听线程和工作线程</li>
+<li><code>EventLoop</code>：事件驱动核心，每个工作线程独立实例</li>
+<li><code>Listener</code>：封装监听socket处理</li>
+</ul>
+</li>
+<li><p><strong>业务处理</strong>：</p>
+<ul>
+<li>通过<code>ServerCal</code>类实现具体业务逻辑</li>
+<li>计算结果通过<code>EventLoop::Send</code>返回客户端</li>
+</ul>
+</li>
+</ol>
+<p>详细代码链接请查看：<a target="_blank" rel="noopener" href="https://github.com/LiuJiaxuan69/Reactor">完整代码</a></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
