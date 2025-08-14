@@ -538,7 +538,6 @@ Redis 阻塞列,"/>
 </ul>
 </li>
 </ol>
-<p>以下是结合 <strong>Mermaid 时序图</strong> 和 <strong>流程图</strong> 的完整 Markdown 版本，清晰对比 Redis 的 <code>LPOP</code> 与 <code>BLPOP</code> 行为差异：</p>
 <hr>
 <h3><span id="1-时序图客户端与-redis-的交互过程">1. 时序图：客户端与 Redis 的交互过程</span></h3><h4><span id="场景1列表不为空时">场景1：列表不为空时</span></h4><pre class="mermaid">sequenceDiagram
     participant Client
@@ -847,12 +846,15 @@ Redis 阻塞列,"/>
     end
 
     Producer -->|LPUSH queue:1| queue1
-    Producer -->|LPUSH queue:2| queue3
+    Producer -->|LPUSH queue:2| queue2
+    Producer -->|LPUSH queue:3| queue3
 
-    queue1 -->|BRPOP queue:1| ConsumerA
-    queue1 -->|BRPOP queue:1| ConsumerB
-    queue2 -->|BRPOP queue:2| ConsumerC
-    queue3 -->|BRPOP queue:1,queue:2| ConsumerD</pre>
+    queue1 --> ConsumerA(ConsumerA:<br>BRPOP queue:1)
+    queue1 --> ConsumerB(ConsumerB:<br>BRPOP queue:1)
+    queue1 --> ConsumerC(ConsumerC:<br>BRPOP queue:1,queue:2)
+    queue2 --> ConsumerC
+    queue2 --> ConsumerD(ConsumerD:<br>BRPOP queue:2,queue:3)
+    queue3 --> ConsumerD</pre>
 
 <p><strong>频道订阅模式</strong>：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生产者发布消息到不同频道</span></span><br><span class="line">LPUSH channel:news &quot;最新消息&quot;</span><br><span class="line">LPUSH channel:alert &quot;系统警报&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">消费者订阅不同组合：</span></span><br><span class="line">BRPOP channel:news 30      # 只订阅新闻频道</span><br><span class="line">BRPOP channel:news channel:alert 30  # 多频道监听</span><br></pre></td></tr></table></figure>

@@ -215,16 +215,18 @@
             <div id="post0">
                 <p>七月 19, 2025</p>
                 <h2>
-                    <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/" title="Linux 文件软链接与硬链接" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 文件软链接与硬链接</a>
+                    <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" title="Linux 动态库和静态库" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 动态库和静态库</a>
                 </h2>
                 <p class="summary">
 
 
-什么是 inode
-Inode 的核心作用
-Inode 的底层结构
-Inode 如何关联到文件
-Inode ...</p>
+静态库创建
+动态库创建
+
+
+
+静态库创建我们先设计一个简单的头文件及实现方法：
+12345678910111...</p>
             </div>
             
 
@@ -233,10 +235,38 @@ Inode ...</p>
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" 
+       title="Linux 动态库和静态库"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>七月 19, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" title="Linux 动态库和静态库" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 动态库和静态库</a></h3>
+        
+        <p>
+
+
+静态库创建
+动态库创建
+
+
+
+静态库创建我们先设计一个简单的头文件及实现方法：
+1234567891011121314151617181920212...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/" 
        title="Linux 文件软链接与硬链接"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -266,7 +296,7 @@ Inode 的分配与管理
     <a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/" 
        title="文件缓冲区"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -300,7 +330,7 @@ Inode 的分配与管理
     <a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/" 
        title="文件重定向"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -333,7 +363,7 @@ dup2
     <a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/" 
        title="文件读写及文件描述符"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -359,7 +389,7 @@ C语言文件操作回顾
     <a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/" 
        title="Linux 进程程序替换"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -392,7 +422,7 @@ execle 和 execve
     <a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/" 
        title="Linux 进程等待"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -421,7 +451,7 @@ wait 和 waitpid 的 status 参数说...</p>
     <a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/" 
        title="Linux 进程终止"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -484,7 +514,7 @@ strerr 函数
     <a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/" 
        title="Linux 命令行参数和环境变量"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -502,42 +532,6 @@ strerr 函数
 环境变量参数
 进程是如何获取环境变量的？
 getenv...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/" 
-       title="Linux 进程状态及优先级"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 14, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/" title="Linux 进程状态及优先级" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 进程状态及优先级</a></h3>
-        
-        <p>
-
-
-进程状态
-运行状态 R
-休眠状态 S
-深度休眠状态 D
-暂停状态 T
-死亡状态 X
-僵尸状态 Z
-孤儿进程
-
-
-进程优先级
-
-
-
-进程状态进程在操作...</p>
     </div>
 </div>
 

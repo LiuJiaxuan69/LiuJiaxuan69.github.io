@@ -21,9 +21,10 @@ zcount
 zrange
 ZREVRANGE
 ZPOPMAX
-POPMIN、ZPOPMIN
+ZPOPMIN
 ZRANK、ZREVRANK
-ZSCORE,"> 
+ZSCORE 指令详解
+Z,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -45,9 +46,10 @@ zcount
 zrange
 ZREVRANGE
 ZPOPMAX
-POPMIN、ZPOPMIN
+ZPOPMIN
 ZRANK、ZREVRANK
-ZSCORE,"/>
+ZSCORE 指令详解
+Z,"/>
     
     
     
@@ -66,9 +68,10 @@ zcount
 zrange
 ZREVRANGE
 ZPOPMAX
-POPMIN、ZPOPMIN
+ZPOPMIN
 ZRANK、ZREVRANK
-ZSCORE,"/>
+ZSCORE 指令详解
+Z,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -250,7 +253,7 @@ ZSCORE,"/>
 <li><a href="#zrange">zrange</a></li>
 <li><a href="#zrevrange">ZREVRANGE</a></li>
 <li><a href="#zpopmax">ZPOPMAX</a></li>
-<li><a href="#popmin-zpopmin">POPMIN、ZPOPMIN</a></li>
+<li><a href="#zpopmin">ZPOPMIN</a></li>
 <li><a href="#zrank-zrevrank">ZRANK、ZREVRANK</a></li>
 <li><a href="#zscore-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">ZSCORE 指令详解</a></li>
 <li><a href="#zrem-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">ZREM 指令详解</a></li>
@@ -280,7 +283,7 @@ ZSCORE,"/>
 </ul>
 <!-- tocstop -->
 
-<h2><span id="类型简介">类型简介</span></h2><p>有序集合保留了集合不能有重复成员的特点，但与集合不同的是，有序集合中的每个元素都有⼀个唯⼀的浮点类型的分数（score）与之关<br>联，这使得有序集合中的元素是可以维护有序性的，但这个有序不是用下标作为排序依据而是用这个分数。</p>
+<h2><span id="类型简介">类型简介</span></h2><p>有序集合保留了集合不能有重复成员的特点，但与集合不同的是，有序集合中的每个元素都有⼀个唯⼀的浮点类型的分数（score）与之关联，这使得有序集合中的元素是可以维护有序性的，但这个有序不是用下标作为排序依据而是用这个分数。</p>
 <p>下面是列表、集合、有序集合三者的异同点</p>
 <table>
 <thead>
@@ -562,7 +565,7 @@ ZSCORE,"/>
 <ol start="3">
 <li>流量控制（处理最高权重请求）</li>
 </ol>
-<h3><span id="popmin-zpopmin">POPMIN、ZPOPMIN</span></h3><p>用法和POPMAX 和 ZPOPMAX 类型，这里不再赘述</p>
+<h3><span id="zpopmin">ZPOPMIN</span></h3><p>用法和 ZPOPMAX 类似，这里不再赘述</p>
 <h3><span id="zrank-zrevrank">ZRANK、ZREVRANK</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><ul>
 <li><strong>ZRANK</strong>：返回成员在有序集合中的升序排名（分数从低到高），排名从0开始计算，最低分成员排名为0</li>
 <li><strong>ZREVRANK</strong>：返回成员在有序集合中的降序排名（分数从高到低），排名从0开始计算，最高分成员排名为0</li>
