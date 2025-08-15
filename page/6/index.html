@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="刘家炫的博客"/>
+    
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="刘家炫的博客"/>
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeOutUp
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div class="nav">
+    <ul id="menu-menu" class="menu">
+        
+        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
+            <a href="//" title="首页" target="_blank" rel="noopener">首页</a>
+        </li>
+        
+        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
+            <a href="/categories/" title="分类" target="_blank" rel="noopener">分类</a>
+        </li>
+        
+        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
+            <a href="/tags/" title="标签" target="_blank" rel="noopener">标签</a>
+        </li>
+        
+        <li class="pview menu-item menu-item-type-post_type menu-item-object-page">
+            <a href="/archives/" title="归档" target="_blank" rel="noopener">归档</a>
+        </li>
+        
+    </ul>
+	<span class="target"></span>
+	<center>
+	<div class="hitokoto">
+		<span class="typed" id="hitokoto" data-st="true"></span>
+	</div>
+	</center>
+	
+	<p class="footerlinks">
+		<a href="#" class="iconfont icon-null"></a>
+		
+            <a href="https://github.com/liujiaxuan69" title="github" class="iconfont icon-github" target="_blank" rel="noopener"> </a>
+        
+            <a href="mailto:1928099560@qq.com" title="email" class="iconfont icon-email" target="_blank" rel="noopener"> </a>
+        
+		<a href="#" class="iconfont icon-null"></a>
+	</p>
+	
+    <p id="copyright">
+        &copy; 2025 Jiaxuan Liu.
+        <span> | </span>Powered by <a href="https://hexo.io/" title="Hexo" target="_blank" rel="noopener">Hexo</a>
+        <span> | </span>Theme <a href="https://github.com/Fechin/hexo-theme-diaspora" title="Diaspora" target="_blank" rel="noopener">Diaspora</a> by Fechin
+		
+    </p>
+</div>
+
+  <div id="container" class="gradient">
+    
+    <div id="screen">
+        <div id="mark">
+            <div class="layer" data-depth="0.4">
+                <img src="/img/welcome.jpg" id="cover" crossorigin="anonymous" width="1920" height="1080">
+            </div>
+        </div>
+        <div id="vibrant">
+            <svg viewbox="0 0 2880 1620" height="100%" preserveaspectratio="xMaxYMax slice">
+                <polygon opacity="0.7" points="2000,1620 0,1620 0,0 600,0 " />
+            </svg>
+            <div></div>
+        </div>
+        <div id="header">
+            <div>
+                <a href="/"
+                    style="position: relative; display: inline-block; padding: 1; font-size: 40px; color:white; font-family: 'Youyuan';">刘家炫的博客</a>
+                
+                        <div class="iconfont icon-menu switchmenu"></div>
+            </div>
+        </div>
+        
+            <div id="post0">
+                <p>六月 16, 2025</p>
+                <h2>
+                    <a href="/2025/06/16/Redis/redis_command_line_user_guide/" title="Redis 命令行使用指南" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 命令行使用指南</a>
+                </h2>
+                <p class="summary">
+
+
+Redis 命令行中的两个核心（最基础）的命令
+1.set命令
+2.get命令
+
+
+全局环境的命令
+一、ke...</p>
+            </div>
+            
+
+    </div>
+      <div id="primary">
+        
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/06/16/Redis/redis_command_line_user_guide/" 
+       title="Redis 命令行使用指南"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>六月 16, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/06/16/Redis/redis_command_line_user_guide/" title="Redis 命令行使用指南" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 命令行使用指南</a></h3>
+        
+        <p>
+
+
+Redis 命令行中的两个核心（最基础）的命令
+1.set命令
+2.get命令
+
+
+全局环境的命令
+一、keys
+二、exists
+三、del
+四、...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/05/29/Hello-World/" 
+       title="Hello World"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>五月 29, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/05/29/Hello-World/" title="Hello World" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Hello World</a></h3>
+        
+        <p>欢迎来到我的博客网站
+
+
+</p>
+    </div>
+</div>
+
+
+      </div>
+      
+  </div>
+  <div id="preview"></div>
+  
+
+
+      <!DOCTYPE html>
+<html>
+<head>
+<style>
+  .gradient {
+    position: relative;
+    background: linear-gradient(-45deg,
+      rgba(208, 255, 182, 0.5),
+      rgba(105, 255, 225, 0.5),
+      rgba(173, 216, 230, 0.5),
+      rgba(109, 100, 237, 0.5)
+    );
+    background-size: 400% 400%;
+    animation: gradientBG 7s ease infinite alternate;
+    overflow: hidden;
+  }
+
+  /* 粒子光点样式 */
+  .gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at var(--x, 50%) var(--y, 50%), 
+      rgba(255, 255, 255, 0.25) 0%, 
+      transparent 25%
+    );
+    transition: background 0.3s ease-out;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    70% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+
+
+</style>
+</head>
+<body>
+  <div class="gradient"></div>
+
+  <script>
+    // 全局监听鼠标位置（即使在浏览器外）
+    document.addEventListener('mousemove', (e) => {
+      document.documentElement.style.setProperty('--x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--y', `${e.clientY}px`);
+    });
+
+    // 鼠标离开视窗时复位到中心
+    document.addEventListener('mouseleave', () => {
+      document.documentElement.style.setProperty('--x', '50%');
+      document.documentElement.style.setProperty('--y', '50%');
+    });
+
+    // 初始化居中
+    document.documentElement.style.setProperty('--x', '50%');
+    document.documentElement.style.setProperty('--y', '50%');
+  </script>
+</body>
+</html>
+
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
