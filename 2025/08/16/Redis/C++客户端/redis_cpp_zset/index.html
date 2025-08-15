@@ -14,7 +14,7 @@
 
 
 Redis++（C++）ZSet（有序集合）类型常用接口详解
-zadd &amp;#x2F; zrange
+zadd、zrange
 zcard
 zrem
 zscore
@@ -24,7 +24,7 @@ zrank
 
 
 
-Redis++（C++）ZSet（,"> 
+Redis++（C++）ZSet（有序集合）类型,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -39,7 +39,7 @@ Redis++（C++）ZSet（,">
 
 
 Redis++（C++）ZSet（有序集合）类型常用接口详解
-zadd &amp;#x2F; zrange
+zadd、zrange
 zcard
 zrem
 zscore
@@ -49,7 +49,7 @@ zrank
 
 
 
-Redis++（C++）ZSet（,"/>
+Redis++（C++）ZSet（有序集合）类型,"/>
     
     
     
@@ -61,7 +61,7 @@ Redis++（C++）ZSet（,"/>
 
 
 Redis++（C++）ZSet（有序集合）类型常用接口详解
-zadd &amp;#x2F; zrange
+zadd、zrange
 zcard
 zrem
 zscore
@@ -71,7 +71,7 @@ zrank
 
 
 
-Redis++（C++）ZSet（,"/>
+Redis++（C++）ZSet（有序集合）类型,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -246,7 +246,7 @@ Redis++（C++）ZSet（,"/>
 
 <ul>
 <li><a href="#redisczset%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3%E8%AF%A6%E8%A7%A3">Redis++（C++）ZSet（有序集合）类型常用接口详解</a><ul>
-<li><a href="#zadd-zrange">zadd &#x2F; zrange</a></li>
+<li><a href="#zadd-zrange">zadd、zrange</a></li>
 <li><a href="#zcard">zcard</a></li>
 <li><a href="#zrem">zrem</a></li>
 <li><a href="#zscore">zscore</a></li>
@@ -258,7 +258,7 @@ Redis++（C++）ZSet（,"/>
 
 <h2><span id="redisczset有序集合类型常用接口详解">Redis++（C++）ZSet（有序集合）类型常用接口详解</span></h2><p>在 C++ 后端开发中，redis++ 提供了丰富的 ZSet（有序集合）类型操作接口，支持元素的添加、查询、删除、分数和排名获取等功能。下面结合实际代码示例，详细介绍常用接口的函数原型和用法。</p>
 <hr>
-<h3><span id="zadd-x2f-zrange">zadd &#x2F; zrange</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="zadd-zrange">zadd、zrange</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">zadd</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;member, <span class="type">double</span> score)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">zadd</span><span class="params">(<span class="type">const</span> StringView &amp;key, std::initializer_list&lt;std::pair&lt;StringView, <span class="type">double</span>&gt;&gt; m)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Input&gt;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">zadd</span><span class="params">(<span class="type">const</span> StringView &amp;key, Input first, Input last)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">zrange</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">long</span> <span class="type">long</span> start, <span class="type">long</span> <span class="type">long</span> stop, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>

@@ -221,8 +221,10 @@
 
 
 Redis++（C++）ZSet（有序集合）类型常用接口详解
-zadd &#x2F; zrange
-zcar...</p>
+zadd、zrange
+zcard
+zrem
+...</p>
             </div>
             
 
@@ -234,7 +236,7 @@ zcar...</p>
     <a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/" 
        title="Redis C++ 客户端使用指南-Hash 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -247,11 +249,12 @@ zcar...</p>
 
 
 Redis++（C++）Hash 类型常用接口详解
-hset &#x2F; hget
+hset、hget
 hexists
 hdel
 hlen
-hkeys &#x2F; ...</p>
+hkeys、hvals
+hmset、hm...</p>
     </div>
 </div>
 
@@ -261,7 +264,7 @@ hkeys &#x2F; ...</p>
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/" 
        title="Redis C++ 客户端使用指南-Set 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -274,11 +277,12 @@ hkeys &#x2F; ...</p>
 
 
 Redis++（C++）Set 类型常用接口详解
-sadd &#x2F; smembers
+sadd、smembers
 sismember
 spop
 scard
-sinter ...</p>
+sinter、sunion
+...</p>
     </div>
 </div>
 
@@ -288,7 +292,7 @@ sinter ...</p>
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/" 
        title="Redis C++ 客户端使用指南-List 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -301,8 +305,13 @@ sinter ...</p>
 
 
 Redis++（C++）List 类型常用接口详解
-lpush &#x2F; lrange
-rpush &#x2F; lpop &#x2F; rpo...</p>
+lpush、lrange
+rpush、lpop、rpop
+blpop（阻塞弹出）
+llen
+
+
+...</p>
     </div>
 </div>
 
@@ -312,7 +321,7 @@ rpush &#x2F; lpop &#x2F; rpo...</p>
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/" 
        title="Redis C++ 客户端使用指南-String 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -325,9 +334,10 @@ rpush &#x2F; lpop &#x2F; rpo...</p>
 
 
 redis++ 中 String 类型相关接口详解
-set &#x2F; get
+set、get
 set（带过期时间）&#x2F; get（过期后）
-mset &#...</p>
+mset、mget
+getr...</p>
     </div>
 </div>
 
@@ -337,7 +347,7 @@ mset &#...</p>
     <a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/" 
        title="Redis C++ 客户端使用指南-基础指令篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -352,16 +362,16 @@ mset &#...</p>
 C++ 客户端连接
 基础指令
 SET
-EXISTS &amp; DEL
+EXISTS、DEL
 KEYS
-EXPIRE &amp; TTL
+EXPIRE、TTL
 TYPE
 
 
 
 
 
-C++ 客户...</p>
+C++ 客户端连接C++ 客户端连接...</p>
     </div>
 </div>
 
@@ -371,7 +381,7 @@ C++ 客户...</p>
     <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/" 
        title="Linux 基于 Epoll 的主从 Reactor 多线程模型"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -403,7 +413,7 @@ C++ 客户...</p>
     <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/" 
        title="Linux IO 多路转接--Epoll"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -430,7 +440,7 @@ epoll 的工作流程
     <a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" 
        title="Linux IO 多路转接--Poll"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -460,7 +470,7 @@ poll 示例代码（监控多个 FD）
     <a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" 
        title="自定义协议 && 序列化与反序列化"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg3.png" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">

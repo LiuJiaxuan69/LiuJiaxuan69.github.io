@@ -14,10 +14,11 @@
 
 
 redis++ 中 String 类型相关接口详解
-set &amp;#x2F; get
+set、get
 set（带过期时间）&amp;#x2F; get（过期后）
-mset &amp;#x2F; mget
-getrange &amp;#x,"> 
+mset、mget
+getrange、setrange
+incr、dec,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -32,10 +33,11 @@ getrange &amp;#x,">
 
 
 redis++ 中 String 类型相关接口详解
-set &amp;#x2F; get
+set、get
 set（带过期时间）&amp;#x2F; get（过期后）
-mset &amp;#x2F; mget
-getrange &amp;#x,"/>
+mset、mget
+getrange、setrange
+incr、dec,"/>
     
     
     
@@ -47,10 +49,11 @@ getrange &amp;#x,"/>
 
 
 redis++ 中 String 类型相关接口详解
-set &amp;#x2F; get
+set、get
 set（带过期时间）&amp;#x2F; get（过期后）
-mset &amp;#x2F; mget
-getrange &amp;#x,"/>
+mset、mget
+getrange、setrange
+incr、dec,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -225,11 +228,11 @@ getrange &amp;#x,"/>
 
 <ul>
 <li><a href="#redis-%E4%B8%AD-string-%E7%B1%BB%E5%9E%8B%E7%9B%B8%E5%85%B3%E6%8E%A5%E5%8F%A3%E8%AF%A6%E8%A7%A3">redis++ 中 String 类型相关接口详解</a><ul>
-<li><a href="#set-get">set &#x2F; get</a></li>
+<li><a href="#set-get">set、get</a></li>
 <li><a href="#set%E5%B8%A6%E8%BF%87%E6%9C%9F%E6%97%B6%E9%97%B4-get%E8%BF%87%E6%9C%9F%E5%90%8E">set（带过期时间）&#x2F; get（过期后）</a></li>
-<li><a href="#mset-mget">mset &#x2F; mget</a></li>
-<li><a href="#getrange-setrange">getrange &#x2F; setrange</a></li>
-<li><a href="#incr-decr">incr &#x2F; decr</a></li>
+<li><a href="#mset-mget">mset、mget</a></li>
+<li><a href="#getrange-setrange">getrange、setrange</a></li>
+<li><a href="#incr-decr">incr、decr</a></li>
 </ul>
 </li>
 </ul>
@@ -237,7 +240,7 @@ getrange &amp;#x,"/>
 
 <h2><span id="redis-中-string-类型相关接口详解">redis++ 中 String 类型相关接口详解</span></h2><p>redis++（sw::redis::Redis）为 Redis 字符串类型提供了丰富的 C++ 接口，下面将详细介绍常用接口的函数原型及用法。</p>
 <hr>
-<h3><span id="set-x2f-get">set &#x2F; get</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="set-get">set、get</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">set</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;val)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Rep, <span class="keyword">typename</span> Period&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">set</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;val, <span class="type">const</span> std::chrono::duration&lt;Rep, Period&gt; &amp;timeout)</span></span>;</span><br><span class="line"><span class="function">OptionalString <span class="title">get</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -257,7 +260,7 @@ getrange &amp;#x,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Sleeping for 7 seconds...</span><br><span class="line">key1 has expired</span><br><span class="line">value2: value2</span><br><span class="line">value3: value3</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="mset-x2f-mget">mset &#x2F; mget</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="mset-mget">mset、mget</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">mset</span><span class="params">(std::initializer_list&lt;std::pair&lt;StringView, StringView&gt;&gt; kvs)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Input&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">mset</span><span class="params">(Input first, Input last)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">mget</span><span class="params">(std::initializer_list&lt;StringView&gt; keys, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <h4><span id="mset-的两种-key-value-传递方式">mset 的两种 key-value 传递方式</span></h4><ol>
@@ -279,7 +282,7 @@ getrange &amp;#x,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">MGET results:</span><br><span class="line">value1</span><br><span class="line">value2</span><br><span class="line">value3</span><br><span class="line">value4</span><br><span class="line">nil</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="getrange-x2f-setrange">getrange &#x2F; setrange</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="getrange-setrange">getrange、setrange</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">std::string <span class="title">getrange</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">long</span> <span class="type">long</span> start, <span class="type">long</span> <span class="type">long</span> end)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">setrange</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">long</span> <span class="type">long</span> offset, <span class="type">const</span> StringView &amp;val)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -289,7 +292,7 @@ getrange &amp;#x,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Original value of key1: Hello, World!</span><br><span class="line">Range from key1 (7 to 11): World</span><br><span class="line">Updated value of key1: Hello, Redis!</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="incr-x2f-decr">incr &#x2F; decr</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="incr-decr">incr、decr</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">incr</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">decr</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>

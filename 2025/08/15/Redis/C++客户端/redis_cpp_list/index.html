@@ -14,14 +14,16 @@
 
 
 Redis++（C++）List 类型常用接口详解
-lpush &amp;#x2F; lrange
-rpush &amp;#x2F; lpop &amp;#x2F; rpop
+lpush、lrange
+rpush、lpop、rpop
 blpop（阻塞弹出）
 llen
 
 
 
-,"> 
+
+
+Redis++（C++）List 类型,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -36,14 +38,16 @@ llen
 
 
 Redis++（C++）List 类型常用接口详解
-lpush &amp;#x2F; lrange
-rpush &amp;#x2F; lpop &amp;#x2F; rpop
+lpush、lrange
+rpush、lpop、rpop
 blpop（阻塞弹出）
 llen
 
 
 
-,"/>
+
+
+Redis++（C++）List 类型,"/>
     
     
     
@@ -55,14 +59,16 @@ llen
 
 
 Redis++（C++）List 类型常用接口详解
-lpush &amp;#x2F; lrange
-rpush &amp;#x2F; lpop &amp;#x2F; rpop
+lpush、lrange
+rpush、lpop、rpop
 blpop（阻塞弹出）
 llen
 
 
 
-,"/>
+
+
+Redis++（C++）List 类型,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -237,8 +243,8 @@ llen
 
 <ul>
 <li><a href="#redisclist-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3%E8%AF%A6%E8%A7%A3">Redis++（C++）List 类型常用接口详解</a><ul>
-<li><a href="#lpush-lrange">lpush &#x2F; lrange</a></li>
-<li><a href="#rpush-lpop-rpop">rpush &#x2F; lpop &#x2F; rpop</a></li>
+<li><a href="#lpush-lrange">lpush、lrange</a></li>
+<li><a href="#rpush-lpop-rpop">rpush、lpop、rpop</a></li>
 <li><a href="#blpop%E9%98%BB%E5%A1%9E%E5%BC%B9%E5%87%BA">blpop（阻塞弹出）</a></li>
 <li><a href="#llen">llen</a></li>
 </ul>
@@ -248,7 +254,7 @@ llen
 
 <h2><span id="redisclist-类型常用接口详解">Redis++（C++）List 类型常用接口详解</span></h2><p>在 C++ 后端开发中，redis++ 提供了丰富的 List 类型操作接口，支持高效的头尾插入、弹出、阻塞弹出等功能。下面结合实际代码示例，详细介绍常用接口的函数原型和用法。</p>
 <hr>
-<h3><span id="lpush-x2f-lrange">lpush &#x2F; lrange</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="lpush-lrange">lpush、lrange</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">lpush</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;val)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">lrange</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">long</span> <span class="type">long</span> start, <span class="type">long</span> <span class="type">long</span> stop, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -258,7 +264,7 @@ llen
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List contents after lpush:</span><br><span class="line">value4</span><br><span class="line">value3</span><br><span class="line">value2</span><br><span class="line">value1</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="rpush-x2f-lpop-x2f-rpop">rpush &#x2F; lpop &#x2F; rpop</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="rpush-lpop-rpop">rpush、lpop、rpop</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">rpush</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;val)</span></span>;</span><br><span class="line"><span class="function">OptionalString <span class="title">lpop</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br><span class="line"><span class="function">OptionalString <span class="title">rpop</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>

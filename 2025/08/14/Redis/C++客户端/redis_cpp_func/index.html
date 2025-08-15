@@ -16,16 +16,18 @@
 C++ 客户端连接
 基础指令
 SET
-EXISTS &amp;amp; DEL
+EXISTS、DEL
 KEYS
-EXPIRE &amp;amp; TTL
+EXPIRE、TTL
 TYPE
 
 
 
 
 
-C++ 客户端连接C++ 客户端连接 Redis 的基本,"> 
+C++ 客户端连接C++ 客户端连接 Redis 的基本步骤如下：
+
+引入 Re,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -42,16 +44,18 @@ C++ 客户端连接C++ 客户端连接 Redis 的基本,">
 C++ 客户端连接
 基础指令
 SET
-EXISTS &amp;amp; DEL
+EXISTS、DEL
 KEYS
-EXPIRE &amp;amp; TTL
+EXPIRE、TTL
 TYPE
 
 
 
 
 
-C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
+C++ 客户端连接C++ 客户端连接 Redis 的基本步骤如下：
+
+引入 Re,"/>
     
     
     
@@ -65,16 +69,18 @@ C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
 C++ 客户端连接
 基础指令
 SET
-EXISTS &amp;amp; DEL
+EXISTS、DEL
 KEYS
-EXPIRE &amp;amp; TTL
+EXPIRE、TTL
 TYPE
 
 
 
 
 
-C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
+C++ 客户端连接C++ 客户端连接 Redis 的基本步骤如下：
+
+引入 Re,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -251,9 +257,9 @@ C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
 <li><a href="#c-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%BF%9E%E6%8E%A5">C++ 客户端连接</a></li>
 <li><a href="#%E5%9F%BA%E7%A1%80%E6%8C%87%E4%BB%A4">基础指令</a><ul>
 <li><a href="#set">SET</a></li>
-<li><a href="#exists-del">EXISTS &amp; DEL</a></li>
+<li><a href="#exists-del">EXISTS、DEL</a></li>
 <li><a href="#keys">KEYS</a></li>
-<li><a href="#expire-ttl">EXPIRE &amp; TTL</a></li>
+<li><a href="#expire-ttl">EXPIRE、TTL</a></li>
 <li><a href="#type">TYPE</a></li>
 </ul>
 </li>
@@ -291,7 +297,7 @@ C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">value1: value1</span><br><span class="line">value2: value2</span><br><span class="line">value3: value3</span><br><span class="line">key4 does not exist</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="exists-amp-del">EXISTS &amp; DEL</span></h3><p><code>exists</code> 用于判断一个或多个 key 是否存在，返回存在的 key 的数量。<br><code>del</code> 用于删除指定的 key。</p>
+<h3><span id="exists-del">EXISTS、DEL</span></h3><p><code>exists</code> 用于判断一个或多个 key 是否存在，返回存在的 key 的数量。<br><code>del</code> 用于删除指定的 key。</p>
 <p>对应的 C++ 接口为：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">Redis::exists</span><span class="params">(<span class="type">const</span> std::initializer_list&lt;StringView&gt; &amp;keys)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">Redis::del</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br></pre></td></tr></table></figure>
 
@@ -313,7 +319,7 @@ C++ 客户端连接C++ 客户端连接 Redis 的基本,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">All keys: key3 key2 key1 </span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="expire-amp-ttl">EXPIRE &amp; TTL</span></h3><p><code>expire</code> 用于为指定 key 设置过期时间（秒），<code>ttl</code> 用于获取 key 的剩余过期时间（秒）。</p>
+<h3><span id="expire-ttl">EXPIRE、TTL</span></h3><p><code>expire</code> 用于为指定 key 设置过期时间（秒），<code>ttl</code> 用于获取 key 的剩余过期时间（秒）。</p>
 <p>对应的 C++ 接口为：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Rep, <span class="keyword">typename</span> Period&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Redis::expire</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> std::chrono::duration&lt;Rep, Period&gt; &amp;timeout)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">Redis::ttl</span><span class="params">(<span class="type">const</span> StringView &amp;key)</span></span>;</span><br></pre></td></tr></table></figure>
 

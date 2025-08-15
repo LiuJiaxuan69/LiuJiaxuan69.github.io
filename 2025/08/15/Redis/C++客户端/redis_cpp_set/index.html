@@ -14,12 +14,18 @@
 
 
 Redis++（C++）Set 类型常用接口详解
-sadd &amp;#x2F; smembers
+sadd、smembers
 sismember
 spop
 scard
-sinter &amp;#x2F; sunion
-sinterst,"> 
+sinter、sunion
+sinterstore
+
+
+
+
+
+Redis,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -34,12 +40,18 @@ sinterst,">
 
 
 Redis++（C++）Set 类型常用接口详解
-sadd &amp;#x2F; smembers
+sadd、smembers
 sismember
 spop
 scard
-sinter &amp;#x2F; sunion
-sinterst,"/>
+sinter、sunion
+sinterstore
+
+
+
+
+
+Redis,"/>
     
     
     
@@ -51,12 +63,18 @@ sinterst,"/>
 
 
 Redis++（C++）Set 类型常用接口详解
-sadd &amp;#x2F; smembers
+sadd、smembers
 sismember
 spop
 scard
-sinter &amp;#x2F; sunion
-sinterst,"/>
+sinter、sunion
+sinterstore
+
+
+
+
+
+Redis,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -231,11 +249,11 @@ sinterst,"/>
 
 <ul>
 <li><a href="#rediscset-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3%E8%AF%A6%E8%A7%A3">Redis++（C++）Set 类型常用接口详解</a><ul>
-<li><a href="#sadd-smembers">sadd &#x2F; smembers</a></li>
+<li><a href="#sadd-smembers">sadd、smembers</a></li>
 <li><a href="#sismember">sismember</a></li>
 <li><a href="#spop">spop</a></li>
 <li><a href="#scard">scard</a></li>
-<li><a href="#sinter-sunion">sinter &#x2F; sunion</a></li>
+<li><a href="#sinter-sunion">sinter、sunion</a></li>
 <li><a href="#sinterstore">sinterstore</a></li>
 </ul>
 </li>
@@ -244,7 +262,7 @@ sinterst,"/>
 
 <h2><span id="rediscset-类型常用接口详解">Redis++（C++）Set 类型常用接口详解</span></h2><p>在 C++ 后端开发中，redis++ 提供了丰富的 Set 类型操作接口，支持集合的添加、查询、弹出、集合运算等功能。下面结合实际代码示例，详细介绍常用接口的函数原型和用法。</p>
 <hr>
-<h3><span id="sadd-x2f-smembers">sadd &#x2F; smembers</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="sadd-smembers">sadd、smembers</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">sadd</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;member)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">smembers</span><span class="params">(<span class="type">const</span> StringView &amp;key, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -284,7 +302,7 @@ sinterst,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Set cardinality: 3</span><br><span class="line">Non-existent set cardinality: 0</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="sinter-x2f-sunion">sinter &#x2F; sunion</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="sinter-sunion">sinter、sunion</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sinter</span><span class="params">(std::initializer_list&lt;StringView&gt; keys, Output output)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">sunion</span><span class="params">(std::initializer_list&lt;StringView&gt; keys, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>

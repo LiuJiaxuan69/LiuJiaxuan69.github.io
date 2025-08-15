@@ -14,12 +14,18 @@
 
 
 Redis++（C++）Hash 类型常用接口详解
-hset &amp;#x2F; hget
+hset、hget
 hexists
 hdel
 hlen
-hkeys &amp;#x2F; hvals
-hmset &amp;#x2F; hmg,"> 
+hkeys、hvals
+hmset、hmget
+
+
+
+
+
+Redis++（C++）H,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -34,12 +40,18 @@ hmset &amp;#x2F; hmg,">
 
 
 Redis++（C++）Hash 类型常用接口详解
-hset &amp;#x2F; hget
+hset、hget
 hexists
 hdel
 hlen
-hkeys &amp;#x2F; hvals
-hmset &amp;#x2F; hmg,"/>
+hkeys、hvals
+hmset、hmget
+
+
+
+
+
+Redis++（C++）H,"/>
     
     
     
@@ -51,12 +63,18 @@ hmset &amp;#x2F; hmg,"/>
 
 
 Redis++（C++）Hash 类型常用接口详解
-hset &amp;#x2F; hget
+hset、hget
 hexists
 hdel
 hlen
-hkeys &amp;#x2F; hvals
-hmset &amp;#x2F; hmg,"/>
+hkeys、hvals
+hmset、hmget
+
+
+
+
+
+Redis++（C++）H,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -231,12 +249,12 @@ hmset &amp;#x2F; hmg,"/>
 
 <ul>
 <li><a href="#redischash-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3%E8%AF%A6%E8%A7%A3">Redis++（C++）Hash 类型常用接口详解</a><ul>
-<li><a href="#hset-hget">hset &#x2F; hget</a></li>
+<li><a href="#hset-hget">hset、hget</a></li>
 <li><a href="#hexists">hexists</a></li>
 <li><a href="#hdel">hdel</a></li>
 <li><a href="#hlen">hlen</a></li>
-<li><a href="#hkeys-hvals">hkeys &#x2F; hvals</a></li>
-<li><a href="#hmset-hmget">hmset &#x2F; hmget</a></li>
+<li><a href="#hkeys-hvals">hkeys、hvals</a></li>
+<li><a href="#hmset-hmget">hmset、hmget</a></li>
 </ul>
 </li>
 </ul>
@@ -244,7 +262,7 @@ hmset &amp;#x2F; hmg,"/>
 
 <h2><span id="redischash-类型常用接口详解">Redis++（C++）Hash 类型常用接口详解</span></h2><p>在 C++ 后端开发中，redis++ 提供了丰富的 Hash 类型操作接口，支持字段的添加、查询、删除、批量操作等功能。下面结合实际代码示例，详细介绍常用接口的函数原型和用法。</p>
 <hr>
-<h3><span id="hset-x2f-hget">hset &#x2F; hget</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="hset-hget">hset、hget</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">hset</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;field, <span class="type">const</span> StringView &amp;val)</span></span>;</span><br><span class="line"><span class="function"><span class="type">long</span> <span class="type">long</span> <span class="title">hset</span><span class="params">(<span class="type">const</span> StringView &amp;key, std::initializer_list&lt;StringView&gt; field_vals)</span></span>;</span><br><span class="line"><span class="function">OptionalString <span class="title">hget</span><span class="params">(<span class="type">const</span> StringView &amp;key, <span class="type">const</span> StringView &amp;field)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -284,7 +302,7 @@ hmset &amp;#x2F; hmg,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Length of myhash: 3</span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="hkeys-x2f-hvals">hkeys &#x2F; hvals</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="hkeys-hvals">hkeys、hvals</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hkeys</span><span class="params">(<span class="type">const</span> StringView &amp;key, Output output)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hvals</span><span class="params">(<span class="type">const</span> StringView &amp;key, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
@@ -294,7 +312,7 @@ hmset &amp;#x2F; hmg,"/>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Keys in myhash: field1 field2 field3 </span><br><span class="line">Values in myhash: value1 value2 value3 </span><br></pre></td></tr></table></figure>
 
 <hr>
-<h3><span id="hmset-x2f-hmget">hmset &#x2F; hmget</span></h3><p><strong>函数原型：</strong></p>
+<h3><span id="hmset-hmget">hmset、hmget</span></h3><p><strong>函数原型：</strong></p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">hmset</span><span class="params">(<span class="type">const</span> StringView &amp;key, std::initializer_list&lt;StringView&gt; field_vals)</span></span>;</span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Input&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hmset</span><span class="params">(<span class="type">const</span> StringView &amp;key, Input first, Input last)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> Output&gt;</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">hmget</span><span class="params">(<span class="type">const</span> StringView &amp;key, std::initializer_list&lt;StringView&gt; fields, Output output)</span></span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>示例：</strong></p>
