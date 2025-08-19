@@ -213,18 +213,20 @@
         </div>
         
             <div id="post0">
-                <p>八月 16, 2025</p>
+                <p>八月 19, 2025</p>
                 <h2>
-                    <a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/" title="Redis C++ 客户端使用指南-Zset 篇" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis C++ 客户端使用指南-Zset 篇</a>
+                    <a href="/2025/08/19/Redis/redis_rdb/" title="Redis 持久化" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 持久化</a>
                 </h2>
                 <p class="summary">
 
 
-Redis++（C++）ZSet（有序集合）类型常用接口详解
-zadd、zrange
-zcard
-zrem
-...</p>
+RDB
+触发机制
+配置文件
+3. RDB 文件校验与故障恢复
+Redis RDB 持久化优缺点
+AOF
+AO...</p>
             </div>
             
 
@@ -233,10 +235,43 @@ zrem
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/" 
+       title="Redis C++ 客户端使用指南-Zset 篇"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>八月 16, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/" title="Redis C++ 客户端使用指南-Zset 篇" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis C++ 客户端使用指南-Zset 篇</a></h3>
+        
+        <p>
+
+
+Redis++（C++）ZSet（有序集合）类型常用接口详解
+zadd、zrange
+zcard
+zrem
+zscore
+zrank
+
+
+
+
+
+Re...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/" 
        title="Redis C++ 客户端使用指南-Hash 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -264,7 +299,7 @@ hmset、hm...</p>
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/" 
        title="Redis C++ 客户端使用指南-Set 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -292,7 +327,7 @@ sinter、sunion
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/" 
        title="Redis C++ 客户端使用指南-List 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -321,7 +356,7 @@ llen
     <a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/" 
        title="Redis C++ 客户端使用指南-String 篇"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -381,7 +416,7 @@ C++ 客户端连接C++ 客户端连接...</p>
     <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/" 
        title="Linux 基于 Epoll 的主从 Reactor 多线程模型"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -413,7 +448,7 @@ C++ 客户端连接C++ 客户端连接...</p>
     <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/" 
        title="Linux IO 多路转接--Epoll"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -440,7 +475,7 @@ epoll 的工作流程
     <a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" 
        title="Linux IO 多路转接--Poll"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -461,36 +496,6 @@ poll 示例代码（监控多个 FD）
 
 服务端实现
 ...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" 
-       title="自定义协议 && 序列化与反序列化"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 31, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" title="自定义协议 &amp;&amp; 序列化与反序列化" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">自定义协议 &amp;&amp; 序列化与反序列化</a></h3>
-        
-        <p>
-
-
-网络通信中的自定义协议
-什么是自定义协议
-自定义协议的设计要素
-自定义协议的实现方式
-
-
-自定义协议中的序列化和反序列化
-序列化的概念与作用
-反序列...</p>
     </div>
 </div>
 

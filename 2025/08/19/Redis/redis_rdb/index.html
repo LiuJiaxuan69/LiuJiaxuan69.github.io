@@ -1,0 +1,1369 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redis 持久化 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+RDB
+触发机制
+配置文件
+3. RDB 文件校验与故障恢复
+Redis RDB 持久化优缺点
+AOF
+AOF 重写机制
+AOF 优缺点
+Redis 混合持久化详解
+Redis 混合持久化在 ,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Redis 持久化 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+RDB
+触发机制
+配置文件
+3. RDB 文件校验与故障恢复
+Redis RDB 持久化优缺点
+AOF
+AOF 重写机制
+AOF 优缺点
+Redis 混合持久化详解
+Redis 混合持久化在 ,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Redis 持久化 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+RDB
+触发机制
+配置文件
+3. RDB 文件校验与故障恢复
+Redis RDB 持久化优缺点
+AOF
+AOF 重写机制
+AOF 优缺点
+Redis 混合持久化详解
+Redis 混合持久化在 ,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Redis 持久化</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Redis 持久化</h1>
+        <div class="stuff">
+            <span>八月 19, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%8C%81%E4%B9%85%E5%8C%96/" rel="tag">持久化</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#rdb">RDB</a><ul>
+<li><a href="#%E8%A7%A6%E5%8F%91%E6%9C%BA%E5%88%B6">触发机制</a></li>
+<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
+<li><a href="#3-rdb-%E6%96%87%E4%BB%B6%E6%A0%A1%E9%AA%8C%E4%B8%8E%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D">3. <strong>RDB 文件校验与故障恢复</strong></a></li>
+<li><a href="#redis-rdb-%E6%8C%81%E4%B9%85%E5%8C%96%E4%BC%98%E7%BC%BA%E7%82%B9">Redis RDB 持久化优缺点</a></li>
+<li><a href="#aof">AOF</a></li>
+<li><a href="#aof-%E9%87%8D%E5%86%99%E6%9C%BA%E5%88%B6">AOF 重写机制</a></li>
+<li><a href="#aof-%E4%BC%98%E7%BC%BA%E7%82%B9"><strong>AOF 优缺点</strong></a></li>
+<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E8%AF%A6%E8%A7%A3">Redis 混合持久化详解</a></li>
+<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E5%9C%A8-70-%E7%89%88%E6%9C%AC%E5%90%8E%E7%9A%84%E6%94%B9%E5%8A%A8">Redis 混合持久化在 7.0 版本后的改动</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<p><code>Redis</code> 支持 <code>RDB</code> 和 <code>AOF</code> 两种持久化机制，持久化功能有效地避免因进程退出造成数据丢失问题，当下次重启时利用之前持久化的文件即可实现数据恢复</p>
+<h2><span id="rdb">RDB</span></h2><p><code>RDB</code>（Redis Database）是 <code>Redis</code> 的默认持久化方式，它会在指定的时间间隔内将数据快照保存到磁盘上，也可以通过手动触发的方式触发</p>
+<h3><span id="触发机制">触发机制</span></h3><h4><span id="手动触发">手动触发</span></h4><p>通过 <code>save</code> 指令和 <code>bgsave</code> 指令都可以实现手动触发快照机制，两者的区别如下：</p>
+<ul>
+<li><code>save</code> 命令：阻塞当前 <code>Redis</code> 服务器，直到保存操作完成，对于内存比较大的实例会造成长时间的阻塞，这种情况基本不采用该命令</li>
+<li><code>bgsave</code> 命令：<code>Redis</code> 进程会执行 <code>fork</code> 操作创建子进程，<code>RDB</code> 持久化过程由子进程负责，完成后自动结束，子进程会通知父进程执行完毕，因此该指令所产生的阻塞只发生在 <code>fork</code> 阶段，因此时间很短。当然，<code>fork</code> 指令最大的开销在于进程控制块的复制和页表的复制，这些资源的复制同样是有非常大的开销的，且在子进程复制页表后，若父进程对内存进行了写操作，会触发写时拷贝，同样会有额外的资源消耗，因此并不建议频繁使用该命令</li>
+</ul>
+<h4><span id="自动触发">自动触发</span></h4><p>除了手动触发以外，<code>Redis</code> 运行自动触发 <code>RDB</code> 持久化机制，这个触发机制才是在实战中更具有价值的，触发时机如下：</p>
+<p>是的，除了手动触发（<code>save</code>&#x2F;<code>bgsave</code>），<strong>自动触发 RDB 持久化</strong> 在实际生产环境中更为关键，因为它能平衡性能和数据安全，避免依赖人工干预。以下是 Redis 自动触发 RDB 的三种核心场景及其细节：</p>
+<hr>
+<h5><span id="1-通过-save-配置自动触发最常用">1. <strong>通过 <code>save</code> 配置自动触发（最常用）</strong></span></h5><ul>
+<li><p><strong>配置语法</strong>：<br><code>save &lt;seconds&gt; &lt;key-changes&gt;</code><br>例如：<code>save 900 1</code> 表示 <strong>900 秒内至少 1 个 key 被修改</strong>时触发 <code>bgsave</code>。</p>
+</li>
+<li><p><strong>工作原理</strong>：<br>Redis 周期性检查是否满足配置的条件，若满足则自动启动 <code>bgsave</code>（后台执行，非阻塞）。</p>
+</li>
+<li><p><strong>默认配置</strong>（Redis 默认的 <code>redis.conf</code> 片段）：  </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+
+<p>含义：  </p>
+<ul>
+<li>900 秒内 1 次修改 → 触发  </li>
+<li>300 秒内 10 次修改 → 触发  </li>
+<li>60 秒内 10000 次修改 → 触发<br>（满足任意一条即触发）</li>
+</ul>
+</li>
+<li><p><strong>注意事项</strong>：  </p>
+<ul>
+<li>生产环境需根据业务负载调整参数，避免频繁触发（如高写入场景可放宽 <code>save</code> 条件）。  </li>
+<li>若完全禁用自动保存，需配置 <code>save &quot;&quot;</code>。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5><span id="2-主节点在复制时自动触发">2. <strong>主节点在复制时自动触发</strong></span></h5><ul>
+<li><strong>场景</strong>：当从节点（Slave）发起 <strong>全量复制（SYNC）</strong> 时，主节点（Master）会自动执行 <code>bgsave</code> 生成 RDB 文件，然后传输给从节点。  </li>
+<li><strong>细节</strong>：  <ul>
+<li>即使未配置 <code>save</code> 规则，复制过程也会强制触发 RDB。  </li>
+<li>若主节点已有最近生成的 RDB 文件（且数据未显著变化），可能直接复用该文件（Redis 7.0+ 优化）。</li>
+</ul>
+</li>
+<li><strong>风险</strong>：  <ul>
+<li>主节点内存过大时，生成 RDB 可能阻塞主进程（<code>fork</code> + COW 开销），影响集群稳定性。  </li>
+<li>解决方案：建议在低峰期扩容从节点，或使用 <code>repl-diskless-sync</code> 配置（无盘复制，直接通过网络发送数据，避免落盘）。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5><span id="3-执行-shutdown-时触发">3. 执行 <code>shutdown</code> 时触发</span></h5><ul>
+<li><strong>行为</strong>：<br>当执行 <code>shutdown</code> 命令关闭 Redis 时，<strong>如果 AOF 未开启</strong>，Redis 会默认执行一次 <code>save</code>（同步阻塞式 RDB 持久化），确保数据不丢失。  </li>
+<li><strong>控制参数</strong>：  <ul>
+<li><code>shutdown save</code>：强制保存 RDB（默认行为）。  </li>
+<li><code>shutdown nosave</code>：跳过保存，直接关闭。</li>
+</ul>
+</li>
+<li><strong>应用场景</strong>：<br>在维护停机前手动执行 <code>shutdown save</code>，比直接杀进程更安全。</li>
+</ul>
+<h3><span id="配置文件">配置文件</span></h3><h4><span id="1-rdb-文件保存路径与动态配置">1. <strong>RDB 文件保存路径与动态配置</strong></span></h4><ul>
+<li><strong>核心机制</strong>：<ul>
+<li><strong>默认路径</strong>：<code>dir /var/lib/redis/</code> + <code>dbfilename dump.rdb</code><br>（注意：默认路径可能因安装方式或操作系统而异，例如 Docker 中常见 <code>/data</code>）</li>
+</ul>
+</li>
+</ul>
+<p>若手动修改配置文件，需重启 Redis 使其生效。</p>
+<ul>
+<li><strong>生产建议</strong>：<ul>
+<li><strong>持久化配置</strong>：动态修改后需同步更新 <code>redis.conf</code>，避免重启失效。  </li>
+<li><strong>权限管理</strong>：确保 Redis 进程对目标目录有读写权限（否则 <code>bgsave</code> 会静默失败）。  </li>
+<li><strong>备份策略</strong>：将 RDB 文件保存到独立磁盘或云存储（如 AWS S3），避免单点故障。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4><span id="2-rdb-文件压缩的权衡">2. <strong>RDB 文件压缩的权衡</strong></span></h4><ul>
+<li><p><strong>技术细节</strong>：</p>
+<ul>
+<li><strong>算法</strong>：LZF 压缩（低 CPU 开销，适合实时场景）。  </li>
+<li><strong>压缩比</strong>：文本型数据（如 JSON）压缩率高，二进制数据（如序列化对象）效果有限。  </li>
+<li><strong>开关控制</strong>：<code>rdbcompression yes</code>（默认开启），禁用可减少 CPU 占用（但文件体积激增）。</li>
+</ul>
+</li>
+<li><p><strong>性能影响</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>开启压缩</th>
+<th>关闭压缩</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CPU 占用</strong></td>
+<td>较高（尤其大数据集）</td>
+<td>几乎为零</td>
+</tr>
+<tr>
+<td><strong>磁盘 I&#x2F;O</strong></td>
+<td>写入量减少 50%~80%</td>
+<td>写入原始数据量</td>
+</tr>
+<tr>
+<td><strong>网络传输</strong></td>
+<td>更快（从节点同步加速）</td>
+<td>慢（带宽占用高）</td>
+</tr>
+</tbody></table>
+<p><strong>建议</strong>：  </p>
+<ul>
+<li>在 CPU 资源充足的场景下<strong>保持开启</strong>（尤其适合云环境或网络复制）。  </li>
+<li>若 Redis 实例已 CPU 过载（如单核 80%+），可临时关闭压缩缓解压力。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3><span id="3-rdb-文件校验与故障恢复">3. <strong>RDB 文件校验与故障恢复</strong></span></h3><ul>
+<li><p><strong>损坏检测</strong>：</p>
+<ul>
+<li><p>Redis 启动时自动校验 RDB 文件完整性（魔数 + CRC 校验），损坏则报错：<br><code># Fatal error loading the DB: Invalid file format.</code></p>
+</li>
+<li><p><strong>修复工具</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-check-rdb dump.rdb</span><br></pre></td></tr></table></figure>
+
+<p>该工具会报告损坏位置（如无效键值对、文件截断等），但<strong>无法直接修复</strong>。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>容灾方案</strong>：</p>
+<ol>
+<li><strong>恢复备份</strong>：从最近的正常 RDB 或 AOF 文件恢复。  </li>
+<li><strong>重建数据</strong>：若无可用的备份，可尝试手动编辑 RDB 文件（风险极高，需十六进制工具）。  </li>
+<li><strong>从从节点提升</strong>：如果主节点 RDB 损坏，且从节点数据完整，可故障转移至从节点。</li>
+</ol>
+</li>
+<li><p><strong>预防措施</strong>：</p>
+<ul>
+<li><strong>定期验证</strong>：对备份的 RDB 文件运行 <code>redis-check-rdb</code>。  </li>
+<li><strong>AOF 互补</strong>：开启 <code>appendonly yes</code> + <code>aof-use-rdb-preamble</code>（混合持久化），双重保障。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="redis-rdb-持久化优缺点">Redis RDB 持久化优缺点</span></h3><h4><span id="优点">✅ 优点</span></h4><h5><span id="1-紧凑的二进制格式">1. <strong>紧凑的二进制格式</strong></span></h5><ul>
+<li><p>RDB 是一个高度压缩的二进制文件，占用空间小，非常适合：</p>
+<ul>
+<li><strong>数据备份</strong>（如每小时&#x2F;每天全量备份）</li>
+<li><strong>全量复制</strong>（主从同步、灾备）</li>
+</ul>
+</li>
+<li><p>示例场景：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每6小时备份并上传到HDFS</span></span><br><span class="line">save 21600 1</span><br><span class="line">hadoop fs -put /var/lib/redis/dump.rdb /backup/redis/$(<span class="built_in">date</span> +%Y%m%d).rdb</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5><span id="2-极快的恢复速度">2. <strong>极快的恢复速度</strong></span></h5><ul>
+<li><p>相比 AOF 的日志重放方式，RDB 直接加载二进制数据：</p>
+<ul>
+<li>恢复 10GB 数据：AOF 可能需要分钟级，RDB 仅需秒级</li>
+</ul>
+</li>
+<li><p>重要指标：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-benchmark -n 1000000 --rdb /tmp/dump.rdb  <span class="comment"># 测试恢复速度</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="缺点">❌ 缺点</span></h4><h5><span id="1-非实时持久化">1. <strong>非实时持久化</strong></span></h5><ul>
+<li><p>致命短板：</p>
+<ul>
+<li><code>bgsave</code> 依赖 <code>fork()</code> 创建子进程（<strong>重量级操作</strong>）</li>
+<li>频繁执行会导致：<ul>
+<li>CPU 峰值（COW 机制）</li>
+<li>内存双倍占用风险</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>典型问题：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监控fork耗时（超过100ms需告警）</span></span><br><span class="line">redis-cli info stats | grep latest_fork_usec</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5><span id="2-版本兼容性风险">2. <strong>版本兼容性风险</strong></span></h5><ul>
+<li>RDB 格式随 Redis 版本演进变化：<table>
+<thead>
+<tr>
+<th>Redis 版本</th>
+<th>RDB 版本</th>
+<th>兼容性风险</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&lt;&#x3D; 5.0</td>
+<td>v6</td>
+<td>高</td>
+</tr>
+<tr>
+<td>6.x</td>
+<td>v7</td>
+<td>中</td>
+</tr>
+<tr>
+<td>7.x</td>
+<td>v8</td>
+<td>低</td>
+</tr>
+</tbody></table>
+</li>
+<li>升级时必须测试旧版 RDB 文件的加载情况</li>
+</ul>
+<h3><span id="aof">AOF</span></h3><p><code>AOF</code> 持久化，以独立日志的方式记录每次写命令，重启时再重新执行 <code>AOF</code> 文件中的命令达到恢复数据的目的。<code>AOF</code> 的主要作用是解决数据持久化的实时性，虽然 <code>AOF</code> 的使用开销比 <code>RDB</code> 要高，但是它提供了更高的数据安全性和更细粒度的恢复能力，且当代计算机的性能已经足以支撑 <code>AOF</code> 的使用</p>
+<p>若想使用 <code>AOF</code>，需要在配置文件中将 <code>appendonly</code>设置为yes，开启 <code>AOF</code> 持久化功能，<code>AOF</code> 文件名通过 <code>appendfilename</code> 配置，默认是 <code>appendonly.aof</code>，保存目录和 <code>RDB</code> 是一致的，通过 <code>dir</code> 配置指定。<code>AOF</code>的工作流程如下：</p>
+<h4><span id="aof-工作流程"><strong>AOF 工作流程</strong></span></h4><h5><span id="1-命令写入append"><strong>1. 命令写入（Append）</strong></span></h5><ul>
+<li>所有写入命令（如 <code>SET</code>、<code>DEL</code>）会先写入 <strong>AOF 缓冲区（aof_buf）</strong>，而不是直接写入磁盘。</li>
+<li><strong>目的</strong>：避免频繁磁盘 I&#x2F;O 影响性能。</li>
+</ul>
+<h5><span id="2-同步到磁盘sync"><strong>2. 同步到磁盘（Sync）</strong></span></h5><p>Redis 提供 <strong>3 种同步策略</strong>（通过 <code>appendfsync</code> 配置）：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>行为</th>
+<th>数据安全性</th>
+<th>性能影响</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong><code>always</code></strong></td>
+<td>每个命令都同步写入磁盘（fsync）</td>
+<td>最高</td>
+<td>最差</td>
+</tr>
+<tr>
+<td><strong><code>everysec</code></strong></td>
+<td>每秒同步一次（默认）</td>
+<td>适中</td>
+<td>较好</td>
+</tr>
+<tr>
+<td><strong><code>no</code></strong></td>
+<td>由操作系统决定何时写入（通常 30s 左右）</td>
+<td>最低</td>
+<td>最好</td>
+</tr>
+</tbody></table>
+<h5><span id="3-aof-重写rewrite"><strong>3. AOF 重写（Rewrite）</strong></span></h5><ul>
+<li><strong>问题</strong>：AOF 文件会不断增长（如 <code>INCR</code> 操作 100 次会记录 100 条命令）。</li>
+<li><strong>解决方案</strong>：Redis 会定期执行 <strong>AOF 重写（BGREWRITEAOF）</strong>，生成一个更紧凑的新 AOF 文件（只保留最终状态）。</li>
+<li><strong>触发方式</strong>：<ul>
+<li>手动触发：<code>BGREWRITEAOF</code> 命令。</li>
+<li>自动触发：通过 <code>auto-aof-rewrite-percentage</code> 和 <code>auto-aof-rewrite-min-size</code> 配置。</li>
+</ul>
+</li>
+</ul>
+<h5><span id="4-数据恢复load"><strong>4. 数据恢复（Load）</strong></span></h5><ul>
+<li>Redis 重启时，会<strong>优先加载 AOF 文件</strong>（如果存在）来恢复数据。</li>
+<li><strong>执行方式</strong>：逐条执行 AOF 文件中的命令（类似于回放日志）。</li>
+</ul>
+<hr>
+<h4><span id="aof-流程图mermaid"><strong>AOF 流程图（Mermaid）</strong></span></h4><pre class="mermaid">flowchart TD
+    A[客户端写入命令] --> B[写入 AOF 缓冲区 aof_buf]
+    B --> C{appendfsync 策略}
+    C -->|always| D[立即同步到磁盘]
+    C -->|everysec| E[每秒同步一次]
+    C -->|no| F[由 OS 决定同步]
+    D & E & F --> G[AOF 文件增长]
+    G --> H{AOF 文件过大?}
+    H -->|是| I[触发 BGREWRITEAOF]
+    H -->|否| G
+    I --> J[生成新 AOF 文件（压缩版）]
+    J --> K[替换旧 AOF 文件]
+    L[Redis 重启] --> M[加载 AOF 文件恢复数据]</pre>
+
+<hr>
+<h3><span id="aof-重写机制">AOF 重写机制</span></h3><ul>
+<li><strong>触发条件</strong>：<ul>
+<li>AOF 文件大小超过 <code>auto-aof-rewrite-min-size</code>。</li>
+<li>AOF 文件增长超过 <code>auto-aof-rewrite-percentage</code>。</li>
+</ul>
+</li>
+</ul>
+<p>当 AOF 文件达到重写条件中的任意一个时，Redis 会自动触发 AOF 重写，生成一个新的 AOF 文件（只保留最终状态）。</p>
+<p>流程图如下：</p>
+<p><img src="/img/Redis/data_type/List/persistence/aof_rewrite.png" alt="rewrite"></p>
+<ol>
+<li>执⾏ AOF 重写请求。<br>如果当前进程正在执⾏ AOF 重写，请求不执行。如果当前进程正在执行 bgsave 操作，重写命令延迟到 bgsave 完成之后再执⾏。</li>
+<li>父进程执行 fork 创建子进程。</li>
+<li>重写<br>  a. 主进程 <code>fork</code> 之后，继续响应其他命令。所有修改操作写入 <code>AOF</code> 缓冲区并根据 <code>appendfsync</code> 策略同步到硬盘，保证旧 <code>AOF</code> 文件机制正确。<br>  b. 子进程只有 <code>fork</code> 之前的所有内存信息，父进程中需要将 <code>fork</code> 之后这段时间的修改操作写⼊ <code>AOF</code> 重写缓冲区中。</li>
+<li>子进程根据内存快照，将命令合并到新的 AOF ⽂件中。</li>
+<li>子进程完成重写<br>  a. 新文件写入后，子进程发送信号给⽗进程。<br>  b. 父进程把 <code>AOF</code>重写缓冲区内临时保存的命令追加到新 <code>AOF</code> 文件中。<br>  c. ⽤新 AOF 文件替换旧 <code>AOF</code> 文件。</li>
+</ol>
+<p>当 <code>Redis</code> 启动时，会根据 <code>RDB</code> 和 <code>AOF</code> 文件的内容，进行数据恢复：</p>
+<p><img src="/img/Redis/data_type/List/persistence/aof_recover.png" alt="recover"></p>
+<h3><span id="aof-优缺点"><strong>AOF 优缺点</strong></span></h3><h4><span id="优点"><strong>✅ 优点</strong></span></h4><ol>
+<li><strong>数据更安全</strong>：最多丢失 1s 数据（<code>appendfsync everysec</code>）。</li>
+<li><strong>可读性强</strong>：AOF 是文本格式（可手动编辑修复）。</li>
+<li><strong>自动重写</strong>：避免文件无限增长。</li>
+</ol>
+<h4><span id="缺点"><strong>❌ 缺点</strong></span></h4><ol>
+<li><strong>文件体积大</strong>：相比 RDB，AOF 文件通常更大。</li>
+<li><strong>恢复速度慢</strong>：需要逐条执行命令。</li>
+<li><strong>写入性能略低</strong>：频繁同步会影响吞吐量。</li>
+</ol>
+<h3><span id="redis-混合持久化详解">Redis 混合持久化详解</span></h3><p>混合持久化是 Redis 4.0 引入的重要特性，它结合了 RDB 和 AOF 两种持久化方式的优点，既保证了数据安全性，又提高了恢复速度。下面我将从工作原理、实现机制、优缺点和使用建议等方面进行全面讲解。</p>
+<h4><span id="1-基本概念">1. 基本概念</span></h4><p>混合持久化（RDB-AOF Hybrid Persistence）是指：</p>
+<ul>
+<li>在 AOF 重写时，将当前数据集以 RDB 格式写入 AOF 文件开头</li>
+<li>后续的写命令继续以 AOF 格式追加到文件中</li>
+<li>最终生成的文件前半部分是 RDB 二进制数据，后半部分是 AOF 命令文本</li>
+</ul>
+<h4><span id="2-核心实现机制">2. 核心实现机制</span></h4><p><strong>触发条件：</strong></p>
+<ol>
+<li>需要同时满足：<ul>
+<li>开启了 AOF（appendonly yes）</li>
+<li>开启了混合模式（aof-use-rdb-preamble yes）</li>
+<li>触发 AOF 重写（自动或手动）</li>
+</ul>
+</li>
+</ol>
+<p><strong>工作流程：</strong></p>
+<pre class="mermaid">flowchart TD
+    A[触发AOF重写] --> B[fork子进程]
+    B --> C[子进程将内存数据写成RDB格式]
+    C --> D[写入到新AOF文件头部]
+    D --> E[父进程继续接收命令]
+    E --> F[新命令以AOF格式追加到缓冲区]
+    F --> G[重写完成后合并到新AOF文件]
+    G --> H[替换旧AOF文件]</pre>
+
+<p><strong>关键点：</strong></p>
+<ul>
+<li>重写过程是非阻塞的（BGREWRITEAOF）</li>
+<li>使用写时复制（COW）机制保证数据一致性</li>
+<li>重写期间的新命令会写入两个缓冲区：<ul>
+<li>aof_buf：正常的AOF缓冲区</li>
+<li>aof_rewrite_buf：专为重写准备的缓冲区</li>
+</ul>
+</li>
+</ul>
+<h4><span id="3-文件结构示例">3. 文件结构示例</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[RDB二进制数据]  ← 文件开头是RDB格式的快照</span><br><span class="line">*3\r\n$3\r\nSET\r\n$5\r\nkey1\r\n$7\r\nvalue1\r\n  ← 后面追加AOF格式命令</span><br><span class="line">*3\r\n$3\r\nSET\r\n$5\r\nkey2\r\n$7\r\nvalue2\r\n</span><br></pre></td></tr></table></figure>
+
+<h4><span id="4-数据恢复过程">4. 数据恢复过程</span></h4><ol>
+<li>Redis 重启时检测到 AOF 文件</li>
+<li>发现文件开头是 RDB 魔数”REDIS”</li>
+<li>先快速加载 RDB 部分（二进制解析）</li>
+<li>然后按顺序执行后面的 AOF 命令</li>
+<li>完成数据恢复</li>
+</ol>
+<h4><span id="5-配置参数">5. 配置参数</span></h4><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes                  <span class="comment"># 启用AOF</span></span><br><span class="line">aof-use-rdb-preamble yes        <span class="comment"># 启用混合持久化</span></span><br><span class="line">aof-rewrite-incremental-fsync yes <span class="comment"># 重写时增量fsync</span></span><br><span class="line">auto-aof-rewrite-percentage 100 <span class="comment"># 文件增长比例阈值</span></span><br><span class="line">auto-aof-rewrite-min-size 64mb  <span class="comment"># 最小重写大小</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="6-优缺点分析">6. 优缺点分析</span></h4><p><strong>优势：</strong></p>
+<ul>
+<li>恢复速度快：RDB 二进制加载比 AOF 命令回放快很多</li>
+<li>数据更安全：AOF 部分保证了重写期间的数据不丢失</li>
+<li>文件更紧凑：RDB 格式比纯 AOF 更节省空间</li>
+<li>兼容性好：支持旧版 RDB 文件格式</li>
+</ul>
+<p><strong>劣势：</strong></p>
+<ul>
+<li>实现复杂度高</li>
+<li>需要 Redis 4.0+ 版本支持</li>
+<li>文件可读性降低（部分二进制）</li>
+</ul>
+<h4><span id="7-生产环境建议">7. 生产环境建议</span></h4><ol>
+<li><p>对于关键业务，强烈建议开启：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes</span><br><span class="line">aof-use-rdb-preamble yes</span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>监控重写过程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli info persistence | grep aof_rewrite</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>定期检查 AOF 文件完整性：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-check-aof --fix appendonly.aof</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配合适当的备份策略（如每小时备份到远程存储）</p>
+</li>
+</ol>
+<h4><span id="8-性能对比">8. 性能对比</span></h4><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>纯RDB</th>
+<th>纯AOF</th>
+<th>混合模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>启动恢复速度</td>
+<td>快</td>
+<td>慢</td>
+<td>快</td>
+</tr>
+<tr>
+<td>数据安全性</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>文件大小</td>
+<td>小</td>
+<td>大</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>写入性能影响</td>
+<td>低</td>
+<td>中</td>
+<td>中</td>
+</tr>
+</tbody></table>
+<h3><span id="redis-混合持久化在-70-版本后的改动">Redis 混合持久化在 7.0 版本后的改动</span></h3><p>在 Redis 7.0+ 的 <strong>Multi-Part AOF (MP-AOF)</strong> 持久化机制中，<code>appendonly.aof.manifest</code>、<code>appendonly.aof.1.base.rdb</code> 和 <code>appendonly.aof.1.incr.aof</code> 这三个文件共同协作，实现高效的数据持久化和恢复。以下是它们的详细作用和运作机制：</p>
+<hr>
+<h4><span id="1-appendonlyaofmanifest清单文件">1. <strong><code>appendonly.aof.manifest</code>（清单文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<ul>
+<li>记录所有 <strong>基本文件（base）</strong> 和 <strong>增量文件（incr）</strong> 的加载顺序，确保 Redis 重启时能正确恢复数据。  </li>
+<li>类似于一个“目录”，告诉 Redis 应该按什么顺序加载数据文件。</li>
+</ul>
+<p><strong>文件内容示例</strong>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;base&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="string">&quot;appendonly.aof.1.base.rdb&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;incr&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;i&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="string">&quot;appendonly.aof.1.incr.aof&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>运作机制</strong>：</p>
+<ul>
+<li>Redis 启动时，<strong>先读取 <code>manifest</code></strong>，然后按 <code>base</code> → <code>incr</code> 的顺序加载文件。</li>
+<li>在 <strong>AOF 重写（<code>BGREWRITEAOF</code>）</strong> 时，会生成新的 <code>base</code> 文件并更新 <code>manifest</code>，确保原子性切换。</li>
+</ul>
+<hr>
+<h4><span id="2-appendonlyaof1baserdb基本文件">2. <strong><code>appendonly.aof.1.base.rdb</code>（基本文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<ul>
+<li>存储 <strong>全量数据快照</strong>，采用 <strong>RDB 二进制格式</strong>（默认情况下，<code>aof-use-rdb-preamble yes</code>）。  </li>
+<li>相当于传统混合持久化中的 <strong>RDB 头部</strong>，但现在是独立文件。</li>
+</ul>
+<p><strong>运作机制</strong>：</p>
+<ul>
+<li>在 <strong>AOF 重写</strong> 时，Redis 会 <code>fork</code> 子进程，将当前内存数据 <strong>序列化为 RDB 格式</strong> 并写入该文件。</li>
+<li>由于 RDB 是压缩的二进制格式，<strong>恢复速度极快</strong>（相比纯 AOF 重放命令）。</li>
+</ul>
+<hr>
+<h4><span id="3-appendonlyaof1incraof增量文件">3. <strong><code>appendonly.aof.1.incr.aof</code>（增量文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<ul>
+<li>记录 <strong>AOF 重写之后的所有写操作</strong>，采用 <strong>Redis 协议文本格式</strong>（RESP）。  </li>
+<li>类似于传统 AOF 的尾部，但现在是独立文件。</li>
+</ul>
+<p><strong>文件内容示例</strong>（RESP 协议）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n</span><br></pre></td></tr></table></figure>
+
+<p><strong>运作机制</strong>：</p>
+<ul>
+<li>Redis <strong>主进程</strong> 在执行写操作时，会同时写入：<ol>
+<li><strong>旧 AOF 文件</strong>（如果尚未完成重写）。</li>
+<li><strong><code>aof_rewrite_buf</code> 缓冲区</strong>（用于新 <code>incr.aof</code> 文件）。</li>
+</ol>
+</li>
+<li>当 <strong>AOF 重写完成</strong> 后，增量命令会追加到 <code>incr.aof</code>，并更新 <code>manifest</code>。</li>
+</ul>
+<hr>
+<h4><span id="三者的协作流程"><strong>三者的协作流程</strong></span></h4><ol>
+<li><p><strong>AOF 重写触发</strong>（手动 <code>BGREWRITEAOF</code> 或自动触发）：</p>
+<ul>
+<li>子进程生成新的 <code>base.rdb</code>（全量快照）。</li>
+<li>主进程继续接收命令，写入 <code>incr.aof</code>。</li>
+<li>完成后，更新 <code>manifest</code> 指向新文件。</li>
+</ul>
+</li>
+<li><p><strong>Redis 重启恢复</strong>：</p>
+<ul>
+<li>读取 <code>manifest</code>，按顺序加载：<ol>
+<li><code>base.rdb</code>（快速恢复全量数据）。</li>
+<li><code>incr.aof</code>（重放增量命令，保证数据最新）。</li>
+</ol>
+</li>
+</ul>
+</li>
+<li><p><strong>文件轮转</strong>：</p>
+<ul>
+<li>当 <code>incr.aof</code> 过大时，会触发新的 AOF 重写，生成新的 <code>base.rdb</code> 和 <code>incr.aof</code>，并更新 <code>manifest</code>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4><span id="与传统混合持久化的区别"><strong>与传统混合持久化的区别</strong></span></h4><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>传统混合模式（单文件）</th>
+<th>MP-AOF（多文件）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>存储方式</strong></td>
+<td>RDB头部 + AOF尾部</td>
+<td><code>base.rdb</code> + <code>incr.aof</code></td>
+</tr>
+<tr>
+<td><strong>文件管理</strong></td>
+<td>单文件，重写时替换</td>
+<td>多文件，<code>manifest</code> 管理版本</td>
+</tr>
+<tr>
+<td><strong>恢复速度</strong></td>
+<td>快（RDB优先）</td>
+<td>更快（并行加载可能）</td>
+</tr>
+<tr>
+<td><strong>运维友好性</strong></td>
+<td>难拆分备份</td>
+<td>可单独备份 <code>base</code>&#x2F;<code>incr</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h4><span id="redis-官方推荐"><strong>Redis 官方推荐</strong></span></h4><ul>
+<li><strong>默认开启 MP-AOF</strong>（Redis 7.0+），因为它：<ul>
+<li>更<strong>健壮</strong>（文件损坏时影响更小）。</li>
+<li>更<strong>高效</strong>（<code>base.rdb</code> 加载快，<code>incr.aof</code> 增量小）。</li>
+</ul>
+</li>
+<li>可通过 <code>redis-check-aof --fix</code> 修复损坏的 AOF 文件。</li>
+</ul>
+<p>如果需要回退到传统单文件模式，可设置：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">aof-use-rdb-preamble yes</span><br><span class="line">aof-manifest-enabled no</span><br></pre></td></tr></table></figure>
+
+<p>但官方建议保持 MP-AOF，除非有特殊兼容性需求。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
