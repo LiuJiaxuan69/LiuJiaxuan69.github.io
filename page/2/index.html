@@ -213,18 +213,18 @@
         </div>
         
             <div id="post0">
-                <p>八月 01, 2025</p>
+                <p>八月 02, 2025</p>
                 <h2>
-                    <a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" title="Linux IO 多路转接--Poll" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux IO 多路转接--Poll</a>
+                    <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/" title="Linux IO 多路转接--Epoll" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux IO 多路转接--Epoll</a>
                 </h2>
                 <p class="summary">
 
 
-poll 函数
-poll 函数原型
-struct pollfd 结构体
-poll 的工作流程
-poll 示例...</p>
+epoll 工作原理详解
+epoll 的核心数据结构
+epoll 的工作流程
+关键设计优势
+对比 selec...</p>
             </div>
             
 
@@ -233,10 +233,37 @@ poll 示例...</p>
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/" 
+       title="Linux IO 多路转接--Epoll"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>八月 02, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/" title="Linux IO 多路转接--Epoll" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux IO 多路转接--Epoll</a></h3>
+        
+        <p>
+
+
+epoll 工作原理详解
+epoll 的核心数据结构
+epoll 的工作流程
+关键设计优势
+对比 select&#x2F;poll
+边缘触发（ET）...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" 
        title="Linux IO 多路转接--Poll"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -329,7 +356,7 @@ tcp_server.hpp
     <a href="/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/" 
        title="Socket 套接字编程-UDP"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -359,7 +386,7 @@ UDP 收发数据接口详...</p>
     <a href="/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/" 
        title="Linux 线程池"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -391,7 +418,7 @@ UDP 收发数据接口详...</p>
     <a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/" 
        title="Linux 线程信号量（POSIX）--优化多生产者-消费者框架"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -422,7 +449,7 @@ POSIX线程信号量（Semaphore）
     <a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/" 
        title="Linux 线程同步"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -455,7 +482,7 @@ pthread_cond_init 与 pthread_...</p>
     <a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/" 
        title="Linux 线程互斥"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -488,7 +515,7 @@ PTHREAD_MUTEX...</p>
     <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" 
        title="Linux 线程控制"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -510,40 +537,6 @@ pthread_create 函数：线程创建
 返回值
 使用示例
 注意事项...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" 
-       title="Linux 线程概念"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 24, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" title="Linux 线程概念" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程概念</a></h3>
-        
-        <p>
-
-
-线程的基本概念
-线程与进程的关系
-资源分配与执行
-
-
-线程的实现机制
-分页式存储管理
-多级页表结构
-
-
-线程的优势
-线程的缺点
-线程与进程的资源对比...</p>
     </div>
 </div>
 

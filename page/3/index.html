@@ -213,18 +213,24 @@
         </div>
         
             <div id="post0">
-                <p>七月 23, 2025</p>
+                <p>七月 24, 2025</p>
                 <h2>
-                    <a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/" title="Linux SIGCHLD信号处理与僵尸进程清理实验" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux SIGCHLD信号处理与僵尸进程清理实验</a>
+                    <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" title="Linux 线程概念" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程概念</a>
                 </h2>
                 <p class="summary">
 
 
-实验背景
-实验一：通过信号处理函数清理僵尸进程（改进版）
-1. 程序结构设计
-2. 关键组件分析
-3. 执行...</p>
+线程的基本概念
+线程与进程的关系
+资源分配与执行
+
+
+线程的实现机制
+分页式存储管理
+多级页表结构
+
+
+线程...</p>
             </div>
             
 
@@ -233,10 +239,44 @@
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" 
+       title="Linux 线程概念"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>七月 24, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" title="Linux 线程概念" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程概念</a></h3>
+        
+        <p>
+
+
+线程的基本概念
+线程与进程的关系
+资源分配与执行
+
+
+线程的实现机制
+分页式存储管理
+多级页表结构
+
+
+线程的优势
+线程的缺点
+线程与进程的资源对比...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/" 
        title="Linux SIGCHLD信号处理与僵尸进程清理实验"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -266,7 +306,7 @@
     <a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/" 
        title="Linux 信号捕捉"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -328,7 +368,7 @@ struct sigaction 结构体
     <a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/" 
        title="Linux 信号产生"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -352,7 +392,7 @@ Linux 信号分类：普通信号 vs 实时信号
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/" 
        title="Linux 进程间通信--system V 共享内存"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -389,7 +429,7 @@ shmctl 函数
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/" 
        title="Linux 进程间通信--命名管道"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -424,7 +464,7 @@ mkfifo 函数
     <a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/" 
        title="Linux 进程间通信--匿名管道"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -457,7 +497,7 @@ mkfifo 函数
     <a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/" 
        title="Linux 动态库和静态库"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg11.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -506,40 +546,6 @@ Inode 的分配与管理
 
 硬链接的实现
 软链接（...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/" 
-       title="文件缓冲区"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 18, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/" title="文件缓冲区" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">文件缓冲区</a></h3>
-        
-        <p>
-
-
-理解文件缓冲区
-标准I&#x2F;O的缓冲区类型
-再看开头代码
-标准输出行缓冲
-文件输出全缓冲
-
-
-文件缓冲区的作用
-
-
-
-首先来看一段代码：
-12...</p>
     </div>
 </div>
 

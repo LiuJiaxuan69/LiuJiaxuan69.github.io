@@ -1,0 +1,1540 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redis 主从复制 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+Redis 核心机制解析：深入理解主从复制
+主从复制配置
+查看主从复制状态
+slaveof
+一、SLAVEOF 指令详解
+二、SLAVEOF 自己连接自己的后果分析
+总结
+
+
+拓扑结构
+1. ,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Redis 主从复制 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+Redis 核心机制解析：深入理解主从复制
+主从复制配置
+查看主从复制状态
+slaveof
+一、SLAVEOF 指令详解
+二、SLAVEOF 自己连接自己的后果分析
+总结
+
+
+拓扑结构
+1. ,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Redis 主从复制 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+Redis 核心机制解析：深入理解主从复制
+主从复制配置
+查看主从复制状态
+slaveof
+一、SLAVEOF 指令详解
+二、SLAVEOF 自己连接自己的后果分析
+总结
+
+
+拓扑结构
+1. ,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Redis 主从复制</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Redis 主从复制</h1>
+        <div class="stuff">
+            <span>八月 20, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag">分布式</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#redis-%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%E8%A7%A3%E6%9E%90%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6">Redis 核心机制解析：深入理解主从复制</a></li>
+<li><a href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E9%85%8D%E7%BD%AE">主从复制配置</a></li>
+<li><a href="#%E6%9F%A5%E7%9C%8B%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E7%8A%B6%E6%80%81">查看主从复制状态</a></li>
+<li><a href="#slaveof">slaveof</a><ul>
+<li><a href="#%E4%B8%80-slaveof-%E6%8C%87%E4%BB%A4%E8%AF%A6%E8%A7%A3">一、<code>SLAVEOF</code> 指令详解</a></li>
+<li><a href="#%E4%BA%8C-slaveof-%E8%87%AA%E5%B7%B1%E8%BF%9E%E6%8E%A5%E8%87%AA%E5%B7%B1%E7%9A%84%E5%90%8E%E6%9E%9C%E5%88%86%E6%9E%90">二、<code>SLAVEOF</code> 自己连接自己的后果分析</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+<li><a href="#%E6%8B%93%E6%89%91%E7%BB%93%E6%9E%84">拓扑结构</a><ul>
+<li><a href="#1-%E4%B8%80%E4%B8%BB%E4%B8%80%E4%BB%8E%E7%BB%93%E6%9E%84">1. 一主一从结构</a></li>
+<li><a href="#2-%E4%B8%80%E4%B8%BB%E5%A4%9A%E4%BB%8E%E7%BB%93%E6%9E%84%E6%98%9F%E5%BD%A2%E7%BB%93%E6%9E%84">2. 一主多从结构（星形结构）</a></li>
+<li><a href="#3-%E6%A0%91%E5%BD%A2%E5%88%86%E5%B1%82%E4%B8%BB%E4%BB%8E%E7%BB%93%E6%9E%84">3. 树形（分层）主从结构</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93%E5%AF%B9%E6%AF%94%E8%A1%A8">总结对比表</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%BB%E4%BB%8E%E7%BB%93%E6%9E%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%87%8D%E5%90%AF%E9%97%AE%E9%A2%98">主从结构服务器重启问题</a></li>
+<li><a href="#%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E5%8E%9F%E7%90%86">主从复制原理</a><ul>
+<li><a href="#redis-%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E8%BF%87%E7%A8%8B%E6%A6%82%E8%A6%81">Redis 主从复制过程概要</a></li>
+<li><a href="#redis-%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6psync-%E8%AF%A6%E8%A7%A3">Redis 数据同步核心机制：PSYNC 详解</a></li>
+<li><a href="#redis-%E5%85%A8%E9%87%8F%E5%A4%8D%E5%88%B6">Redis 全量复制</a></li>
+<li><a href="#redis-%E9%83%A8%E5%88%86%E5%A4%8D%E5%88%B6">Redis 部分复制</a></li>
+<li><a href="#redis-%E5%AE%9E%E6%97%B6%E5%A4%8D%E5%88%B6%E7%BB%B4%E6%8C%81%E6%95%B0%E6%8D%AE%E6%9C%80%E7%BB%88%E4%B8%80%E8%87%B4%E6%80%A7%E7%9A%84%E5%BF%83%E8%B7%B3">Redis 实时复制：维持数据最终一致性的心跳</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="redis-核心机制解析深入理解主从复制">Redis 核心机制解析：深入理解主从复制</span></h2><p>在现代分布式架构中，单点故障是系统可靠性的最大威胁之一。为了解决这个问题，一个常见的实践是将数据复制多个副本并部署到不同的服务器上，这不仅提供了故障恢复的能力，还能通过负载均衡大幅提升系统的整体性能与吞吐量。作为高性能键值数据库的佼佼者，Redis 同样内置了强大而灵活的<strong>复制（Replication）</strong> 功能，允许用户创建包含相同数据的多个副本。</p>
+<p>Redis 的复制功能是其高可用架构的基石。我们日常所使用的<strong>哨兵（Sentinel）</strong> 和<strong>集群（Cluster）</strong> 模式，都是在复制的基本机制之上构建而来的。可以说，深入理解复制，是掌握 Redis 高可用方案的必经之路。</p>
+<p>在本篇博客中，我们将全方位解析 Redis 的主从复制机制。您将了解到：</p>
+<ul>
+<li><strong>如何操作</strong>：包括如何建立或断开复制连接、如何保证复制过程的安全性以及从节点的只读配置。</li>
+<li><strong>如何规划</strong>：介绍复制所支持的各种拓扑结构（如一主一从、一主多从、树状结构等），以及不同架构的适用场景与优缺点。</li>
+<li><strong>如何理解</strong>：深入剖析复制的工作原理，详细讲解建立复制、全量复制、部分复制、心跳检测等核心过程背后的实现细节。</li>
+</ul>
+<h2><span id="主从复制配置">主从复制配置</span></h2><p>参与复制的 <code>Redis</code> 实例划分为主节点 （master）和从节点（slave）。每个从结点只能有⼀个主节点，而⼀个主节点可以同时具有多个从结点。复制的数据流是单向的，只能由主节点到从节点。配置复制的方式有以下三种：</p>
+<ol>
+<li>在配置文件中加入 slaveof {masterHost} {masterPort} 随 Redis 启动生效。</li>
+<li>在 redis-server 启动命令时加入 –slaveof {masterHost} {masterPort} 生效。</li>
+<li>直接使用 redis 命令：slaveof {masterHost} {masterPort} ⽣效。</li>
+</ol>
+<p>下面我将通过修改配置文件的方式来实现主从复制的配置。</p>
+<p>一般来说，主从复制实现的是分布式系统，但由于小编的财力实在有限，只能在本地模拟一个主从复制的环境。实际生产环境中，虽然说是每个主机都作为单机部署，但实际上往往会通过容器化等方式来实现更灵活的部署，这里暂时不做过多介绍，后面会有相关内容。</p>
+<p>我会将 <code>Redis</code> 的配置文件复制多份给从节点使用，并在每个从节点的配置文件中加入对应的 <code>slaveof</code> 配置。</p>
+<p>当然，若我们想要使用主从复制，首先应当将配置文件中的 <code>daemonize</code> 选项设置为 <code>yes</code>，以便在后台运行。该选项是用来指定 Redis 服务器是否以守护进程的方式运行的（一般来说这个选项是默认开启的）。</p>
+<p>然后我们分别为每个从节点配置对应的 <code>slaveof</code> 选项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 从节点1的端口号配置</span><br><span class="line"># Accept connections on the specified port, default is 6379 (IANA #815344).</span><br><span class="line"># If port 0 is specified Redis will not listen on a TCP socket.</span><br><span class="line">port 6380</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 从节点2的端口号配置</span><br><span class="line"># Accept connections on the specified port, default is 6379 (IANA #815344).</span><br><span class="line"># If port 0 is specified Redis will not listen on a TCP socket.</span><br><span class="line">port 6381</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 从节点1的主从配置</span><br><span class="line">slaveof 127.0.0.1 6379</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 从节点2的主从配置</span><br><span class="line">slaveof 127.0.0.1 6379</span><br></pre></td></tr></table></figure>
+
+<p>而后，我们就可以启动这两个从节点了。启动命令与主节点类似，只需指定配置文件即可：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动从节点1</span></span><br><span class="line">redis-server slave1.conf</span><br><span class="line"><span class="comment"># 启动从节点2</span></span><br><span class="line">redis-server slave2.conf</span><br></pre></td></tr></table></figure>
+
+<h2><span id="查看主从复制状态">查看主从复制状态</span></h2><p>我们通过命令可以查看当前的主从复制状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/redistest/project2] - [1044]</span><br><span class="line">└─[$] netstat -ntpa | grep redis-serve                                                                       [22:39:59]</span><br><span class="line">tcp        0      0 0.0.0.0:6380            0.0.0.0:*               LISTEN      1077922/redis-serve</span><br><span class="line">tcp        0      0 0.0.0.0:6381            0.0.0.0:*               LISTEN      1077941/redis-serve</span><br><span class="line">tcp        0      0 0.0.0.0:6379            0.0.0.0:*               LISTEN      1042293/redis-serve</span><br><span class="line">tcp        0      0 127.0.0.1:6379          127.0.0.1:59180         ESTABLISHED 1042293/redis-serve</span><br><span class="line">tcp        0      0 127.0.0.1:59180         127.0.0.1:6379          ESTABLISHED 1077941/redis-serve</span><br><span class="line">tcp        0      0 127.0.0.1:59174         127.0.0.1:6379          ESTABLISHED 1077922/redis-serve</span><br><span class="line">tcp        0      0 127.0.0.1:6379          127.0.0.1:59174         ESTABLISHED 1042293/redis-serve</span><br><span class="line">tcp6       0      0 ::1:6380                :::*                    LISTEN      1077922/redis-serve</span><br><span class="line">tcp6       0      0 ::1:6381                :::*                    LISTEN      1077941/redis-serve</span><br><span class="line">tcp6       0      0 ::1:6379                :::*                    LISTEN      1042293/redis-serve</span><br></pre></td></tr></table></figure>
+
+<p>其中每一行的含义如下：</p>
+<ul>
+<li><p><code>LISTEN</code> 状态的端口（如 6379、6380、6381）：</p>
+<ul>
+<li>这些是 Redis 主节点和从节点各自监听的服务端口。</li>
+<li>例如：<ul>
+<li><code>0.0.0.0:6379</code>、<code>0.0.0.0:6380</code>、<code>0.0.0.0:6381</code> 表示主节点和两个从节点分别监听在本机所有网卡的 6379、6380、6381 端口，等待客户端或其他 Redis 节点的连接。</li>
+<li><code>::1:6379</code>、<code>::1:6380</code>、<code>::1:6381</code> 是 IPv6 的监听端口，作用同上。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code>ESTABLISHED</code> 状态的端口：</p>
+<ul>
+<li>这些是主从节点之间已经建立的 TCP 连接。</li>
+<li>例如：<ul>
+<li><code>127.0.0.1:6379 &lt;-&gt; 127.0.0.1:59180</code>、<code>127.0.0.1:6379 &lt;-&gt; 127.0.0.1:59174</code> 等，表示主节点 6379 端口和从节点的某个本地端口（如 59180、59174）之间已经建立了主从同步的数据通道。</li>
+</ul>
+</li>
+<li>这些连接保证了主节点可以实时地将数据同步到从节点。</li>
+</ul>
+</li>
+</ul>
+<p>这里讲解一个小细节，我们的主节点是通过 <code>service</code> 命令来管理的，而不是直接通过 <code>redis-server</code> 启动的。这意味着主节点的进程是由系统服务管理的，可以更方便地进行监控和管理。若我们尝试直接杀掉主节点的进程，系统会自动重启它。是由 1 号进程管理的，验证如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/redistest/project1/build] - [1012]</span><br><span class="line">└─[$] ps axj | grep redis                                                                                    [19:46:17]</span><br><span class="line">      1 1039968 1039968 1039968 ?             -1 Ssl    105   0:00 /usr/bin/redis-server 0.0.0.0:6379</span><br><span class="line">1041179 1041741 1041740 1041065 pts/0    1041740 S+       0   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv redis</span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/redistest/project1/build] - [1013]</span><br><span class="line">└─[$] <span class="built_in">kill</span> -9 1039968                                                                                        [19:46:19]</span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/redistest/project1/build] - [1014]</span><br><span class="line">└─[$] ps axj | grep redis                                                                                    [19:48:54]</span><br><span class="line">      1 1042293 1042293 1042293 ?             -1 Ssl    105   0:00 /usr/bin/redis-server 0.0.0.0:6379</span><br><span class="line">1041179 1042301 1042300 1041065 pts/0    1042300 S+       0   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox --exclude-dir=.venv --exclude-dir=venv redis</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，服务是由 1 号进程管理的，我将主节点进程杀掉后，系统会自动重启它（前后的 <code>PID</code> 变化），自然就是 1 号进程重启的该进程</p>
+<p>我们分别启动主节点和两个从节点的服务后，可以通过 <code>redis-cli</code> 命令行工具连接到主节点和从节点，利用 <code>info replication</code> 命令查看主从复制状态：</p>
+<p>首先是主节点的状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; info replication</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:master</span><br><span class="line">connected_slaves:2</span><br><span class="line">slave0:ip=127.0.0.1,port=6380,state=online,offset=1595,lag=0</span><br><span class="line">slave1:ip=127.0.0.1,port=6381,state=online,offset=1595,lag=0</span><br><span class="line">master_failover_state:no-failover</span><br><span class="line">master_replid:1d0a5e10c42ce1b2af4b14795cbe0c3ff81aef53</span><br><span class="line">master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">master_repl_offset:1595</span><br><span class="line">second_repl_offset:-1</span><br><span class="line">repl_backlog_active:1</span><br><span class="line">repl_backlog_size:1048576</span><br><span class="line">repl_backlog_first_byte_offset:1</span><br><span class="line">repl_backlog_histlen:1595</span><br></pre></td></tr></table></figure>
+
+<p>对这些信息的解释如下：</p>
+<ul>
+<li><code>role:master</code>：表示当前节点是主节点。</li>
+<li><code>connected_slaves:2</code>：表示当前主节点有两个从节点连接。</li>
+<li><code>slave0</code> 和 <code>slave1</code>：分别表示两个从节点的状态信息，包括 IP 地址、端口、状态、偏移量和延迟等。</li>
+<li><code>master_failover_state:no-failover</code>：表示当前没有故障转移发生。</li>
+<li><code>master_replid</code> 和 <code>master_replid2</code>：表示主节点的复制 ID。</li>
+<li><code>master_repl_offset</code>：表示主节点的复制偏移量。</li>
+<li><code>second_repl_offset</code>：表示第二个复制偏移量。</li>
+<li><code>repl_backlog_active</code>：表示复制积压缓冲区是否激活。</li>
+<li><code>repl_backlog_size</code>：表示复制积压缓冲区的大小。</li>
+<li><code>repl_backlog_first_byte_offset</code> 和 <code>repl_backlog_histlen</code>：表示复制积压缓冲区的相关信息。</li>
+</ul>
+<p>偏移量是用来标注数据在复制过程中的位置和状态的，帮助我们更好地理解主从复制的机制和数据流动。如果主从节点的偏移量一致，则说明主从节点的数据是一致的。</p>
+<p>有关主从复制的更多信息，可以参考 <code>Redis</code> 官方文档中的 <a target="_blank" rel="noopener" href="https://redis.io/topics/replication">Replication</a> 部分。状态中的后面四个选项我将会在后续的内容中详细介绍。</p>
+<p>然后是从节点的状态，我们以第一个从节点为例，来看看其配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6380&gt; info replication</span><br><span class="line"><span class="comment"># Replication</span></span><br><span class="line">role:slave</span><br><span class="line">master_host:127.0.0.1</span><br><span class="line">master_port:6379</span><br><span class="line">master_link_status:up</span><br><span class="line">master_last_io_seconds_ago:5</span><br><span class="line">master_sync_in_progress:0</span><br><span class="line">slave_read_repl_offset:3275</span><br><span class="line">slave_repl_offset:3275</span><br><span class="line">slave_priority:100</span><br><span class="line">slave_read_only:1</span><br><span class="line">replica_announced:1</span><br><span class="line">connected_slaves:0</span><br><span class="line">master_failover_state:no-failover</span><br><span class="line">master_replid:1d0a5e10c42ce1b2af4b14795cbe0c3ff81aef53</span><br><span class="line">master_replid2:0000000000000000000000000000000000000000</span><br><span class="line">master_repl_offset:3275</span><br><span class="line">second_repl_offset:-1</span><br><span class="line">repl_backlog_active:1</span><br><span class="line">repl_backlog_size:1048576</span><br><span class="line">repl_backlog_first_byte_offset:1</span><br><span class="line">repl_backlog_histlen:3275</span><br></pre></td></tr></table></figure>
+
+<p>你会发现，从节点的配置和主节点大多数信息是相同的，其中 <code>role:slave</code> 表示当前节点是从节点，而 <code>master_*</code> 相关的配置项则指向主节点的信息。这些信息帮助从节点与主节点保持同步，并确保数据的一致性。</p>
+<p>可以看到的是，即便是从节点，仍然有 <code>connected_slaves:0</code> 这样的配置项，这说明从节点也是可以有从节点的。</p>
+<p>这样一来，主节点的数据就会被同步到从节点上，从节点可以通过 <code>info replication</code> 命令查看当前的复制状态。</p>
+<h2><span id="slaveof">slaveof</span></h2><h3><span id="一-slaveof-指令详解">一、<code>SLAVEOF</code> 指令详解</span></h3><p><code>SLAVEOF</code> 是一个功能强大的管理命令，用于动态地配置和管理 Redis 的主从复制关系。它主要有两种用法：</p>
+<h4><span id="1-建立复制关系slaveof-master_ip-master_port">1. 建立复制关系：<code>SLAVEOF master_ip master_port</code></span></h4><ul>
+<li><strong>功能</strong>：让当前 Redis 服务器成为指定主节点（master）的从节点（slave&#x2F;replica）。</li>
+<li><strong>流程</strong>：<ol>
+<li><strong>断开旧关系</strong>：如果当前服务器已经是另一个主节点的从节点，则会先断开与旧主节点的复制连接。</li>
+<li><strong>建立新连接</strong>：与新的主节点建立网络连接。</li>
+<li><strong>数据同步</strong>：<ul>
+<li><strong>全量复制</strong>：从节点会先执行一个全量同步。它会清空自己的所有数据，然后主节点会生成一个当前数据集的 RDB 快照文件并发送给从节点。从节点接收并加载这个 RDB 文件，从而获得主节点在某个时间点的完整数据副本。</li>
+<li><strong>部分复制</strong>：在全量同步之后，主节点会将后续新的写命令持续地、异步地发送给从节点，以保持数据实时一致。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li><strong>应用场景</strong>：扩容读性能、做数据备份、为高可用方案（哨兵&#x2F;集群）做准备。</li>
+</ul>
+<h4><span id="2-断开复制关系slaveof-no-one">2. 断开复制关系：<code>SLAVEOF NO ONE</code></span></h4><ul>
+<li><strong>功能</strong>：让当前从节点停止复制，并<strong>晋升为一个独立的主节点</strong>。</li>
+<li><strong>流程</strong>：<ol>
+<li><strong>断开连接</strong>：停止与主节点的复制连接，不再接收主节点的数据流。</li>
+<li><strong>晋升为主</strong>：自身的角色从 <code>slave</code> 变为 <code>master</code>。</li>
+<li><strong>保留数据</strong>：<strong>关键点：它不会清空自身已有的数据</strong>。它只是停止了数据同步，但断开那一刻它所拥有的所有数据都会保留下来。这使得它可以在原主节点宕机时，随时准备接管服务（通常需要配合哨兵来自动完成）。</li>
+</ol>
+</li>
+<li><strong>应用场景</strong>：故障恢复后的人工干预、网络分区后的重置、将某个从节点提升为新的主节点。</li>
+</ul>
+<h4><span id="3-切主操作slaveof-new_master_ip-new_master_port">3. 切主操作：<code>SLAVEOF new_master_ip new_master_port</code></span></h4><p>这实际上是第一种用法的延伸。当一个从节点执行此命令指向一个新的主节点时，会发生：</p>
+<ol>
+<li><strong>断开旧主</strong>：等同于先执行了 <code>SLAVEOF NO ONE</code> 的第一步（断开连接）。</li>
+<li><strong>连接新主</strong>：与新的主节点建立连接。</li>
+<li><strong>删除数据</strong>：<strong>关键区别：这里会清空从节点当前的所有数据！</strong> 因为要保证数据完全来自于新的主节点，必须从一个干净的状态开始同步。</li>
+<li><strong>全量同步</strong>：从新主节点执行一次完整的全量复制流程。</li>
+</ol>
+<hr>
+<h3><span id="二-slaveof-自己连接自己的后果分析">二、<code>SLAVEOF</code> 自己连接自己的后果分析</span></h3><p>现在，我们尝试让 6381 端口的子节点执行 <code>SLAVEOF 127.0.0.1 6381</code>（即自己连接自己）</p>
+<h4><span id="发生了什么流程拆解">发生了什么？（流程拆解）</span></h4><ol>
+<li><p><strong>角色分裂</strong>：服务器 X（端口 6381）接收到命令，试图成为自己的从节点。它的逻辑上分裂为两个角色：<strong>主节点 X</strong> 和 <strong>从节点 X</strong>。</p>
+</li>
+<li><p><strong>从节点 X 的流程</strong>：</p>
+<ul>
+<li>它遵循 <code>SLAVEOF</code> 的标准流程，首先尝试与“主节点 X”（即自己）建立连接。从网络协议上看，连接自己是成功的。</li>
+<li>连接成功后，它发送 <code>PING</code>，自己回复自己，所以认为主节点健康。</li>
+<li>接着，它发起同步请求 <code>PSYNC</code>，将自己的复制 ID 和偏移量发给“主节点 X”，请求增量数据。</li>
+</ul>
+</li>
+<li><p><strong>主节点 X 的回应</strong>：</p>
+<ul>
+<li>“主节点 X”收到了来自“从节点 X”的 <code>PSYNC</code> 请求。</li>
+<li>然而，“主节点 X” <strong>自身也是一个从节点</strong>（因为它执行了 <code>SLAVEOF</code> 命令）。根据 Redis 的核心设计原则：<strong>一个从节点在未与其主节点完成同步之前，是不能为其他从节点提供数据的</strong>。因为它的数据可能不是最新的，直接同步会给其他节点带来脏数据。</li>
+<li>因此，“主节点 X”会检查自身状态，发现 <code>myself-&gt;masterhost</code> 是存在的（指向它自己），于是它果断地<strong>拒绝</strong>了“从节点 X”的同步请求，并回复错误：<code>-NOMASTERLINK Can&#39;t SYNC while not connected with my master</code>（“我连我自己的主都还没连上呢，没法给你同步！”）。</li>
+</ul>
+</li>
+<li><p><strong>死循环形成</strong>：</p>
+<ul>
+<li>“从节点 X”收到拒绝回复后，判定同步失败。</li>
+<li>同步失败会触发重试机制。在短暂的延迟（约 1 秒）后，“从节点 X”又会发起新一轮的连接和同步请求。</li>
+<li>这个循环会每秒一次地、永不停歇地进行下去。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="会导致什么后果">会导致什么后果？</span></h4><ol>
+<li><strong>CPU 资源耗尽</strong>：每一次重试同步，尤其是如果触发了全量同步的判断，都会导致 <code>fork()</code> 操作。频繁的 <code>fork()</code> 会消耗大量 CPU 资源，导致服务器卡死。</li>
+<li><strong>内存消耗飙升</strong>：<code>fork()</code> 操作在写时复制（Copy-On-Write）机制下，如果实例数据量大，会导致内存占用显著增加，有被系统强制杀死的风险。</li>
+<li><strong>服务不可用</strong>：Redis 进程忙于处理这个无意义的死循环，无法有效处理外部客户端的正常请求，性能急剧下降甚至无响应。</li>
+<li><strong>日志磁盘爆满</strong>：日志文件会被每秒一轮的重复错误信息迅速填满。</li>
+</ol>
+<h4><span id="如何修复">如何修复？</span></h4><p>修复方法非常简单直接，就是<strong>打破这个循环</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 连接到出问题的 Redis 服务器</span></span><br><span class="line">redis-cli -p 6381</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行命令，让它停止扮演从节点角色，恢复正常</span></span><br><span class="line">127.0.0.1:6381&gt; SLAVEOF NO ONE</span><br><span class="line">OK</span><br></pre></td></tr></table></figure>
+
+<p>执行后，它解除了自己的从节点身份，循环立即终止，CPU 和内存使用率会逐渐恢复正常。</p>
+<h3><span id="总结">总结</span></h3><table>
+<thead>
+<tr>
+<th align="left">操作</th>
+<th align="left">正常用法</th>
+<th align="left"><strong>错误用法（自己连自己）</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>命令</strong></td>
+<td align="left"><code>SLAVEOF &lt;真实主节点IP&gt; &lt;端口&gt;</code></td>
+<td align="left"><code>SLAVEOF 127.0.0.1 &lt;自身端口&gt;</code></td>
+</tr>
+<tr>
+<td align="left"><strong>逻辑</strong></td>
+<td align="left">两个独立进程间的<strong>网络通信</strong>和数据同步。</td>
+<td align="left">单个进程内部的<strong>逻辑死锁</strong>和<strong>自循环</strong>。</td>
+</tr>
+<tr>
+<td align="left"><strong>数据</strong></td>
+<td align="left">从节点会拥有主节点的数据副本。</td>
+<td align="left"><strong>数据不会有任何变化</strong>，但进程忙于循环，无法服务。</td>
+</tr>
+<tr>
+<td align="left"><strong>后果</strong></td>
+<td align="left">实现读写分离、数据冗余。</td>
+<td align="left"><strong>服务不可用</strong>，CPU&#x2F;内存资源被耗尽。</td>
+</tr>
+<tr>
+<td align="left"><strong>性质</strong></td>
+<td align="left">核心的<strong>功能特性</strong>。</td>
+<td align="left">危险的<strong>错误配置</strong>和<strong>运维事故</strong>。</td>
+</tr>
+</tbody></table>
+<p><strong>切记</strong>：<code>SLAVEOF</code> 是一个强大的工具，但绝对不要指向自己。在自动化脚本和运维操作中，务必加入检查逻辑，防止这种“自杀式”配置的发生。</p>
+<p>Redis 的复制拓扑非常灵活，可以根据不同的应用场景选择最合适的结构。这三种结构在复杂性、性能和容灾能力上各有侧重。</p>
+<hr>
+<h2><span id="拓扑结构">拓扑结构</span></h2><h3><span id="1-一主一从结构">1. 一主一从结构</span></h3><p>这是最简单、最基础的复制拓扑。</p>
+<ul>
+<li><p><strong>结构描述</strong>：一个主节点（Master）配一个从节点（Slave）。</p>
+</li>
+<li><p><strong>示意图</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Redis-A (Master)</span><br><span class="line">      |</span><br><span class="line">      |</span><br><span class="line">Redis-B (Slave)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>优点</strong></p>
+<ol>
+<li><strong>架构简单</strong>：部署和维护都非常容易，逻辑清晰。</li>
+<li><strong>故障转移基础</strong>：这是实现高可用的最小单元。当主节点宕机时，可以手动（或通过哨兵自动）将从节点 <code>SLAVEOF NO ONE</code> 提升为主节点，继续提供服务，实现故障恢复。</li>
+<li><strong>读写分离与持久化优化</strong>：<ul>
+<li><strong>读写分离</strong>：可以让应用程序在主节点上写，在从节点上读，分担负载。</li>
+<li><strong>持久化优化</strong>：<strong>可以在从节点上开启 AOF 持久化，而在主节点上关闭</strong>。这样做的好处是：<ul>
+<li>避免了持久化（生成 RDB 或写 AOF）对主节点性能造成的任何干扰，保证主节点极高的写入性能。</li>
+<li>从节点同样可以保证数据的安全性（因为它有完整的 AOF 日志）。这是一种非常经典的性能与安全兼顾的部署方式。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>缺点</strong></p>
+<ol>
+<li><strong>有限的读扩展能力</strong>：只有一个从节点来处理读请求，读性能的扩展能力有限。</li>
+<li><strong>容错性一般</strong>：如果唯一的从节点也宕机了，系统就失去了备份和读扩展能力，直到从节点恢复。</li>
+<li><strong>主节点负载</strong>：主节点仍需承担复制所有数据到一个从节点的压力。</li>
+</ol>
+<p><strong>适用场景</strong>：数据量不大、读请求不是特别多的场景；作为高可用方案的基础单元；希望保证数据安全但又想最大化主节点写入性能的场景。</p>
+<hr>
+<h3><span id="2-一主多从结构星形结构">2. 一主多从结构（星形结构）</span></h3><p>这是最常见的拓扑结构，主要用于<strong>读写分离</strong>。</p>
+<ul>
+<li><p><strong>结构描述</strong>：一个主节点（Master）配多个从节点（Slave）。</p>
+</li>
+<li><p><strong>示意图</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">      Redis-A (Master)</span><br><span class="line">      /    |    \</span><br><span class="line">     /     |     \</span><br><span class="line">Redis-B Redis-C Redis-D ... (Slaves)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>优点</strong></p>
+<ol>
+<li><strong>强大的读扩展能力</strong>：这是其核心优势。通过部署多个从节点，可以将大量的读请求负载均衡到各个从节点上，极大地提升了系统的整体读吞吐量，轻松应对高并发读场景。</li>
+<li><strong>专用从节点</strong>：可以为一个从节点分配特殊的任务。例如，专门用于执行 <code>keys</code>、<code>sort</code> 等耗时较长的命令，或者专门用于做每日的 RDB 快照备份，而不会影响为线上提供服务的其他从节点。</li>
+<li><strong>更高的数据冗余</strong>：多个从节点意味着多份数据副本，数据安全性更高。</li>
+</ol>
+<p><strong>缺点</strong></p>
+<ol>
+<li><strong>加重主节点负担</strong>：这是最大的缺点。多个从节点会导致主节点写命令的多次发送。主节点需要为<strong>每一个</strong>从节点单独发送一份数据副本。如果从节点数量非常多（例如几十个），主节点的网络和 CPU 资源将大量消耗在复制操作上，反而会影响其处理正常写命令的能力。</li>
+<li><strong>复制延迟放大</strong>：如果主节点写入压力巨大，所有从节点都可能出现不同程度的复制延迟（Replication Lag）。从节点越多，最后一个完成同步的从节点的延迟可能越大。</li>
+<li><strong>资源消耗</strong>：每个从节点都会占用独立的内存来存储完整的数据集，对物理资源的消耗更大。</li>
+</ol>
+<p><strong>适用场景</strong>：读远大于写的经典互联网业务场景，需要显著提升读性能。</p>
+<hr>
+<h3><span id="3-树形分层主从结构">3. 树形（分层）主从结构</span></h3><p>这是一种用于优化一主多从缺点的进阶拓扑结构。</p>
+<ul>
+<li><p><strong>结构描述</strong>：从节点不仅可以复制主节点，还可以作为其他从节点的主节点，形成一种层级关系。<strong>中间的从节点既是下游节点的 Slave，又是上游节点的 Master</strong>。</p>
+</li>
+<li><p><strong>示意图</strong>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">      Redis-A (Master)</span><br><span class="line">         /   \</span><br><span class="line">        /     \</span><br><span class="line">Redis-B (Slave/Master)   Redis-C (Slave)</span><br><span class="line">      /   \</span><br><span class="line">     /     \</span><br><span class="line">Redis-D (Slave)   Redis-E (Slave)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>A 是主节点。</li>
+<li>B 和 C 是 A 的从节点。</li>
+<li>D 和 E 是 B 的从节点（此时 B 是 D 和 E 的主节点）。</li>
+</ul>
+</li>
+</ul>
+<p><strong>优点</strong></p>
+<ol>
+<li><strong>显著减轻主节点压力</strong>：这是其核心价值。有效降低主节点负载和需要传送给从节点的数据量。主节点 A 只需要将数据同步给 B 和 C 两个节点，再由 B 节点将数据同步给 D 和 E。这样，主节点只需要处理 <strong>2 个</strong>从节点的复制请求，而不是 <strong>4 个</strong>。</li>
+<li><strong>网络优化</strong>：在跨机房或跨地域部署时，可以让一个机房内的一个从节点（如 B）作为本机房的其他从节点（D、E）的主节点，避免所有机器都直接跨网络连接远方的主节点，节省了带宽并降低了延迟。</li>
+</ol>
+<p><strong>缺点</strong></p>
+<ol>
+<li><strong>架构复杂</strong>：部署和维护的复杂度更高。</li>
+<li><strong>延迟增加</strong>：数据需要经过多层传递，到达最下层从节点（如 D、E）的延迟会比直接连接主节点的从节点（如 C）更高。</li>
+<li><strong>故障点增加</strong>：中间层的节点（如 B）变得非常关键。如果它宕机，其下层的所有从节点（D、E）都会中断复制。</li>
+</ol>
+<p><strong>适用场景</strong>：主节点需要挂载大量从节点（例如超过 10 个）的场景；跨地域部署时优化网络带宽和成本的场景。</p>
+<h3><span id="总结对比表">总结对比表</span></h3><table>
+<thead>
+<tr>
+<th align="left">拓扑结构</th>
+<th align="left">优点</th>
+<th align="left">缺点</th>
+<th align="left">核心应用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>一主一从</strong></td>
+<td align="left">简单、故障转移基础、可优化持久化</td>
+<td align="left">读扩展性差</td>
+<td align="left">数据备份、高可用基础、写密集型场景</td>
+</tr>
+<tr>
+<td align="left"><strong>一主多从</strong></td>
+<td align="left"><strong>读性能扩展性极强</strong>、数据冗余高、职责分离</td>
+<td align="left"><strong>主节点压力大</strong>、资源消耗多</td>
+<td align="left"><strong>读写分离</strong>，读多写少的经典业务</td>
+</tr>
+<tr>
+<td align="left"><strong>树形主从</strong></td>
+<td align="left"><strong>极大减轻主节点压力</strong>、优化网络带宽</td>
+<td align="left">架构复杂、延迟增加、故障点增加</td>
+<td align="left">挂载大量从节点、跨地域部署</td>
+</tr>
+</tbody></table>
+<p>最终的选择取决于具体需求：是更注重读性能、写性能，还是数据的安全性，以及运维能力和基础设施情况。</p>
+<h2><span id="主从结构服务器重启问题">主从结构服务器重启问题</span></h2><p>通过上述方式创建主从节点后，若我们用 <code>service redis restart</code> 重启主节点，会发现主节点重启失败，这是因为当我们利用该指令启动服务是通过 <code>redis</code> 用户启动的服务，而我们通过 <code>redis-cli</code> 连接时使用的是 <code>root</code> 用户。而 <code>redis-cli</code> 指令是在主节点创建之后用来创建从节点的。这就意味着这些从节点创建后也会在相同的目录下创建和 <code>redis</code> 用户一样的 <code>aof</code> 或 <code>rdb</code> 文件。当我们创建主节点时，文件的拥有者和所属组是 <code>redis</code> 用户：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [~redis/appendonlydir] - [1145]</span><br><span class="line">└─[$] <span class="built_in">rm</span> -rf appendonly.aof.*                                                                                [16:39:32]</span><br><span class="line">┌─[root@VM-16-15-debian] - [~redis/appendonlydir] - [1146]</span><br><span class="line">└─[$] service redis-server restart                                                                           [16:41:05]</span><br><span class="line">┌─[root@VM-16-15-debian] - [~redis/appendonlydir] - [1147]</span><br><span class="line">└─[$] ll                                                                                                     [16:41:10]</span><br><span class="line">total 8.0K</span><br><span class="line">-rw-rw---- 1 redis redis 89 Aug 21 16:41 appendonly.aof.1.base.rdb</span><br><span class="line">-rw-r----- 1 redis redis  0 Aug 21 16:41 appendonly.aof.1.incr.aof</span><br><span class="line">-rw-r----- 1 redis redis 88 Aug 21 16:41 appendonly.aof.manifest</span><br></pre></td></tr></table></figure>
+
+<p>当我们利用 <code>redis-cli</code> 命令创建从节点时，这些从节点的 <code>aof</code> 或 <code>rdb</code> 文件的拥有者和所属组会变成 <code>root</code> 用户。这就导致了权限问题，从而使得主节点在重启时无法正常加载这些文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [~redis/appendonlydir] - [1148]</span><br><span class="line">└─[$] ll                                                                                                     [16:41:26]</span><br><span class="line">total 12K</span><br><span class="line">-rw-rw---- 1 redis redis 89 Aug 21 16:41 appendonly.aof.1.base.rdb</span><br><span class="line">-rw-r----- 1 redis redis  0 Aug 21 16:41 appendonly.aof.1.incr.aof</span><br><span class="line">-rw-r--r-- 1 root  root  89 Aug 21 16:41 appendonly.aof.7.base.rdb</span><br><span class="line">-rw-r--r-- 1 root  root   0 Aug 21 16:41 appendonly.aof.7.incr.aof</span><br><span class="line">-rw-r--r-- 1 root  root  88 Aug 21 16:41 appendonly.aof.manifest</span><br></pre></td></tr></table></figure>
+
+<p>关系如下：</p>
+<p><img src="/img/Redis/slave/redis.png" alt="alt text"></p>
+<p>可以看到，因为 <code>Redis7</code> 版本后对混合持久化采用版本号轮转的方式来存储的，因此 <code>base</code> 文件和 <code>incr</code> 文件并不冲突，但是 <code>manifest</code> 文件的拥有者和所属组会变成 <code>root</code> 用户，这就会导致 <code>service</code> 命令重启主节点后主节点发现 <code>appendonly.aof.manifest</code> 文件时权限不足，而且也没有办法对该文件进行删除，故无法在指定的路径下创建新的 <code>manifest</code> 文件，就会导致重启失败。</p>
+<p>解决方法很简单，我们让子节点的持久化文件存储在和主节点不同的目录下即可。我们可以在从节点的配置文件中指定不同的 <code>appendonly</code> 和 <code>dbfilename</code> 路径。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 从节点1</span><br><span class="line"># Note that you must specify a directory here, not a file name.</span><br><span class="line">dir /home/ljx/redistest/project2/slave1</span><br><span class="line"># 从节点2</span><br><span class="line"># Note that you must specify a directory here, not a file name.</span><br><span class="line">dir /home/ljx/redistest/project2/slave2</span><br></pre></td></tr></table></figure>
+
+<p>这样一来，我们就让每个不同的节点的持久化文件存储在不同的目录下，避免了权限冲突的问题。</p>
+<p>同时，在生产环境中，建议所有 Redis 实例都统一用 redis 用户启动，避免 root 写入文件</p>
+<h2><span id="主从复制原理">主从复制原理</span></h2><h3><span id="redis-主从复制过程概要">Redis 主从复制过程概要</span></h3><p>Redis 主从复制是数据同步的核心机制，其建立过程主要包含以下六个关键步骤。下图清晰地展示了从节点启动后，与主节点建立连接并完成数据同步的完整流程：</p>
+<pre class="mermaid">flowchart TD
+    A[从节点配置 slaveof <master_ip> <master_port>] --> B
+
+    subgraph B [第1步: 保存主节点信息]
+        B1[保存master_ip与master_port<br>master_link_status:down]
+    end
+
+    B --> C
+
+    subgraph C [第2步: 建立TCP连接]
+        C1[从节点定时任务尝试连接主节点]
+        C2{连接成功?}
+        C2 -- 是 --> D[发送PING命令]
+        C2 -- 否 --> C1[等待重试]
+    end
+
+    D --> E{PONG响应正常?}
+    E -- 是 --> F
+    E -- 否 --> C1[断开连接, 等待重试]
+
+    subgraph F [第3步: 权限验证]
+        F1[主节点要求密码?]
+        F1 -- 是 --> F2[从节点提供masterauth]
+        F2 --> F3{密码验证通过?}
+        F3 -- 是 --> G
+        F3 -- 否 --> H[复制过程停止]
+        F1 -- 否 --> G
+    end
+
+    subgraph G [第4步: 同步数据集]
+        G1[首次复制?]
+        G1 -- 是 --> G2[进行全量同步]
+        G1 -- 否 --> G3[尝试部分同步]
+    end
+
+    G --> I
+
+    subgraph I [第5步: 命令持续复制]
+        I1[主节点持续发送<br>修改命令]
+        I2[从节点执行命令<br>保持数据一致性]
+        I1 --> I2
+    end</master_port></master_ip></pre>
+
+<h4><span id="详细步骤说明">详细步骤说明</span></h4><p><strong>1. 保存主节点信息</strong></p>
+<ul>
+<li><strong>触发</strong>：从节点 (<code>slave</code>) 配置 <code>slaveof &lt;master_ip&gt; &lt;master_port&gt;</code> 并启动后。</li>
+<li><strong>动作</strong>：从节点将主节点的 IP (<code>master_host</code>) 和端口 (<code>master_port</code>) 保存到自身。</li>
+<li><strong>状态</strong>：此时主从连接尚未建立，连接状态 (<code>master_link_status</code>) 为 <code>down</code>。</li>
+</ul>
+<p><strong>2. 主从建立 Socket 连接</strong></p>
+<ul>
+<li><strong>触发</strong>：从节点内部有一个每秒运行的定时任务，用于维护复制逻辑。</li>
+<li><strong>动作</strong>：定时任务发现新配置的主节点后，会尝试与主节点 (<code>master</code>) 建立一个 TCP 网络连接。</li>
+<li><strong>重试</strong>：如果连接失败，定时任务会无限重试，直到连接成功或用户停止复制。</li>
+</ul>
+<p><strong>3. 发送 PING 命令（应用层健康检查）</strong></p>
+<ul>
+<li><strong>触发</strong>：TCP 连接成功建立后。</li>
+<li><strong>目的</strong>：检查主节点是否在应用层正常工作，以及当前连接的网络状态是否良好。</li>
+<li><strong>结果</strong>：<ul>
+<li><strong>成功</strong>：主节点返回 <code>PONG</code>，进入下一步。</li>
+<li><strong>失败</strong>：从节点会断开 TCP 连接，并等待定时任务下次重新建立连接。</li>
+</ul>
+</li>
+</ul>
+<p><strong>4. 权限验证</strong></p>
+<ul>
+<li><strong>触发</strong>：PING-PONG 检查通过后。</li>
+<li><strong>验证方式</strong>：<ul>
+<li>如果主节点配置了 <code>requirepass</code> 参数，则需要进行密码验证。</li>
+<li>从节点需要通过 <code>masterauth</code> 参数配置相同的密码。</li>
+</ul>
+</li>
+<li><strong>结果</strong>：<ul>
+<li><strong>成功</strong>：复制过程继续。</li>
+<li><strong>失败</strong>：从节点的复制过程停止。</li>
+</ul>
+</li>
+</ul>
+<p><strong>5. 同步数据集</strong></p>
+<ul>
+<li><strong>触发</strong>：权限验证通过后，尤其是首次建立复制的场景。</li>
+<li><strong>动作</strong>：主节点将其持有的全部数据发送给从节点。</li>
+<li><strong>特性</strong>：这是复制过程中最耗时的一步，根据不同情况分为：<ul>
+<li><strong>全量同步</strong>：从节点首次连接或无法部分同步时，主节点生成 <code>RDB</code> 快照并发送。</li>
+<li><strong>部分同步</strong>：连接中断后重连，主节点仅发送中断期间丢失的命令（依赖复制积压缓冲区 <code>repl-backlog-buffer</code>）。</li>
+</ul>
+</li>
+</ul>
+<p><strong>6. 命令持续复制</strong></p>
+<ul>
+<li><strong>触发</strong>：全量&#x2F;部分同步完成后。</li>
+<li><strong>动作</strong>：<ul>
+<li>主节点每执行一个会修改数据的写命令，都会异步地发送给从节点。</li>
+<li>从节点接收并执行相同的命令，从而保证主从数据的一致性。</li>
+</ul>
+</li>
+<li><strong>状态</strong>：复制进入稳定的持续阶段，只要连接保持，数据就会一直同步。</li>
+</ul>
+<h3><span id="redis-数据同步核心机制psync-详解">Redis 数据同步核心机制：PSYNC 详解</span></h3><p>在 Redis 主从复制中，数据同步是保证数据一致性的基石。<code>PSYNC</code> 命令作为 <code>SYNC</code> 的增强版，有效地解决了全量复制在高开销和网络抖动场景下的痛点，支持<strong>全量复制</strong>和<strong>部分复制</strong>两种模式。</p>
+<h4><span id="一-两种同步模式">一、两种同步模式</span></h4><ol>
+<li><p><strong>全量复制 (Full Resynchronization)</strong></p>
+<ul>
+<li><strong>场景</strong>：主要用于初次建立主从关系的场景。</li>
+<li><strong>过程</strong>：主节点将当前内存中的全部数据生成一个 RDB 快照文件，发送给从节点。从节点清空自身旧数据后，加载 RDB 文件。</li>
+<li><strong>开销</strong>：当数据量巨大时，会对主节点的 CPU、内存、磁盘 I&#x2F;O 以及网络带宽造成巨大压力。</li>
+</ul>
+</li>
+<li><p><strong>部分复制 (Partial Resynchronization)</strong></p>
+<ul>
+<li><strong>场景</strong>：用于处理因网络闪断等原因造成数据丢失后重连的场景。</li>
+<li><strong>过程</strong>：从节点重新连接后，主节点仅补发中断期间缺失的命令数据。</li>
+<li><strong>优势</strong>：补发的数据量远小于全量数据，开销小，效率高，是保障复制高效的关键。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="二-psync-的核心要素复制-id-与偏移量">二、PSYNC 的核心要素：复制 ID 与偏移量</span></h4><p><code>PSYNC</code> 命令的语法为：<code>PSYNC &lt;replid&gt; &lt;offset&gt;</code>。其运行逻辑依赖于两个核心机制：</p>
+<ol>
+<li><p><strong>复制 ID (Replication ID)</strong></p>
+<ul>
+<li>每个主节点都有一个唯一的 <code>master_replid</code>，用于标识一个特定的数据集。主节点重启或从节点晋升为主节点时，会生成一个新的 <code>replid</code>。</li>
+<li>从节点会保存主节点的 <code>replid</code>，并在尝试重连时发送给主节点。</li>
+<li><strong><code>master_replid2</code> 的妙用</strong>：节点（尤其是曾切换角色的节点）会记录两组 <code>replid</code>。例如，从节点因网络分区“自立为主”后，会生成新的 <code>master_replid</code>，同时将旧主节点的 <code>replid</code> 保存在 <code>master_replid2</code> 中。这样网络恢复后，它可以根据 <code>master_replid2</code> 找回原来的主从关系，避免不必要的全量同步。</li>
+</ul>
+</li>
+<li><p><strong>复制偏移量 (Replication Offset)</strong></p>
+<ul>
+<li><strong>主从节点各自维护</strong>一个偏移量 (<code>offset</code>)。</li>
+<li><strong>主节点</strong>每传播一个写命令，其偏移量 <code>master_repl_offset</code> 就会增加该命令的字节长度。</li>
+<li><strong>从节点</strong>每接收到并执行一个命令，其偏移量 <code>slave_repl_offset</code> 也会相应增加。</li>
+<li><strong>作用</strong>：通过对比主从节点的偏移量，可以判断数据是否一致。当从节点重连时，通过上报自己的 <code>offset</code>，主节点便能判断需要补发哪些数据。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="三-psync-的工作流程">三、PSYNC 的工作流程</span></h4><p>其工作流程可以概括为以下几个步骤，如下图所示：</p>
+<pre class="mermaid">flowchart TD
+    A[从节点发送 PSYNC 请求] --> B{主节点判断}
+    B -- replid 不匹配<br>或 offset 不在积压缓冲区 --> C[回复 +FULLRESYNC<br>触发全量复制]
+    B -- replid 匹配且<br>offset 在积压缓冲区内 --> D[回复 +CONTINUE<br>触发部分复制]
+    C --> E[从节点接收RDB快照并加载]
+    D --> F[主节点发送积压缓冲区内<br>从offset之后的所有命令]
+    E --> G[进入命令传播阶段<br>主持续发送写命令]
+    F --> G</pre>
+
+<ol>
+<li><strong>从节点发送请求</strong>：从节点向主节点发送 <code>PSYNC ? -1</code>（请求全量复制）或 <code>PSYNC &lt;replid&gt; &lt;offset&gt;</code>（请求部分复制）。</li>
+<li><strong>主节点决策</strong>：主节点根据收到的 <code>replid</code> 和 <code>offset</code> 判断如何响应：<ul>
+<li>如果 <code>replid</code> 与自身不匹配，或 <code>offset</code> 背后的数据不在<strong>复制积压缓冲区</strong>中，则回复 <code>+FULLRESYNC &lt;replid&gt; &lt;offset&gt;</code>，触发<strong>全量复制</strong>。</li>
+<li>如果 <code>replid</code> 匹配且 <code>offset</code> 背后的数据仍在缓冲区中，则回复 <code>+CONTINUE</code>，触发<strong>部分复制</strong>，并将缺失的命令流发送给从节点。</li>
+</ul>
+</li>
+<li><strong>同步执行</strong>：从节点根据响应执行全量或部分同步流程。</li>
+<li><strong>命令持续传播</strong>：同步完成后，主节点进入命令传播阶段，持续将新的写命令发送给从节点，维持数据最终一致性。</li>
+</ol>
+<h4><span id="四-总结与优势">四、总结与优势</span></h4><ul>
+<li><strong>自动化</strong>：<code>PSYNC</code> 过程由 Redis 自身管理，开发者无需手动干预。</li>
+<li><strong>高效性</strong>：部分复制机制极大地降低了网络闪断带来的复制开销。</li>
+<li><strong>可靠性</strong>：通过 <code>Replication ID</code> 和 <code>Offset</code> 的巧妙设计， robustly 处理了主从切换和重连的各种复杂场景。</li>
+<li><strong>非阻塞</strong>：与旧的 <code>SYNC</code> 命令不同，<code>PSYNC</code> 执行期间不会阻塞主节点的其他操作。</li>
+</ul>
+<h4><span id="注意事项">注意事项</span></h4><p>在 <code>Redis</code> 新版本当中，<code>sync</code> 指令也是采用的创建后台子进程的方式来进行全量数据的同步，这样可以避免阻塞主线程，提高系统的整体性能。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!strcasecmp(c-&gt;argv[<span class="number">0</span>]-&gt;ptr,<span class="string">&quot;psync&quot;</span>)) &#123;</span><br><span class="line">        ......</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* If a slave uses SYNC, we are dealing with an old implementation</span></span><br><span class="line"><span class="comment">         * of the replication protocol (like redis-cli --slave). Flag the client</span></span><br><span class="line"><span class="comment">         * so that we don&#x27;t expect to receive REPLCONF ACK feedbacks. */</span></span><br><span class="line">        c-&gt;flags |= CLIENT_PRE_PSYNC;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (server.child_type == CHILD_TYPE_RDB &amp;&amp;</span><br><span class="line">        server.rdb_child_type == RDB_CHILD_TYPE_DISK)&#123;</span><br><span class="line">      ......</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span> (server.child_type == CHILD_TYPE_RDB &amp;&amp;</span><br><span class="line">               server.rdb_child_type == RDB_CHILD_TYPE_SOCKET)</span><br><span class="line">    &#123;</span><br><span class="line">      ......</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (server.repl_diskless_sync &amp;&amp; (c-&gt;slave_capa &amp; SLAVE_CAPA_EOF) &amp;&amp;</span><br><span class="line">            server.repl_diskless_sync_delay) &#123;</span><br><span class="line">        ......</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!hasActiveChildProcess()) &#123;</span><br><span class="line">                startBgsaveForReplication(c-&gt;slave_capa, c-&gt;slave_req);</span><br><span class="line">            &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，8.2.1 版本中的 <code>Redis</code> 在实现 <code>SYNC</code> 时，同样会让它执行 <code>startBgsaveForReplication</code> 从而创建子进程实现复制，我们查询 <code>Redis</code> 文档可以看到：</p>
+<p><img src="/img/Redis/slave/doc.png" alt="redis"></p>
+<p>“在较新版本的 Redis 中，它已被 PSYNC 取代”，这是官方文档的原话</p>
+<h3><span id="redis-全量复制">Redis 全量复制</span></h3><p>全量复制是 Redis 主从复制中最为基础和彻底的数据同步方式。它确保了从节点在初次建立复制或无法进行部分复制时，获得与主节点完全一致的数据副本。然而，这个过程成本高昂，理解其机制对于优化 Redis 架构至关重要。</p>
+<h4><span id="一-全量复制的核心流程">一、全量复制的核心流程</span></h4><p>全量复制的过程可以清晰地分为以下几个阶段，其完整流程如下图所示：</p>
+<pre class="mermaid">flowchart TD
+    A[从节点发送PSYNC ? -1] --> B[主节点回复+FULLRESYNC<br>并携带replid与offset]
+    B --> C[主节点执行bgsave<br>生成RDB快照]
+    C --> D[主节点将RDB文件发送给从节点]
+    D --> E[从节点将RDB文件保存至本地磁盘]
+    C -.-> F[主节点将bgsave期间的<br>写命令存入复制缓冲区]
+    E --> G[从节点清空自身旧数据]
+    G --> H[从节点加载RDB文件]
+    F --> I[主节点发送复制缓冲区中的命令]
+    I --> J[从节点执行这些命令<br>追平主节点最新状态]
+    H --> K[若开启AOF, 从节点执行<br>BGREWRITEAOF重写AOF文件]</pre>
+
+<p><strong>阶段一：连接与协商</strong></p>
+<ol>
+<li><strong>发起同步</strong>：从节点启动后，向主节点发送 <code>PSYNC ? -1</code> 命令。参数 <code>?</code> 和 <code>-1</code> 表明从节点未知主节点的运行 ID 和复制偏移量，意图进行全量复制。</li>
+<li><strong>主节点响应</strong>：主节点识别出全量复制的请求，回复 <code>+FULLRESYNC &lt;runid&gt; &lt;offset&gt;</code>。其中包含主节点的<strong>运行 ID</strong> 和当前的<strong>复制偏移量</strong>，从节点会保存这些信息以备后用。</li>
+</ol>
+<p><strong>阶段二：RDB 快照生成与传输</strong> 3. <strong>生成快照</strong>：主节点调用 <code>bgsave</code> 命令，在<strong>后台派生一个子进程</strong>生成 RDB 快照文件。此举避免了阻塞主进程。 4. <strong>传输数据</strong>：RDB 文件生成后，主节点将其发送给从节点。从节点会将其<strong>暂存到本地磁盘</strong>。</p>
+<p><strong>阶段三：数据加载与追赶</strong> 5. <strong>清空旧数据</strong>：从节点在加载新的 RDB 数据前，会<strong>清空自身所有旧数据</strong>，以确保状态的一致性。 6. <strong>加载快照</strong>：从节点<strong>加载</strong>接收到的 RDB 文件到内存中，此时其数据状态与主节点开始执行 <code>bgsave</code> 那个时刻的点完全相同。 7. <strong>补发增量数据</strong>：在 <code>bgsave</code> 子进程生成 RDB 期间，主节点接收的新写命令会被写入一个专门的<strong>复制缓冲区</strong>。待 RDB 传输完成，主节点会将该缓冲区内的所有命令<strong>补发</strong>给从节点。从节点执行这些命令，从而追平主节点的最新状态。</p>
+<p><strong>阶段四：后续处理</strong> 8. <strong>AOF 重写</strong>：如果从节点配置了 AOF 持久化，在加载完 RDB 后，它会自动触发 <code>BGREWRITEAOF</code> 操作，立即生成一份与当前内存数据对应的最新 AOF 文件。</p>
+<h4><span id="二-全量复制的高成本分析">二、全量复制的高成本分析</span></h4><p>全量复制是一项资源密集型操作，其高昂的成本体现在多个环节：</p>
+<ol>
+<li><p><strong>主节点开销</strong></p>
+<ul>
+<li><strong>CPU&#x2F;内存</strong>：<code>bgsave</code> 创建子进程进行快照生成，属于 <strong>CPU 密集型</strong>操作，可能导致主节点 CPU 占用飙升。同时，子进程会拷贝父进程的内存页，可能导致<strong>内存占用翻倍</strong>。</li>
+<li><strong>磁盘 I&#x2F;O</strong>：传统模式下，主节点需要将 RDB 文件<strong>写入磁盘</strong>。</li>
+</ul>
+</li>
+<li><p><strong>网络开销</strong></p>
+<ul>
+<li>需要将整个 RDB 文件<strong>通过网络传输</strong>。对于数据量达数个 GB 的实例，会占用大量带宽，可能影响其他业务的网络性能。</li>
+</ul>
+</li>
+<li><p><strong>从节点开销</strong></p>
+<ul>
+<li><strong>数据清空与加载</strong>：从节点<strong>清空旧数据</strong>和<strong>加载新 RDB</strong> 的过程是阻塞性的，在此期间从节点无法对外提供服务。</li>
+<li><strong>磁盘 I&#x2F;O</strong>：从节点需要将接收到的 RDB 数据<strong>写入本地磁盘</strong>，然后再次<strong>从磁盘读取</strong>以加载到内存。</li>
+</ul>
+</li>
+</ol>
+<p><strong>结论</strong>：应<strong>极力避免</strong>对数据量大的生产环境实例进行全量复制。优化策略包括：配置合理的 <code>repl-backlog-size</code> 以支持部分复制、保证主从网络稳定、在从节点重启前做好持久化等。</p>
+<h4><span id="三-优化无盘复制-diskless-replication">三、优化：无盘复制 (Diskless Replication)</span></h4><p>为了 mitigating 磁盘 I&#x2F;O 带来的开销，Redis 自 2.8.18 版本起支持<strong>无盘复制</strong>。</p>
+<ul>
+<li><strong>传统模式</strong>：主节点 <code>bgsave</code> → <strong>写入磁盘</strong> → 从节点读取 RDB 文件。</li>
+<li><strong>无盘模式</strong>：主节点 <code>bgsave</code> → <strong>直接通过网络发送 RDB 数据给从节点</strong>。</li>
+</ul>
+<p><strong>优势</strong>：省去了主节点磁盘写入和从节点磁盘读取的步骤，<strong>显著降低磁盘 I&#x2F;O 压力</strong>，尤其适用于磁盘性能较差的机器或高速网络环境。可通过配置 <code>repl-diskless-sync yes</code> 开启。</p>
+<blockquote>
+<p>在大多数情况下，网络传输速度都是最大的性能瓶颈，因此，即便有了无盘复制的优化，实际上对效率的提升并不大</p>
+</blockquote>
+<h3><span id="redis-部分复制">Redis 部分复制</span></h3><p>部分复制是 Redis 为优化全量复制的高昂开销而设计的核心机制。它能够在主从连接出现短暂中断后，仅同步缺失的数据，从而极大地提升复制效率和系统可用性。</p>
+<h4><span id="一-核心概念复制积压缓冲区">一、核心概念：复制积压缓冲区</span></h4><p>要理解部分复制，首先要了解其基石——<strong>复制积压缓冲区</strong>。</p>
+<ul>
+<li><p><strong>是什么</strong>：复制积压缓冲区是主节点上一个<strong>固定长度的先进先出队列</strong>。默认大小为 1MB，在主节点拥有从节点时自动创建。</p>
+</li>
+<li><p><strong>工作原理</strong>：主节点在处理每一个写命令时，除了将其发送给所有从节点，还会<strong>写入这个缓冲区</strong>。这使得缓冲区中总是保存着最近传播的写命令。</p>
+</li>
+<li><p><strong>环形结构</strong>：缓冲区是一个环形队列，当新数据写满后，会覆盖最旧的数据。其状态可以通过 <code>INFO replication</code> 命令监控：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">repl_backlog_active:1           <span class="comment"># 激活状态</span></span><br><span class="line">repl_backlog_size:1048576       <span class="comment"># 缓冲区总大小 (1MB)</span></span><br><span class="line">repl_backlog_first_byte_offset:7479 <span class="comment"># 缓冲区起始偏移量</span></span><br><span class="line">repl_backlog_histlen:1048576    <span class="comment"># 当前缓冲区中有效数据的长度</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>核心作用</strong>：根据偏移量 (<code>offset</code>)，主节点可以判断从节点缺失的数据是否还在这个缓冲区中。如果存在，即可进行部分复制；如果已被覆盖，则只能退回到全量复制。</p>
+</li>
+</ul>
+<h4><span id="二-部分复制的触发与流程">二、部分复制的触发与流程</span></h4><p>部分复制的核心思想是“缺啥补啥”，其完整流程如下图所示，通常在网络中断后重连时触发：</p>
+<pre class="mermaid">flowchart TD
+    A[主从连接因网络中断超时断开] --> B[中断期间: 主节点继续处理写命令<br>并将其存入复制积压缓冲区]
+    B --> C[网络恢复后, 从节点重连主节点]
+    C --> D[从节点发送PSYNC请求<br>携带之前的主节点replid与自身offset]
+    D --> E{主节点校验<br>从节点offset是否在<br>积压缓冲区范围内?}
+
+    E -- 是 --> F
+    subgraph F [部分复制流程]
+        F1[主节点回复 +CONTINUE]
+        F2[从节点接收响应, 准备接收数据]
+        F3[主节点从积压缓冲区中<br>查找并发送从offset之后的所有命令]
+        F4[从节点执行命令, 追平数据]
+    end
+
+    E -- 否 --> G
+    subgraph G [全量复制流程]
+        G1[主节点回复 +FULLRESYNC]
+        G2[触发完整的全量复制过程]
+    end
+
+    F --> H[同步完成, 进入命令持续传播阶段]
+    G --> H</pre>
+
+<p><strong>流程阶段解析：</strong></p>
+<ol>
+<li><p><strong>连接中断与数据缓存</strong>：</p>
+<ul>
+<li>主从节点之间因网络抖动或中断，连接时间超过 <code>repl-timeout</code> 配置值，连接断开。</li>
+<li>中断期间，主节点依然正常处理写命令。这些无法即时发送给从节点的命令被<strong>暂存到复制积压缓冲区</strong>中。</li>
+</ul>
+</li>
+<li><p><strong>重连与同步请求</strong>：</p>
+<ul>
+<li>网络恢复后，从节点自动重连主节点，并重新发起复制请求。</li>
+<li>从节点使用之前保存的<strong>主节点运行 ID</strong> 和<strong>自身的复制偏移量</strong>作为参数，发送 <code>PSYNC &lt;replid&gt; &lt;offset&gt;</code> 命令。</li>
+</ul>
+</li>
+<li><p><strong>主节点验证与决策</strong>：</p>
+<ul>
+<li>主节点验证从节点传来的 <code>replid</code> 是否与自身匹配。</li>
+<li><strong>关键检查</strong>：主节点判断从节点传来的 <code>offset</code> 是否还在自己的复制积压缓冲区范围内。<ul>
+<li><strong>如果 <code>offset</code> 仍在缓冲区中</strong>：主节点回复 <code>+CONTINUE</code>，表示可以进行部分复制。</li>
+<li><strong>如果 <code>offset</code> 已被覆盖</strong>：主节点回复 <code>+FULLRESYNC</code>，并触发全量复制。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>数据补发与最终一致</strong>：</p>
+<ul>
+<li>主节点从积压缓冲区中提取从节点 <code>offset</code> 之后的所有命令，发送给从节点。</li>
+<li>从节点接收并执行这些命令，最终将自己的数据状态追平至与主节点一致。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="三-部分复制的优势与配置建议">三、部分复制的优势与配置建议</span></h4><ul>
+<li><p><strong>巨大优势</strong>：部分复制机制将中断恢复的代价从<strong>传输整个数据集</strong>降低为<strong>仅传输中断期间的少量写命令</strong>，极大地减少了对 CPU、网络和 I&#x2F;O 资源的消耗，降低了系统延迟。</p>
+</li>
+<li><p><strong>关键配置</strong>：</p>
+<ul>
+<li><strong><code>repl-backlog-size</code></strong>：<strong>调整此配置至关重要</strong>。对于写操作频繁的系统，1MB 的默认值可能很快被覆盖，导致部分复制失效。建议根据 <code>master_repl_offset</code> 的增长速度（如每秒偏移量增量）和可能的网络中断时间（如 60 秒）来估算并调大该值（例如设置为 <code>100MB</code>），以降低全量复制的概率。</li>
+<li><strong><code>repl-timeout</code></strong>：设置合理的超时时间，避免在网络波动时过早断开连接。</li>
+</ul>
+</li>
+</ul>
+<h4><span id="四-总结">四、总结</span></h4><p>部分复制是 Redis 主从复制高可用性的关键保障。它通过<strong>复制积压缓冲区</strong>这一精巧的设计，实现了高效、快速的数据故障恢复。理解和合理配置 <code>repl-backlog-size</code> 等参数，是保证 Redis 主从架构在大流量、不稳定网络环境下依然稳定可靠的关键。</p>
+<h3><span id="redis-实时复制维持数据最终一致性的心跳">Redis 实时复制：维持数据最终一致性的心跳</span></h3><p>当全量或部分复制完成后，主从节点之间的数据状态达到一致。此后，为了保持这种一致性，系统会进入<strong>实时复制</strong>阶段（也称为命令传播阶段）。这是主从复制过程中最持久和常态化的阶段，确保从节点能够实时跟上主节点的数据变化。</p>
+<h4><span id="一-核心机制命令传播">一、核心机制：命令传播</span></h4><p>实时复制的核心过程非常简单高效：</p>
+<ol>
+<li><strong>主节点</strong>接收并执行任何一个会修改数据集（如 <code>SET</code>, <code>LPUSH</code>, <code>SADD</code>, <code>DEL</code> 等）的写命令。</li>
+<li>主节点将该命令<strong>异步地</strong>通过之前建立的 TCP 长连接发送给所有从节点。</li>
+<li><strong>从节点</strong>接收、解析并<strong>执行</strong>相同的命令，从而使得自身数据状态与主节点保持同步。</li>
+</ol>
+<p>这个过程是<strong>异步</strong>的，意味着主节点不会等待从节点执行完毕后再返回结果给客户端，这保证了高性能，但也带来了极短的<strong>主从延迟</strong>。</p>
+<h4><span id="二-生命线心跳维护机制">二、生命线：心跳维护机制</span></h4><p>为了确保命令传播的 TCP 长连接稳定可用，并能及时发现失败的从节点，Redis 在主从节点之间实现了一套<strong>应用层的心跳检测机制</strong>。</p>
+<p>这套机制的核心作用是<strong>保活连接</strong>和<strong>监控状态</strong>，其工作原理如下图所示：</p>
+<pre class="mermaid">sequenceDiagram
+    participant M as 主节点
+    participant S as 从节点
+
+    Note over M, S: 心跳检测机制
+    loop Every 10 Seconds
+        M->>S: PING
+        S-->>M: PONG (响应)
+    end
+
+    loop Every 1 Second
+        S->>M: REPLCONF ACK <offset>
+    end
+
+    Note over M: 监控超时
+    Note over M: 若超过repl-timeout(默认60s)<br>未收到从节点REPLCONF ACK，<br>则判定从节点下线，断开连接。</offset></pre>
+
+<p><strong>1. 主节点 → 从节点：PING（健康检查）</strong></p>
+<ul>
+<li><strong>频率</strong>：主节点默认每隔 <strong>10 秒</strong>向从节点发送一次 <code>PING</code> 命令。</li>
+<li><strong>目的</strong>：<ul>
+<li>检查从节点是否仍然存活。</li>
+<li>检查网络连接是否正常。</li>
+<li>维持长连接活性，防止被中间网络设备因超时断开。</li>
+</ul>
+</li>
+</ul>
+<p><strong>2. 从节点 → 主节点：REPLCONF ACK（偏移量上报）</strong></p>
+<ul>
+<li><strong>频率</strong>：从节点默认每隔 <strong>1 秒</strong>向主节点发送一次 <code>REPLCONF ACK &lt;offset&gt;</code> 命令。</li>
+<li><strong>目的</strong>：<ul>
+<li><strong>上报自身复制偏移量</strong>：主节点通过此命令知晓每个从节点的复制进度，可用于监控延迟和判断部分复制的可能性。</li>
+<li><strong>作为另一种心跳信号</strong>：这是对主节点 <code>PING</code> 的补充，更频繁地向主节点证明自己的活跃状态。</li>
+<li>实现<strong>读写分离</strong>场景下的<strong>弱一致性保证</strong>（通过 <code>min-slaves-to-write</code> 和 <code>min-slaves-max-lag</code> 配置）。</li>
+</ul>
+</li>
+</ul>
+<h4><span id="三-超时判定与故障处理">三、超时判定与故障处理</span></h4><ul>
+<li><strong><code>repl-timeout</code></strong>：这是一个关键配置项，默认值为 <strong>60 秒</strong>。它定义了主从节点之间心跳响应的超时时间。</li>
+<li><strong>故障判定</strong>：如果主节点在 <code>repl-timeout</code> 时间内，既没有收到从节点的 <code>REPLCONF ACK</code> 响应，也没有收到其对 <code>PING</code> 的 <code>PONG</code> 回复，主节点就会判定该从节点已下线。</li>
+<li><strong>处理方式</strong>：主节点会<strong>主动断开</strong>与该从节点的复制连接，以释放资源。从节点恢复后，需要重新发起连接并根据偏移量尝试进行部分复制或全量复制。</li>
+</ul>
+<h4><span id="四-总结与意义">四、总结与意义</span></h4><ul>
+<li><strong>实时复制</strong>是主从复制中<strong>持续进行</strong>的阶段，通过异步传播命令来保持数据一致性。</li>
+<li><strong>心跳机制</strong>是维持复制链路可靠的<strong>生命线</strong>，它包括主节点的 <code>PING</code> 和从节点的 <code>REPLCONF ACK</code>。</li>
+<li><strong><code>repl-timeout</code></strong> 是判断连接健康度的关键阈值，超时会导致连接断开。</li>
+<li>这种设计使得 Redis 主从复制在保证高性能的同时，也具备了一定的自愈能力，能够自动处理网络波动和从节点临时故障的场景，是构建可靠 Redis 架构的基础。</li>
+</ul>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
