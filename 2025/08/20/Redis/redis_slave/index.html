@@ -582,10 +582,10 @@ slaveof
 <p>同时，在生产环境中，建议所有 Redis 实例都统一用 redis 用户启动，避免 root 写入文件</p>
 <h2><span id="主从复制原理">主从复制原理</span></h2><h3><span id="redis-主从复制过程概要">Redis 主从复制过程概要</span></h3><p>Redis 主从复制是数据同步的核心机制，其建立过程主要包含以下六个关键步骤。下图清晰地展示了从节点启动后，与主节点建立连接并完成数据同步的完整流程：</p>
 <pre class="mermaid">flowchart TD
-    A[从节点配置 slaveof <master_ip> <master_port>] --> B
+    A[从节点配置 slaveof &ltmaster_ip&gt &ltmaster_port&gt] --> B
 
     subgraph B [第1步: 保存主节点信息]
-        B1[保存master_ip与master_port<br>master_link_status:down]
+        B1[保存master_ip与master_port\nmaster_link_status:down]
     end
 
     B --> C
@@ -594,12 +594,12 @@ slaveof
         C1[从节点定时任务尝试连接主节点]
         C2{连接成功?}
         C2 -- 是 --> D[发送PING命令]
-        C2 -- 否 --> C1[等待重试]
+        C2 -- 否 --> C3[等待重试]
     end
 
     D --> E{PONG响应正常?}
     E -- 是 --> F
-    E -- 否 --> C1[断开连接, 等待重试]
+    E -- 否 --> C3[断开连接, 等待重试]
 
     subgraph F [第3步: 权限验证]
         F1[主节点要求密码?]
@@ -619,10 +619,10 @@ slaveof
     G --> I
 
     subgraph I [第5步: 命令持续复制]
-        I1[主节点持续发送<br>修改命令]
-        I2[从节点执行命令<br>保持数据一致性]
+        I1[主节点持续发送\n修改命令]
+        I2[从节点执行命令\n保持数据一致性]
         I1 --> I2
-    end</master_port></master_ip></pre>
+    end</pre>
 
 <h4><span id="详细步骤说明">详细步骤说明</span></h4><p><strong>1. 保存主节点信息</strong></p>
 <ul>
