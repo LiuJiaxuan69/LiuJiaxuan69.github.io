@@ -1,0 +1,1318 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker 前置知识-技术架构演进 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+常见概念
+基本概念
+评价指标（Metric）
+
+
+架构演进
+单机架构
+应用数据分离架构
+应用服务集群架构
+读写分离&amp;#x2F;主从分离架构
+冷热分离架构
+垂直分库
+水平分库
+微服务架构
+容器编,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Docker 前置知识-技术架构演进 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+常见概念
+基本概念
+评价指标（Metric）
+
+
+架构演进
+单机架构
+应用数据分离架构
+应用服务集群架构
+读写分离&amp;#x2F;主从分离架构
+冷热分离架构
+垂直分库
+水平分库
+微服务架构
+容器编,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Docker 前置知识-技术架构演进 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+常见概念
+基本概念
+评价指标（Metric）
+
+
+架构演进
+单机架构
+应用数据分离架构
+应用服务集群架构
+读写分离&amp;#x2F;主从分离架构
+冷热分离架构
+垂直分库
+水平分库
+微服务架构
+容器编,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Docker 前置知识-技术架构演进</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+
+    <div class="section">
+      <div class="article" style="padding-top: 10%;padding-bottom: 13%;width:70%;">
+    <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+        <h1 class="title">Docker 前置知识-技术架构演进</h1>
+        <div class="stuff">
+            <span>六月 16, 2025</span>
+            
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" rel="tag">技术架构</a></li></ul>
+
+
+        </div>
+        <div class="content markdown" 
+             id="post-content" 
+             style="color: var(--text-color, inherit);">
+            <!-- toc -->
+
+<ul>
+<li><a href="#%E5%B8%B8%E8%A7%81%E6%A6%82%E5%BF%B5">常见概念</a><ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">基本概念</a></li>
+<li><a href="#%E8%AF%84%E4%BB%B7%E6%8C%87%E6%A0%87metric">评价指标（Metric）</a></li>
+</ul>
+</li>
+<li><a href="#%E6%9E%B6%E6%9E%84%E6%BC%94%E8%BF%9B">架构演进</a><ul>
+<li><a href="#%E5%8D%95%E6%9C%BA%E6%9E%B6%E6%9E%84">单机架构</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E6%95%B0%E6%8D%AE%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84">应用数据分离架构</a></li>
+<li><a href="#%E5%BA%94%E7%94%A8%E6%9C%8D%E5%8A%A1%E9%9B%86%E7%BE%A4%E6%9E%B6%E6%9E%84">应用服务集群架构</a></li>
+<li><a href="#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB%E4%B8%BB%E4%BB%8E%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84">读写分离&#x2F;主从分离架构</a></li>
+<li><a href="#%E5%86%B7%E7%83%AD%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84">冷热分离架构</a></li>
+<li><a href="#%E5%9E%82%E7%9B%B4%E5%88%86%E5%BA%93">垂直分库</a></li>
+<li><a href="#%E6%B0%B4%E5%B9%B3%E5%88%86%E5%BA%93">水平分库</a></li>
+<li><a href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84">微服务架构</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E7%BC%96%E6%8E%92%E6%9E%B6%E6%9E%84">容器编排架构</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="常见概念">常见概念</span></h2><p>在正式引入架构演进之前，为避免读者对架构中的概念有所疑惑，故对其中一些比较重要的概念做前置介绍：</p>
+<h3><span id="基本概念">基本概念</span></h3><h4><span id="应用applicationx2f-系统system">应用（Application）&#x2F; 系统（System）</span></h4><p>为了完成一整套服务的一个程序或者一组相互配合的程序群。生活例子类比：为了完成一项任务，而搭建的由一个人或者一群相互配的人组成的团队。</p>
+<h4><span id="模块modulex2f-组件component">模块（Module）&#x2F; 组件（Component）</span></h4><p>当应用较复杂时，为了分离职责，将其中具有清晰职责的、内聚性强的部分，抽象出概念，便于理解。生活例子类比：军队中为了进行某据点的攻克，将人员分为突击小组、爆破小组、掩护小组、通信小组等。</p>
+<h4><span id="分布式distributed">分布式（Distributed）</span></h4><p>系统中的多个模块被部署于不同服务器之上，即可以将该系统称为分布式系统。如 Web 服务器与数据库分别工作在不同的服务器上，或者多台 Web 服务器被分别部署在不同服务器上。生活例子类比：为了更好的满足现实需要，一个在同一个办公场地的工作小组被分散到多个城市的不同工作场地中进行远程配合工作完成目标。跨主机之间的模块之间的通信基本要借助网络支撑完成。</p>
+<h4><span id="集群cluster">集群（Cluster）</span></h4><p>被部署于多台服务器上的、为了实现特定目标的一个&#x2F;组特定的组件，整个整体被称为集群。比如多个 MySQL 工作在不同服务器上，共同提供数据库服务目标，可以被称为一组数据库集群。生活例子类比：为了解决军队攻克防守坚固的大城市的作战目标，指挥部将大批炮兵部队集中起来形成一个炮兵打击集群。</p>
+<p>分布式 vs 集群。通常不用太严格区分两者的细微概念，细致的话，分布式强调的是物理形态，即工作在不同服务器上并且通过网络通信配合完成任务；而集群更在意逻辑形态，即是否为了完成特定服务目标。</p>
+<h4><span id="主masterx2f-从slave">主（Master）&#x2F; 从（Slave）</span></h4><p>集群中，通常有一个程序需要承担更多的职责，被称为主；其他承担附属职责的被称为从。比如 MySQL 集群中，只有其中一台服务器上数据库允许进行数据的写入（增&#x2F;删&#x2F;改），其他数据库的数据修改全部要从这台数据库同步而来，则把那台数据库称为主库，其他数据库称为从库。</p>
+<h4><span id="中间件middleware">中间件（Middleware）</span></h4><p>一类提供不同应用程序用于相互通信的软件，即处于不同技术、工具和数据库之间的桥梁。生活例子类比：一家饭店开始时，会每天去市场挑选买菜，但随着饭店业务量变大，成立一个采购部，由采购部专职于采买业务，称为厨房和菜市场之间的桥梁。</p>
+<h4><span id="容器docker">容器（Docker）</span></h4><p>Docker 是一个开源的应用容器引擎，让开发者可以打包他们的应用以及依赖包到一个可移植的镜像中，然后发布到任何流行的 Linux 或 Windows 操作系统的机器上，也可以实现虚拟化。可以理解为一个集装箱，集装箱里面是每个用户的货物，整体打包。</p>
+<h4><span id="容器编排k8s">容器编排（K8S）</span></h4><p>kubernetes，简称 K8s，是用 8 代替名字中间的 8 个字符“ubernete”而成的缩写。是一个开源的，用于管理云平台中多个主机上的容器化的应用，Kubernetes 的目标是让部署容器化的应用简单并且高效。可以理解为一个货船，安装集装箱的大小，货物情况合理的来组织集装箱完成整体货物的搬运。</p>
+<h3><span id="评价指标metric">评价指标（Metric）</span></h3><h4><span id="可用性availability">可用性（Availability）</span></h4><p>考察单位时间段内，系统可以正常提供服务的概率&#x2F;期望。例如：年化系统可用性 &#x3D; 系统正常提供服务时长 &#x2F; 一年总时长。这里暗含着一个指标，即如何评价系统提供无法是否正常，我们就不深入了。平时我们常说的 4 个 9 即系统可以提供 99.99% 的可用性，5 个 9 是 99.999% 的可用性，以此类推。我们平时只是用高可用（High Availability HA）这个非量化目标简要表达我们系统的追求。</p>
+<h4><span id="响应时长response-time-rt">响应时长（Response Time RT）</span></h4><p>指用户完成输入到系统给出用户反应的时长。例如点外卖业务的响应时长 &#x3D; 拿到外卖的时刻 - 完成点单的时刻。通常我们需要衡量的是最长响应时长、平均响应时长和中位数响应时长。这个指标原则上是越小越好，但很多情况下由于实现的限制，需要根据实际情况具体判断</p>
+<h4><span id="吞吐throughputvs-并发concurrent">吞吐（Throughput）vs 并发（Concurrent）</span></h4><p>吞吐考察单位时间段内，系统可以成功处理的请求的数量。并发指系统同一时刻支持的请求最高量。例如一条 2 车道高速公路，一分钟可以通过 20 辆车，则并发是 2，一分钟的吞吐量是 20。实践中，并发量往往无法直接获取，很多时候都是用极短的时间段（比如 1 秒）的吞吐量做代替。我们平时用高并发（Hight Concurrent）这个非量化目标简要表达系统的追求。</p>
+<h2><span id="架构演进">架构演进</span></h2><h3><span id="单机架构">单机架构</span></h3><p><img src="/img/Docker/base/single.png" alt="single"></p>
+<p>初期，我们需要利用我们精干的技术团队，快速将业务系统投入市场进行检验，并且可以迅速响应变化要求。但好在前期用户访问量很少，没有对我们的性能、安全等提出很高的要求，而且系统架构简单，无需专业的运维团队，所以选择单机架构是合适的。</p>
+<p>在这种架构当中，应用服务和数据库服务共用一台服务器，所有的请求都通过这台服务器进行处理。</p>
+<p>的确，这样的架构部署简单，成本也很低，但是会存在严重的性能瓶颈，且数据库和应用服务会互相竞争资源。</p>
+<h3><span id="应用数据分离架构">应用数据分离架构</span></h3><p>随着系统的上线，我们不出意外地获得了成功。市场上出现了一批忠实于我们的用户，使得系统的访问量逐步上升，逐渐逼近了硬件资源的极限，同时团队也在此期间积累了对业务流程的一批经验。面对当前的性能压力，我们需要未雨绸缪去进行系统重构、架构挑战，以提升系统的承载能力。但由于预算仍然很紧张，我们选择了将应用和数据分离的做法，可以最小代价的提升系统的承载能力</p>
+<p><img src="/img/Docker/base/apart.png" alt="apart"></p>
+<p>和之前架构的主要区别在于将数据库服务独立部署在同一个数据中心的其他服务器上，应用服务通过网络访问数据，但是这种架构也难免遇到一些缺点，我们来总结一下这个架构的优缺点：</p>
+<h4><span id="优点"><strong>优点</strong></span></h4><ol>
+<li><strong>性能提升</strong>：相较于单机架构（应用和数据库同服），将应用服务和数据库服务分离到不同服务器上，减轻了单台服务器的资源竞争压力，整体性能得到提升。</li>
+<li><strong>容灾能力增强</strong>：实现了初步的隔离。数据库被独立出来，避免了因应用程序故障（如内存泄漏、CPU 占满）而直接拖垮数据库服务，提升了系统的稳定性和容灾能力。</li>
+<li><strong>成本相对可控</strong>：作为架构演进的第一步，此方案只需增加少量的服务器，其硬件和运维成本相对于更复杂的分布式架构而言，依然在可接受的范围内。</li>
+</ol>
+<h4><span id="缺点"><strong>缺点</strong></span></h4><ol>
+<li><strong>硬件成本变高</strong>：这种架构需要购买和维护更多的服务器，导致了硬件成本和运维复杂度的增加。</li>
+<li><strong>存在性能瓶颈</strong>：虽然性能相比单机有提升，但数据库和应用通常仍是“单点”。随着业务增长，尤其是数据库层面，很容易遇到 I&#x2F;O、CPU 等瓶颈，<strong>无法独立应对海量的并发请求</strong>。</li>
+</ol>
+<h3><span id="应用服务集群架构">应用服务集群架构</span></h3><p>应用集群架构是指在水平扩展（Scale-Out）方案中，<strong>将多台应用服务器组织成一个统一的整体，共同对外提供服务的架构模式</strong>。这个集群对用户来说就像一个单一、高性能和高可用的服务器。</p>
+<p><img src="/img/Docker/base/cluster.png" alt="cluster"></p>
+<p>其核心目的是：<strong>通过增加廉价商用服务器的数量，而非提升单台服务器的性能（Scale-Up），来线性地提升系统的整体处理能力和可用性。</strong></p>
+<p>当系统用户量激增，单台应用服务器遇到性能瓶颈（如 CPU、内存、网络带宽耗尽）时，主要有两种选择：</p>
+<ol>
+<li><strong>垂直扩展：</strong> 升级单台服务器的硬件（更快的 CPU、更大的内存）。<strong>缺点</strong>：成本高昂（性能提升非线性增长）、有物理上限、存在单点故障风险。</li>
+<li><strong>水平扩展：</strong> 增加更多的服务器。<strong>缺点</strong>：引入了架构复杂性，需要解决流量如何分发、会话如何保持等问题。</li>
+</ol>
+<p>应用集群架构正是<strong>水平扩展方案的具体实现</strong>。</p>
+<h4><span id="核心组件负载均衡器">核心组件：负载均衡器</span></h4><p>实现应用集群的关键是引入一个<strong>负载均衡器</strong>。它就像是一个<strong>交通警察</strong>，站在所有应用服务器之前，负责将所有 incoming 的用户请求，按照预设的规则，智能地分发到集群中某一台健康的应用服务器上。</p>
+<h5><span id="常见的流量调度算法">常见的流量调度算法</span></h5><p>负载均衡器根据不同的算法决定将请求分发给谁：</p>
+<ul>
+<li><strong>轮询：</strong> 将请求依次、平均地分发给每一台服务器。</li>
+<li><strong>加权轮询：</strong> 给性能更强的服务器分配更高的权重，让其处理更多的请求，实现“能者多劳”。</li>
+<li><strong>最少连接数：</strong> 将新的请求发送给当前连接数最少的服务器，避免某台服务器过载。</li>
+<li><strong>IP 哈希&#x2F;一致性哈希：</strong> 根据用户的 IP 地址计算出一个哈希值，相同来源的请求总是被分配到同一台服务器上。<strong>优点</strong>：可以很好地解决<strong>用户会话</strong>的问题，例如用户的登录状态可以只保存在一台服务器上而无需同步到所有服务器。</li>
+</ul>
+<hr>
+<h4><span id="应用集群架构的优缺点">应用集群架构的优缺点</span></h4><h5><span id="优点"><strong>优点</strong></span></h5><ol>
+<li><strong>高并发处理能力：</strong> 通过多台服务器并行处理请求，极大地提升了系统的整体<strong>吞吐量</strong>，能够应对海量用户访问。</li>
+<li><strong>高可用性：</strong> 消除了单点故障。如果集群中一台应用服务器宕机，负载均衡器能够自动检测到并将其从健康列表中移除，后续流量只会被分发到其他正常的服务器上，从而保证服务不中断。</li>
+<li><strong>良好的可扩展性：</strong> 当流量进一步增长时，可以非常简单地向集群中<strong>动态添加</strong>新的应用服务器，几乎可以无限水平扩展。</li>
+<li><strong>成本效益高：</strong> 使用多台普通商用服务器通常比升级到一台顶级大型机的成本更低，更具性价比。</li>
+</ol>
+<h5><span id="缺点"><strong>缺点</strong></span></h5><ol>
+<li><strong>架构复杂性增加：</strong> 需要引入并维护负载均衡器等新组件。</li>
+<li><strong>带来新的技术挑战：</strong><ul>
+<li><strong>会话保持问题：</strong> 如果用户第一次请求被发到服务器 A 并登录，第二次请求被发到服务器 B，如何让 B 也知道用户已登录？解决方案有：Session 复制、Session 集中存储（如存入 Redis）、或使用 IP 哈希算法固定用户访问的服务器。</li>
+<li><strong>数据一致性问题：</strong> 所有应用服务器需要访问同一数据源（如数据库、缓存），要确保它们看到的数据是一致的。</li>
+<li><strong>依赖服务压力：</strong> 应用服务器变多了，它们共同依赖的数据库、文件服务等下游服务可能会成为新的瓶颈。</li>
+</ul>
+</li>
+</ol>
+<h3><span id="读写分离x2f主从分离架构">读写分离&#x2F;主从分离架构</span></h3><p><img src="/img/Docker/base/slave.png" alt="slave"></p>
+<p>读写分离&#x2F;主从分离架构是一种<strong>通过复制技术，将一个数据库（主库）的数据同步到另一个或多个数据库（从库），并在此基础上实现写操作（增删改）与读操作（查询）分离</strong>的数据库架构模式。</p>
+<p>其核心思想是：<strong>一主多从，主库负责写，从库负责读。</strong></p>
+<p>当应用层通过集群化解决了自身瓶颈后，压力就全部转移到了数据库层面。单一数据库服务器很快就会遇到 I&#x2F;O、CPU、连接数等瓶颈。然而，数据库<strong>不能像应用服务器那样简单地通过加机器并负载均衡来扩展</strong>，因为必须要保证所有机器上数据的一致性。</p>
+<p>读写分离架构就是为了解决数据库的<strong>读多写少</strong>型压力而生的。它基于一个关键观察：<strong>在大多数业务系统（如电商、内容网站）中，读请求（如浏览商品、查看文章）的频率远高于写请求（如下单、评论）。</strong></p>
+<hr>
+<h4><span id="它是如何工作的">它是如何工作的？</span></h4><ol>
+<li><p><strong>主数据库</strong>：承担所有<strong>写操作</strong>（INSERT, UPDATE, DELETE）。任何对数据的修改都只发生在这里。它是数据的唯一权威来源。</p>
+</li>
+<li><p><strong>从数据库</strong>：通过数据库内置的<strong>复制机制</strong>（如 MySQL 的 binlog 复制），实时（或近实时）地将主库的数据变更同步过来。从库是主库的一个<strong>完整副本</strong>。它<strong>只承担读操作</strong>（SELECT）。</p>
+</li>
+<li><p><strong>应用层调整</strong>：应用程序在访问数据库时，需要进行判断：</p>
+<ul>
+<li>当执行<strong>写操作</strong>时，请求直接发往<strong>主库</strong>。</li>
+<li>当执行<strong>读操作</strong>时，请求被分发到某一个<strong>从库</strong>。</li>
+</ul>
+</li>
+</ol>
+<p>这个过程通常需要一个<strong>数据库中间件</strong>（或是在应用内集成特定组件）来智能地路由读写请求。</p>
+<h4><span id="读写分离架构的优缺点">读写分离架构的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>显著提升读取性能</strong>：这是最核心的优点。通过<strong>增加从库数量</strong>，可以将大量的读请求分散到多台机器上，从而极大地提升了系统的整体查询处理能力和<strong>吞吐量</strong>。解决了“热点数据的频繁读取导致数据库负载很高”的问题。</li>
+<li><strong>间接提升写入性能</strong>：将读操作从主库剥离，使主库可以<strong>更专注于处理写操作</strong>，减少了锁竞争等开销，从而间接提升了写操作的性能。</li>
+<li><strong>提高数据库可用性与容灾能力</strong>：<ul>
+<li><strong>高可用</strong>：如果一台从库宕机，其他从库仍然可以提供读服务，系统整体功能不受大的影响。</li>
+<li><strong>数据备份</strong>：从库本质上就是一个实时备份的数据库副本，可以用于数据备份和恢复，降低了数据丢失的风险。</li>
+<li><strong>快速故障转移</strong>：如果主库宕机，可以快速地将一台从库提升为新的主库（需要配合其他工具和流程），缩短系统不可用时间。</li>
+</ul>
+</li>
+</ol>
+<h5><span id="缺点">缺点</span></h5><ol>
+<li><strong>数据同步延迟（致命缺点）</strong>：这是该架构最大的挑战。由于主库到从库的数据同步是<strong>异步</strong>的（通常是出于性能考虑），它需要时间。这会导致<strong>主从数据短暂不一致</strong>。<ul>
+<li><strong>场景</strong>：用户刚下单成功（数据写入主库），立刻刷新订单列表（请求被路由到尚未同步完成的从库），可能看不到刚下的订单。这对用户体验是致命的。</li>
+<li><strong>解决方案</strong>：对一致性要求极高的操作，可以强制走主库查询（但这会增加主库压力）。</li>
+</ul>
+</li>
+<li><strong>架构复杂度和成本增加</strong>：<ul>
+<li>需要引入和管理更多的数据库服务器，<strong>硬件和运维成本更高</strong>。</li>
+<li>应用程序需要识别读写操作并进行路由，增加了代码的复杂性。通常需要引入或开发额外的中间件。</li>
+</ul>
+</li>
+<li><strong>主库仍然是单点</strong>：写操作和数据同步的源头仍然是单一主库，它本身存在单点故障风险。虽然可以通过一些高可用方案（如 MHA、MGR）缓解，但并未从根本上解决写操作的扩展性问题。</li>
+</ol>
+<h3><span id="冷热分离架构">冷热分离架构</span></h3><p>冷热分离架构是一种<strong>根据数据的访问频率（热度）将其分离到不同存储介质或系统中进行管理的设计思想</strong>。其核心目的是：<strong>将有限的高性能资源（如内存）服务于最需要它的高频访问数据（热数据），而将低频访问数据（冷数据）存放在成本更低、容量更大的存储中</strong>，从而实现成本与性能的最优平衡。</p>
+<p><img src="/img/Docker/base/hot.png" alt="hot_cold"></p>
+<p>在实践中，它最常见的实现方式就是<strong>引入缓存</strong>，构建一个层次化的存储体系。</p>
+<hr>
+<h4><span id="为什么需要冷热分离架构">为什么需要冷热分离架构？</span></h4><p>在前面的读写分离架构中，虽然从库分担了读压力，但所有请求最终仍然会到达数据库。这存在几个明显问题：</p>
+<ol>
+<li><strong>数据库瓶颈仍在</strong>：对于<strong>极端热点的数据</strong>（如明星八卦新闻、秒杀商品信息），即使经过读写分离，大量的重复查询依然会对数据库造成巨大的压力，成为系统的瓶颈。</li>
+<li><strong>响应时间瓶颈</strong>：即使数据库能承受住压力，每次请求都需要执行完整的 SQL 查询、磁盘 I&#x2F;O 等操作，<strong>响应时间（RT）的极限受限于数据库本身</strong>，难以进一步降低。</li>
+<li><strong>资源浪费</strong>：数据库中存储着大量很少被访问的历史数据（冷数据），它们与高频访问的热数据存放在一起，共享着昂贵的数据库资源，这是一种浪费。</li>
+</ol>
+<p>冷热分离架构（引入缓存）正是为了<strong>根治“热点数据频繁读取导致数据库负载很高”这一顽疾</strong>。</p>
+<hr>
+<h4><span id="架构原理">架构原理</span></h4><p>该架构在应用层和数据库层之间增加了一个<strong>缓存层</strong>（通常是基于内存的键值存储，如 Redis、Memcached）。</p>
+<ol>
+<li><p><strong>数据分级</strong>：</p>
+<ul>
+<li><strong>热数据</strong>：访问频率极高的数据（如热门商品信息、热门文章、用户会话信息）。存放在<strong>缓存层</strong>。</li>
+<li><strong>冷数据</strong>：访问频率低的数据（如历史订单、旧日志、归档信息）。存放在<strong>数据库层</strong>。</li>
+</ul>
+</li>
+<li><p><strong>工作流程（以读取为例）</strong>：</p>
+<ul>
+<li><strong>第 1 步</strong>：应用需要读取数据时，首先<strong>查询缓存</strong>。</li>
+<li><strong>第 2 步 - 缓存命中</strong>：如果缓存中存在该数据（<strong>Hit</strong>），则直接返回给应用，<strong>整个过程完全不涉及数据库</strong>。</li>
+<li><strong>第 3 步 - 缓存未命中</strong>：如果缓存中不存在该数据（<strong>Miss</strong>），则再去查询数据库。</li>
+<li><strong>第 4 步</strong>：从数据库取出数据后，一方面返回给应用，另一方面<strong>将数据写入缓存</strong>，并设置一个过期时间，以便后续请求能直接从缓存中获取。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4><span id="冷热分离架构的优缺点">冷热分离架构的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>性能大幅提升</strong>：内存的读写速度（微秒级）远高于磁盘（毫秒级）。<strong>响应时长（RT）显著降低</strong>，用户体验极佳。</li>
+<li><strong>极大减轻数据库压力</strong>：绝大部分的读请求被缓存拦截，数据库的<strong>吞吐量</strong>瓶颈被打破，使其能更专注于处理写操作和真正的缓存未命中查询。</li>
+<li><strong>高并发支撑能力</strong>：缓存系统天生擅长处理高并发读取，使得系统<strong>应对突发流量的能力</strong>（如秒杀、热点事件）大大增强。</li>
+<li><strong>成本效益高</strong>：用相对廉价的内存资源保护了昂贵且脆弱的数据库资源，性价比极高。</li>
+</ol>
+<h5><span id="缺点与挑战引入了新的技术复杂性">缺点与挑战（引入了新的技术复杂性）</span></h5><ol>
+<li><strong>数据一致性难题</strong>：如何保证缓存中的数据与数据库中的数据一致？<ul>
+<li><strong>场景</strong>：更新了数据库中的商品价格后，如何确保缓存中的旧价格被及时清除或更新？</li>
+<li><strong>常见策略</strong>：设置缓存过期时间、在更新数据库后主动删除或更新缓存（如先更新数据库，再删除缓存）。</li>
+</ul>
+</li>
+<li><strong>缓存穿透</strong>：查询一个数据库中<strong>根本不存在</strong>的数据，导致每次请求都无法命中缓存，直接击穿到数据库。<ul>
+<li><strong>解决方案</strong>：缓存空值、使用布隆过滤器进行初步校验。</li>
+</ul>
+</li>
+<li><strong>缓存击穿</strong>：某个<strong>热点 key</strong>在缓存过期的瞬间，大量请求同时涌入，直接击穿到数据库。<ul>
+<li><strong>解决方案</strong>：设置热点数据永不过期、使用互斥锁（Mutex Lock）只允许一个请求去重建缓存。</li>
+</ul>
+</li>
+<li><strong>缓存雪崩</strong>：在同一时间，<strong>大量缓存 key 同时过期</strong>，导致所有请求都涌向数据库，造成数据库瞬时压力过大而崩溃。<ul>
+<li><strong>解决方案</strong>：给缓存过期时间加上随机值，避免集体过期。</li>
+</ul>
+</li>
+<li><strong>架构复杂度提升</strong>：需要维护和监控缓存集群，增加了运维成本。</li>
+<li><strong>数据库瓶颈</strong>：业务体量支持变大后，数据不断增加，数据库单库太大，单个表体量也太大，数据查询会很慢，导致数据库再度成为系统瓶颈</li>
+</ol>
+<h3><span id="垂直分库">垂直分库</span></h3><p><strong>垂直分库</strong>是基于业务维度，将同一个数据库中的<strong>不同业务模块的表</strong>拆分到不同的物理数据库中的架构设计。</p>
+<p><img src="/img/Docker/base/vertical.png" alt="vertical"></p>
+<p>其核心思想是：<strong>专库专用，按业务拆分</strong>。比如，一个庞大的单体数据库（如 <code>mall_db</code>），可能包含了用户、商品、订单、支付等多个业务模块的表。垂直分库就是将这些表分离出来，分别建立独立的数据库：<code>user_db</code>（用户库）、<code>product_db</code>（商品库）、<code>order_db</code>（订单库）、<code>payment_db</code>（支付库）。</p>
+<hr>
+<h4><span id="为什么需要垂直分库">为什么需要垂直分库</span></h4><p>当业务发展到一定规模，单个数据库会面临如下瓶颈，垂直分库是解决这些问题的自然演进：</p>
+<ol>
+<li><strong>单机性能瓶颈</strong>：所有业务的表都存放在一个数据库实例上，其连接数、CPU、I&#x2F;O、磁盘空间等资源是有限的，最终会成为整个系统的天花板。</li>
+<li><strong>运维与耦合性问题</strong>：<ul>
+<li><strong>难以维护</strong>：一个巨大的数据库，表结构复杂，任何改动和迁移风险都极高。</li>
+<li><strong>耦合性高</strong>：所有业务耦合在一起，无法针对特定业务进行优化、扩容或故障隔离。一个业务的高压力查询可能会拖慢整个系统的其他业务。</li>
+</ul>
+</li>
+<li><strong>团队协作问题</strong>：不同的开发团队可能需要操作同一个数据库，容易引发权限管理和安全风险。</li>
+</ol>
+<p>垂直分库的目标是<strong>实现业务层面的解耦，让每个业务库可以独立管理、独立优化和独立扩展</strong>。</p>
+<hr>
+<h4><span id="架构原理">架构原理</span></h4><ol>
+<li><p><strong>拆分依据</strong>：根据系统的业务领域模型进行拆分。一个经典的电商系统可以拆分为：</p>
+<ul>
+<li><strong>用户库 (<code>user_db</code>)</strong>：存储用户信息、会员等级、收货地址等。</li>
+<li><strong>商品库 (<code>product_db</code>)</strong>：存储商品信息、类目、库存、品牌等。</li>
+<li><strong>订单库 (<code>order_db</code>)</strong>：存储订单主表、订单明细表等。</li>
+<li><strong>支付库 (<code>payment_db</code>)</strong>：存储支付记录、账单、交易流水等。</li>
+</ul>
+</li>
+<li><p><strong>应用层调整</strong>：应用程序在访问数据库时，需要知道要操作的数据位于哪个业务库。这通常需要在代码或中间件中进行路由：</p>
+<ul>
+<li>用户登录 → 连接 <code>user_db</code></li>
+<li>查询商品 → 连接 <code>product_db</code></li>
+<li>下单 → 需要同时操作 <code>order_db</code> 和 <code>product_db</code>（扣减库存）</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4><span id="垂直分库的优缺点">垂直分库的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>解决系统级耦合问题</strong>：这是最大的优点。实现了<strong>业务清晰、系统解耦</strong>。不同的业务可以由不同的团队维护不同的数据库。</li>
+<li><strong>提升整体性能</strong>：将不同业务的负载分散到不同的数据库服务器上，避免了资源竞争，<strong>提升了系统的整体吞吐能力</strong>。</li>
+<li><strong>便于优化和扩展</strong>：<ul>
+<li><strong>可针对性优化</strong>：可以根据不同业务的特点（如用户库读多写少，支付库写多读少）独立配置硬件和优化参数。</li>
+<li><strong>可独立扩展</strong>：如果用户量激增，可以单独对 <code>user_db</code> 进行扩容（如升级硬件或后续做读写分离），而不影响商品和订单业务。</li>
+</ul>
+</li>
+<li><strong>提升可用性</strong>：实现了故障隔离。如果 <code>product_db</code> 因故宕机，通常不会影响到用户登录和支付功能（除非是下单流程），系统的可用性更高。</li>
+</ol>
+<h5><span id="缺点">缺点</span></h5><ol>
+<li><strong>架构复杂度显著增加</strong>：<ul>
+<li>应用程序需要维护多个数据源，并实现复杂的数据访问路由逻辑。</li>
+<li>系统的部署和运维复杂度上升。</li>
+</ul>
+</li>
+<li><strong>跨库关联查询困难（无法进行 JOIN 操作）</strong>：这是最致命的缺点。<ul>
+<li><strong>场景</strong>：查询“某个用户购买过的所有商品”需要关联用户库和订单库。在单体数据库中一个简单的 <code>JOIN</code> 查询就能完成，但在垂直分库后，<strong>数据库本身不再支持跨库 JOIN</strong>。</li>
+<li><strong>解决方案</strong>：必须在<strong>应用层</strong>通过代码来实现。先从一个库查询出订单 ID 列表，再去另一个库用 <code>IN</code> 查询商品信息，然后自己在内存中组装数据。这增加了代码的复杂度和网络开销。</li>
+</ul>
+</li>
+<li><strong>分布式事务问题</strong>：<ul>
+<li><strong>场景</strong>：用户下单操作，需要在 <code>order_db</code> 中创建订单，同时在 <code>product_db</code> 中扣减库存。这两个操作必须同时成功或失败，这就涉及<strong>跨数据库的事务</strong>。</li>
+<li><strong>解决方案</strong>：需要引入复杂的分布式事务解决方案（如两阶段提交 2PC、基于消息队列的最终一致性方案等），技术难度和性能开销都很大。</li>
+</ul>
+</li>
+<li><strong>成本增加</strong>：需要更多的数据库服务器，硬件和运维成本更高。</li>
+</ol>
+<p><strong>垂直分库是系统从单体架构迈向分布式架构非常关键的一步。</strong> 它主要解决了<strong>业务耦合</strong>和<strong>单机资源瓶颈</strong>的问题。</p>
+<p>它通常发生在<strong>读写分离</strong>和<strong>引入缓存</strong>之后，当这些手段都无法缓解单数据库实例的压力时，就会考虑按业务进行垂直拆分。</p>
+<p>然而，垂直分库也带来了<strong>跨库查询</strong>和<strong>分布式事务</strong>这两个经典的分布式系统难题。解决这些难题，通常需要业务上做出妥协（如避免跨库关联），或者引入更复杂的中间件和技术方案。当垂直分库后，单个业务库的数据量依然巨大时，下一步就会自然演进到<strong>水平分库（分库分表）</strong>。</p>
+<h3><span id="水平分库">水平分库</span></h3><p><strong>水平分库分表</strong>是指将<strong>同一个逻辑表</strong>中的数据，按照某种特定的规则（如哈希、范围等），分散存储到<strong>多个物理数据库</strong>的<strong>多个结构相同的表</strong>中。</p>
+<p>其核心思想是：<strong>“分散存储，分散访问”</strong>，通过将数据和请求分摊到多个低成本的服务器上，来突破单机容量的上限。</p>
+<hr>
+<h4><span id="为什么需要水平分库">为什么需要水平分库</span></h4><p>垂直分库后，单个业务库（如 <code>订单库</code>）仍然可能面临巨大挑战：</p>
+<ol>
+<li><strong>单表数据量过大</strong>：例如，订单表数据达到亿级甚至十亿级，SQL 查询性能（如全表扫描、索引深度）会急剧下降。</li>
+<li><strong>单库写操作瓶颈</strong>：所有的写请求仍然集中在一个数据库上，CPU、磁盘 I&#x2F;O 和网络带宽成为瓶颈，无法通过升级硬件线性提升性能。</li>
+<li><strong>单点故障风险</strong>：这个业务库如果宕机，整个业务模块（如所有订单功能）会完全不可用。</li>
+</ol>
+<p>水平分库就是为了<strong>根治单个业务库的容量和性能瓶颈</strong>。</p>
+<hr>
+<h4><span id="它是如何工作的核心分片策略">它是如何工作的？（核心：分片策略）</span></h4><p>水平分库的核心在于选择一个合适的分片键（Sharding Key）和分片算法，确保数据能均匀分布。</p>
+<h5><span id="1-常用的分片策略">1. 常用的分片策略</span></h5><table>
+<thead>
+<tr>
+<th align="left">策略</th>
+<th align="left">描述</th>
+<th align="left">优点</th>
+<th align="left">缺点</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>哈希取模</strong></td>
+<td align="left">对分片键（如<code>user_id</code>）进行哈希计算，然后对分片总数取模，得到目标分片。</td>
+<td align="left"><strong>数据分布均匀</strong>，负载均衡性好。</td>
+<td align="left"><strong>扩容困难</strong>。增加分片数量时，需要大量数据迁移。</td>
+<td align="left"><code>分片序号 = hash(user_id) % 4</code></td>
+</tr>
+<tr>
+<td align="left"><strong>范围分片</strong></td>
+<td align="left">根据分片键的值的范围（如时间、ID 区间）进行分片。</td>
+<td align="left"><strong>易于扩容</strong>，只需在新分片写入新数据。</td>
+<td align="left"><strong>容易产生数据热点</strong>（如最新数据都在一个分片上）。</td>
+<td align="left"><code>create_time &lt; &#39;2023&#39;</code> 的数据在分片 0，<code>&#39;2023&#39; &lt;= create_time &lt; &#39;2024&#39;</code> 的在分片 1</td>
+</tr>
+<tr>
+<td align="left"><strong>地理分片</strong></td>
+<td align="left">根据用户所在地理位置等业务属性分片。</td>
+<td align="left">符合业务特征，能优化本地访问。</td>
+<td align="left">分布可能不均匀。</td>
+<td align="left">华北用户数据存北京机房，华南用户数据存深圳机房</td>
+</tr>
+<tr>
+<td align="left"><strong>一致性哈希</strong></td>
+<td align="left">一个特殊的哈希算法，在扩缩容时仅需迁移少量数据。</td>
+<td align="left"><strong>扩缩容影响小</strong>，数据迁移量少。</td>
+<td align="left">实现相对复杂。</td>
+<td align="left">常用于缓存集群（如 Redis），数据库分片也有应用</td>
+</tr>
+</tbody></table>
+<h5><span id="2-架构与组件">2. 架构与组件</span></h5><p>应用程序通常不直接连接多个分片数据库，而是通过一个<strong>数据库中间件</strong>来访问。这个中间件是水平分库架构的“大脑”。</p>
+<ul>
+<li><strong>角色</strong>：<strong>SQL 代理</strong>、<strong>路由中心</strong>、<strong>结果聚合器</strong>。</li>
+<li><strong>工作流程</strong>：<ol>
+<li>应用向中间件发送一条 SQL（<code>SELECT * FROM orders WHERE user_id = 123</code>）。</li>
+<li>中间件<strong>解析 SQL</strong>，根据<code>user_id = 123</code>和预设的分片规则（如<code>hash(123) % 4 = 1</code>），<strong>将 SQL 路由</strong>到对应的物理分片（如<code>order_db_1.orders_1</code>）上执行。</li>
+<li>中间件<strong>接收各个分片返回的结果</strong>，进行聚合、排序、分页等处理。</li>
+<li>中间件将最终结果返回给应用。</li>
+</ol>
+</li>
+<li><strong>常见中间件</strong>：ShardingSphere（应用层）、Mycat（代理层）、Vitess 等。</li>
+</ul>
+<hr>
+<h4><span id="水平分库的优缺点">水平分库的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>极大提升系统容量与性能</strong>：从根本上解决了<strong>单库存储容量</strong>、<strong>写并发瓶颈</strong>和<strong>单表性能</strong>问题。</li>
+<li><strong>提升系统可用性</strong>：单个分片数据库宕机，只影响部分数据和功能，不会导致整个业务模块完全不可用。</li>
+<li><strong>良好的可扩展性</strong>：理论上可以通过不断增加分片数量来实现近乎无限的线性扩展。</li>
+</ol>
+<h5><span id="缺点与挑战复杂性急剧上升">缺点与挑战（复杂性急剧上升）</span></h5><ol>
+<li><strong>分布式事务</strong>：一个业务逻辑同时操作多个分片时，如何保证所有分片上的数据一致性？这是最大挑战。（方案：Seata、最终一致性）</li>
+<li><strong>跨分片查询</strong>：<code>ORDER BY ... LIMIT</code>、<code>GROUP BY</code>、<code>JOIN</code> 等操作变得异常复杂，需要在中间件中聚合多个分片的结果，性能损耗大。</li>
+<li><strong>全局主键生成</strong>：如何避免多个分片产生重复 ID？（方案：Snowflake 雪花算法、Redis、数据库序列）</li>
+<li><strong>数据迁移与扩容</strong>：初始分片数规划不当，后续扩容（如从 4 个分片扩展到 8 个）会非常痛苦，需要迁移大量数据。</li>
+<li><strong>运维复杂度</strong>：需要管理大量的数据库实例，监控、备份、恢复等运维工作的复杂度呈指数级增长。</li>
+</ol>
+<p><strong>水平分库是数据库架构演进的终极武器，也是最后的手段。</strong> 它带来了巨大的性能和容量提升，但也极大地增加了系统的复杂性。它不是为了解决小问题而设计的。</p>
+<p>因此，架构师必须谨慎评估：</p>
+<ul>
+<li><strong>是否真的必要？</strong> 是否已用尽读写分离、缓存、垂直分库等其他优化手段？</li>
+<li><strong>如何选择分片键？</strong> 这决定了数据分布是否均匀，是成功与否的关键。</li>
+<li><strong>如何应对挑战？</strong> 必须对分布式事务、全局 ID 等问题有成熟的解决方案。</li>
+</ul>
+<h3><span id="微服务架构">微服务架构</span></h3><p>微服务架构是一种将单一应用程序作为<strong>一套小型服务</strong>的集合来开发的架构风格。每个服务都<strong>围绕特定的业务能力构建</strong>（如用户服务、商品服务、订单服务），并可以<strong>独立部署、独立运行和独立扩展</strong>。服务之间通过轻量级的通信机制（通常是 HTTP&#x2F;REST 或 RPC）进行协作。</p>
+<p>其核心思想是：<strong>分而治之，强内聚，弱耦合</strong>。</p>
+<p><img src="/img/Docker/base/server.png" alt="server"></p>
+<hr>
+<h4><span id="为什么需要微服务架构">为什么需要微服务架构？</span></h4><p>在分库分后，虽然数据库能力得到了扩展，但应用层却变成了一个维护的噩梦：</p>
+<ol>
+<li><strong>“巨石应用”困境</strong>：所有业务代码仍然集中在一个庞大的、单一的应用中（通常称为单体架构）。这个应用需要连接<strong>所有拆分后的数据库</strong>，代码变得无比复杂和臃肿。</li>
+<li><strong>极高的耦合度</strong>：修改用户模块的一行代码，可能需要重新构建和部署整个庞大的应用，因为所有模块都紧密耦合在一起。</li>
+<li><strong>技术栈僵化</strong>：整个系统必须使用统一的技术栈（如 Java Spring），难以引入更合适的新技术（如用 Go 编写高性能的推荐服务，用 Python 编写 AI 服务）。</li>
+<li><strong>扩展性差</strong>：无法根据业务压力进行细粒度扩展。即使只有商品搜索服务面临高并发，也不得不扩展整个单体应用，造成资源浪费。</li>
+<li><strong>团队协作低效</strong>：一个大团队维护一个巨无霸代码库，沟通成本高，发布流程复杂，效率低下。</li>
+</ol>
+<p>微服务架构通过<strong>将应用本身也进行拆分</strong>，来从根本上解决上述问题。</p>
+<hr>
+<h4><span id="架构原理">架构原理</span></h4><ol>
+<li><p><strong>服务拆分</strong>：根据业务边界（领域驱动设计 DDD），将庞大的单体应用拆分为一系列小的、自治的服务。</p>
+<ul>
+<li><strong>示例</strong>：电商系统被拆分为：<ul>
+<li><code>用户服务</code>：负责注册、登录、用户信息管理。</li>
+<li><code>商品服务</code>：负责商品管理、类目管理、库存查询。</li>
+<li><code>订单服务</code>：负责下单、订单查询。</li>
+<li><code>支付服务</code>：负责支付流程。</li>
+<li><code>购物车服务</code>：负责购物车管理。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>独立部署与运行</strong>：每个服务都是一个独立的进程，可以被部署在任何地方。它们<strong>拥有自己独立的数据库</strong>（或数据库分片），服务之间不能直接访问对方的数据库，只能通过 API 调用。</p>
+</li>
+<li><p><strong>服务间通信</strong>：服务之间通过轻量级的通信机制进行协作，通常是：</p>
+<ul>
+<li><strong>同步调用</strong>：如 HTTP&#x2F;RESTful API 或 gRPC。适用于需要立即得到结果的场景。</li>
+<li><strong>异步消息</strong>：如通过消息队列（Kafka, RabbitMQ）。适用于解耦和最终一致性的场景。</li>
+</ul>
+</li>
+<li><p><strong>服务治理</strong>：由于服务数量众多，需要一系列基础设施来管理它们，这就是<strong>服务网格</strong>和<strong>云原生技术</strong>的用武之地。</p>
+<ul>
+<li><strong>API 网关</strong>：所有外部请求的统一入口，负责路由、认证、限流、日志等。</li>
+<li><strong>服务注册与发现</strong>：服务启动后将自己注册到中心（如 Nacos, Consul），并能发现其他服务的位置。</li>
+<li><strong>配置中心</strong>：统一管理所有服务的配置。</li>
+<li><strong>熔断、降级、限流</strong>：防止服务雪崩，提升系统弹性。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h4><span id="微服务架构的优缺点">微服务架构的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>技术异构性</strong>：每个服务可以使用最适合其需求的技术栈，不受其他服务约束。</li>
+<li><strong>强内聚，弱耦合</strong>：每个服务功能单一，职责清晰，代码更易理解和维护。</li>
+<li><strong>独立部署与扩展</strong>：每个服务可以独立开发、测试、部署和扩展，极大地提升了交付速度和资源利用率。</li>
+<li><strong>故障隔离</strong>：单个服务发生故障不会像多米诺骨牌一样导致整个系统崩溃。</li>
+<li><strong>提升团队效率</strong>：小的、跨功能的团队可以独立负责一个或多个服务的全生命周期（“你构建，你运行”）。</li>
+</ol>
+<h5><span id="缺点">缺点</span></h5><ol>
+<li><strong>架构复杂度急剧升高</strong>：这是最大的缺点。从单体的一体式架构转变为分布式系统，带来了巨大的复杂性。</li>
+<li><strong>运维难度极大</strong>：需要管理数十甚至上百个服务，对自动化部署、监控、告警的要求极高。<strong>容器化技术（Docker）和容器编排工具（Kubernetes）几乎是微服务的必需品</strong>。</li>
+<li><strong>分布式系统的挑战</strong>：<ul>
+<li><strong>网络延迟和不稳定性</strong>：远程调用远比本地调用慢且不可靠。</li>
+<li><strong>分布式事务</strong>：保证跨多个服务的数据一致性极其困难，通常需要放弃强一致性，采用最终一致性方案。</li>
+<li><strong>故障排查困难</strong>：一个请求可能经过多个服务，排查问题需要聚合各个服务的日志（需要引入分布式链路追踪，如 SkyWalking, Zipkin）。</li>
+</ul>
+</li>
+<li><strong>资源开销</strong>：每个服务实例都需要额外的内存和 CPU 开销（如每个 Spring Boot 应用启动都需要 JVM）。</li>
+</ol>
+<hr>
+<h4><span id="总结">总结</span></h4><p>微服务架构不是银弹，而是一把<strong>双刃剑</strong>。它通过将应用拆分为小服务，解决了<strong>复杂项目的开发效率和可维护性</strong>问题，但同时也引入了<strong>分布式系统的所有复杂性</strong>。</p>
+<p>它的引入通常是这样一个过程：</p>
+<ol>
+<li>数据库层面先通过<strong>读写分离、垂直分库、水平分库</strong>解决了数据容量和性能问题。</li>
+<li>随之而来的<strong>应用层复杂度和耦合度</strong>问题变得不可接受。</li>
+<li>于是，<strong>微服务架构</strong>被引入，将应用按业务拆解，每个微服务独立管理自己的数据和业务，并通过明确的 API 进行协作。</li>
+</ol>
+<p>这是一种<strong>用运维的复杂性来换取开发的简单性和业务的敏捷性</strong>的权衡。只有在业务足够复杂、团队规模较大、且具备成熟的 DevOps 和自动化运维能力时，才应考虑采用微服务架构。</p>
+<h3><span id="容器编排架构">容器编排架构</span></h3><p>这是一种利用<strong>容器化技术</strong>（如 Docker）将应用及其所有依赖项打包成一个标准化的、轻量的、可移植的单元（镜像），然后使用<strong>容器编排平台</strong>（如 Kubernetes, K8s）来自动化地部署、管理、扩展和运维这些容器化应用的架构模式。</p>
+<p>其核心目标是：<strong>实现应用的标准化交付和运维的自动化，从而高效地管理由大量微服务组成的复杂系统。</strong></p>
+<p><img src="/img/Docker/base/container.png" alt="container"></p>
+<hr>
+<h4><span id="为什么需要它">为什么需要它？</span></h4><p>微服务架构解决了开发和业务敏捷性的问题，但却给运维带来了巨大的灾难：</p>
+<ol>
+<li><strong>部署工作量大且复杂</strong>：几十上百个微服务，每个都需要配置运行环境、依赖库、启动参数，手动部署效率低下，极易出错。</li>
+<li><strong>环境不一致问题</strong>：开发、测试、生产环境差异导致“在我这儿是好的”经典问题。</li>
+<li><strong>资源隔离与冲突</strong>：多个服务部署在同一台机器上，可能因为环境变量、端口、依赖库版本不同而产生冲突。</li>
+<li><strong>扩缩容极其麻烦</strong>：应对流量高峰时需要快速扩容多个服务实例，流量过去后又要及时缩容以节省成本。手动操作速度慢，且难以精确控制。</li>
+<li><strong>资源利用率低</strong>：为了应对可能的流量高峰，需要长期闲置大量服务器资源，造成巨大浪费。</li>
+</ol>
+<p>容器化与编排技术正是为了解决微服务带来的<strong>运维复杂性</strong>和<strong>资源利用率</strong>问题。</p>
+<hr>
+<h4><span id="架构工作原理">架构工作原理</span></h4><h5><span id="1-容器化docker">1. 容器化（Docker）</span></h5><ul>
+<li><strong>打包</strong>：开发者将应用代码、运行时环境、系统工具、系统库和设置一起打包到一个<strong>Docker 镜像</strong>中。这个镜像是一个轻量级的、可执行的独立软件包。</li>
+<li><strong>标准</strong>：镜像一旦构建完成，就可以在任何安装了 Docker 引擎的环境中<strong>以完全相同的方式运行</strong>，彻底解决了环境不一致的问题。</li>
+<li><strong>隔离</strong>：运行的镜像称为<strong>容器</strong>。容器之间共享主机操作系统内核，但拥有各自独立的文件系统、网络和进程空间，实现了<strong>隔离性</strong>，避免了冲突。</li>
+</ul>
+<h5><span id="2-容器编排kubernetes-k8s">2. 容器编排（Kubernetes, K8s）</span></h5><p>K8s 是一个生产级别的容器编排系统，可以看作是一个<strong>分布式的操作系统</strong>，用于管理海量的容器化应用。</p>
+<ul>
+<li><strong>核心概念</strong>：<ul>
+<li><strong>Pod</strong>：K8s 的最小调度单元，通常包含一个或多个紧密关联的容器。</li>
+<li><strong>Deployment</strong>：定义了 Pod 的期望状态（如需要运行 3 个副本）。K8s 会确保实际状态始终与期望状态一致。</li>
+<li><strong>Service</strong>：为一组 Pod 提供一个稳定的网络入口（IP 地址和 DNS 名称），实现负载均衡和服务发现。</li>
+</ul>
+</li>
+<li><strong>工作流程</strong>：<ol>
+<li>用户通过配置文件（YAML）声明应用的期望状态（如：我需要运行 2 个“用户服务”的实例）。</li>
+<li>将配置提交给 K8s Master（主节点）。</li>
+<li>K8s <strong>调度器</strong>会智能地决定将 Pod 部署到哪个<strong>Node</strong>（工作节点）上。</li>
+<li>各个 Node 上的<strong>Kubelet</strong>代理接收指令，从镜像仓库拉取镜像并启动容器。</li>
+<li>如果某个容器宕机，K8s 会<strong>自动重启</strong>它。如果整个 Node 宕机，K8s 会在其他 Node 上<strong>重新创建</strong>Pod。</li>
+<li>当需要扩容时，只需修改配置文件中的副本数量，K8s 就会<strong>自动创建</strong>新的 Pod 实例。</li>
+</ol>
+</li>
+</ul>
+<hr>
+<h4><span id="容器编排架构的优缺点">容器编排架构的优缺点</span></h4><h5><span id="优点">优点</span></h5><ol>
+<li><strong>部署、运维简单快速</strong>：<strong>一条命令</strong>就可以完成几百个服务的滚动更新、扩缩容、版本回滚，实现了完全的<strong>自动化运维</strong>。</li>
+<li><strong>环境标准化与隔离</strong>：容器镜像保证了环境一致性，从根本上解决了“开发测试生产环境不一致”的问题。容器间隔离性好，无冲突。</li>
+<li><strong>高可用性与自愈能力</strong>：Pod 故障后会自动重启，节点故障后 Pod 会被自动迁移到健康节点，极大提升了系统的<strong>SLA（服务等级协议）</strong>。</li>
+<li><strong>高效的资源利用与弹性伸缩</strong>：<ul>
+<li>可以混合部署多种服务，充分利用服务器资源。</li>
+<li>可以基于 CPU&#x2F;内存使用率或自定义指标（如 QPS）进行<strong>自动扩缩容</strong>，真正做到按需使用资源，成本优化。</li>
+</ul>
+</li>
+</ol>
+<h5><span id="缺点">缺点</span></h5><ol>
+<li><strong>学习曲线陡峭</strong>：技术栈非常复杂（Docker, K8s, Helm, Prometheus 等），对开发和运维团队的技术要求极高。</li>
+<li><strong>系统复杂性增加</strong>：引入了一个分布式的管理平台（K8s 集群），其本身的搭建、维护和故障排查就非常复杂。</li>
+<li><strong>监控和日志挑战</strong>：大量的、动态变化的容器实例使得传统的监控和日志收集方式失效，必须引入更先进的<strong>云原生监控体系</strong>（如 Prometheus + Grafana）和<strong>集中式日志收集</strong>（如 ELK）。</li>
+<li><strong>网络模型复杂</strong>：容器网络涉及 Overlay、CNI 等概念，配置和调试相对复杂。</li>
+<li><strong>成本问题（自建时）</strong>：自建和维护一个高可用的 K8s 集群需要投入大量的人力和机器成本。这也是为什么很多公司选择直接使用<strong>云厂商提供的托管 K8s 服务</strong>（如阿里云 ACK、腾讯云 TKE、Amazon EKS）的原因，它们极大地降低了管理控制平面的负担。</li>
+</ol>
+<hr>
+<h4><span id="总结">总结</span></h4><p><strong>容器化与容器编排架构是微服务架构的“最佳伴侣”</strong>。它并不是一个业务架构，而是一个<strong>支撑性的基础设施架构</strong>。</p>
+<p>它通过将应用<strong>容器化</strong>来解决环境一致性和隔离性问题，通过<strong>编排</strong>来解决微服务部署、运维和管理的自动化问题。</p>
+<p>这套架构的出现，使得大规模部署和管理微服务从一种“痛苦的折磨”变成了“可实现的工程实践”，是现代云计算和互联网公司技术栈的基石。它的引入，标志着企业的研发运维体系真正走向了<strong>云原生</strong>时代。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+            <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+            <audio id="audio" loop="1" preload="auto" controls="controls" data-autoplay="false">
+                <source type="audio/mpeg" src="">
+            </audio>
+            
+                <ul id="audio-list" style="display:none">
+                    
+                        
+                            <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                        
+                    
+                        
+                            <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                        
+                    
+                        
+                            <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                        
+                    
+                </ul>
+            
+        </div>
+        
+        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+    </div>
+</div>
+
+<style>
+    .dark-mode .main{
+        background-color: rgb(0, 0, 0, 0.3)  !important;
+        backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+    }
+    .post-tags-list-link{
+        color: rgba(0, 0, 0, 0.6);
+    }
+    .dark-mode .post-tags-list-link{
+        color: white;
+    }
+</style>
+
+
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+  :target {
+  scroll-margin-top: 40vh;
+  animation: 
+    /* heartbeat 1.2s ease-in-out, */
+    /* glow 2s ease, */
+    highlight 1s ease !important;
+}
+
+/* @keyframes heartbeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.08); }
+  50% { transform: scale(1); }
+  75% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 15px #ffeb3b; }
+  100% { box-shadow: none; }
+} */
+
+@keyframes highlight {
+  /* 初始状态（0%） */
+  0% {
+    background-color: #ffeb3b;  /* 高亮背景 */
+    color: #d32f2f;             /* 红色文字 */
+    transform: scale(1);        /* 初始大小 */
+    box-shadow: 0 0 15px #ffeb3b; /* 发光效果 */
+    font-size: 1em;            /* 初始字体大小 */
+  }
+
+  /* 心跳放大（25%） */
+  25% {
+    transform: scale(1.08);     /* 心跳放大 */
+    font-size: 1.2em;           /* 字体放大 */
+  }
+
+  /* 心跳回弹（50%） */
+  50% {
+    transform: scale(1);        /* 恢复 */
+    font-size: 1em;
+  }
+
+  /* 心跳轻微放大（75%） */
+  75% {
+    transform: scale(1.05);     /* 轻微放大 */
+    font-size: 1.1em;
+  }
+
+  /* 结束状态（100%） */
+  100% {
+    background-color: transparent; /* 背景透明 */
+    color: inherit;             /* 恢复文字颜色 */
+    transform: scale(1);        /* 恢复大小 */
+    box-shadow: none;          /* 取消发光 */
+    font-size: inherit;        /* 恢复字体大小 */
+  }
+}
+
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+    
+  }
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+/* 锚点样式修改 */
+.dark-mode a[href^="#"] {
+  color: #ff9900 !important;  /* 橙色 */
+}
+
+a[href^="#"] {
+  color: #aa00ff !important;  /* 橙色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
