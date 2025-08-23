@@ -16,13 +16,18 @@
 RDB
 触发机制
 配置文件
-3. RDB 文件校验与故障恢复
 Redis RDB 持久化优缺点
 AOF
 AOF 重写机制
 AOF 优缺点
 Redis 混合持久化详解
-Redis 混合持久化在 ,"> 
+Redis 混合持久化在 7.0 版本后的改动
+
+
+
+
+
+R,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -39,13 +44,18 @@ Redis 混合持久化在 ,">
 RDB
 触发机制
 配置文件
-3. RDB 文件校验与故障恢复
 Redis RDB 持久化优缺点
 AOF
 AOF 重写机制
 AOF 优缺点
 Redis 混合持久化详解
-Redis 混合持久化在 ,"/>
+Redis 混合持久化在 7.0 版本后的改动
+
+
+
+
+
+R,"/>
     
     
     
@@ -59,13 +69,18 @@ Redis 混合持久化在 ,"/>
 RDB
 触发机制
 配置文件
-3. RDB 文件校验与故障恢复
 Redis RDB 持久化优缺点
 AOF
 AOF 重写机制
 AOF 优缺点
 Redis 混合持久化详解
-Redis 混合持久化在 ,"/>
+Redis 混合持久化在 7.0 版本后的改动
+
+
+
+
+
+R,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -217,7 +232,7 @@ Redis 混合持久化在 ,"/>
                     <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
                         style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 </a>
-                <div class="github-name" style="margin-top: 10px; font-size: 18px; color: #333; font-weight: bold;">
+                <div class="github-name" style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
                     LiuJiaxuan69
                 </div>
                 <button class="github-follow-btn"
@@ -228,14 +243,14 @@ Redis 混合持久化在 ,"/>
                     <div>
                         <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
                             style="text-decoration: none; color: inherit;">
-                            <span id="github-followers" style="font-weight:bold; font-size:20px;">--</span>
-                            <span style="font-size:20px;color:#666;">关注者</span>
+                            <span id="github-followers" style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
                         </a>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;">56</span>
-                            <span style="font-size:20px;color:#666;">文章</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">56</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
                 </div>
@@ -275,11 +290,10 @@ Redis 混合持久化在 ,"/>
 <li><a href="#rdb">RDB</a><ul>
 <li><a href="#%E8%A7%A6%E5%8F%91%E6%9C%BA%E5%88%B6">触发机制</a></li>
 <li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
-<li><a href="#3-rdb-%E6%96%87%E4%BB%B6%E6%A0%A1%E9%AA%8C%E4%B8%8E%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D">3. <strong>RDB 文件校验与故障恢复</strong></a></li>
 <li><a href="#redis-rdb-%E6%8C%81%E4%B9%85%E5%8C%96%E4%BC%98%E7%BC%BA%E7%82%B9">Redis RDB 持久化优缺点</a></li>
 <li><a href="#aof">AOF</a></li>
 <li><a href="#aof-%E9%87%8D%E5%86%99%E6%9C%BA%E5%88%B6">AOF 重写机制</a></li>
-<li><a href="#aof-%E4%BC%98%E7%BC%BA%E7%82%B9"><strong>AOF 优缺点</strong></a></li>
+<li><a href="#aof-%E4%BC%98%E7%BC%BA%E7%82%B9">AOF 优缺点</a></li>
 <li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E8%AF%A6%E8%A7%A3">Redis 混合持久化详解</a></li>
 <li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E5%9C%A8-70-%E7%89%88%E6%9C%AC%E5%90%8E%E7%9A%84%E6%94%B9%E5%8A%A8">Redis 混合持久化在 7.0 版本后的改动</a></li>
 </ul>
@@ -400,7 +414,7 @@ Redis 混合持久化在 ,"/>
 </li>
 </ul>
 <hr>
-<h3><span id="3-rdb-文件校验与故障恢复">3. <strong>RDB 文件校验与故障恢复</strong></span></h3><ul>
+<h4><span id="3-rdb-文件校验与故障恢复">3. <strong>RDB 文件校验与故障恢复</strong></span></h4><ul>
 <li><p><strong>损坏检测</strong>：</p>
 <ul>
 <li><p>Redis 启动时自动校验 RDB 文件完整性（魔数 + CRC 校验），损坏则报错：<br><code># Fatal error loading the DB: Invalid file format.</code></p>
@@ -570,7 +584,7 @@ Redis 混合持久化在 ,"/>
 </ol>
 <p>当 <code>Redis</code> 启动时，会根据 <code>RDB</code> 和 <code>AOF</code> 文件的内容，进行数据恢复：</p>
 <p><img src="/img/Redis/data_type/List/persistence/aof_recover.png" alt="recover"></p>
-<h3><span id="aof-优缺点"><strong>AOF 优缺点</strong></span></h3><h4><span id="优点"><strong>✅ 优点</strong></span></h4><ol>
+<h3><span id="aof-优缺点">AOF 优缺点</span></h3><h4><span id="优点"><strong>✅ 优点</strong></span></h4><ol>
 <li><strong>数据更安全</strong>：最多丢失 1s 数据（<code>appendfsync everysec</code>）。</li>
 <li><strong>可读性强</strong>：AOF 是文本格式（可手动编辑修复）。</li>
 <li><strong>自动重写</strong>：避免文件无限增长。</li>
@@ -841,7 +855,7 @@ Redis 混合持久化在 ,"/>
         <!-- 右侧目录栏 -->
         <aside class="toc-sidebar">
             <div class="toc-header">
-                <h1 class="toc-title">目录</h1>
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
             </div>
         </aside>
     </div>
@@ -1359,11 +1373,6 @@ Redis 混合持久化在 ,"/>
 
 .dark-mode .spoiler-title{
   background-color: #2d2d2d;
-}
-
-/* 锚点样式修改 */
-.dark-mode a[href^="#"] {
-  color: #e0e0e0 !important;  /* 白色 */
 }
 
 a[href^="#"] {
