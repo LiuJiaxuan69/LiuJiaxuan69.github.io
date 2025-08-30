@@ -223,7 +223,8 @@ Z,"/>
                     <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
                         style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 </a>
-                <div class="github-name" style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
                     LiuJiaxuan69
                 </div>
                 <button class="github-follow-btn"
@@ -234,7 +235,8 @@ Z,"/>
                     <div>
                         <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
                             style="text-decoration: none; color: inherit;">
-                            <span id="github-followers" style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
                             <span style="font-size:20px;color:#666!important;">关注者</span>
                         </a>
                     </div>
@@ -246,6 +248,10 @@ Z,"/>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -1289,6 +1295,110 @@ Z,"/>
         </aside>
     </div>
 
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 350px;
+            height: 350px;
+            min-width: 200px;
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 14px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        }
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
     <style>
         .follow-sidebar {
             position: fixed;
@@ -1303,8 +1413,7 @@ Z,"/>
             background-color: rgba(237, 231, 246, 0.8);
             border-radius: 12px;
             padding-top: 60px;
-            height: 50%;
-            min-height: 500px;
+            height: 350px;
             overflow-y: auto;
             z-index: 100;
             box-sizing: border-box;
@@ -1476,6 +1585,13 @@ Z,"/>
     </style>
 
     <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
         // 获取 GitHub 关注数
         fetch('https://api.github.com/users/LiuJiaxuan69')
             .then(res => res.json())
@@ -1548,16 +1664,15 @@ Z,"/>
                     }
                 });
             }
-            if (typeof AV !== 'undefined') {
+            if (typeof AV !== 'undefined' && !isLocalhost) {
                 AV.init({
                     appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
                     appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
                     serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
                 });
-
-
                 updatePageView();
-                // 统计并显示阅读量
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
             }
 
         });

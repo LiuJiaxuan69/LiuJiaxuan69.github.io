@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #45B7D1, #98D8C8);
+  background: linear-gradient(135deg, #45B7D1, #FFA07A);
 }
 
 .tag-hero h1 {
@@ -194,8 +194,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #FFA07A;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #4ECDC4;
+  background: #FF6B6B;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #45B7D1;
 }
 
 .node-content {
@@ -268,11 +268,35 @@
   font-size: var(--tag-size);
 }
 
-.related-tag:hover {
-  background: getRandomColor();
-  color: rgb(108, 174, 170);
+.related-tag:hover,
+.related-tag:focus,
+.related-tag:active,
+.related-tag:visited:hover {
+  background: var(--hover-bg, rgba(13,148,136,.08));
+  color: #0d9488;
   transform: scale(1.05);
 }
+</style>
+
+<style>
+  .single-tag-container .node-content h3 a {
+  color: #1f2937; text-decoration: none; transition: color .2s;
+}
+.single-tag-container .node-content h3 a:link { color: #1f2937; }
+.single-tag-container .node-content h3 a:visited { color: #374151; }
+.single-tag-container .node-content h3 a:hover,
+.single-tag-container .node-content h3 a:focus,
+.single-tag-container .node-content h3 a:active,
+.single-tag-container .node-content h3 a:visited:hover {
+  color: #0d9488 !important; text-decoration: none;
+}
+.cat-badge:hover,
+.cat-badge:focus,
+.cat-badge:active,
+.cat-badge:visited:hover {
+  color: #0d9488; background: rgba(13,148,136,.08);
+}
+
 </style>
 
 
@@ -319,16 +343,6 @@
     <h3>🚀 关联维度</h3>
     <div class="related-tag-cloud">
       
-        <a href="/tags/Hexo/" class="related-tag" 
-           style="--tag-size: 22px">
-          Hexo (1)
-        </a>
-      
-        <a href="/tags/%E6%95%99%E7%A8%8B/" class="related-tag" 
-           style="--tag-size: 22px">
-          教程 (1)
-        </a>
-      
         <a href="/tags/Docker/" class="related-tag" 
            style="--tag-size: 28px">
           Docker (4)
@@ -347,6 +361,16 @@
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
+        </a>
+      
+        <a href="/tags/Hexo/" class="related-tag" 
+           style="--tag-size: 22px">
+          Hexo (1)
+        </a>
+      
+        <a href="/tags/%E6%95%99%E7%A8%8B/" class="related-tag" 
+           style="--tag-size: 22px">
+          教程 (1)
         </a>
       
     </div>
