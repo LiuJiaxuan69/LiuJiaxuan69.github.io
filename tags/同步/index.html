@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #98D8C8, #45B7D1);
+  background: linear-gradient(135deg, #45B7D1, #98D8C8);
 }
 
 .tag-hero h1 {
@@ -379,7 +379,10 @@
       </div>
     
   </div>
-
+<!-- 加载更多按钮 -->
+  <div class="tag-loadmore-wrap">
+    <button id="tag-load-more" class="btn-loadmore" data-step="10">加载更多</button>
+  </div>
   <!-- 相关标签推荐 -->
   <div class="related-tags">
     <h3>🚀 关联维度</h3>
@@ -405,20 +408,66 @@
           容器 (4)
         </a>
       
-        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+        <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
-          技术架构 (1)
+          镜像 (1)
         </a>
       
-        <a href="/tags/%E5%9F%BA%E7%A1%80/" class="related-tag" 
-           style="--tag-size: 30px">
-          基础 (5)
+        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
+           style="--tag-size: 22px">
+          入门 (1)
         </a>
       
     </div>
   </div>
 </div>
+<style>
+/* 隐藏后续文章，点击再显示 */
+.timeline-node.lazy-hide { display: none; }
 
+/* 加载更多按钮样式 */
+.tag-loadmore-wrap {
+  display: flex; justify-content: center; margin: 16px 0 32px;
+}
+.btn-loadmore {
+  padding: 10px 16px; border-radius: 10px;
+  background: rgba(13,148,136,.1); color: #0d9488;
+  border: 1px solid rgba(13,148,136,.25); cursor: pointer;
+  transition: background .2s, color .2s, transform .1s;
+}
+.btn-loadmore:hover { background: rgba(13,148,136,.18); }
+.btn-loadmore:active { transform: scale(0.98); }
+.btn-loadmore[disabled] { opacity: .5; cursor: not-allowed; }
+</style>
+
+<script>
+// 每次加载 data-step（默认10）篇
+(function(){
+  var btn = document.getElementById('tag-load-more');
+  var box = document.querySelector('.tag-timeline');
+  if (!btn || !box) return;
+
+  var step = parseInt(btn.getAttribute('data-step') || '10', 10);
+  var hidden = Array.prototype.slice.call(box.querySelectorAll('.timeline-node.lazy-hide'));
+
+  function updateBtn() {
+    if (hidden.length === 0) {
+      btn.setAttribute('disabled', 'disabled');
+      btn.textContent = '没有更多了';
+    }
+  }
+  function loadMore() {
+    var count = Math.min(step, hidden.length);
+    for (var i = 0; i < count; i++) hidden[i].classList.remove('lazy-hide');
+    hidden = hidden.slice(count);
+    updateBtn();
+  }
+
+  // 初始化：如果不足或没有隐藏项，按钮禁用
+  updateBtn();
+  btn.addEventListener('click', loadMore);
+})();
+</script>
 </body>
 
 <script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
