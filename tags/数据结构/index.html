@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #4ECDC4, #98D8C8);
+  background: linear-gradient(135deg, #4ECDC4, #FFA07A);
 }
 
 .tag-hero h1 {
@@ -194,8 +194,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #FFA07A;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #4ECDC4;
+  background: #98D8C8;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #FFA07A;
 }
 
 .node-content {
@@ -319,11 +319,19 @@
         <div class="node-content">
           <time>2025/07/10</time>
           <h3><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B&#34;&gt;类型简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+类型简介
+相关指令
+ZADD 指令深度解析
+zcard
+zcount
+zrange
+ZREVRANGE
+ZPOPMAX
+ZPOPMIN
+ZRANK、...</div>
           
             <div class="post-cats">
               
@@ -343,11 +351,23 @@
         <div class="node-content">
           <time>2025/07/09</time>
           <h3><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B&#34;&gt;类型简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+类型简介
+相关指令
+sadd
+smembers
+sismember
+scard
+spop
+smove
+srem
+
+
+集合间操作
+sinter
+sin...</div>
           
             <div class="post-cats">
               
@@ -367,11 +387,20 @@
         <div class="node-content">
           <time>2025/07/09</time>
           <h3><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B&#34;&gt;类型简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+类型简介
+相关指令
+lpush
+lrange
+lpushx
+rpush、rpushx
+lpop、rpop
+lindex
+linsert
+lrem
+l...</div>
           
             <div class="post-cats">
               
@@ -391,11 +420,17 @@
         <div class="node-content">
           <time>2025/07/08</time>
           <h3><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B&#34;&gt;类型简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+类型简介
+相关指令
+1、hset 指令
+2、hget 指令
+3、hexists
+4、hdel
+5、hkeys、hvals、hgetall
+6、hmg...</div>
           
             <div class="post-cats">
               
@@ -415,11 +450,16 @@
         <div class="node-content">
           <time>2025/07/07</time>
           <h3><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%B1%BB%E5%9E%8B%E7%AE%80%E4%BB%8B&#34;&gt;类型简介&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+类型简介
+相关指令
+1、setex 指令
+2、psetex 指令
+3、setnx 指令
+4、incr 及 incrby 指令
+5、decr 及 de...</div>
           
             <div class="post-cats">
               
@@ -464,14 +504,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

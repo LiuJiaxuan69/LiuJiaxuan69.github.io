@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #FFA07A, #FFA07A);
+  background: linear-gradient(135deg, #45B7D1, #45B7D1);
 }
 
 .tag-hero h1 {
@@ -194,8 +194,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #FFA07A;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #98D8C8;
+  background: #4ECDC4;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #FF6B6B;
 }
 
 .node-content {
@@ -319,10 +319,21 @@
         <div class="node-content">
           <time>2025/08/16</time>
           <h3><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#redisczset%E6%9C%89%E5%BA%8F%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B...</div>
+
+Redis++（C++）ZSet（有序集合）类型常用接口详解
+zadd、zrange
+zcard
+zrem
+zscore
+zrank
+
+
+
+
+
+Re...</div>
           
             <div class="post-cats">
               
@@ -342,10 +353,16 @@
         <div class="node-content">
           <time>2025/08/16</time>
           <h3><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#redischash-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A...</div>
+
+Redis++（C++）Hash 类型常用接口详解
+hset、hget
+hexists
+hdel
+hlen
+hkeys、hvals
+hmset、hm...</div>
           
             <div class="post-cats">
               
@@ -365,10 +382,16 @@
         <div class="node-content">
           <time>2025/08/15</time>
           <h3><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#rediscset-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A3...</div>
+
+Redis++（C++）Set 类型常用接口详解
+sadd、smembers
+sismember
+spop
+scard
+sinter、sunion
+...</div>
           
             <div class="post-cats">
               
@@ -388,10 +411,17 @@
         <div class="node-content">
           <time>2025/08/15</time>
           <h3><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#redisclist-%E7%B1%BB%E5%9E%8B%E5%B8%B8%E7%94%A8%E6%8E%A5%E5%8F%A...</div>
+
+Redis++（C++）List 类型常用接口详解
+lpush、lrange
+rpush、lpop、rpop
+blpop（阻塞弹出）
+llen
+
+
+...</div>
           
             <div class="post-cats">
               
@@ -411,10 +441,14 @@
         <div class="node-content">
           <time>2025/08/15</time>
           <h3><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#redis-%E4%B8%AD-string-%E7%B1%BB%E5%9E%8B%E7%9B%B8%E5%85%B3%E6%8...</div>
+
+redis++ 中 String 类型相关接口详解
+set、get
+set（带过期时间）&#x2F; get（过期后）
+mset、mget
+getr...</div>
           
             <div class="post-cats">
               
@@ -434,10 +468,22 @@
         <div class="node-content">
           <time>2025/08/14</time>
           <h3><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#c-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%BF%9E%E6%8E%A5&#34;&gt;C++ 客户端连接&lt;/a&gt;&lt;/...</div>
+
+C++ 客户端连接
+基础指令
+SET
+EXISTS、DEL
+KEYS
+EXPIRE、TTL
+TYPE
+
+
+
+
+
+C++ 客户端连接C++ 客户端连接...</div>
           
             <div class="post-cats">
               
@@ -482,14 +528,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

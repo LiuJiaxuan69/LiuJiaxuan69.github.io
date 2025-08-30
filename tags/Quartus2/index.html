@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #98D8C8, #4ECDC4);
+  background: linear-gradient(135deg, #98D8C8, #45B7D1);
 }
 
 .tag-hero h1 {
@@ -195,7 +195,7 @@
   height: 12px;
   border-radius: 50%;
   background: #4ECDC4;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #4ECDC4;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #98D8C8;
 }
 
 .node-content {
@@ -319,10 +319,17 @@
         <div class="node-content">
           <time>2025/07/05</time>
           <h3><a href="/2025/07/05/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/">串口通信</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%A1%AC%E4%BB%B6%E4%B8%8A%E7%9A%84%E4%BF%AE%E6%94%B9&#34;&gt;硬件上的修改&lt;/...</div>
+
+硬件上的修改
+软件上的实现
+超频
+
+
+
+设计概要如下：
+在前述“简易8位通用CPU设计”的基础上扩充UART异步串行通信收发器硬件，实现以特定波特率...</div>
           
             <div class="post-cats">
               
@@ -340,29 +347,16 @@
         <div class="node-content">
           <time>2025/06/25</time>
           <h3><a href="/2025/06/25/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/8%E4%BD%8DCPU%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/">8位CPU硬件设计</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E8%AE%BE%E8%AE%A1%E6%A6%82%E8%BF%B0&#34;&gt;设计概述&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
-          
-            <div class="post-cats">
-              
-                <a href="/categories/%E6%8A%80%E6%9C%AF/" class="cat-badge">📁 技术</a>
-              
-                <a href="/categories/%E6%8A%80%E6%9C%AF/%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="cat-badge">📁 硬件设计</a>
-              
-            </div>
-          
-        </div>
-      </div>
-    
-      <div class="timeline-node">
-        <div class="node-dot"></div>
-        <div class="node-content">
-          <time>2025/06/23</time>
-          <h3><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a></h3>
-          <div class="post-excerpt">&lt;p&gt;&lt;strong&gt;题目如下&lt;/strong&gt;&lt;br&gt;模拟自动售货机（加法器）&lt;br&gt;输入信号：投币信号inscoin[1:0]、商品价格信号d[3:0]、时钟信号clk&lt;br&gt;输出信号：余额...</div>
+
+设计概述
+基于这个框架图，我们将依次设计各个部件的模块逻辑
+一、PC模块设计
+二、ALU模块设计
+三、寄存器组模块设计
+四、指令存储器模块设计
+五、...</div>
           
             <div class="post-cats">
               
@@ -380,10 +374,47 @@
         <div class="node-content">
           <time>2025/06/23</time>
           <h3><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/4bit_alu/">4bit ALU verilog 设计</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%B8%80-%E5%AE%9E%E7%8E%B0%E6%89%80%E6%9C%89%E7%9A%84%E8%BF%90...</div>
+
+一、实现所有的运算逻辑，包装成底层模块
+二、顶层模块复用所有子模块
+三、结果选择器实现
+四、D触发器存储结果数据实现
+五、最终输出
+
+
+
+设计概要如...</div>
+          
+            <div class="post-cats">
+              
+                <a href="/categories/%E6%8A%80%E6%9C%AF/" class="cat-badge">📁 技术</a>
+              
+                <a href="/categories/%E6%8A%80%E6%9C%AF/%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/" class="cat-badge">📁 硬件设计</a>
+              
+            </div>
+          
+        </div>
+      </div>
+    
+      <div class="timeline-node">
+        <div class="node-dot"></div>
+        <div class="node-content">
+          <time>2025/06/23</time>
+          <h3><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a></h3>
+          <div class="post-excerpt">
+
+
+题目内容
+硬件设计
+inscoin 输入对应加数 B 映射表
+
+
+
+
+
+题目内容模拟自动售货机（加法器）输入信号：投币信号inscoin[1:0]、...</div>
           
             <div class="post-cats">
               
@@ -426,14 +457,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

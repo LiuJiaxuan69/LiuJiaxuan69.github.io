@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #98D8C8, #4ECDC4);
+  background: linear-gradient(135deg, #45B7D1, #98D8C8);
 }
 
 .tag-hero h1 {
@@ -194,8 +194,8 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #45B7D1;
-  box-shadow: 0 0 0 3px white, 0 0 0 6px #4ECDC4;
+  background: #FFA07A;
+  box-shadow: 0 0 0 3px white, 0 0 0 6px #45B7D1;
 }
 
 .node-content {
@@ -319,10 +319,20 @@
         <div class="node-content">
           <time>2025/07/27</time>
           <h3><a href="/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BC%A0%E7%BB%9F%E7%BA%BF%E7%A8%8B%E6%B1%A0%E8%AE%BE%E8%AE%A1&#34;...</div>
+
+传统线程池设计
+1. 线程池概述
+2. 核心实现分析
+3. 关键特性
+4. 使用示例
+
+
+基于环形队列（信号量）的线程池
+代码实现
+一、设计思想
+二...</div>
           
             <div class="post-cats">
               
@@ -340,10 +350,19 @@
         <div class="node-content">
           <time>2025/07/26</time>
           <h3><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#posix%E7%BA%BF%E7%A8%8B%E4%BF%A1%E5%8F%B7%E9%87%8Fsemaphore&#34;&gt;POS...</div>
+
+POSIX线程信号量（Semaphore）
+基本概念
+核心函数
+典型使用场景
+信号量 vs 互斥锁
+注意事项
+
+
+生产者-消费者问题
+1. 核心组件...</div>
           
             <div class="post-cats">
               
@@ -361,11 +380,21 @@
         <div class="node-content">
           <time>2025/07/26</time>
           <h3><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F&#34;&gt;条件变量&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;...</div>
+
+条件变量
+关键特点
+典型应用场景
+
+
+同步概念与竞态条件
+同步
+竞态条件
+
+
+条件变量函数
+pthread_cond_init 与 pthread_...</div>
           
             <div class="post-cats">
               
@@ -383,10 +412,21 @@
         <div class="node-content">
           <time>2025/07/25</time>
           <h3><a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E8%BF%9B%E7%A8%8B%E7%BA%BF%E7%A8%8B%E9%97%B4%E7%9A%84%E4%BA%92%...</div>
+
+进程线程间的互斥相关概念详解
+共享资源
+临界资源
+临界区
+互斥
+原子性
+互斥的实现方式
+
+
+互斥锁 Mutex
+背景引入
+PTHREAD_MUTEX...</div>
           
             <div class="post-cats">
               
@@ -404,11 +444,19 @@
         <div class="node-content">
           <time>2025/07/24</time>
           <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#posix-%E7%BA%BF%E7%A8%8B%E5%BA%93&#34;&gt;POSIX 线程库&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href...</div>
+
+POSIX 线程库
+使用 pthread 注意事项
+
+
+pthread_create 函数：线程创建
+函数原型
+参数说明
+返回值
+使用示例
+注意事项...</div>
           
             <div class="post-cats">
               
@@ -426,10 +474,22 @@
         <div class="node-content">
           <time>2025/07/24</time>
           <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5&#34;...</div>
+
+线程的基本概念
+线程与进程的关系
+资源分配与执行
+
+
+线程的实现机制
+分页式存储管理
+多级页表结构
+
+
+线程的优势
+线程的缺点
+线程与进程的资源对比...</div>
           
             <div class="post-cats">
               
@@ -472,14 +532,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

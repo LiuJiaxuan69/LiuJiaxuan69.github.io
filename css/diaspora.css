@@ -393,9 +393,19 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 /* 分类容器 */
 /* 分类容器 */
 .category-container {
+  width: 800px;
+  margin: 0 auto;
+  height: 100vh;
+  display: flex;
+  justify-content: center;         /* 水平居中 */
+  flex-direction: column;
+}
+
+.categories-container {
   max-width: 800px;
   margin: 0 auto;
 }
+
 
 /* 分类标题 */
 .category-title {
@@ -444,7 +454,7 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 
 /* 顶部留白区域 */
 .category-header-space {
-  height: 5vw;
+  height: calc(50vh - 700px/2);
 }
 
 /* 分类标题装饰 */

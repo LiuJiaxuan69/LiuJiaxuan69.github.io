@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #4ECDC4, #FF6B6B);
+  background: linear-gradient(135deg, #FF6B6B, #98D8C8);
 }
 
 .tag-hero h1 {
@@ -194,7 +194,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #4ECDC4;
+  background: #98D8C8;
   box-shadow: 0 0 0 3px white, 0 0 0 6px #45B7D1;
 }
 
@@ -319,11 +319,18 @@
         <div class="node-content">
           <time>2025/07/23</time>
           <h3><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E5%AE%9E%E9%AA%8C%E8%83%8C%E6%99%AF&#34;&gt;实验背景&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+实验背景
+实验一：通过信号处理函数清理僵尸进程（改进版）
+1. 程序结构设计
+2. 关键组件分析
+3. 执行流程优化点
+4. 可能的改进建议
+
+
+实...</div>
           
             <div class="post-cats">
               
@@ -341,10 +348,20 @@
         <div class="node-content">
           <time>2025/07/23</time>
           <h3><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BF%A1%E5%8F%B7%E6%8D%95%E6%8D%89%E6%B5%81%E7%A8%8B&#34;&gt;信号捕捉流程&lt;/...</div>
+
+信号捕捉流程
+sigaction 函数
+函数原型
+参数说明
+返回值
+struct sigaction 结构体
+关键字段说明
+
+
+信号捕捉底层细节
+3...</div>
           
             <div class="post-cats">
               
@@ -362,11 +379,18 @@
         <div class="node-content">
           <time>2025/07/22</time>
           <h3><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BF%A1%E5%8F%B7%E7%9A%84%E7%8A%B6%E6%80%81&#34;&gt;信号的状态&lt;/a&gt;&lt;ul&gt;
-&lt;li...</div>
+
+信号的状态
+信号的三种状态
+2. 阻塞 vs 忽略
+3. 内核中的实现
+
+
+信号管理核心数据结构：信号集 sigset_t
+信号标志的存储方式
+信号...</div>
           
             <div class="post-cats">
               
@@ -384,10 +408,12 @@
         <div class="node-content">
           <time>2025/07/22</time>
           <h3><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#linux-%E4%BF%A1%E5%8F%B7signal%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%...</div>
+
+Linux 信号（Signal）的简单定义
+Linux 信号分类：普通信号 vs 实时信号
+1. 普通信号（Standard Signals，1~3...</div>
           
             <div class="post-cats">
               
@@ -430,14 +456,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

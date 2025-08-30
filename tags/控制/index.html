@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #FFA07A, #4ECDC4);
+  background: linear-gradient(135deg, #FFA07A, #98D8C8);
 }
 
 .tag-hero h1 {
@@ -194,7 +194,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #4ECDC4;
+  background: #FF6B6B;
   box-shadow: 0 0 0 3px white, 0 0 0 6px #45B7D1;
 }
 
@@ -319,11 +319,19 @@
         <div class="node-content">
           <time>2025/07/24</time>
           <h3><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#posix-%E7%BA%BF%E7%A8%8B%E5%BA%93&#34;&gt;POSIX 线程库&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a href...</div>
+
+POSIX 线程库
+使用 pthread 注意事项
+
+
+pthread_create 函数：线程创建
+函数原型
+参数说明
+返回值
+使用示例
+注意事项...</div>
           
             <div class="post-cats">
               
@@ -341,11 +349,21 @@
         <div class="node-content">
           <time>2025/07/17</time>
           <h3><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E6%9B%BF%E6%8D%A2%E5%8E%9F%E7%90%86&#34;&gt;替换原理&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=...</div>
+
+替换原理
+替换函数
+execl 函数
+execv 函数
+execlp 和 execvp
+execle 和 execve
+
+
+
+
+
+若父进程希望创建的...</div>
           
             <div class="post-cats">
               
@@ -363,10 +381,17 @@
         <div class="node-content">
           <time>2025/07/16</time>
           <h3><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E8%BF%9B%E7%A8%8B%E7%AD%89%E5%BE%85%E5%BF%85%E8%A6%81%E6%80%A7&#34;...</div>
+
+进程等待必要性
+进程等待方法
+wait
+waitpid
+
+
+等待获取子进程状态 status
+wait 和 waitpid 的 status 参数说...</div>
           
             <div class="post-cats">
               
@@ -384,10 +409,22 @@
         <div class="node-content">
           <time>2025/07/15</time>
           <h3><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C%E5%AE%8C%E6%AF%95%E7%BB%93%...</div>
+
+代码运行完毕结果不正确
+_exit 函数
+exit 函数
+strerr 函数
+
+
+代码异常终止
+
+
+
+一个进程退出一般分为以下这三种情况：
+
+代码运...</div>
           
             <div class="post-cats">
               
@@ -430,14 +467,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

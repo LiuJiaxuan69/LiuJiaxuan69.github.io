@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #FFA07A, #98D8C8);
+  background: linear-gradient(135deg, #98D8C8, #45B7D1);
 }
 
 .tag-hero h1 {
@@ -194,7 +194,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #4ECDC4;
+  background: #45B7D1;
   box-shadow: 0 0 0 3px white, 0 0 0 6px #98D8C8;
 }
 
@@ -319,10 +319,20 @@
         <div class="node-content">
           <time>2025/08/02</time>
           <h3><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/">Linux 基于 Epoll 的主从 Reactor 多线程模型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BB%80%E4%B9%88%E6%98%AF-reactor-%E6%A8%A1%E5%9E%8B&#34;&gt;什么是 &lt;cod...</div>
+
+什么是 Reactor 模型
+核心概念
+模型分类
+工作流程
+
+
+基于 Epoll 的主从 Reactor 多线程模型
+核心组件
+工作流程
+注意事项
+...</div>
           
             <div class="post-cats">
               
@@ -340,10 +350,15 @@
         <div class="node-content">
           <time>2025/08/02</time>
           <h3><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/">Linux IO 多路转接--Epoll</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#epoll-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3&#34;&gt;ep...</div>
+
+epoll 工作原理详解
+epoll 的核心数据结构
+epoll 的工作流程
+关键设计优势
+对比 select&#x2F;poll
+边缘触发（ET）...</div>
           
             <div class="post-cats">
               
@@ -361,11 +376,18 @@
         <div class="node-content">
           <time>2025/08/01</time>
           <h3><a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#poll-%E5%87%BD%E6%95%B0&#34;&gt;&lt;code&gt;poll&lt;/code&gt; 函数&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a hre...</div>
+
+poll 函数
+poll 函数原型
+struct pollfd 结构体
+poll 的工作流程
+poll 示例代码（监控多个 FD）
+
+
+服务端实现
+...</div>
           
             <div class="post-cats">
               
@@ -383,10 +405,18 @@
         <div class="node-content">
           <time>2025/07/31</time>
           <h3><a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/">自定义协议 &amp;&amp; 序列化与反序列化</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1%E4%B8%AD%E7%9A%84%E8%87%AA%...</div>
+
+网络通信中的自定义协议
+什么是自定义协议
+自定义协议的设计要素
+自定义协议的实现方式
+
+
+自定义协议中的序列化和反序列化
+序列化的概念与作用
+反序列...</div>
           
             <div class="post-cats">
               
@@ -404,10 +434,21 @@
         <div class="node-content">
           <time>2025/07/29</time>
           <h3><a href="/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/">Socket 套接字编程-TCP</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E5%9F%BA%E7%A1%80%E9%80%9A%E4%BF%A1%E6%A1%86%E6%9E%B6%E8%AE%BE%...</div>
+
+基础通信框架设计
+tcp.hpp
+tcp_server.hpp
+功能测试
+
+
+利用线程池处理批量连接
+客户端添加重连机制
+封装成简单的聊天服务
+
+
+...</div>
           
             <div class="post-cats">
               
@@ -425,10 +466,18 @@
         <div class="node-content">
           <time>2025/07/28</time>
           <h3><a href="/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/">Socket 套接字编程-UDP</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#socket-%E5%87%BD%E6%95%B0%E8%AF%A6%E8%A7%A3&#34;&gt;Socket 函数详解&lt;/a&gt;&lt;ul&gt;...</div>
+
+Socket 函数详解
+Socket 的基本概念
+Socket 的核心函数
+Socket 工作流程
+TCP 服务器
+总结
+
+
+UDP 收发数据接口详...</div>
           
             <div class="post-cats">
               
@@ -471,14 +520,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

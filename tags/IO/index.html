@@ -161,7 +161,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #98D8C8, #45B7D1);
+  background: linear-gradient(135deg, #4ECDC4, #FF6B6B);
 }
 
 .tag-hero h1 {
@@ -194,7 +194,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #98D8C8;
+  background: #FF6B6B;
   box-shadow: 0 0 0 3px white, 0 0 0 6px #45B7D1;
 }
 
@@ -319,10 +319,20 @@
         <div class="node-content">
           <time>2025/08/02</time>
           <h3><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/">Linux 基于 Epoll 的主从 Reactor 多线程模型</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#%E4%BB%80%E4%B9%88%E6%98%AF-reactor-%E6%A8%A1%E5%9E%8B&#34;&gt;什么是 &lt;cod...</div>
+
+什么是 Reactor 模型
+核心概念
+模型分类
+工作流程
+
+
+基于 Epoll 的主从 Reactor 多线程模型
+核心组件
+工作流程
+注意事项
+...</div>
           
             <div class="post-cats">
               
@@ -340,10 +350,15 @@
         <div class="node-content">
           <time>2025/08/02</time>
           <h3><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/">Linux IO 多路转接--Epoll</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#epoll-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E8%AF%A6%E8%A7%A3&#34;&gt;ep...</div>
+
+epoll 工作原理详解
+epoll 的核心数据结构
+epoll 的工作流程
+关键设计优势
+对比 select&#x2F;poll
+边缘触发（ET）...</div>
           
             <div class="post-cats">
               
@@ -361,11 +376,18 @@
         <div class="node-content">
           <time>2025/08/01</time>
           <h3><a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a></h3>
-          <div class="post-excerpt">&lt;!-- toc --&gt;
+          <div class="post-excerpt">
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;#poll-%E5%87%BD%E6%95%B0&#34;&gt;&lt;code&gt;poll&lt;/code&gt; 函数&lt;/a&gt;&lt;ul&gt;
-&lt;li&gt;&lt;a hre...</div>
+
+poll 函数
+poll 函数原型
+struct pollfd 结构体
+poll 的工作流程
+poll 示例代码（监控多个 FD）
+
+
+服务端实现
+...</div>
           
             <div class="post-cats">
               
@@ -408,14 +430,14 @@
           容器 (4)
         </a>
       
+        <a href="/tags/%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84/" class="related-tag" 
+           style="--tag-size: 22px">
+          技术架构 (1)
+        </a>
+      
         <a href="/tags/%E9%95%9C%E5%83%8F/" class="related-tag" 
            style="--tag-size: 22px">
           镜像 (1)
-        </a>
-      
-        <a href="/tags/%E5%85%A5%E9%97%A8/" class="related-tag" 
-           style="--tag-size: 22px">
-          入门 (1)
         </a>
       
     </div>

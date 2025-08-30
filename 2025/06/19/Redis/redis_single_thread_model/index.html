@@ -212,7 +212,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/4bit_alu/">4bit ALU verilog 设计</a></li><li><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li><li><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a></li></ul>
+            <ul><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -319,7 +319,7 @@
             /* 薄荷青 */
             border-radius: 12px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
-            padding: 14px 0px 12px;
+            padding: 14px 6px 12px;
             /* 原来只有 padding-top:60px，排版会怪 */
             overflow-y: auto;
         }
@@ -998,6 +998,7 @@
     backToTopBtn.addEventListener('touchend', function () {
       this.classList.remove('touching');
     });
+    
   })();
 </script>
 
@@ -1222,6 +1223,47 @@ a[href^="#"] {
 .mermaid text {
     fill: #4a8ecd !important; /* 文字 */
 }
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
 </style>
 </body>
 
