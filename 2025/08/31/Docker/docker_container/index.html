@@ -1,0 +1,3058 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker Container 使用指南 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是容器
+为什么需要容器
+容器的生命周期
+容器 OOM
+容器异常退出
+容器暂停
+
+
+Docker Container 常用命令
+docker create
+docker start
+dock,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Docker Container 使用指南 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是容器
+为什么需要容器
+容器的生命周期
+容器 OOM
+容器异常退出
+容器暂停
+
+
+Docker Container 常用命令
+docker create
+docker start
+dock,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Docker Container 使用指南 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是容器
+为什么需要容器
+容器的生命周期
+容器 OOM
+容器异常退出
+容器暂停
+
+
+Docker Container 常用命令
+docker create
+docker start
+dock,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Docker Container 使用指南</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">60</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image 使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">Docker Container 使用指南</h1>
+            <div class="stuff">
+                <span>八月 31, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AE%B9%E5%99%A8">什么是容器</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%AE%B9%E5%99%A8">为什么需要容器</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">容器的生命周期</a><ul>
+<li><a href="#%E5%AE%B9%E5%99%A8-oom">容器 OOM</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E5%BC%82%E5%B8%B8%E9%80%80%E5%87%BA">容器异常退出</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E6%9A%82%E5%81%9C">容器暂停</a></li>
+</ul>
+</li>
+<li><a href="#docker-container-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4">Docker Container 常用命令</a><ul>
+<li><a href="#docker-create">docker create</a></li>
+<li><a href="#docker-start">docker start</a></li>
+<li><a href="#docker-run">docker run</a></li>
+<li><a href="#docker-ps">docker ps</a></li>
+<li><a href="#docker-logs">docker logs</a></li>
+<li><a href="#docker-attach">docker attach</a></li>
+<li><a href="#docker-exec">docker exec</a></li>
+<li><a href="#docker-restart">docker restart</a></li>
+<li><a href="#docker-stop">docker stop</a></li>
+<li><a href="#docker-kill">docker kill</a></li>
+<li><a href="#docker-top">docker top</a></li>
+<li><a href="#docker-stat">docker stat</a></li>
+<li><a href="#docker-container-inspect">docker container inspect</a></li>
+<li><a href="#docker-port">docker port</a></li>
+<li><a href="#docker-cp">docker cp</a></li>
+<li><a href="#docker-diff">docker diff</a></li>
+<li><a href="#docker-commit">docker commit</a></li>
+<li><a href="#docker-pause-%E5%92%8C-docker-unpause">docker pause 和 docker unpause</a></li>
+<li><a href="#docker-rm">docker rm</a></li>
+<li><a href="#docker-export-%E5%92%8C-docker-import">docker export 和 docker import</a></li>
+<li><a href="#docker-wait">docker wait</a></li>
+<li><a href="#docker-rename">docker rename</a></li>
+<li><a href="#docker-container-prune">docker container prune</a></li>
+<li><a href="#docker-update">docker update</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="什么是容器">什么是容器</span></h2><p>通俗地讲，容器是镜像的运行实体。镜像是静态的只读文件，而容器带有运行时需要的可写文件层，并且容器中的进程属于运行状态。即容器运行着真正的应用进程。容器有初建、运行、停止、暂停和删除五种状态。<br>虽然容器的本质是主机上运行的一个进程，但是容器有自己独立的命名空间隔离和资源限制。也就是说，在容器内部，无法看到主机上的进程、环境变量、网络等信息，这是容器与直接运行在主机上进程的本质区别。<br>容器是基于镜像创建的可运行实例，并且单独存在，一个镜像可以创建出多个容器。运行容器化环境时，实际上是在容器内部创建该文件系统的读写副本。这将添加一个容器层，该层允许修改镜像的整个副本。</p>
+<p><img src="/img/Docker/container/base.png" alt="base"></p>
+<h2><span id="为什么需要容器">为什么需要容器</span></h2><p>镜像是静态文件，是只读的，它并不能提供服务，就好比我有一个 <code>Linux</code> 的光盘，它里面有操作系统的所有文件，但我无法直接从光盘上运行这些文件。为了让这些文件发挥作用，我需要将它们加载到内存中并运行。这就是容器的作用，它为镜像提供了一个可运行的环境。</p>
+<h2><span id="容器的生命周期">容器的生命周期</span></h2><p>容器的生命周期指的是容器可能处于的不同状态，通常分为以下几类：</p>
+<p>1、created：容器已创建，但尚未启动。<br>2、running：容器正在运行中。<br>3、stopped：容器已停止运行。<br>4、paused：容器已暂停。<br>5、deleted：容器已被删除。</p>
+<p>各生命周期之间的转换关系如图所示：</p>
+<p><img src="/img/Docker/container/status.png" alt="status"></p>
+<p><strong>名词解释如下</strong>：</p>
+<ul>
+<li><strong><code>docker create</code></strong>：创建容器后，不立即启动运行，容器进入初建状态；</li>
+<li><strong><code>docker run</code></strong>：创建容器，并立即启动运行，进入运行状态；</li>
+<li><strong><code>docker start</code></strong>：容器转为运行状态；</li>
+<li><strong><code>docker stop</code></strong>：容器将转入停止状态；</li>
+<li><strong><code>docker kill</code></strong>：容器在故障（死机）时，执行 kill（断电），容器转入停止状态，这种操作容易丢失数据，除非必要，否则不建议使用；</li>
+<li><strong><code>docker restart</code></strong>：重启容器，容器转入运行状态；</li>
+<li><strong><code>docker pause</code></strong>：容器进入暂停状态；</li>
+<li><strong><code>docker unpause</code></strong>：取消暂停状态，容器进入运行状态；</li>
+<li><strong><code>docker rm</code></strong>：删除容器，容器转入删除状态。</li>
+</ul>
+<p><strong>异常终止状态说明</strong>：</p>
+<ul>
+<li>killed by out-of-memory（因内存不足被终止）</li>
+</ul>
+<p>宿主机内存被耗尽，也被称为 OOM。属于<strong>非计划终止</strong>，这时需要杀死最吃内存的容器。</p>
+<ul>
+<li>container process exited（异常终止）</li>
+</ul>
+<p>出现容器被终止后，将进入 <code>Should restart?</code> 选择操作：</p>
+<ul>
+<li><strong>yes</strong>：需要重启，容器执行 <code>start</code> 命令，转为运行状态。</li>
+<li><strong>no</strong>：不需要重启，容器转为停止状态。</li>
+</ul>
+<p>针对容器的 OOM、异常退出以及暂停，我们来作进一步的深入分析。</p>
+<h3><span id="容器-oom">容器 OOM</span></h3><p>Docker 在处理 OOM 事件时分为三种情况：</p>
+<p>（1）容器内存超限触发 OOM<br>如果容器中的应用耗尽了主机系统分配给容器的内存限额，就会触发 OOM 事件。例如，在容器当中部署了一个 web 服务。假设主机分配给此容器的内存上限为 1G，当脚本申请的内存大于 1G 时，此容器就会触发 OOM 事件。而在这种情况下，此容器将会被强制关闭。</p>
+<p>但需要注意的是，此时关闭容器的并非是 Docker Daemon，而是宿主机操作系统。因为一个容器其实就是一组运行在宿主机操作系统中的进程，宿主机操作系统通过 cgroups 对这组进程设定资源上限，当这些进程申请的资源到达上限时，触发的是宿主机操作系统的内核 OOM 事件，因此最终是由宿主机内核来关闭这些进程。</p>
+<p>（2）禁用 OOM-Killer 的情况<br>如果用户不想关闭这个容器，那么可以选择 <code>--oom-kill-disable</code> 来禁用 OOM-Killer。使用此参数时，仍需要注意：如果使用 <code>-m</code> 设置了此容器内存上限，那么当容器到达内存资源上限时，主机不会关闭容器，但也不会继续向此容器继续分配资源，此时容器将处于 hung 状态。只需要将最坏的情况封闭在一定范围之内，而不至于蔓延出去。</p>
+<p>（3）禁用 OOM-Killer 但未设置内存上限<br>如果用户使用了 <code>--oom-kill-disable</code>，但也没有使用 <code>-m</code> 来设定上限，因而此时此容器将会尽可能地使用主机内存资源。换言之，主机内存有多大，它就将用多大。</p>
+<h3><span id="容器异常退出">容器异常退出</span></h3><p>每个容器内部都存在一个 Init 进程，容器中其他所有进程都是此进程的子进程。运行的容器是因为 Init 进程在运行，如果一个子进程因为某种原因造成了退出，那么其父进程也会同步退出，直至 Init 进程也退出。当 Init 进程退出时，也就代表着此容器被关闭。</p>
+<p>Docker 目前没有办法知道此时的进程退出属于正常退出还是异常退出。当出现容器关闭情况时，Docker Daemon 会尝试再次重新将此容器由 Stopped 状态转为 Running 状态。只有设置了 <code>--restart</code> 参数的容器，Docker Daemon 才会去尝试启动，否则容器会保持停止状态。</p>
+<h3><span id="容器暂停">容器暂停</span></h3><p>Docker”剥夺”了此容器的 CPU 资源。而其他资源，如 Memory 资源、Network 资源等还保留未动。如此一来，失去了 CPU 资源的进程，是不会被主机内核系统所调度的，所以此容器就处于”冰封”状态，底层实现上，实际上就是不给该容器的进程分配时间片。</p>
+<h2><span id="docker-container-常用命令">Docker Container 常用命令</span></h2><h3><span id="docker-create">docker create</span></h3><p><code>docker create</code> 命令用于<strong>创建一个新的容器</strong>，但<strong>并不会立即启动它</strong>。</p>
+<p>语法格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker create [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
+
+<p>你可以把它想象成买了一辆新车（从镜像创建容器），把它停在了车库裡，但还没有插入钥匙启动引擎。此时，车辆的所有配置（颜色、型号、内饰）都已就绪，只差最后一步——点火。</p>
+<h4><span id="docker-create-与-docker-run-的区别"><code>docker create</code> 与 <code>docker run</code> 的区别</span></h4><p>我们可以用一个简单的类比来区分：</p>
+<ul>
+<li><p><strong><code>docker run = docker create + docker start</code></strong></p>
+<ul>
+<li><code>docker run nginx:latest</code>：这条命令会直接拉取镜像（如果本地没有）、创建容器、并立刻启动它，让你马上看到一个运行中的 Nginx 服务。</li>
+</ul>
+</li>
+<li><p><strong><code>docker create</code></strong>：它只完成 <code>docker run</code> 的前半部分工作。</p>
+<ul>
+<li><code>docker create --name my-nginx nginx:latest</code>：这条命令会基于 <code>nginx:latest</code> 镜像创建好一个容器，配置好一切，然后将其置于<strong>已创建（Created）</strong> 状态。此时，容器存在，但内部的进程（如 Nginx 主进程）还没有启动。</li>
+</ul>
+</li>
+</ul>
+<p><strong>核心区别在于</strong>：<code>docker create</code> 让容器在运行前有一个“停滞”的状态，这为我们提供了检查和修改配置的机会。</p>
+<h4><span id="docker-create-的核心工作流程"><code>docker create</code> 的核心工作流程</span></h4><ol>
+<li><strong>查找镜像</strong>：首先，Docker 会在本地查找指定的镜像（如 <code>nginx:latest</code>）。如果找不到，它会尝试从配置的仓库（如 Docker Hub）拉取。</li>
+<li><strong>创建容器层</strong>：在镜像的只读层（Read-only Layers）之上，添加一个可写的容器层（Container Layer），为未来的文件系统更改做准备。</li>
+<li><strong>配置网络</strong>：根据命令参数或默认配置，为容器设置网络模式（如桥接网络 <code>bridge</code>）。</li>
+<li><strong>初始化配置</strong>：处理所有通过 <code>-e</code>（环境变量）、<code>-v</code>（数据卷）、<code>-p</code>（端口映射）等参数传递的配置。</li>
+<li><strong>准备执行</strong>：设置好默认要运行的命令（即 Dockerfile 中的 <code>CMD</code> 或 <code>ENTRYPOINT</code>），但<strong>不执行它</strong>。</li>
+<li><strong>输出容器 ID</strong>：最终，命令会返回一个唯一的长 ID（如 <code>f39a6aadc79f...</code>）和容器名称，表示创建成功。</li>
+</ol>
+<h4><span id="常用参数和示例">常用参数和示例</span></h4><p><code>docker create</code> 的参数与 <code>docker run</code> 几乎完全一致，因为它需要为容器设定所有运行时的配置。</p>
+<p><strong>基本示例 1：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个名为 `my_web` 的 Nginx 容器，但不启动它</span></span><br><span class="line">docker create --name my_web nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p><strong>基本示例 2（包含常用参数）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个复杂的容器</span></span><br><span class="line">docker create \</span><br><span class="line">  --name my_app \                  <span class="comment"># 为容器指定一个名称</span></span><br><span class="line">  -p 8080:80 \                     <span class="comment"># 将主机的 8080 端口映射到容器的 80 端口</span></span><br><span class="line">  -v /host/path:/container/path \  <span class="comment"># 挂载主机目录到容器中</span></span><br><span class="line">  -e ENV_VAR=<span class="string">&quot;my_value&quot;</span> \          <span class="comment"># 设置环境变量</span></span><br><span class="line">  --restart=unless-stopped \       <span class="comment"># 设置重启策略</span></span><br><span class="line">  nginx:latest                     <span class="comment"># 使用的镜像</span></span><br></pre></td></tr></table></figure>
+
+<p>执行上述命令后，你会得到一个容器 ID，表示容器已创建成功。可以使用 <code>docker ps -a</code> 查看所有容器（包括已停止的），你会发现 <code>my_app</code> 的状态是 <code>Created</code>。</p>
+<h4><span id="docker-create-的典型应用场景"><code>docker create</code> 的典型应用场景</span></h4><ol>
+<li><strong>预先配置</strong>：在复杂部署前，先创建容器以确保所有配置（如卷挂载、环境变量）正确无误，之后再统一启动。</li>
+<li><strong>CI&#x2F;CD 流水线</strong>：在持续集成&#x2F;部署中，可以先创建容器镜像，然后在一个部署阶段统一启动所有容器，保证服务同时上线。</li>
+<li><strong>调试和检查</strong>：创建后，可以使用 <code>docker inspect &lt;container_id&gt;</code> 命令详细检查容器的所有配置，确保其符合预期，然后再启动。</li>
+<li><strong>作为模板</strong>：我们可以先创建一个配置好的容器，如果需要多个相同配置的实例，可以基于这个已创建的容器来提交新的镜像，或者作为参考模板。</li>
+</ol>
+<h3><span id="docker-start">docker start</span></h3><p>创建容器后，通常会需要启动它：</p>
+<p>语法格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个已创建的容器</span></span><br><span class="line">docker start my_web</span><br></pre></td></tr></table></figure>
+
+<p>这条命令会将容器从 <code>Created</code> 状态转为 <code>Running</code> 状态，启动容器内的主进程（如 Nginx 服务）。</p>
+<h3><span id="docker-run">docker run</span></h3><p>如果想要直接创建并启动容器，可以使用 <code>docker run</code> 命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
+
+<p>在选项方面，<code>docker run</code> 比 <code>docker create</code> 多了一个 <code>-d</code>（后台运行）选项。</p>
+<p>示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建并启动一个 Nginx 容器</span></span><br><span class="line">docker run --name my_web -d nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>这条命令会拉取 <code>nginx:latest</code> 镜像（如果本地不存在），创建一个名为 <code>my_web</code> 的容器，并在后台运行它。</p>
+<h3><span id="docker-ps">docker ps</span></h3><p>该命令在之前的文章中已经介绍过，用于查看当前运行的容器，若需要了解请展开：</p>
+<div class="spoiler collapsed">
+    <div class="spoiler-title">
+        
+    </div>
+    <div class="spoiler-content">
+        <h4><span id="功能">功能</span></h4><p>列出容器。这是 Docker 中最常用的监控和管理命令之一，用于查看当前容器运行状态。</p>
+<h4><span id="语法">语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps [OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="别名">别名</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">ls</span></span><br><span class="line">docker container list</span><br><span class="line">docker container ps</span><br></pre></td></tr></table></figure>
+
+<h4><span id="关键参数详解">关键参数详解</span></h4><h5><span id="显示范围控制">显示范围控制</span></h5><ul>
+<li><p><strong><code>-a, --all</code></strong>：显示所有容器，包括停止的容器。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>-f, --filter</code></strong>：根据条件过滤显示结果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=running&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>-n, --last</code></strong>：显示最近创建的 n 个容器（包括所有状态）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -n 3</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5><span id="显示格式控制">显示格式控制</span></h5><ul>
+<li><p><strong><code>-q, --quiet</code></strong>：只显示容器 ID。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -q</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>--no-trunc</code></strong>：显示完整信息，不截断输出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps --no-trunc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>--format</code></strong>：使用 Go 模板格式化输出。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>-s, --size</code></strong>：显示容器文件大小。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -s</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5><span id="时间显示">时间显示</span></h5><ul>
+<li><p><strong><code>-l, --latest</code></strong>：显示最近创建的容器（包括所有状态）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -l</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="输出列说明">输出列说明</span></h4><p>执行 <code>docker ps</code> 后显示的表格包含以下重要列：</p>
+<table>
+<thead>
+<tr>
+<th>列名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CONTAINER ID</strong></td>
+<td>容器的唯一标识符（通常显示前 12 位）</td>
+</tr>
+<tr>
+<td><strong>IMAGE</strong></td>
+<td>创建容器所使用的镜像名称</td>
+</tr>
+<tr>
+<td><strong>COMMAND</strong></td>
+<td>容器启动时运行的命令</td>
+</tr>
+<tr>
+<td><strong>CREATED</strong></td>
+<td>容器创建时间</td>
+</tr>
+<tr>
+<td><strong>STATUS</strong></td>
+<td>容器状态（Up 表示运行中，Exited 表示已退出）</td>
+</tr>
+<tr>
+<td><strong>PORTS</strong></td>
+<td>端口映射信息</td>
+</tr>
+<tr>
+<td><strong>NAMES</strong></td>
+<td>容器名称</td>
+</tr>
+</tbody></table>
+<h4><span id="过滤器常用用法">过滤器常用用法</span></h4><p>过滤器是 <code>docker ps</code> 的强大功能，支持多种过滤条件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按名称过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按状态过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=running&quot;</span>   <span class="comment"># 运行中的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=exited&quot;</span>    <span class="comment"># 已停止的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=created&quot;</span>   <span class="comment"># 已创建但未运行的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按镜像过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;ancestor=nginx&quot;</span>   <span class="comment"># 使用nginx镜像的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按退出代码过滤</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=0&quot;</span>      <span class="comment"># 正常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span>      <span class="comment"># 异常退出的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按标签过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;label=environment=production&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 组合多个过滤器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=db&quot;</span> -f <span class="string">&quot;status=running&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="格式化输出示例">格式化输出示例</span></h4><p>使用 <code>--format</code> 参数可以自定义输出格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只显示ID和名称</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示ID、名称、状态和端口</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;\t&#123;&#123;.Ports&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以JSON格式输出</span></span><br><span class="line">docker ps --format <span class="string">&quot;&#123;&#123;json .&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义表格标题</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;&quot;</span> --format <span class="string">&quot;ID\tNAME\tSTATUS&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="使用示例">使用示例</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有运行中的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有容器（包括已停止的）</span></span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看最近创建的2个容器</span></span><br><span class="line">docker ps -n 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示运行中容器的ID</span></span><br><span class="line">docker ps -q</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看名称包含&quot;web&quot;的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有异常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示容器大小信息</span></span><br><span class="line">docker ps -s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义格式输出</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;\t&#123;&#123;.Ports&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="实际应用场景">实际应用场景</span></h4><ol>
+<li><p><strong>快速查看容器状态</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 日常监控</span></span><br><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查找特定容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找MySQL容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=mysql&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>批量操作容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止所有运行中的容器</span></span><br><span class="line">docker stop $(docker ps -q)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除所有已停止的容器</span></span><br><span class="line">docker <span class="built_in">rm</span> $(docker ps -a -q -f <span class="string">&quot;status=exited&quot;</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>故障排查</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看异常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>资源监控</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器占用空间</span></span><br><span class="line">docker ps -s</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li>默认情况下 <code>docker ps</code> 只显示运行中的容器</li>
+<li>使用 <code>-a</code> 参数可以查看所有状态的容器</li>
+<li>过滤器功能非常强大，可以组合多个条件进行精确查询</li>
+<li>格式化输出适合编写脚本和自动化工具</li>
+<li>容器 ID 的前几个字符通常就足够唯一标识一个容器</li>
+</ol>
+
+    </div>
+</div>
+
+<h3><span id="docker-logs">docker logs</span></h3><p>当我们启动一个容器后，一个很自然的问题是：<strong>我的应用程序在里面运行得怎么样？它输出了什么？有没有报错？</strong> 容器是一个隔离的环境，我们无法直接像操作普通进程一样看到它的终端输出。这时，<code>docker logs</code> 命令就成了我们窥探容器内部运行时状态的 <strong>“万能窗口”</strong>。</p>
+<p><code>docker logs</code> 命令用于<strong>获取容器的日志</strong>。它会抓取并输出目标容器在其生命周期内，其内部主进程（PID 1）写入到<strong>标准输出（STDOUT）</strong> 和<strong>标准错误（STDERR）</strong> 的所有数据。</p>
+<p>简单来说，你在容器内应用程序中用 <code>console.log()</code>、<code>print()</code>、<code>cout</code>、<code>System.out.println()</code> 等语句输出的内容，以及产生的错误信息，都可以通过这个命令查看到。</p>
+<h4><span id="docker-的日志处理机制">Docker 的日志处理机制</span></h4><p>要理解 <code>docker logs</code>，首先要知道 Docker 是如何处理容器日志的。</p>
+<ol>
+<li><strong>默认的日志驱动（JSON File）</strong>：Docker 默认使用 <code>json-file</code> 日志驱动。这意味着容器内主进程的 STDOUT 和 STDERR 流会被 Docker 守护进程（Docker Daemon）捕获。</li>
+<li><strong>持久化存储</strong>：Docker Daemon 会将捕获到的每一条日志，以 JSON 格式追加写入到主机磁盘上的一个文件中（通常位于 <code>/var/lib/docker/containers/&lt;container_id&gt;/&lt;container_id&gt;-json.log</code>）。</li>
+<li><strong>命令读取</strong>：当你执行 <code>docker logs</code> 时，Docker 客户端会与 Daemon 通信，Daemon 则去读取对应的 JSON 日志文件，并将格式化后的内容返回给你。</li>
+</ol>
+<p>这种机制的好处在于，<strong>即使容器已经停止（Exited）</strong>，只要日志文件没有被手动清理（例如通过 <code>docker rm</code> 删除容器），你依然可以查看其历史日志。</p>
+<h4><span id="基本语法和常用参数">基本语法和常用参数</span></h4><p><code>docker logs</code> 的功能非常强大，通过添加不同的参数，可以满足各种查看需求。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs [OPTIONS] CONTAINER</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>CONTAINER</code> 可以是容器名称 (<code>--name</code> 指定的) 或容器 ID（通常取前几位即可）。</p>
+<p><strong>最常用的参数（Flags）：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">全称</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>-f</code></td>
+<td align="left"><code>--follow</code></td>
+<td align="left"><strong>持续跟踪</strong>日志输出。类似于 <code>tail -f</code>，会实时显示新产生的日志，是监控容器行为的利器。</td>
+</tr>
+<tr>
+<td align="left"><code>-t</code></td>
+<td align="left"><code>--timestamps</code></td>
+<td align="left">显示<strong>时间戳</strong>。每条日志前都会加上其产生的时间，对于调试和排序非常有用。</td>
+</tr>
+<tr>
+<td align="left"><code>-n</code></td>
+<td align="left"><code>--tail</code></td>
+<td align="left">仅显示<strong>最后 N 条</strong>日志。例如 <code>--tail 100</code> 显示最后 100 行。</td>
+</tr>
+<tr>
+<td align="left"><code>--since</code></td>
+<td align="left"></td>
+<td align="left">显示从某个时间点开始的日志。例如 <code>--since 2024-08-31</code> 或 <code>--since 1h</code>（过去 1 小时）。</td>
+</tr>
+<tr>
+<td align="left"><code>--until</code></td>
+<td align="left"></td>
+<td align="left">显示在某个时间点之前的日志。</td>
+</tr>
+<tr>
+<td align="left"><code>--details</code></td>
+<td align="left"></td>
+<td align="left">显示更多的细节（额外的属性）。</td>
+</tr>
+</tbody></table>
+<h4><span id="实战示例">实战示例</span></h4><p>假设我们有一个正在运行的名为 <code>my_web_app</code> 的容器。</p>
+<ol>
+<li><p><strong>查看最新日志：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看最后10条日志（默认）</span></span><br><span class="line">docker logs my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看最后100条日志</span></span><br><span class="line">docker logs --<span class="built_in">tail</span> 100 my_web_app</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">docker logs -n 100 my_web_app</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>实时跟踪日志（最常用）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实时查看最新日志，常用于调试和监控</span></span><br><span class="line">docker logs -f my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时查看并带上时间戳</span></span><br><span class="line">docker logs -ft my_web_app</span><br></pre></td></tr></table></figure>
+
+<p><em>按下 <code>Ctrl+C</code> 可以退出跟踪模式。</em></p>
+</li>
+<li><p><strong>查看某个时间段内的日志：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看过去30分钟内的日志</span></span><br><span class="line">docker logs --since 30m my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看2024年1月1日之后的日志，并显示时间戳</span></span><br><span class="line">docker logs -t --since 2024-01-01 my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看今天早上8点到9点之间的日志</span></span><br><span class="line">docker logs --since 2024-08-31T08:00:00 --<span class="keyword">until</span> 2024-08-31T09:00:00 my_web_app</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看已停止容器的日志：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 即使容器已停止，只要没被删除，日志依然可查</span></span><br><span class="line">docker logs my_stopped_container</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="高级用法与最佳实践">高级用法与最佳实践</span></h4><ol>
+<li><p><strong>日志驱动（Logging Driver）</strong>：<br>Docker 支持多种日志驱动（如 <code>json-file</code>, <code>syslog</code>, <code>journald</code>, <code>fluentd</code>, <code>awslogs</code> 等）。<code>docker logs</code> 命令<strong>仅适用于 <code>json-file</code>、<code>journald</code> 和 <code>local</code> 等少数几种驱动</strong>。如果你将日志驱动设置为 <code>syslog</code> 或第三方工具（如 Fluentd），则 <code>docker logs</code> 将无法工作，你需要使用相应日志系统的工具（如 <code>journalctl</code>）来查看日志。</p>
+</li>
+<li><p><strong>避免在容器内写日志文件</strong>：<br>一个常见的反模式是在容器内将日志写入文件（如 <code>/app/logs/app.log</code>）。这会导致：</p>
+<ul>
+<li>日志失去 Docker 的自动管理功能。</li>
+<li>使用 <code>docker logs</code> 看不到这些日志。</li>
+<li>容器文件层变大，且日志清理困难。<br><strong>最佳实践是始终将日志输出到 STDOUT&#x2F;STDERR</strong>，让 Docker 来统一处理。</li>
+</ul>
+</li>
+<li><p><strong>日志大小轮替（Log Rotation）</strong>：<br>使用默认的 <code>json-file</code> 驱动时，需要注意日志文件会不断增长。可以通过 <code>docker run</code> 时设置 <code>--log-opt</code> 参数来控制日志大小和轮替，防止撑爆磁盘。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --log-opt max-size=10m --log-opt max-file=3 my_image</span><br><span class="line"><span class="comment"># 含义：最多保存3个日志文件，每个文件最大10MB</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3><span id="docker-attach">docker attach</span></h3><p>在 Docker 的交互命令工具箱里，<code>docker attach</code> 是一个特殊的存在。如果说 <code>docker exec</code> 像是通过 SSH 远程登录到一台服务器，那么 <code>docker attach</code> 就更像是<strong>直接坐在那台服务器的显示器前，接管了它的键盘和屏幕</strong>。先说明一个个人的观点：<code>docker attach</code> 并不是一个常用命令，除非你非常清楚它的行为和风险，否则不建议随意使用。</p>
+<hr>
+<p><code>docker attach</code> 命令用于<strong>将你的终端附加到一个正在运行的容器的主进程（PID 1）上</strong>。</p>
+<p>它的核心作用是：</p>
+<ul>
+<li>将你终端的<strong>标准输入（STDIN）</strong>、<strong>标准输出（STDOUT）</strong> 和<strong>标准错误（STDERR）</strong> 连接到容器的主进程。</li>
+<li>让你能够<strong>看到</strong>主进程产生的输出，并<strong>向</strong>主进程发送输入。</li>
+</ul>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach [OPTIONS] CONTAINER</span><br></pre></td></tr></table></figure>
+
+<h4><span id="docker-attach-的核心特性与工作机制"><code>docker attach</code> 的核心特性与工作机制</span></h4><p>要理解 <code>attach</code>，必须理解它的几个关键特性：</p>
+<ol>
+<li><p><strong>附加到主进程，而非新进程</strong>：</p>
+<ul>
+<li><code>docker exec</code>：在容器内<strong>启动一个新进程</strong>（如 <code>/bin/bash</code>）。</li>
+<li><code>docker attach</code>：<strong>连接到一个已存在的进程</strong>（主进程）。你看到的就是主进程自己的输出，你输入的内容也会直接发送给主进程。</li>
+</ul>
+</li>
+<li><p><strong>输入输出流的重定向</strong>：<br>假设你这样启动一个容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name my_container -it alpine /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>此时，<code>/bin/sh</code> 就是主进程。<code>docker attach my_container</code> 会直接将你的终端连接到这个 <code>/bin/sh</code> 进程的输入输出流。</p>
+</li>
+<li><p><strong>退出行为的危险性（最需要注意！）</strong>：</p>
+<ul>
+<li>在 <code>attach</code> 的模式下，如果你按下 <code>Ctrl+C</code>（发送 SIGINT 信号），这个信号会直接传递给容器的主进程。</li>
+<li>如果主进程因此终止，<strong>容器也会随之停止（Exited）</strong>。</li>
+<li>同理，输入 <code>exit</code> 或 <code>Ctrl+D</code>（EOF）也会导致主进程退出，从而停止容器。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="实战示例与场景">实战示例与场景</span></h4><p><strong>场景 1：查看交互式容器的输出</strong>：</p>
+<p>假设你有一个 Python 应用在容器中运行，它会每秒打印一次日志。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设容器已通过 `docker run -d --name my_app my_python_image` 运行</span></span><br><span class="line">docker attach my_app</span><br></pre></td></tr></table></figure>
+
+<p>输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Current <span class="keyword">time</span>: 19:25:01</span><br><span class="line">Current <span class="keyword">time</span>: 19:25:02</span><br><span class="line">Current <span class="keyword">time</span>: 19:25:03</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>此时，你就像在 <code>tail -f</code> 日志一样。<strong>但要小心！</strong> 如果你不小心按了 <code>Ctrl+C</code>，Python 程序会被中断，容器也就停止了。</p>
+<p><strong>场景 2：与交互式程序通信</strong>：</p>
+<p>有些容器运行的是交互式程序，比如一个简单的 CLI 工具。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个容器，运行一个要求输入名字的程序</span></span><br><span class="line">docker run -it --name asker my_image</span><br><span class="line"></span><br><span class="line"><span class="comment"># （在另一个终端）附加到它</span></span><br><span class="line">docker attach asker</span><br></pre></td></tr></table></figure>
+
+<p>你现在就可以直接向那个程序输入内容了。</p>
+<h4><span id="如何安全地退出-docker-attach">如何安全地退出 <code>docker attach</code>？</span></h4><p>由于直接退出会停止容器，Docker 提供了一个<strong>序列来脱离（detach）终端，而不停止容器</strong>：</p>
+<p><strong>按顺序按下：<code>Ctrl+P</code>, 然后 <code>Ctrl+Q</code></strong>，需要注意的是，通过这种方式脱离终端需要你再启动该容器的时候给该容器指定了 <code>-it</code> 参数。</p>
+<p>这个按键序列会<strong>将你的终端从容器主进程上分离出来，但让容器继续在后台运行</strong>。这是使用 <code>attach</code> 时必须掌握的“安全逃生”技巧。</p>
+<p>当然，<code>docker attach</code> 也提供了一种<strong>安全脱离</strong>的方式，避免意外停止容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach --sig-proxy=<span class="literal">false</span> my_container</span><br></pre></td></tr></table></figure>
+
+<h4><span id="docker-attach-与-docker-exec-的对比"><code>docker attach</code> 与 <code>docker exec</code> 的对比</span></h4><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><code>docker attach</code></th>
+<th align="left"><code>docker exec</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>目标进程</strong></td>
+<td align="left">附加到<strong>现有的主进程（PID 1）</strong></td>
+<td align="left"><strong>启动一个新的子进程</strong>（如 bash）</td>
+</tr>
+<tr>
+<td align="left"><strong>作用</strong></td>
+<td align="left">连接主进程的输入输出流</td>
+<td align="left">在容器内执行额外命令</td>
+</tr>
+<tr>
+<td align="left"><strong>退出后果</strong></td>
+<td align="left"><code>Ctrl+C</code> 会<strong>停止主进程和容器</strong></td>
+<td align="left"><code>exit</code> 只退出 Shell，<strong>容器照常运行</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>安全退出</strong></td>
+<td align="left"><code>Ctrl+P</code> + <code>Ctrl+Q</code>（分离而不停止）</td>
+<td align="left"><code>exit</code> 或 <code>Ctrl+D</code></td>
+</tr>
+<tr>
+<td align="left"><strong>典型用途</strong></td>
+<td align="left">查看主进程原始输出流、与交互式主进程通信</td>
+<td align="left">调试、排查、管理容器（主要手段）</td>
+</tr>
+</tbody></table>
+<h4><span id="最佳实践和适用场景">最佳实践和适用场景</span></h4><p><strong>什么时候使用 <code>docker attach</code>？</strong></p>
+<ol>
+<li><strong>查看实时输出</strong>：当你需要查看一个<strong>前台运行</strong>的容器的原始、未经过滤的实时输出流，并且这个容器没有将日志重定向到其他地方时。</li>
+<li><strong>与交互式应用程序通信</strong>：容器的主进程本身就是一个等待用户输入的程序（例如一个自定义的 CLI 工具、一个 REPL 环境）。</li>
+</ol>
+<p><strong>什么时候避免使用 <code>docker attach</code>？</strong></p>
+<ol>
+<li><strong>绝大多数调试和管理任务</strong>：这是 <code>docker exec</code> 的主场。你需要的是一个稳定的、不会意外停止容器的 Shell 环境。</li>
+<li><strong>生产环境调试</strong>：在生产环境中使用 <code>attach</code> 非常危险，一个误操作就可能导致服务中断。</li>
+<li><strong>容器主进程是非交互式的</strong>：例如，附加到一个 Nginx 或 MySQL 容器，你只会看到它们的访问日志或错误日志疯狂滚动，而你无法输入任何有意义的命令。按 <code>Ctrl+C</code> 会立刻终止服务。</li>
+</ol>
+<hr>
+<p><code>docker attach</code> 是一个<strong>强大但具有破坏性</strong>的工具。它提供了与容器主进程最直接的连接方式，但这份力量也带来了风险。</p>
+<ul>
+<li><strong>它的本质是“连接”而非“执行”</strong>。</li>
+<li><strong>牢记 <code>Ctrl+C</code> 的破坏性</strong>，并熟练掌握安全脱离序列 <code>Ctrl+P</code> + <code>Ctrl+Q</code>。</li>
+<li><strong>对于 99% 的日常操作，<code>docker exec -it</code> 是更安全、更灵活的选择</strong>。我们应该优先使用它来进入容器 Shell。</li>
+</ul>
+<p>再次强调，该指令在实践中请务必谨慎使用。</p>
+<h3><span id="docker-exec">docker exec</span></h3><p>在 Docker 的日常运维中，我们经常会遇到这样的场景：一个容器正在运行，但我们需要检查其配置文件、查看日志文件、安装调试工具，或者简单地看看容器内部的环境。由于容器是隔离的环境，我们无法像登录物理服务器一样直接进入。这时，<code>docker exec</code> 命令就如同一位万能锁匠，为我们打开了进入运行中容器的大门，是 Docker 运维中<strong>使用最频繁、最重要的诊断和调试工具</strong>。</p>
+<hr>
+<p><code>docker exec</code>（execute 的缩写）命令用于<strong>在正在运行的容器内部启动一个新的进程</strong>。</p>
+<p>它与容器启动时运行的主进程（PID 1）<strong>并行运行</strong>，互不干扰。这意味着你可以安全地在容器内执行任何命令，而无需担心影响主应用程序的正常运行。这就像是在一台正在提供服务的服务器上，新开了一个 SSH 会话进行操作，完全不会影响正在运行的网站或数据库服务。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> [OPTIONS] CONTAINER COMMAND [ARG...]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>: 目标容器的<strong>名称</strong>或 <strong>ID</strong>（通常取前几位即可）。</li>
+<li><code>COMMAND</code>: 要在容器内执行的命令及其参数，例如 <code>/bin/bash</code>, <code>ls</code>, <code>ps</code>, <code>cat</code> 等。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>实时诊断与调试</strong>：当容器行为异常时（如服务不可用、报错），<code>exec</code> 是排查问题的第一选择。你可以直接进入容器查看日志、进程状态、网络连接等。</li>
+<li><strong>交互式探索</strong>：对于不熟悉的镜像，可以启动一个 Shell 来探索其文件系统结构、预装软件和环境变量，从而更好地理解它的行为。</li>
+<li><strong>执行管理任务</strong>：在不重新构建镜像的情况下，临时安装软件（如 <code>curl</code>, <code>vim</code>, <code>net-tools</code>）来进行测试或调试。</li>
+<li><strong>安全且非侵入</strong>：由于是在新进程中操作，你的调试行为不会影响主进程，极大地提升了操作的安全性。</li>
+</ol>
+<h4><span id="核心选项options详解">核心选项（OPTIONS）详解</span></h4><p><code>docker exec</code> 的强大功能通过其选项来实现，其中最关键是 <code>-i</code> 和 <code>-t</code>。</p>
+<table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">全称</th>
+<th align="left">作用</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>-i</code></strong></td>
+<td align="left"><code>--interactive</code></td>
+<td align="left">保持标准输入（STDIN）打开。允许你向容器内的进程发送命令。</td>
+<td align="left"><code>docker exec -i ...</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-t</code></strong></td>
+<td align="left"><code>--tty</code></td>
+<td align="left">分配一个伪终端（pseudo-TTY）。它会格式化输出，提供完整的终端体验，支持命令补全、颜色显示等。</td>
+<td align="left"><code>docker exec -t ...</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-it</code></strong></td>
+<td align="left"></td>
+<td align="left"><strong>几乎总是组合使用</strong>。提供交互式的终端体验，是进入容器 Shell 的标准方式。</td>
+<td align="left"><code>docker exec -it ...</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-e</code></strong></td>
+<td align="left"><code>--env</code></td>
+<td align="left">设置环境变量。这对于临时改变程序行为非常有用。</td>
+<td align="left"><code>docker exec -e MY_VAR=value ...</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-u</code></strong></td>
+<td align="left"><code>--user</code></td>
+<td align="left">指定以哪个用户身份执行命令。可以是用户名或 UID。</td>
+<td align="left"><code>docker exec -u root ...</code> <br> <code>docker exec -u 1000 ...</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-w</code></strong></td>
+<td align="left"><code>--workdir</code></td>
+<td align="left">设置命令在容器内的工作目录。</td>
+<td align="left"><code>docker exec -w /app ...</code></td>
+</tr>
+</tbody></table>
+<h4><span id="实战示例从入门到精通">实战示例：从入门到精通</span></h4><p>假设我们有一个名为 <code>my_web</code> 的 Nginx 容器在运行。</p>
+<p><strong>1. 进入容器的交互式 Shell（最常用）</strong><br>这是 <code>docker exec</code> 最经典的用法，让你获得一个容器内的终端。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 bash（如果镜像基于 Ubuntu、CentOS 等）</span></span><br><span class="line">docker <span class="built_in">exec</span> -it my_web /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 sh（更通用，Alpine 等精简镜像也支持）</span></span><br><span class="line">docker <span class="built_in">exec</span> -it my_web /bin/sh</span><br></pre></td></tr></table></figure>
+
+<p>成功执行后，命令行提示符会变化，表示你已“进入”容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@a1b2c3d4e5f6:/#</span><br></pre></td></tr></table></figure>
+
+<p>现在，你可以像操作普通 Linux 系统一样执行任何命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 探索文件系统</span></span><br><span class="line"><span class="built_in">ls</span> -la /etc/nginx/</span><br><span class="line"><span class="built_in">cat</span> /etc/nginx/nginx.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看进程</span></span><br><span class="line">ps aux</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装软件（但不推荐持久化这样做）</span></span><br><span class="line">apt update &amp;&amp; apt install -y vim net-tools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查网络</span></span><br><span class="line">netstat -tulpn</span><br><span class="line">curl localhost</span><br></pre></td></tr></table></figure>
+
+<p><strong>退出时，只需输入 <code>exit</code> 或按 <code>Ctrl+D</code>。容器会继续正常运行。</strong></p>
+<p><strong>2. 执行单条命令并获取结果</strong><br>你不需要总是启动一个完整的 Shell 会话，可以直接执行命令并返回结果。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器内的当前工作目录</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看环境变量</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">env</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Nginx 访问日志的最后10行</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">tail</span> -10 /var/log/nginx/access.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试配置文件语法是否正确（非常实用的调试命令）</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web nginx -t</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 以特定用户身份执行命令</strong><br>为了安全，最佳实践是不以 root 身份运行应用。<code>exec</code> 允许你指定用户。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设你的 Nginx 以 &#x27;www-data&#x27; 用户运行</span></span><br><span class="line"><span class="comment"># 以该用户身份查看它有权访问的文件</span></span><br><span class="line">docker <span class="built_in">exec</span> -it -u www-data my_web /bin/sh</span><br><span class="line"><span class="built_in">whoami</span> <span class="comment"># 会显示 &#x27;www-data&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 但如果需要调试，可以临时切换回 root</span></span><br><span class="line">docker <span class="built_in">exec</span> -it -u root my_web /bin/bash</span><br></pre></td></tr></table></figure>
+
+<p><strong>4. 在特定目录下执行命令</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接列出容器内 /app 目录下的文件</span></span><br><span class="line">docker <span class="built_in">exec</span> -w /app my_web <span class="built_in">ls</span> -la</span><br></pre></td></tr></table></figure>
+
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><p><strong>容器必须处于运行状态</strong>：<code>docker exec</code> 只能用于状态为 <code>Up</code> 的容器。如果容器已停止（<code>Exited</code>），你需要先使用 <code>docker start</code> 启动它。</p>
+</li>
+<li><p><strong>选择正确的 Shell</strong>：基于 Alpine 的镜像非常流行，但它们不包含 <code>bash</code>，只包含 <code>sh</code>（通常是 <code>ash</code>）。因此，使用 <code>/bin/sh</code> 是更通用、更安全的选择。</p>
+</li>
+<li><p><strong>修改是临时的</strong>：通过 <code>exec</code> 在容器内进行的任何修改（如安装软件、创建文件）都发生在容器的<strong>可写层</strong>中。<strong>一旦容器被删除并重新创建（这是常事），这些修改会全部丢失</strong>。持久化配置应通过 Docker <strong>数据卷（Volumes）</strong> 或<strong>绑定挂载（Bind Mounts）</strong> 来实现。</p>
+</li>
+<li><p><strong>区分 <code>exec</code> 与 <code>attach</code></strong>：</p>
+<ul>
+<li><strong><code>docker exec</code></strong>：<strong>启动新进程</strong>，用于调试和管理，退出不会影响容器。</li>
+<li><strong><code>docker attach</code></strong>：<strong>连接主进程</strong>，直接与主进程交互，误操作可能导致容器停止。<strong>绝大多数情况下，应优先使用 <code>exec</code></strong>。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><code>docker exec -it &lt;container&gt; /bin/sh</code> 是 Docker 运维的<strong>瑞士军刀</strong>，是每个开发者和运维人员必须熟练掌握的核心命令。</p>
+<ul>
+<li><strong>它是你的诊断控制台</strong>，让你可以实时洞察容器内部状态。</li>
+<li><strong>它是你的调试工具</strong>，帮助快速定位和解决应用问题。</li>
+<li><strong>它是你的探索工具</strong>，用于学习和理解第三方镜像的构建方式。</li>
+</ul>
+<h3><span id="docker-restart">docker restart</span></h3><p>在容器化应用的日常运维中，重启是一个高频操作。无论是应用配置更新、依赖项变更，还是简单地应对一些难以定位的偶发性问题，我们常常需要重启容器。Docker 提供了 <code>docker restart</code> 命令来满足这一需求，但它背后的行为远比表面上的“重启”二字要复杂。理解它，能帮助你更安全、更优雅地管理你的容器。</p>
+<hr>
+<p><code>docker restart</code> 命令用于<strong>重启一个或多个正在运行或已停止的容器</strong>。</p>
+<p>它的核心工作流程可以简单概括为：<br><strong><code>docker stop</code> + <code>docker start</code></strong></p>
+<p>也就是说，<code>restart</code> 并不是让容器内的进程原地“热重启”，而是先执行一个停止流程，然后再重新启动容器。这使得它的行为非常明确和可预测。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>你可以同时重启多个容器，只需将它们的名称或 ID 用空格隔开。</p>
+<h4><span id="docker-restart-的工作流程与生命周期"><code>docker restart</code> 的工作流程与生命周期</span></h4><p>要深入理解 <code>restart</code>，我们需要跟踪一个容器在重启过程中的状态变化：</p>
+<ol>
+<li><p><strong>发起重启请求</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart my_container</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>停止阶段（<code>docker stop</code>）</strong>：</p>
+<ul>
+<li>Docker Daemon 会向容器内的<strong>主进程（PID 1）</strong> 发送 <strong>SIGTERM</strong> 信号。</li>
+<li>这是一个“优雅终止”的信号，通知应用程序：“你即将被关闭，请做好收尾工作”（如保存数据、关闭网络连接、释放资源等）。</li>
+<li>系统会等待一个“宽限期”（默认为 <strong>10 秒</strong>）。如果进程在此时限内自行退出，则停止流程完成。</li>
+</ul>
+</li>
+<li><p><strong>强制终止（如果必要）</strong>：</p>
+<ul>
+<li>如果 10 秒后容器进程仍然没有停止，Docker Daemon 会发送 <strong>SIGKILL</strong> 信号。</li>
+<li>这个信号无法被捕获或忽略，会立即强制终止进程。<strong>这是一种强制手段，可能会造成数据丢失或状态不一致</strong>。</li>
+</ul>
+</li>
+<li><p><strong>启动阶段（<code>docker start</code>）</strong>：</p>
+<ul>
+<li>停止完成后，Docker 会立即基于容器最初的配置（镜像、命令、网络、卷等）重新启动它。</li>
+<li>容器重新进入运行（Up）状态，其内部的文件系统也会回退到镜像的原始状态（除非有数据卷或绑定挂载）。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="核心选项options">核心选项（OPTIONS）</span></h4><p><code>docker restart</code> 的选项相对简单，但非常实用：</p>
+<table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">全称</th>
+<th align="left">作用</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>-t</code></strong></td>
+<td align="left"><code>--time</code></td>
+<td align="left"><strong>改变停止超时时间</strong>。这是最重要的选项。你可以指定一个不同于默认 10 秒的等待时间（单位：秒）。</td>
+<td align="left"><code>docker restart -t 30 my_container</code> <br> （给予应用 30 秒的时间进行优雅关闭）</td>
+</tr>
+</tbody></table>
+<h4><span id="实战示例与场景">实战示例与场景</span></h4><p><strong>1. 重启单个容器：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重启名为 &#x27;nginx&#x27; 的容器</span></span><br><span class="line">docker restart nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启指定ID的容器（取前几位即可）</span></span><br><span class="line">docker restart a1b2c3d4</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 重启多个容器：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时重启整个应用栈的所有容器</span></span><br><span class="line">docker restart nginx web_app database cache</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 延长优雅停止时间：</strong><br>对于数据库、有状态服务等需要较长时间进行收尾工作的应用，默认的 10 秒可能不够。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给予数据库容器60秒的时间来完成事务、刷新缓存和关闭连接</span></span><br><span class="line">docker restart -t 60 mysql_db</span><br></pre></td></tr></table></figure>
+
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><p><strong>理解“无状态”与“有状态”</strong>：</p>
+<ul>
+<li><strong>无状态服务（如 Web 服务器、API）</strong>：<code>docker restart</code> 通常非常安全，是更新配置和应对问题的标准操作。</li>
+<li><strong>有状态服务（如数据库、消息队列）</strong>：需要格外小心。虽然 <code>-t</code> 选项可以增加优雅停止的时间，但重启仍然可能导致正在进行的客户端连接中断。对于生产环境的有状态服务，应有更完善的高可用和故障转移方案，而不是简单地重启。</li>
+</ul>
+</li>
+<li><p><strong>数据持久化是前提</strong>：<br>务必确保容器内需要保留的任何数据（如数据库文件、上传的内容、日志）都通过 <strong>Docker 数据卷（Volumes）</strong> 或<strong>绑定挂载（Bind Mounts）</strong> 存储在容器之外。否则，重启后容器内的所有更改都会丢失（因为文件系统会回退到镜像初始状态）。</p>
+</li>
+<li><p><strong>与 <code>docker stop</code> + <code>docker start</code> 的区别</strong>：<br>从结果上看，<code>restart</code> 等价于先后执行 <code>stop</code> 和 <code>start</code>。但使用单一命令更简洁，并且在一些编排工具中更容易管理。<strong><code>restart</code> 的优势在于其原子性和便利性。</strong></p>
+</li>
+<li><p><strong>监控重启后的状态</strong>：<br>重启后，务必检查容器是否真正成功启动并健康运行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器状态</span></span><br><span class="line">docker ps -a | grep my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器启动日志，排查任何启动错误</span></span><br><span class="line">docker logs my_container</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>不要滥用重启</strong>：<br>重启是解决“症状”的快速方法，但不应替代对“根因”的排查。如果某个容器需要频繁重启，你应该深入调查其背后的根本原因，如内存泄漏、配置错误或资源不足。</p>
+</li>
+</ol>
+<h4><span id="restart-vs-stopx2fstart-vs-run-restart"><code>restart</code> vs <code>stop</code>&#x2F;<code>start</code> vs <code>run --restart</code></span></h4><ul>
+<li><strong><code>docker restart</code></strong>：<strong>手动</strong>重启特定容器。</li>
+<li><strong><code>docker stop</code> &amp;&amp; <code>docker start</code></strong>：手动将停止和启动操作分开执行，提供更精细的控制。</li>
+<li><strong><code>docker run --restart &lt;policy&gt;</code></strong>：<strong>自动重启策略</strong>。这是在容器<strong>退出后</strong>由 Docker Daemon 自动触发的行为（如总是重启、失败时重启等），与手动的 <code>restart</code> 命令有本质区别。</li>
+</ul>
+<hr>
+<p><code>docker restart</code> 是一个简单却强大的命令，是容器生命周期管理中的“重启按钮”。</p>
+<ul>
+<li><strong>它的本质是“优雅停止”后“重新启动”</strong>，遵循标准的生命周期。</li>
+<li><strong><code>-t</code> 选项</strong>允许你为重要应用定制优雅停止的时长，是安全重启的关键。</li>
+<li>它最适合用于<strong>无状态服务</strong>，对于有状态服务需谨慎评估影响。</li>
+<li>确保<strong>数据持久化</strong>是安全使用任何重启操作的前提。</li>
+</ul>
+<p>掌握 <code>docker restart</code> 的正确使用场景和方法，能让你在保证服务可用性的同时，更加从容地进行应用管理和故障排除。</p>
+<h3><span id="docker-stop">docker stop</span></h3><p>在 Docker 的运维世界里，我们不仅需要知道如何让容器跑起来，更需要懂得如何让它们优雅地停下来。<code>docker stop</code> 便是完成这一使命的关键命令。它远非简单的“杀死”进程，而是一个遵循标准流程、旨在保护数据完整性的<strong>优雅终止（Graceful Shutdown）</strong> 操作。理解 <code>docker stop</code>，就是理解容器生命末期如何实现“善终”。</p>
+<hr>
+<p><code>docker stop</code> 命令用于<strong>停止一个或多个正在运行的容器</strong>。</p>
+<p>其核心目标是在尽可能保证应用程序数据一致性的前提下，安全地终止容器。它通过向容器内进程发送特定的系统信号（Signal）来实现这一目标。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="docker-stop-的工作流程一个两阶段的优雅过程"><code>docker stop</code> 的工作流程：一个两阶段的优雅过程</span></h4><p><code>docker stop</code> 的执行并非一蹴而就，而是一个包含等待和协商的过程：</p>
+<ol>
+<li><p><strong>阶段一：友好协商（SIGTERM）</strong></p>
+<ul>
+<li>当您执行 <code>docker stop my_container</code> 时，Docker Daemon 会首先向容器内的<strong>主进程（PID 1）</strong> 发送一个 <strong>SIGTERM</strong> 信号。</li>
+<li><strong>SIGTERM</strong> 是一个“礼貌”的终止信号，它通知应用程序：“你即将被关闭，请做好收尾工作”。收到此信号后，一个设计良好的应用程序应当执行一系列清理操作，例如：<ul>
+<li>停止接受新的连接请求。</li>
+<li>完成正在进行的任务或事务。</li>
+<li>将内存中的数据刷新到磁盘（如数据库提交事务、缓存持久化）。</li>
+<li>释放占用的资源（关闭文件描述符、网络连接等）。</li>
+<li>最终自行退出。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>阶段二：强制终止（SIGKILL）</strong></p>
+<ul>
+<li>系统不会无限期地等待。默认情况下，Docker 会给予进程 <strong>10 秒</strong>的“宽限期”来完成上述清理工作。</li>
+<li>如果 10 秒后容器进程仍然没有自行终止，Docker Daemon 便会失去耐心，发送 <strong>SIGKILL</strong> 信号。</li>
+<li><strong>SIGKILL</strong> 信号非常强大且粗暴，它无法被应用程序捕获或忽略，会立即从内核层面强制终止进程。<strong>这是一种保底手段，但可能会导致数据丢失或状态损坏</strong>。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="核心选项-t-time">核心选项：-t, –time</span></h4><p>此选项是 <code>docker stop</code> 命令的灵魂，它允许您自定义第一阶段“友好协商”的超时时间。</p>
+<ul>
+<li><p><strong>作用</strong>：改变默认的 10 秒等待时间。</p>
+</li>
+<li><p><strong>使用场景</strong>：对于数据库、消息队列等需要较长时间进行收尾工作的<strong>有状态服务</strong>，默认的 10 秒可能远远不够。使用 <code>-t</code> 可以给予它们充足的时间完成优雅关闭。</p>
+</li>
+<li><p><strong>示例</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给予容器30秒的时间进行优雅关闭，30秒后才会强制终止</span></span><br><span class="line">docker stop -t 30 mysql_container</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="最佳实践与精要注意事项">最佳实践与精要注意事项</span></h4><ol>
+<li><p><strong>区分“有状态”与“无状态”服务</strong>：</p>
+<ul>
+<li><strong>无状态服务（Stateless）</strong>：如 Web 服务器、API 微服务。它们通常可以快速关闭，对 <code>docker stop</code> 不敏感，使用默认超时即可。</li>
+<li><strong>有状态服务（Stateful）</strong>：如 MySQL、Redis、Kafka。它们是 <code>docker stop</code> 操作的重点关注对象。<strong>务必使用 <code>-t</code> 选项设置一个足够长的超时时间</strong>，以确保它们能完成数据持久化等关键操作。</li>
+</ul>
+</li>
+<li><p><strong>应用程序的信号处理是前提</strong>：<br><code>docker stop</code> 的优雅与否，最终取决于<strong>容器内主进程是否正确地处理了 SIGTERM 信号</strong>。如果您的自定义应用程序会运行为主进程，请确保它实现了 SIGTERM 信号处理逻辑。一个对 SIGTERM 毫无反应的进程，最终都难逃被 SIGKILL 强制终结的命运。</p>
+</li>
+<li><p><strong>数据持久化是安全停靠的港湾</strong>：<br>再次强调，任何有价值的数据都不应只存在于容器的可写层中。必须通过 <strong>Docker 数据卷（Volumes）</strong> 或<strong>绑定挂载（Bind Mounts）</strong> 将数据存储在容器之外。这样，无论容器是优雅停止还是被强制杀死，您的数据都是安全的。</p>
+</li>
+<li><p><strong>停止 vs 杀死</strong>：<br>与 <code>docker stop</code> 的优雅形成鲜明对比的是 <code>docker kill</code> 命令。<code>docker kill</code> 默认发送 <strong>SIGKILL</strong> 信号（也可指定其他信号），实现的是强制立即终止，相当于直接拔掉电源。<strong>除非容器已完全无响应，否则应优先使用 <code>docker stop</code>。</strong></p>
+</li>
+</ol>
+<hr>
+<p><code>docker stop</code> 远不止是一个停止容器的指令，它体现了 Docker 设计中对应用生命周期的尊重。</p>
+<ul>
+<li><strong>它不是杀手，而是信使</strong>：它先礼（SIGTERM）后兵（SIGKILL），致力于协商而非破坏。</li>
+<li><strong><code>-t</code> 选项是其灵魂</strong>：通过自定义超时时间，您可以将优雅终止的控制权掌握在自己手中，尤其对于有状态服务至关重要。</li>
+<li><strong>优雅是双向的</strong>：Docker 提供了优雅停止的机制，但最终效果需要容器内的应用程序协同配合。</li>
+</ul>
+<h3><span id="docker-kill">docker kill</span></h3><p>在 Docker 的管理工具箱中，如果 <code>docker stop</code> 是遵循流程、彬彬有礼的“交涉官”，那么 <code>docker kill</code> 就是果断坚决、毫无余地的“行刑队”。它不进行协商，不给予宽限期，它的任务只有一个：<strong>立即终止容器</strong>。理解何时以及如何使用这个“最终手段”，是应对紧急情况的关键。</p>
+<hr>
+<p><code>docker kill</code> 命令用于<strong>向一个或多个容器的主进程发送一个特定的系统信号（Signal）</strong>，默认情况下，这个信号是 <strong>SIGKILL</strong>。</p>
+<p>它的核心特点是<strong>强制性和即时性</strong>。它绕过了 <code>docker stop</code> 的优雅终止流程，旨在以最快的方式让容器停止运行。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">kill</span> [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="docker-kill-的核心机制信号的力量"><code>docker kill</code> 的核心机制：信号的力量</span></h4><p><code>docker kill</code> 的威力源于 Linux 的系统信号机制。与 <code>docker stop</code> 固定先 SIGTERM 再 SIGKILL 的流程不同，<code>docker kill</code> 允许你<strong>直接指定发送任何信号</strong>，赋予了操作者极大的灵活性和控制力。</p>
+<p><strong>最关键的选项：<code>-s</code> (–signal)</strong><br>这是 <code>docker kill</code> 的灵魂所在，它允许你指定要发送的信号。</p>
+<table>
+<thead>
+<tr>
+<th align="left">信号</th>
+<th align="left">值</th>
+<th align="left">作用</th>
+<th align="left">使用示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>SIGKILL</strong></td>
+<td align="left">9</td>
+<td align="left"><strong>强制终止</strong>。无法被捕获、阻塞或忽略，进程会立即被操作系统内核终止。这是<strong>默认信号</strong>。</td>
+<td align="left"><code>docker kill my_container</code></td>
+</tr>
+<tr>
+<td align="left"><strong>SIGTERM</strong></td>
+<td align="left">15</td>
+<td align="left"><strong>优雅终止</strong>。通知进程终止，允许其进行清理工作。</td>
+<td align="left"><code>docker kill -s SIGTERM my_container</code></td>
+</tr>
+<tr>
+<td align="left"><strong>SIGHUP</strong></td>
+<td align="left">1</td>
+<td align="left"><strong>挂起</strong>。通常用于通知守护进程重新加载其配置。</td>
+<td align="left"><code>docker kill -s SIGHUP nginx</code></td>
+</tr>
+<tr>
+<td align="left"><strong>其他信号</strong></td>
+<td align="left"></td>
+<td align="left">如 SIGINT (2), SIGUSR1 (10) 等，可用于与进程进行特定交互。</td>
+<td align="left"><code>docker kill -s SIGUSR1 my_app</code></td>
+</tr>
+</tbody></table>
+<p><strong>工作流程：</strong></p>
+<ol>
+<li>你执行 <code>docker kill [OPTIONS] CONTAINER</code>。</li>
+<li>Docker Daemon 直接向指定容器的主进程发送你通过 <code>-s</code> 指定的信号（默认为 SIGKILL）。</li>
+<li>进程根据收到的信号做出反应（对于 SIGKILL，就是立即被终结）。</li>
+<li>容器状态变为 <code>Exited</code>。</li>
+</ol>
+<h4><span id="为什么需要它应用场景">为什么需要它？应用场景</span></h4><p><code>docker kill</code> 的存在不是为了替代 <code>docker stop</code>，而是为了处理 <code>docker stop</code> 无法有效解决的极端情况。它的应用场景非常明确：</p>
+<ol>
+<li><p><strong>容器完全无响应（死机）</strong>：这是最经典的场景。当容器内的主进程陷入死循环、死锁或因为其他原因完全卡住，不再响应任何请求（包括 SIGTERM 信号）时，<code>docker stop</code> 会在等待超时后失败。此时，<code>docker kill -s SIGKILL</code> 是唯一能强制结束它的方法。</p>
+</li>
+<li><p><strong>立即释放关键资源</strong>：当某个失控的容器正在疯狂消耗主机资源（如 CPU、内存、磁盘 I&#x2F;O），导致系统即将崩溃时，你没有时间等待 10 秒的优雅退出。必须使用 <code>docker kill</code> 立即“拔掉电源”，以保护主机和其他容器。</p>
+</li>
+<li><p><strong>与进程进行特定通信</strong>：通过 <code>-s</code> 选项，它可以成为一个高级管理工具。例如，通知 Nginx 重新加载配置而不重启进程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向nginx容器发送SIGHUP信号，使其重新加载配置文件</span></span><br><span class="line">docker <span class="built_in">kill</span> -s SIGHUP nginx</span><br></pre></td></tr></table></figure>
+
+<p>在这种情况下，它非但不会终止容器，反而是一种“管理”指令。</p>
+</li>
+</ol>
+<h4><span id="最佳实践与严厉警告">最佳实践与严厉警告</span></h4><p><strong>⚠️ 警告：核武器选项</strong></p>
+<p>默认的 <code>SIGKILL</code> 是容器世界里的“核武器”。使用时必须清楚其后果：</p>
+<ul>
+<li><strong>数据丢失风险极高</strong>：进程没有机会执行任何清理操作。正在进行的写操作会中断，内存中的数据会丢失。<strong>绝对不要将其作为停止数据库或有状态服务的常规手段。</strong></li>
+<li><strong>可能导致状态不一致</strong>：强制终止可能会使应用程序留下残缺的临时文件、孤立的锁文件或处于中间状态的数据，为下次启动埋下隐患。</li>
+</ul>
+<p><strong>最佳实践：</strong></p>
+<ol>
+<li><p><strong>始终优先使用 <code>docker stop</code></strong>：将其作为停止容器的默认和首选命令。只有在 <code>docker stop</code> 失效或情况万分紧急时，才诉诸于 <code>docker kill</code>。</p>
+</li>
+<li><p><strong>明确的升级流程</strong>：建立自己的操作流程：<code>docker stop -&gt; (等待) -&gt; 如果超时或无响应) -&gt; docker kill</code>。</p>
+</li>
+<li><p><strong>尝试“软”杀死</strong>：在发送最终的 <code>SIGKILL</code> 之前，可以尝试先手动发送 <code>SIGTERM</code>，给它最后一次机会：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">kill</span> -s SIGTERM my_stuck_container</span><br><span class="line"><span class="comment"># 等待几秒...</span></span><br><span class="line">docker <span class="built_in">kill</span> my_stuck_container <span class="comment"># 默认发送SIGKILL</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>记录与复盘</strong>：每次使用 <code>docker kill</code> 后，都应记录原因并复盘。一个需要频繁被强制杀死的容器，其本身一定存在需要修复的缺陷（如内存泄漏、死锁 bug）。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker kill</code> 是一个强大但危险的命令，是 Docker 管理员武器库中的“最后手段”。</p>
+<ul>
+<li><strong>它的核心是直接发送信号</strong>，默认是立即终止的 <code>SIGKILL</code>。</li>
+<li><strong>它的设计目的是处理故障和紧急情况</strong>，而非日常操作。</li>
+<li><strong><code>-s</code> 选项赋予了它灵活性</strong>，使其不仅能强制终止，还能用于特定的进程管理。</li>
+<li><strong>最大的风险是数据丢失</strong>，使用时必须心怀敬畏。</li>
+</ul>
+<h3><span id="docker-top">docker top</span></h3><p>当我们运行一个 Docker 容器时，它就像是一个黑盒——我们知道它在运行，但很难直观地看到里面究竟发生了什么。<code>docker top</code> 命令正是为了打破这种信息壁垒而生的。它就像一台<strong>X 光机</strong>，能够让我们无需进入容器内部，就能清晰地洞察其内部运行的进程信息，是容器监控和故障排查中一个轻量级却极其实用的工具。</p>
+<hr>
+<p><code>docker top</code> 命令用于<strong>显示一个运行中容器内部的进程信息</strong>。</p>
+<p>它的功能类似于在宿主机上执行 <code>ps</code>（process status）命令，但它的查看对象是容器内部的进程树。这个命令执行速度极快，因为它直接从 Docker 守护进程获取信息，而无需通过容器的 Shell 环境。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top CONTAINER [ps OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>: 目标容器的名称或 ID。</li>
+<li><code>[ps OPTIONS]</code>: （可选）任何标准的 <code>ps</code> 命令选项，用于格式化输出内容。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>快速诊断与排查</strong>：当容器行为异常（如 CPU&#x2F;内存占用过高）时，<code>docker top</code> 是第一步的排查工具。你可以立即看到是容器内的哪个（或哪些）进程在消耗资源，而无需先 <code>exec</code> 进入容器。</li>
+<li><strong>验证容器内容</strong>：确认容器内运行的主进程是否符合预期。例如，你运行了一个 Nginx 镜像，可以用 <code>docker top</code> 来验证 Nginx 主进程及其 worker 进程是否都已启动。</li>
+<li><strong>获取进程 PID</strong>：容器内进程的 PID 在宿主机上有其对应的 PID。<code>docker top</code> 可以显示这些映射关系，这对于一些高级调试和监控场景非常有用。</li>
+<li><strong>轻量级且非侵入</strong>：它不需要在容器内安装任何额外的工具（如 <code>htop</code>, <code>ps</code> 本身），几乎所有容器都可以直接使用，对容器本身零影响。</li>
+</ol>
+<h4><span id="实战示例从基础到高级">实战示例：从基础到高级</span></h4><p>假设我们有一个名为 <code>my_web</code> 的 Nginx 容器在运行。</p>
+<p><strong>1. 基础用法：查看容器内进程</strong><br>最基本的命令，显示容器内所有进程的基本信息，默认输出格式与 <code>ps</code> 相同。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">UID    PID    PPID   C   STIME   TTY   TIME        CMD</span><br><span class="line">root   12345  12316  0   10:00   ?     00:00:00   nginx: master process nginx -g daemon off;</span><br><span class="line">systemd+ 12367 12345  0   10:00   ?     00:00:00   nginx: worker process</span><br><span class="line">systemd+ 12368 12345  0   10:00   ?     00:00:00   nginx: worker process</span><br></pre></td></tr></table></figure>
+
+<p>从输出可以清晰地看到：</p>
+<ul>
+<li><strong>主进程 (PID 12345)</strong>：<code>nginx: master process</code>。</li>
+<li><strong>子进程 (PPID 12345)</strong>：两个 <code>nginx: worker process</code>，它们的父进程 ID (PPID) 指向主进程的 PID。</li>
+</ul>
+<p><strong>2. 高级用法：自定义输出格式</strong><br>通过传递标准的 <code>ps</code> 选项，可以获取更详细或更具体的信息。这是 <code>docker top</code> 最强大的地方。</p>
+<ul>
+<li><p><strong>显示完整的命令及其参数</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">docker top my_web -args</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>查看进程的 UID 和用户名</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e -o uid,user,pid,cmd</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>以森林模式显示进程层级关系</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e -o pid,ppid,user,cmd --forest</span><br></pre></td></tr></table></figure>
+
+<p>输出示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PID    PPID   USER    COMMAND</span><br><span class="line">12345  12316  root    nginx: master process nginx -g daemon off;</span><br><span class="line">12367  12345  systemd+  \_ nginx: worker process</span><br><span class="line">12368  12345  systemd+  \_ nginx: worker process</span><br></pre></td></tr></table></figure>
+
+<p>这种方式可以非常直观地看到进程的父子关系。</p>
+</li>
+<li><p><strong>查看进程资源占用（CPU、内存）</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -o pid,user,%cpu,%mem,cmd --<span class="built_in">sort</span> -%cpu</span><br></pre></td></tr></table></figure>
+
+<p>此命令按 CPU 使用率降序排列，快速定位最耗资源的进程。</p>
+</li>
+</ul>
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><strong>容器必须处于运行状态</strong>：<code>docker top</code> 只能用于状态为 <code>Up</code> 的容器。对于已停止的容器，该命令无法工作。</li>
+<li><strong>理解 PID 映射</strong>：<code>docker top</code> 显示的第一个 PID 列是<strong>进程在宿主机命名空间中的真实 PID</strong>，而不是在容器内部的 PID。这对于在宿主机上使用 <code>strace</code>, <code>gdb</code> 等工具调试容器进程至关重要。</li>
+<li><strong>功能的局限性</strong>：<code>docker top</code> 是一个<strong>诊断工具</strong>，而非<strong>管理工具</strong>。你可以用它来查看进程，但不能用它来直接管理（如杀死、改变优先级）进程。要管理进程，你需要使用 <code>docker exec</code> 在容器内执行命令，或使用宿主机的 <code>kill</code> 命令配合从 <code>docker top</code> 获取的宿主 PID。</li>
+<li><strong>结合其他命令使用</strong>：<code>docker top</code> 通常与 <code>docker stats</code>（查看整体资源使用）和 <code>docker logs</code>（查看进程输出）结合使用，形成完整的排查链条：<ul>
+<li><code>docker stats</code> 发现某个容器 CPU 高 -&gt;</li>
+<li><code>docker top</code> 该容器找到具体的异常进程 -&gt;</li>
+<li><code>docker exec</code> 进入容器或 <code>docker logs</code> 查看该进程的日志进行深度排查。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><code>docker top</code> 是一个简单却极其强大的原生调试命令，是每一位 Docker 使用者都应该掌握的“显微镜”。</p>
+<ul>
+<li><strong>它是洞察容器内部进程状态的窗口</strong>，提供了无需侵入即可观察的能力。</li>
+<li><strong>它通过支持原生 <code>ps</code> 选项</strong>，提供了强大的信息过滤和格式化功能。</li>
+<li><strong>它是性能排查和故障诊断的起点</strong>，能快速将问题定位到具体进程。</li>
+<li><strong>它揭示了容器与宿主机之间的进程映射关系</strong>，为高级调试铺平了道路。</li>
+</ul>
+<p>将其加入你的日常运维工具箱，你会发现排查容器问题的效率得到了显著的提升。</p>
+<h3><span id="docker-stat">docker stat</span></h3><p>当我们在一台主机上运行多个 Docker 容器时，一个核心的运维问题是：<strong>我的系统资源（CPU、内存、网络…）都被谁吃掉了？哪个容器是“资源大户”？</strong> 靠手动登录每个容器查看显然不现实。这时，<code>docker stats</code> 命令就如同一个<strong>统一的实时资源仪表盘</strong>，让你能够一目了然地监控所有容器的性能指标，是保障容器化环境健康运行的必备工具。</p>
+<hr>
+<p><code>docker stats</code> 命令用于<strong>实时显示一个或多个容器的资源使用情况统计信息</strong>。</p>
+<p>它会动态刷新一个表格，其中包含了每个容器在 CPU、内存、网络 I&#x2F;O 和磁盘 I&#x2F;O 等方面的关键性能指标。这些数据直接来源于 Linux 内核的控制组（cgroups），因此非常准确和高效。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats [OPTIONS] [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>如果不指定任何容器，默认会显示所有运行中（Up）容器的统计信息。</p>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>实时性能监控</strong>：提供容器级别的实时资源消耗视图，帮助快速发现异常（如内存泄漏、CPU 爆满）。</li>
+<li><strong>资源瓶颈定位</strong>：当主机出现高负载时，可以快速定位是哪个（或哪些）容器导致的，从而进行针对性处理。</li>
+<li><strong>容量规划与优化</strong>：通过观察常态下的资源使用情况，可以为容器设置更合理的资源限制（<code>-m</code>, <code>--cpus</code>），避免资源浪费或竞争。</li>
+<li><strong>零成本、零侵入</strong>：该命令是 Docker CLI 自带的，无需在容器内安装任何代理或监控软件，对容器本身毫无影响。</li>
+</ol>
+<h4><span id="解读监控面板每一列的含义">解读监控面板：每一列的含义</span></h4><p>执行 <code>docker stats</code> 后，你会看到一个类似这样的动态更新的表格：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O        PIDS</span><br><span class="line">a1b2c3d4e5f6   redis     0.12%     45.21MiB / 1.5GiB     2.94%     1.45kB / 0B      0B / 0B          4</span><br><span class="line">f6e5d4c3b2a1   nginx     0.05%     12.5MiB /  unlimited    -        25.6kB / 120kB   0B / 0B          3</span><br><span class="line">c3b2a1f6e5d4   web-app   125.7%    512.4MiB / 512MiB     100.0%    450kB / 1.2MB    12.3MB / 0B      27</span><br></pre></td></tr></table></figure>
+
+<p>每一列都代表一个关键指标：</p>
+<ul>
+<li><strong>CONTAINER ID &amp; NAME</strong>: 容器的标识符和名称。</li>
+<li><strong>CPU %</strong>: <strong>CPU 使用率百分比</strong>。显示容器正在使用的宿主 CPU 总时间的百分比。<strong>如果有多核心 CPU，这个值可以超过 100%</strong>。例如，125% 表示容器使用了 1.25 个 CPU 核心的计算能力。</li>
+<li><strong>MEM USAGE &#x2F; LIMIT</strong>: <strong>内存使用量 &#x2F; 内存限制</strong>。这是两个最关键的数字之一，直观显示了“用量”和“上限”。</li>
+<li><strong>MEM %</strong>: <strong>内存使用率百分比</strong>。即 <code>MEM USAGE / LIMIT * 100%</code>。如果未设置内存限制（<code>unlimited</code>），此列会显示为 <code>-</code>。</li>
+<li><strong>NET I&#x2F;O</strong>: <strong>网络输入&#x2F;输出流量</strong>。显示容器自启动以来累计接收和发送的数据量。这是排查网络流量异常的重要依据。</li>
+<li><strong>BLOCK I&#x2F;O</strong>: <strong>块设备输入&#x2F;输出量</strong>。显示容器读写磁盘的数据量。对于数据库等磁盘密集型应用，这个指标非常重要。</li>
+<li><strong>PIDS</strong>: <strong>进程数量</strong>。显示容器内当前存在的进程和线程数。一个异常的激增可能预示着某些问题。</li>
+</ul>
+<h4><span id="实战示例从概览到聚焦">实战示例：从概览到聚焦</span></h4><p><strong>1. 监控所有容器（全局概览）</strong><br>最基本的命令，给你一个主机上所有运行容器的资源大盘。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats</span><br></pre></td></tr></table></figure>
+
+<p>按 <code>Ctrl+C</code> 退出监控。</p>
+<p><strong>2. 监控特定容器（精准聚焦）</strong><br>如果你只关心某几个容器，可以在命令后指定它们的名称或 ID。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监控指定的容器</span></span><br><span class="line">docker stats nginx redis</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用容器ID（取前几位即可）</span></span><br><span class="line">docker stats a1b2c3 f6e5d4</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 使用选项格式化输出</strong><br><code>docker stats</code> 提供了一些有用的选项来定制输出。</p>
+<ul>
+<li><p><strong><code>--no-stream</code></strong>：<strong>只输出一次当前状态，然后退出</strong>。适用于编写脚本或快速获取某个时间点的快照，而不是持续监控。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats --no-stream</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>--format</code></strong>：<strong>按照 Go 模板自定义输出格式</strong>。这是高级用法，可以让你只显示关心的列，或者用于自动化脚本。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只显示容器名、CPU百分比和内存使用量</span></span><br><span class="line">docker stats --format <span class="string">&quot;table &#123;&#123;.Name&#125;&#125;\t&#123;&#123;.CPUPerc&#125;&#125;\t&#123;&#123;.MemUsage&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以纯JSON格式输出一次（非常适合由其他程序解析）</span></span><br><span class="line">docker stats --no-stream --format <span class="string">&quot;&#123;&#123;json .&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><p><strong>它只是一个实时工具</strong>：<code>docker stats</code> 显示的是<strong>实时数据流</strong>，而非历史数据。它不会保存任何历史记录。对于长期趋势分析、告警和数据持久化，你需要更专业的监控方案，如 <strong>Prometheus + Grafana</strong>（通常通过 <code>cAdvisor</code> 来收集 Docker 指标）。</p>
+</li>
+<li><p><strong>结合 <code>docker top</code> 进行深度排查</strong>：<code>docker stats</code> 告诉你<strong>哪个容器</strong>出了问题（如 CPU 100%），而 <code>docker top</code> 可以进一步告诉你该容器内<strong>是哪个进程</strong>导致了问题。这两个命令是黄金搭档。</p>
+</li>
+<li><p><strong>理解“ unlimited”</strong>：如果运行容器时未使用 <code>-m</code> 或 <code>--memory-swap</code> 设置内存限制，<code>MEM LIMIT</code> 会显示为 <code>unlimited</code>，<code>MEM %</code> 会显示为 <code>-</code>。在生产环境中，<strong>强烈建议为所有容器设置内存限制</strong>，以防止某个容器耗尽整个主机内存导致系统崩溃（OOM）。</p>
+</li>
+<li><p><strong>性能影响极小</strong>：由于数据直接来自内核的 cgroups，运行 <code>docker stats</code> 的开销非常小，可以放心使用。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker stats</code> 是 Docker 原生提供的、最简单高效的实时监控工具。</p>
+<ul>
+<li><strong>它是容器资源的实时仪表盘</strong>，让你对系统状态了如指掌。</li>
+<li><strong>它是故障排查的起点</strong>，能快速将性能问题定位到具体容器。</li>
+<li><strong>它简单易用且零成本</strong>，是每个 Docker 用户都应该掌握的第一个监控命令。</li>
+<li><strong>对于更高级的需求</strong>，它是指引你走向更强大监控系统（如 Prometheus）的敲门砖。</li>
+</ul>
+<p>无论是日常运维还是应急排查，熟练使用 <code>docker stats</code> 都能让你更加从容地管理和维护你的容器化应用。</p>
+<h3><span id="docker-container-inspect">docker container inspect</span></h3><p>在 Docker 的生态中，我们经常需要了解一个容器的详细信息：它的配置是什么？它的网络是如何设置的？它挂载了哪些数据卷？虽然我们可以通过 <code>docker ps</code> 看到容器的概览，但要获取其全部底层细节，就需要一个更强大的工具——<code>docker container inspect</code>。这个命令就像是为容器生成的一份<strong>全方位的“体检报告”</strong>，揭示了从创建到运行的每一个技术细节。</p>
+<hr>
+<p><code>docker container inspect</code> 命令用于<strong>获取 Docker 容器底层配置和运行时状态的详细信息（元数据）</strong>。</p>
+<p>它会返回一个庞大的 JSON 对象，这个对象包含了容器生命周期的几乎所有信息，从最初的创建配置（<code>docker create</code>&#x2F;<code>docker run</code> 时指定的所有参数）到当前的运行时状态（如 IP 地址、端口映射、进程 ID 等）。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>你也可以使用它的传统缩写形式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect CONTAINER</span><br></pre></td></tr></table></figure>
+
+<p>两者功能完全一致。</p>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>故障排查与调试</strong>：当容器行为异常时，<code>inspect</code> 是查明根本原因的第一站。你可以检查网络配置、卷挂载、环境变量等是否正确。</li>
+<li><strong>发现连接信息</strong>：快速查找容器的 IP 地址、网关以及端口映射关系，这对于容器间的网络通信或从外部访问服务至关重要。</li>
+<li><strong>审计与验证</strong>：验证容器的运行配置是否与预期一致，例如资源限制、重启策略、安全选项等。</li>
+<li><strong>信息提取用于自动化</strong>：其结构化（JSON）的输出格式非常适合被脚本或其他工具（如 <code>jq</code>）解析，以实现自动化运维。</li>
+<li><strong>学习与理解</strong>：通过查看容器元数据，可以更深入地理解 Docker 是如何构建和管理容器环境的。</li>
+</ol>
+<h4><span id="解读体检报告json-输出中的关键信息">解读“体检报告”：JSON 输出中的关键信息</span></h4><p><code>docker container inspect</code> 的输出是一个深度嵌套的 JSON 对象，主要包含两大块：<strong>容器配置（Config）</strong> 和<strong>容器状态（State）</strong>。</p>
+<p>执行以下命令查看原始格式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect my_container</span><br></pre></td></tr></table></figure>
+
+<p>输出内容非常丰富，以下是一些最常用和关键的字段：</p>
+<p><strong>1. 网络设置（NetworkSettings）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;NetworkSettings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Networks&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;bridge&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// 网络模式，可能是 bridge, host, 或自定义网络名</span></span><br><span class="line">      <span class="attr">&quot;IPAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.17.0.2&quot;</span><span class="punctuation">,</span> <span class="comment">// **容器的IP地址**</span></span><br><span class="line">      <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.17.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;02:42:ac:11:00:02&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Ports&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// **端口映射**</span></span><br><span class="line">    <span class="attr">&quot;80/tcp&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;HostIp&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.0.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;HostPort&quot;</span><span class="punctuation">:</span> <span class="string">&quot;8080&quot;</span> <span class="comment">// **宿主机的映射端口**</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>用途</strong>：查找容器 IP 以进行连接测试，确认端口映射是否正确。</li>
+</ul>
+<p><strong>2. 挂载信息（Mounts）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span> <span class="comment">// 类型可以是 volume（数据卷）, bind（绑定挂载）, tmpfs</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;my_volume&quot;</span><span class="punctuation">,</span> <span class="comment">// 卷名</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/my_volume/_data&quot;</span><span class="punctuation">,</span> <span class="comment">// **在宿主机上的源路径**</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app/data&quot;</span><span class="punctuation">,</span> <span class="comment">// **在容器内的目标路径**</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;z&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span> <span class="comment">// 读写权限</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>用途</strong>：确认数据卷和绑定挂载是否正确配置，并找到数据在宿主机上的实际存储位置。</li>
+</ul>
+<p><strong>3. 配置信息（Config）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nginx:latest&quot;</span><span class="punctuation">,</span> <span class="comment">// 使用的镜像</span></span><br><span class="line">  <span class="attr">&quot;Env&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span> <span class="comment">// **环境变量**</span></span><br><span class="line">    <span class="string">&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;NGINX_VERSION=1.25.3&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Cmd&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;nginx&quot;</span><span class="punctuation">,</span> <span class="string">&quot;-g&quot;</span><span class="punctuation">,</span> <span class="string">&quot;daemon off;&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="comment">// 启动命令</span></span><br><span class="line">  <span class="attr">&quot;Labels&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// 标签</span></span><br><span class="line">    <span class="attr">&quot;maintainer&quot;</span><span class="punctuation">:</span> <span class="string">&quot;NGINX Docker Maintainers&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>用途</strong>：检查容器运行时的核心配置，如启动命令、环境变量等。</li>
+</ul>
+<p><strong>4. 状态信息（State）：</strong></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;State&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;running&quot;</span><span class="punctuation">,</span> <span class="comment">// 状态：running, paused, exited, restarting</span></span><br><span class="line">  <span class="attr">&quot;Running&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Paused&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Restarting&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Pid&quot;</span><span class="punctuation">:</span> <span class="number">1234</span><span class="punctuation">,</span> <span class="comment">// **容器主进程在宿主机上的PID**</span></span><br><span class="line">  <span class="attr">&quot;StartedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2024-08-31T10:00:00.123456789Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;FinishedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0001-01-01T00:00:00Z&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>用途</strong>：确认容器的精确状态和运行时长，获取 PID 用于高级调试。</li>
+</ul>
+<h4><span id="实战示例使用格式化和过滤">实战示例：使用格式化和过滤</span></h4><p>原始 JSON 输出信息量巨大，我们通常需要借助选项来提取特定信息。</p>
+<p><strong>1. 使用 <code>--format</code> 或 <code>-f</code> 提取特定字段（Go 模板）</strong><br>这是最强大的功能，可以精准获取你需要的值。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取容器的IP地址</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;range .NetworkSettings.Networks&#125;&#125;&#123;&#123;.IPAddress&#125;&#125;&#123;&#123;end&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取容器状态</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;.State.Status&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取容器使用的镜像</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;.Config.Image&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取宿主机映射的端口（例如映射到容器80端口的主机端口）</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;(index (index .NetworkSettings.Ports &quot;80/tcp&quot;) 0).HostPort&#125;&#125;&#x27;</span> my_container</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 使用 <code>jq</code> 工具解析输出（更灵活）</strong><br><code>jq</code> 是一个强大的命令行 JSON 处理器，与 <code>docker inspect</code> 是绝配。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先确保系统安装了 jq: apt-get install jq</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取所有挂载点的源和目标</span></span><br><span class="line">docker inspect my_container | jq <span class="string">&#x27;.[].Mounts[] | .Source, .Destination&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以更漂亮的格式输出整个JSON，便于阅读</span></span><br><span class="line">docker inspect my_container | jq .</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 一次检查多个容器</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect nginx redis</span><br></pre></td></tr></table></figure>
+
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><strong>适用于所有状态的容器</strong>：与许多命令不同，<code>docker container inspect</code> 不仅可以用于运行中的容器，也可以用于已停止（<code>exited</code>）的容器。这对于排查为什么容器启动失败非常有用。</li>
+<li><strong>信息是只读的</strong>：该命令仅用于查看信息，无法用于修改任何容器配置。要修改配置，需要重新创建容器。</li>
+<li><strong>掌握 <code>--format</code> 和 <code>jq</code></strong>：学习基础的 Go 模板语法和 <code>jq</code> 的使用，能让你从信息海洋中高效地捞出所需的数据，这是进阶玩家的必备技能。</li>
+<li><strong>理解输出结构</strong>：花些时间浏览一次完整的输出，熟悉其主要结构（<code>Config</code>, <code>State</code>, <code>NetworkSettings</code>, <code>Mounts</code>），以后排查问题时就能快速定位。</li>
+</ol>
+<hr>
+<p><code>docker container inspect</code> 是 Docker 工具箱中最强大的诊断命令之一，是探索容器内部机制的“瑞士军刀”。</p>
+<ul>
+<li><strong>它是容器元数据的终极来源</strong>，提供了无与伦比的细节深度。</li>
+<li><strong>它是连接抽象概念和具体实现的桥梁</strong>，让你真正“看透”容器。</li>
+<li><strong>结合 <code>--format</code> 和 <code>jq</code></strong>，它从一個诊断工具转变为自动化脚本的核心组件。</li>
+<li><strong>无论是开发、调试还是运维</strong>，它都是不可或缺的得力助手。</li>
+</ul>
+<h3><span id="docker-port">docker port</span></h3><p>在 Docker 网络模型中，容器拥有自己独立的网络命名空间，这意味着容器内部服务的监听端口（如 Nginx 的 80 端口）默认在外部是无法直接访问的。为了解决这个问题，我们使用 <code>-p</code> 或 <code>-P</code> 参数来创建端口映射。但容器一旦运行起来，我们如何快速确认<strong>容器内的端口到底映射到了宿主机的哪个端口上</strong>？<code>docker port</code> 命令就是为了回答这个简单而关键的问题而生的，它是一个轻巧、快速的专用查询工具。</p>
+<hr>
+<p><code>docker port</code> 命令用于<strong>快速列出容器端口到宿主机端口的映射关系</strong>。</p>
+<p>它直接查询 Docker 守护进程中记录的端口绑定信息，并以最清晰的方式呈现出来，让你无需从冗长的 <code>docker inspect</code> 输出中费力地寻找答案。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker port CONTAINER [PRIVATE_PORT[/PROTO]]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>: 目标容器的名称或 ID。</li>
+<li><code>[PRIVATE_PORT[/PROTO]]</code>: （可选）指定要查询的容器内部端口和协议（如 <code>80/tcp</code>），用于过滤结果。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>快速验证与连接</strong>：当你想从宿主机或其他机器连接到一个容器内的服务时，需要知道具体映射到了哪个端口。<code>docker port</code> 提供了最直接的查询方式。</li>
+<li><strong>简化运维操作</strong>：相比使用 <code>docker inspect</code> 并手动解析庞大的 JSON 输出，<code>docker port</code> 的命令和输出都极其简单，非常适合在脚本或快速运维时使用。</li>
+<li><strong>避免记忆和猜测</strong>在复杂环境中，可能同时运行着多个容器，每个容器都有多个端口映射。此命令可以准确告诉你当前的映射状态，避免因记错端口而导致的连接失败。</li>
+</ol>
+<h4><span id="实战示例从查全部到精准查询">实战示例：从查全部到精准查询</span></h4><p>假设我们运行了一个 Nginx 容器，并将容器的 80 端口映射到了宿主机的 <strong>8080</strong> 端口，同时将容器的 443 端口映射到了宿主机的 <strong>8443</strong> 端口。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name my_nginx -p 8080:80 -p 8443:443 nginx</span><br></pre></td></tr></table></figure>
+
+<p><strong>1. 查询容器的所有端口映射</strong><br>这是最常用的方式，列出该容器配置的所有端口映射规则。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker port my_nginx</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出示例：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">80/tcp -&gt; 0.0.0.0:8080</span><br><span class="line">443/tcp -&gt; 0.0.0.0:8443</span><br></pre></td></tr></table></figure>
+
+<p><strong>解读输出：</strong></p>
+<ul>
+<li><code>80/tcp</code>：容器内部监听的端口和协议（TCP）。</li>
+<li><code>-&gt;</code>：表示映射关系。</li>
+<li><code>0.0.0.0:8080</code>：宿主机上绑定的 IP 地址和端口。<code>0.0.0.0</code> 表示绑定在宿主机的所有网络接口上，可通过宿主机的任何一个 IP 地址加 <code>8080</code> 端口来访问。</li>
+</ul>
+<p><strong>2. 查询容器的特定端口映射</strong><br>如果你只关心某个特定端口（例如只想知道 80 端口映射到了哪里），可以使用可选参数进行过滤。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询容器内部80端口的映射情况</span></span><br><span class="line">docker port my_nginx 80</span><br><span class="line"><span class="comment"># 或更精确地指定协议（虽然TCP是默认值）</span></span><br><span class="line">docker port my_nginx 80/tcp</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0.0.0.0:8080</span><br></pre></td></tr></table></figure>
+
+<p>这次输出更加简洁，只返回了宿主机端的绑定信息。</p>
+<h4><span id="工作原理与局限性">工作原理与局限性</span></h4><p><strong>工作原理：</strong><br><code>docker port</code> 命令本质上是查询 Docker 守护进程维护的 iptables 规则或内部状态表，这些规则是在容器启动时通过 <code>-p</code> 或 <code>-P</code> 参数设置的。它返回的是<strong>配置的映射关系</strong>，而不是实时检测端口是否真正处于监听状态。</p>
+<p><strong>局限性：</strong></p>
+<ol>
+<li><p><strong>仅显示显式映射的端口</strong>：它只显示通过 <code>-p</code> 或 <code>-P</code> 参数设置的端口映射。对于使用 <code>--network=host</code> 模式（主机网络模式）的容器，由于容器直接使用宿主机的网络命名空间，没有端口映射的概念，因此此命令不会返回任何信息。</p>
+</li>
+<li><p><strong>不检测端口状态</strong>：它只告诉你“根据配置，端口应该映射到哪里”，但并不会检查宿主机的 <code>8080</code> 端口是否真的处于监听状态。要验证端口是否可访问，还需要配合 <code>netstat</code>、<code>ss</code> 或 <code>telnet</code> 等命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 docker port 找到映射端口，再用 telnet 测试连通性</span></span><br><span class="line">docker port my_nginx 80</span><br><span class="line">telnet localhost 8080</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="最佳实践与应用场景">最佳实践与应用场景</span></h4><ol>
+<li><p><strong>快速诊断连接问题</strong>：当无法通过宿主机 IP 和端口访问容器服务时，第一步就应用 <code>docker port</code> 确认映射关系是否正确建立。</p>
+</li>
+<li><p><strong>自动化脚本</strong>：在 CI&#x2F;CD 流水线或运维脚本中，如果需要获取容器的映射端口以便进行健康检查或集成测试，<code>docker port</code> 的简洁输出非常适合被其他命令直接使用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在脚本中获取映射端口并赋值给变量</span></span><br><span class="line">MAPPED_PORT=$(docker port my_nginx 80 | <span class="built_in">cut</span> -d: -f2)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;The application is accessible on port <span class="variable">$MAPPED_PORT</span>.&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>与 <code>docker ps</code> 互补</strong>：<code>docker ps</code> 也会显示端口映射，但格式是浓缩的（如 <code>0.0.0.0:8080-&gt;80/tcp</code>）。当 <code>docker ps</code> 的输出因信息过多而不易阅读时，使用 <code>docker port</code> 查看特定容器的映射会更加清晰。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker port</code> 是一个“小而美”的典范，它专注于解决一个非常具体的问题：</p>
+<ul>
+<li><strong>它是端口映射的专用查询工具</strong>，功能单一但极其高效。</li>
+<li><strong>它的输出简洁明了</strong>，无需像解析 <code>docker inspect</code> 那样需要处理复杂的 JSON。</li>
+<li><strong>它是网络调试的第一步</strong>，帮助快速验证基础的网络配置是否正确。</li>
+<li><strong>它完美体现了 Unix 哲学</strong>——“做好一件事”，并与其他命令（如 <code>inspect</code>, <code>ps</code>, <code>netstat</code>）组合使用，形成完整的故障排查链条。</li>
+</ul>
+<h3><span id="docker-cp">docker cp</span></h3><p>Docker 容器以其隔离性而闻名，但这种隔离有时也会带来不便：我们如何将宿主机的配置文件传入容器？又如何将容器内应用程序生成的日志或数据文件提取出来进行分析？<code>docker cp</code>（copy 的缩写）命令正是为了打破这种隔离而设计的。它就像一座<strong>安全的文件桥梁</strong>，允许在宿主机和容器之间双向复制文件和目录，是开发、调试和运维中不可或缺的实用工具。</p>
+<hr>
+<p><code>docker cp</code> 命令用于<strong>在宿主机文件系统和一个运行的或已停止的容器文件系统之间复制文件或目录</strong>。</p>
+<p>它实现了容器内外环境的文件交换，支持双向操作，并且对容器内的进程毫无影响。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> [OPTIONS] CONTAINER:SRC_PATH DEST_PATH</span><br><span class="line">docker <span class="built_in">cp</span> [OPTIONS] SRC_PATH CONTAINER:DEST_PATH</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>：目标容器的名称或 ID。</li>
+<li><code>SRC_PATH</code>：源文件或目录的路径。</li>
+<li><code>DEST_PATH</code>：目标文件或目录的路径。</li>
+<li><code>[OPTIONS]</code>：可选参数，目前主要支持 <code>-a</code>（归档模式，保留文件属性）和 <code>-L</code>（跟随符号链接）。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>快速注入配置</strong>：将宿主机上修改好的配置文件（如 Nginx 的 <code>nginx.conf</code>）快速复制到容器中生效，无需重新构建镜像。</li>
+<li><strong>提取日志和数据</strong>：将容器内应用生成的日志文件、临时数据或崩溃报告复制到宿主机上进行深入分析。</li>
+<li><strong>动态调试与支持</strong>：在调试时，向容器内注入调试脚本或工具，或者从容器中提取状态信息。</li>
+<li><strong>备份与恢复</strong>：快速备份容器内用户生成的重要数据，或者将备份数据恢复到另一个容器中。</li>
+</ol>
+<h4><span id="实战示例从宿主机到容器以及反向操作">实战示例：从宿主机到容器，以及反向操作</span></h4><p><strong>1. 将文件从宿主机复制到容器内（Host -&gt; Container）</strong><br>这是最常见的操作，例如传入一个配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将宿主机当前目录下的 app.conf 文件复制到容器内 /etc/ 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> ./app.conf my_container:/etc/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将宿主机目录 /host/logs 整个复制到容器内的 /tmp 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> -a /host/logs my_container:/tmp/</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>注意</strong>：如果容器内的目标路径是一个目录，文件会被复制到该目录下。如果目标路径不存在，<code>docker cp</code> 会尝试创建它。</li>
+</ul>
+<p><strong>2. 将文件从容器内复制到宿主机（Container -&gt; Host）</strong><br>同样重要，常用于提取数据。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器内 /var/log/nginx/error.log 文件复制到宿主机当前目录</span></span><br><span class="line">docker <span class="built_in">cp</span> my_container:/var/log/nginx/error.log ./</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将容器内 /app/data 整个目录复制到宿主机的 /backup 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> -a my_container:/app/data /backup/</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>注意</strong>：从容器内复制时，源路径必须写全路径，并以 <code>容器名或ID:</code> 开头。</li>
+</ul>
+<p><strong>3. 复制已停止的容器中的文件</strong><br><code>docker cp</code> 的一个巨大优势是它不仅适用于运行中的容器，也适用于已停止（<code>exited</code>）的容器。只要容器没有被删除，你仍然可以访问其文件系统。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一个已停止的容器，其ID为 stopped_container</span></span><br><span class="line">docker <span class="built_in">cp</span> stopped_container:/app/config.json ./recovered_config.json</span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心选项options详解">核心选项（OPTIONS）详解</span></h4><ul>
+<li><p><strong><code>-a</code> (–archive)</strong>：<strong>归档模式</strong>。这是最常用的选项，它在复制时会保留文件的所有元信息，包括：</p>
+<ul>
+<li>用户和组所有权（UID&#x2F;GID）</li>
+<li>时间戳（修改时间、访问时间）</li>
+<li>权限模式（读、写、执行）</li>
+<li>特殊标志（如 setuid）</li>
+<li>使用 <code>-a</code> 选项可以确保复制的文件与原始文件属性完全一致。</li>
+</ul>
+</li>
+<li><p><strong><code>-L</code> (–follow-link)</strong>：<strong>跟随符号链接</strong>。默认情况下，<code>docker cp</code> 会复制符号链接本身（一个指向其他文件的快捷方式）。使用此选项后，它会复制符号链接所指向的<strong>实际文件内容</strong>。</p>
+</li>
+</ul>
+<h4><span id="最佳实践与重要注意事项">最佳实践与重要注意事项</span></h4><ol>
+<li><p><strong>它不是持久化的替代品</strong>：<code>docker cp</code> 是用于<strong>临时</strong>文件传输的。通过它复制到容器内的文件<strong>仅存在于该容器的可写层中</strong>。如果容器被删除并重新创建（基于原镜像），这些文件会丢失。<strong>持久化数据必须通过 Docker 数据卷（Volumes）或绑定挂载（Bind Mounts）来实现。</strong></p>
+</li>
+<li><p><strong>对运行中应用的影响</strong>：向一个运行中的容器复制文件（尤其是覆盖正在被进程打开的文件）可能会导致不可预知的行为。对于配置文件，更安全的做法是复制进去后，再在容器内发送信号让应用重载配置（如 <code>nginx -s reload</code>），或者重启容器。</p>
+</li>
+<li><p><strong>路径中的空格和特殊字符</strong>：如果文件或目录的路径中包含空格或特殊字符，务必使用引号将其括起来。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> <span class="string">&quot;my_container:/path/with spaces/file.txt&quot;</span> ./</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>与 <code>docker exec</code> 和重定向的结合使用</strong>：有时，直接生成文件内容到容器内更方便。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不推荐：先在本机创建文件，再复制</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;config_value=123&quot;</span> &gt; temp.conf</span><br><span class="line">docker <span class="built_in">cp</span> temp.conf my_container:/app/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推荐：使用 docker exec 和重定向直接写入（更高效）</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container sh -c <span class="string">&#x27;echo &quot;config_value=123&quot; &gt; /app/config&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>性能考虑</strong>：复制大量小文件时，打包成一个归档文件（如 <code>.tar</code>）再进行复制，效率会远高于直接复制目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在宿主机上打包</span></span><br><span class="line">tar -czf logs.tar.gz /path/to/many/files/</span><br><span class="line">docker <span class="built_in">cp</span> logs.tar.gz my_container:/tmp/</span><br><span class="line"><span class="comment"># 在容器内解压</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container tar -xzf /tmp/logs.tar.gz -C /target/dir</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<p><code>docker cp</code> 是一个简单而强大的“救火队员”和“调试助手”。</p>
+<ul>
+<li><strong>它是容器与宿主机间临时的文件交换通道</strong>，打破了隔离的壁垒。</li>
+<li><strong>它支持双向操作</strong>，既可用于注入，也可用于提取。</li>
+<li><strong>它适用于运行中和已停止的容器</strong>，提供了极大的灵活性。</li>
+<li><strong><code>-a</code> 选项</strong>是保障文件元信息正确的关键。</li>
+<li><strong>切记它并非持久化方案</strong>，对于重要数据，应始终使用数据卷。</li>
+</ul>
+<h3><span id="docker-diff">docker diff</span></h3><p>Docker 镜像的核心优势之一是其不可变性（Immutable）。我们基于一个纯净的镜像运行容器，但容器在运行过程中，应用程序会产生日志、用户会上传文件、临时数据会被创建。一个关键问题随之而来：<strong>自从容器启动后，它的文件系统相对于最初的镜像，发生了哪些变化？</strong> <code>docker diff</code> 命令正是为了回答这个问题而设计的。它就像一台<strong>文件系统的时光机</strong>，可以清晰地展示出容器读写层（Container Layer）的所有变更，是审计、调试和理解容器行为的强大工具。</p>
+<hr>
+<p><code>docker diff</code> 命令用于<strong>检查一个容器相对于其基础镜像，在文件系统层面所做的更改</strong>。</p>
+<p>这些更改包括添加、修改和删除的文件和目录，它们都被记录在容器的可写层（Container Layer）中。该命令会扫描这些变更，并以列表形式呈现出来。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker diff CONTAINER</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>：目标容器的名称或 ID。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>调试与故障排查</strong>：当容器行为异常时，快速检查是否有关键配置文件被意外修改或删除，或者是否有异常文件被创建（如病毒、入侵痕迹）。</li>
+<li><strong>审计与安全分析</strong>：验证容器内的文件变更是否符合预期。例如，一个只读的应用容器不应该在系统目录创建文件。</li>
+<li><strong>逆向工程与学习</strong>：对于不熟悉的第三方镜像，运行后通过 <code>docker diff</code> 可以了解它启动了哪些服务、修改了哪些配置、在哪些路径写入了数据，从而更好地理解其行为。</li>
+<li><strong>为提交镜像做准备</strong>：在手动调试容器并准备使用 <code>docker commit</code> 将其保存为新镜像之前，先用 <code>docker diff</code> 审查一下变更内容，避免将临时文件、日志或敏感信息意外提交到新镜像中。</li>
+</ol>
+<h4><span id="解读输出理解变更类型">解读输出：理解变更类型</span></h4><p><code>docker diff</code> 的命令输出非常简洁，每一行代表一个文件的变更，由一个表示变更类型的字母开头，后接文件或目录的路径。</p>
+<p><strong>变更类型标识符：</strong></p>
+<table>
+<thead>
+<tr>
+<th align="left">标识符</th>
+<th align="left">含义</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>A</code></strong></td>
+<td align="left"><strong>Add</strong></td>
+<td align="left">新添加的文件或目录。</td>
+</tr>
+<tr>
+<td align="left"><strong><code>C</code></strong></td>
+<td align="left"><strong>Change</strong></td>
+<td align="left">已存在文件的内容被修改。</td>
+</tr>
+<tr>
+<td align="left"><strong><code>D</code></strong></td>
+<td align="left"><strong>Delete</strong></td>
+<td align="left">已存在文件被删除。</td>
+</tr>
+</tbody></table>
+<p><strong>实战示例输出：</strong><br>假设我们运行一个 Ubuntu 容器，并做一些操作：</p>
+<ol>
+<li>安装 <code>nginx</code> 软件包（会添加大量文件）</li>
+<li>修改 <code>/etc/hosts</code> 文件</li>
+<li>删除 <code>/etc/issue</code> 文件</li>
+</ol>
+<p>执行 <code>docker diff &lt;container_id&gt;</code> 后，你可能会看到如下输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">C /etc</span><br><span class="line">C /etc/hosts</span><br><span class="line">D /etc/issue.net</span><br><span class="line">A /var</span><br><span class="line">A /var/lib</span><br><span class="line">A /var/lib/nginx</span><br><span class="line">A /var/lib/nginx/body</span><br><span class="line">A /var/lib/nginx/fastcgi</span><br><span class="line">A /var/lib/nginx/proxy</span><br><span class="line">A /var/lib/nginx/uwsgi</span><br><span class="line">A /var/lib/nginx/scgi</span><br><span class="line">A /run</span><br><span class="line">A /run/nginx.pid</span><br><span class="line">C /var/lib/dpkg/status</span><br><span class="line">A /usr</span><br><span class="line">A /usr/sbin</span><br><span class="line">A /usr/sbin/nginx</span><br><span class="line">... (很长的一系列添加项)</span><br></pre></td></tr></table></figure>
+
+<p><strong>解读：</strong></p>
+<ul>
+<li><code>C /etc/hosts</code>：我们修改了 hosts 文件。</li>
+<li><code>D /etc/issue.net</code>：我们删除了 issue.net 文件。</li>
+<li>所有以 <code>A</code> 开头的行（如 <code>/usr/sbin/nginx</code>）都是安装 Nginx 时添加的新文件。</li>
+</ul>
+<h4><span id="实战示例与应用场景">实战示例与应用场景</span></h4><p><strong>场景 1：快速排查“容器为什么不起作用？”</strong><br>一个原本运行良好的容器突然无法启动。你可以运行它的最新版本，并使用 <code>docker diff</code> 检查它与之前正常版本的文件差异，也许会发现某个关键的配置文件（<code>C</code>）被覆盖或数据库文件被意外删除（<code>D</code>）。</p>
+<p><strong>场景 2：检查数据持久化位置</strong><br>你想知道一个第三方应用（如 WordPress）默认会把上传的文件和插件放在哪里。你可以：</p>
+<ol>
+<li>启动一个纯净的 WordPress 容器。</li>
+<li>在浏览器中完成安装，上传一张图片，安装一个插件。</li>
+<li>使用 <code>docker diff</code> 命令，查看新增了哪些文件（<code>A</code>）。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker diff wordpress_container</span><br></pre></td></tr></table></figure>
+
+<p>输出可能会显示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">A /var/www/html/wp-content/uploads</span><br><span class="line">A /var/www/html/wp-content/uploads/2024/08</span><br><span class="line">A /var/www/html/wp-content/uploads/2024/08/my-image.jpg</span><br><span class="line">A /var/www/html/wp-content/plugins</span><br><span class="line">A /var/www/html/wp-content/plugins/my-plugin</span><br></pre></td></tr></table></figure>
+
+<p>这清晰地告诉你，必须将 <code>/var/www/html/wp-content</code> 目录通过卷挂载出来才能持久化数据。</p>
+<p><strong>场景 3：审计容器安全性</strong><br>检查一个正在运行的容器是否被入侵，可以定期执行 <code>docker diff</code>，查看是否有异常的可执行文件（<code>A</code>）被添加到 <code>/tmp</code>、<code>/dev/shm</code> 等目录，或者系统的关键命令（如 <code>/bin/bash</code>）是否被修改（<code>C</code>）。</p>
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><p><strong>适用于所有状态的容器</strong>：与许多命令不同，<code>docker diff</code> 既可以用于<strong>运行中</strong>的容器，也可以用于<strong>已停止</strong>的容器。这对于排查已经停止的容器为何出问题非常有用。</p>
+</li>
+<li><p><strong>它显示的是“差异”，不是“内容”</strong>：<code>docker diff</code> 只告诉你<strong>哪些文件变了</strong>（以及变化的类型），但<strong>不会显示文件变化的具体内容</strong>。要查看具体内容，你需要使用 <code>docker cp</code> 将文件复制出来，或者使用 <code>docker exec</code> 在容器内用 <code>cat</code> 查看。</p>
+</li>
+<li><p><strong>理解容器层的本质</strong>：这些变更都存储在容器的可写层中。<strong>一旦容器被删除，所有这些变更都会永久丢失</strong>（除非通过 <code>docker commit</code> 提交为镜像，或通过 <code>docker cp</code> 备份出来）。这再次强调了使用<strong>数据卷（Volumes）</strong> 进行持久化的重要性。</p>
+</li>
+<li><p><strong>输出可能很长</strong>：对于安装了大量软件的容器（如通过 <code>apt install</code>），输出列表会非常长。可以结合 <code>grep</code> 等工具进行过滤。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只查看 /etc 目录下的变更</span></span><br><span class="line">docker diff my_container | grep /etc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看被删除的文件</span></span><br><span class="line">docker diff my_container | grep ^D</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<p><code>docker diff</code> 是一个低调但极其强大的诊断和审计工具。</p>
+<ul>
+<li><strong>它是容器文件系统变化的“审计日志”</strong>，提供了从镜像基础层到当前状态的完整变更跟踪。</li>
+<li><strong>它是理解容器行为的“显微镜”</strong>，通过文件变更反向推导出容器内发生的操作。</li>
+<li><strong>它是安全和调试的“第一响应者”</strong>，帮助快速定位异常文件变更。</li>
+<li><strong>它的输出简单却信息丰富</strong>，三个字母（A, C, D）清晰地概括了所有变更类型。</li>
+</ul>
+<p>虽然它不像 <code>docker logs</code> 或 <code>docker exec</code> 那样常用，但当你需要深入理解容器内部的文件系统发生了什么时，<code>docker diff</code> 是无可替代的首选工具。掌握它，会让你对容器的运作机制有更深刻的理解。</p>
+<h3><span id="docker-commit">docker commit</span></h3><p>在 Docker 的世界里，我们通常通过编写 Dockerfile 来构建一个可重复、可声明的基础镜像。但有时我们会遇到一种情况：需要在容器内进行一系列复杂的交互式调试和配置，这个过程难以用 Dockerfile 的指令完全描述。此时，<code>docker commit</code> 命令就成了一把“快照刀”，它能够<strong>将容器当前的可写层（变化）冻结下来，并打包成一个全新的镜像</strong>。这是一个强大却需要慎用的功能。</p>
+<hr>
+<p><code>docker commit</code> 命令用于<strong>基于一个容器的当前状态创建一个新的镜像</strong>。</p>
+<p>它会将容器相对于其基础镜像所做的所有更改（包括文件系统的添加、修改和删除，但不包括挂载的卷中的数据）保存下来，形成一个新镜像的只读层。这个新镜像可以像其他任何镜像一样，被用于创建新的容器。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>CONTAINER</code>：源容器的名称或 ID，其当前状态将被保存。</li>
+<li><code>[REPOSITORY[:TAG]]</code>：（可选）为新镜像指定仓库名和标签。如果省略，新镜像会成为一个没有名字的悬虚镜像（dangling image）。</li>
+</ul>
+<h4><span id="为什么需要它核心价值与争议">为什么需要它？核心价值与争议</span></h4><p><code>docker commit</code> 是一个带有“争议”的命令，因为它违背了“不可变基础设施”和“声明式配置”的最佳实践。但在特定场景下，它无可替代：</p>
+<ol>
+<li><strong>交互式调试与原型设计</strong>：当你需要反复试验才能确定正确的配置、依赖项或设置时，可以在容器内手动操作，成功后一次性提交为镜像。这在快速原型阶段非常有用。</li>
+<li><strong>保存调试现场</strong>：当一个正在运行的容器出现复杂问题，你通过 <code>docker exec</code> 进入容器排查。排查结束后，可以将这个包含现场信息（如日志、临时测试文件）的容器状态保存为镜像，供后续分析或分享给他人复现问题。</li>
+<li><strong>从他人手中“抢救”镜像</strong>：如果有人给了你一个正在运行的容器（但无法提供其 Dockerfile），你可以使用 <code>commit</code> 将其保存为镜像，从而得以继续使用和分发。</li>
+</ol>
+<p><strong>尽管有上述用途，但通常认为：</strong><br><strong><code>docker commit</code> 应仅作为最后的手段或临时工具，而不应作为创建镜像的常规方法。</strong> 优先使用 Dockerfile。</p>
+<h4><span id="核心选项options详解">核心选项（OPTIONS）详解</span></h4><table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">全称</th>
+<th align="left">作用</th>
+<th align="left">示例</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong><code>-a</code></strong></td>
+<td align="left"><code>--author</code></td>
+<td align="left">指定新镜像的作者信息。</td>
+<td align="left"><code>-a &quot;John Doe &lt;john@example.com&gt;&quot;</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-m</code></strong></td>
+<td align="left"><code>--message</code></td>
+<td align="left">为本次提交添加一条注释信息，类似于 Git commit message。这对于记录这次快照的原因至关重要。</td>
+<td align="left"><code>-m &quot;Added curl and configured proxy&quot;</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-c</code></strong></td>
+<td align="left"><code>--change</code></td>
+<td align="left"><strong>非常强大</strong>的选项。允许你在提交时应用一条 Dockerfile 指令。可以多次使用。</td>
+<td align="left"><code>-c &#39;CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]&#39;</code> <br> <code>-c &#39;ENV MODE=production&#39;</code></td>
+</tr>
+<tr>
+<td align="left"><strong><code>-p</code></strong></td>
+<td align="left"><code>--pause</code></td>
+<td align="left">在提交过程中<strong>暂停</strong>容器。这能确保数据一致性，是默认行为。</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<h4><span id="实战示例">实战示例</span></h4><p><strong>1. 基础提交：创建一个无名镜像</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设我们在一个ubuntu容器中安装了nginx</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container apt update &amp;&amp; apt install -y nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将安装了nginx的容器状态提交为一个新镜像</span></span><br><span class="line">docker commit my_container</span><br></pre></td></tr></table></figure>
+
+<p>输出会返回一个新镜像的 ID，如 <code>sha256:a1b2c3d4...</code>。这个镜像没有名字（REPOSITORY: TAG 为 <code>&lt;none&gt;:&lt;none&gt;</code>），但可以通过 ID 使用。</p>
+<p><strong>2. 提交并命名镜像（推荐）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提交并指定仓库名和标签</span></span><br><span class="line">docker commit my_container my-nginx:version1</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 提交并添加元信息</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提交并添加作者信息、提交说明，同时修改启动命令</span></span><br><span class="line">docker commit \</span><br><span class="line">  -a <span class="string">&quot;Your Name &lt;email@example.com&gt;&quot;</span> \</span><br><span class="line">  -m <span class="string">&quot;Installed Nginx and configured custom homepage&quot;</span> \</span><br><span class="line">  -c <span class="string">&#x27;CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]&#x27;</span> \</span><br><span class="line">  my_container \</span><br><span class="line">  my-custom-app:latest</span><br></pre></td></tr></table></figure>
+
+<h4><span id="最佳实践与严重警告">最佳实践与严重警告</span></h4><ol>
+<li><p><strong>Dockerfile 优先原则</strong>：<strong>永远不要用 <code>docker commit</code> 来代替 Dockerfile</strong>。通过 <code>commit</code> 生成的镜像被称为“黑盒镜像”，它缺乏透明性、可重复性和可维护性。你无法确切知道镜像中包含了哪些更改，也无法轻松地重建它。</p>
+</li>
+<li><p><strong>数据卷不会被提交</strong>：<code>docker commit</code> <strong>不会</strong>保存通过 <code>-v</code> 挂载的<strong>数据卷（Volumes）</strong> 中的内容。卷的目的是持久化数据，与镜像的生命周期分离。</p>
+</li>
+<li><p><strong>小心提交敏感信息</strong>：如果你在容器内操作时写入了密码、API 密钥等敏感信息，它们会被完整地提交到新镜像中。使用前务必检查，或使用 <code>--change</code> 选项在提交后覆盖环境变量。</p>
+</li>
+<li><p><strong>作为临时工具，而非流程核心</strong>：将 <code>docker commit</code> 视为一个“快速存档”工具。一旦通过交互式方法确定了正确的配置，就应该<strong>将这些步骤翻译成 Dockerfile 指令</strong>，从而构建一个真正可管理的镜像。</p>
+</li>
+<li><p><strong>先审查再提交</strong>：提交前，使用 <code>docker diff &lt;container&gt;</code> 命令检查一下容器内到底发生了哪些变化，避免将临时文件、缓存或日志提交进去。</p>
+</li>
+</ol>
+<h4><span id="docker-commit-的工作流程"><code>docker commit</code> 的工作流程</span></h4><pre class="mermaid">graph LR
+    A[基础镜像: ubuntu:latest] --> B[运行容器: docker run -it --name my_container ubuntu]
+    B --> C[在容器内操作: apt install nginx]
+    C --> D[提交容器: docker commit my_container my-nginx:custom]
+    D --> E[新镜像: my-nginx:custom]
+    E --> F[基于新镜像运行容器: docker run my-nginx:custom]</pre>
+
+<hr>
+<p><code>docker commit</code> 是一把强大的“双刃剑”。</p>
+<ul>
+<li><strong>它是什么</strong>：一个将容器现场保存为镜像的“快照”工具。</li>
+<li><strong>它的价值</strong>：在交互式调试、原型设计和拯救现场等场景中提供了无与伦比的便捷性。</li>
+<li><strong>它的危险</strong>：极易创建出臃肿、不透明、不可重复的“黑盒镜像”，违背基础设施即代码（IaC）的最佳实践。</li>
+<li><strong>最佳实践</strong>：<strong>谨慎使用，仅作为权宜之计</strong>。一旦实验成功，应立即将过程转化为 Dockerfile。使用时务必通过 <code>-m</code> 和 <code>-a</code> 添加注释，并通过 <code>--change</code> 规范化配置。</li>
+</ul>
+<h3><span id="docker-pause-和-docker-unpause">docker pause 和 docker unpause</span></h3><p>在 Docker 的日常运维中，我们熟悉了 <code>start</code>、<code>stop</code> 和 <code>restart</code> 这种“生杀予夺”式的生命周期管理。但有时我们需要一种更细腻的控制——能否在不终止进程的情况下，暂时让一个容器“静默”？Docker 提供的 <code>docker pause</code> 和 <code>docker unpause</code> 命令正是这样一对精巧的“魔法开关”，它们允许我们<strong>冻结和恢复容器内所有进程的执行</strong>，为容器管理提供了前所未有的灵活性。</p>
+<h4><span id="什么是-docker-pause-和-docker-unpause">什么是 <code>docker pause</code> 和 <code>docker unpause</code>？</span></h4><ul>
+<li><strong><code>docker pause</code></strong>：用于<strong>暂停（冻结）</strong> 一个运行中容器内的所有进程。</li>
+<li><strong><code>docker unpause</code></strong>：用于<strong>恢复（解冻）</strong> 一个被暂停的容器，使其进程继续正常运行。</li>
+</ul>
+<p>这对命令的核心价值在于其操作的<strong>即时性和无损性</strong>。它利用 Linux 内核的 <strong>cgroup freezer</strong> 功能来实现，整个过程不涉及进程终止和启动，因此对容器内应用程序来说是完全无感知的。</p>
+<h4><span id="为什么需要它们核心价值与应用场景">为什么需要它们？核心价值与应用场景</span></h4><p>虽然不像 <code>stop</code> 和 <code>start</code> 那样常用，但 <code>pause/unpause</code> 在特定场景下是不可或缺的利器：</p>
+<ol>
+<li><p><strong>故障排查与“抓现场”</strong>：当某个容器占用了极高的 CPU 或磁盘 I&#x2F;O，导致系统不稳定时，直接 <code>stop</code> 它会丢失现场。使用 <code>pause</code> 可以立即“定格”所有进程的状态（包括内存中的数据），方便您用 <code>docker inspect</code> 或其他工具分析问题根源，然后再 <code>unpause</code> 恢复。</p>
+<ul>
+<li>这就像是给正在播放的电影按下了<strong>暂停键</strong>，画面定格，但播放器并未关闭。</li>
+</ul>
+</li>
+<li><p><strong>资源争用管理</strong>：在开发或测试环境中，当主机资源紧张时，可以临时 <code>pause</code> 一些非关键容器（如后台任务处理器、开发环境容器），将 CPU 和内存资源让给更重要的服务（如数据库、主应用）。处理完后，再 <code>unpause</code> 它们，无需重新启动。</p>
+</li>
+<li><p><strong>维护与升级</strong>：在对集群进行维护或滚动升级时，可以先 <code>pause</code> 一个容器，确保它不会处理新的请求，同时保留其完整状态。待维护完成后，再 <code>unpause</code> 它无缝接回服务中。</p>
+</li>
+<li><p><strong>一致性快照的辅助工具</strong>：虽然容器本身不支持热备份，但 <code>pause</code> 容器可以为底层文件系统（如果结合存储驱动）或外部备份工具创建一个短暂的、相对一致的窗口期，因为此时没有进程在写入文件。</p>
+</li>
+</ol>
+<h4><span id="工作原理cgroup-freezer-的魔法">工作原理：cgroup freezer 的魔法</span></h4><p>这对命令的实现依赖于 Linux 内核的一个强大功能：<strong>cgroup freezer</strong>。</p>
+<ol>
+<li><p><strong><code>docker pause CONTAINER</code></strong>：</p>
+<ul>
+<li>Docker Daemon 会向该容器对应的 cgroup 发送一个“冻结”指令。</li>
+<li>内核立即将属于这个 cgroup 的所有进程（即容器内所有进程）标记为 <strong>TASK_STOPPED</strong> 或 <strong>TASK_TRACED</strong> 状态。</li>
+<li>此时，这些进程不再被 CPU 调度执行，它们“在原地被冻住”，但依然完整地保留在内存中，包括它们的堆栈、内存数据和所有打开的文件描述符。</li>
+</ul>
+</li>
+<li><p><strong><code>docker unpause CONTAINER</code></strong>：</p>
+<ul>
+<li>Docker Daemon 向 cgroup 发送“解冻”指令。</li>
+<li>内核将所有被冻结的进程状态恢复为 <strong>TASK_RUNNING</strong>。</li>
+<li>进程立即重新进入调度队列，从刚才被暂停的指令处继续执行，就像什么都没有发生过一样。</li>
+</ul>
+</li>
+</ol>
+<p><strong>整个过程不涉及 SIGTERM 或 SIGKILL 信号</strong>，因此应用程序完全不知道曾经被暂停过。</p>
+<h4><span id="实战示例">实战示例</span></h4><p>假设我们有一个名为 <code>my_app</code> 的容器正在运行一个 Web 服务。</p>
+<ol>
+<li><p><strong>暂停容器</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pause my_app</span><br></pre></td></tr></table></figure>
+
+<p>执行后，容器的状态（在 <code>docker ps</code> 中）会从 <code>Up</code> 变为 <strong><code>Up (Paused)</code></strong>。</p>
+</li>
+<li><p><strong>尝试访问服务</strong>：<br>此时，任何尝试连接到该容器服务的请求（如 HTTP 请求）都会<strong>挂起或超时</strong>，因为处理请求的进程已经被冻结，无法响应。</p>
+</li>
+<li><p><strong>检查状态</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CONTAINER ID   IMAGE          COMMAND                  STATUS</span><br><span class="line">a1b2c3d4e5f6   nginx:latest   <span class="string">&quot;/docker-entrypoint.…&quot;</span>   Up 5 minutes (Paused)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>恢复容器</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker unpause my_app</span><br></pre></td></tr></table></figure>
+
+<p>容器状态立刻恢复为 <code>Up</code>，被挂起的请求会得到处理，服务恢复正常。</p>
+</li>
+</ol>
+<h4><span id="最佳实践与重要注意事项">最佳实践与重要注意事项</span></h4><ol>
+<li><p><strong>对网络的影响</strong>：被暂停的容器<strong>网络栈同样被冻结</strong>。它不会响应 ARP 请求、TCP 握手等。对于服务发现和负载均衡器来说，这个容器会表现得像突然宕机一样，可能导致请求失败和连接错误。解冻后，恢复过程取决于应用程序和网络设备的超时设置。</p>
+</li>
+<li><p><strong>无损性并非绝对</strong>：虽然进程状态无损，但<strong>应用程序的业务逻辑可能会受影响</strong>。例如，一个被暂停的数据库容器可能导致依赖它的应用报错；一个被暂停的客户端可能导致心跳超时而被服务器踢下线。因此，要在合适的时机（如没有活跃事务时）使用。</p>
+</li>
+<li><p><strong>不能暂停已停止的容器</strong>：<code>pause</code> 和 <code>unpause</code> 只能作用于状态为 <code>Up</code>（运行中）的容器。无法暂停一个已 <code>Exited</code> 的容器。</p>
+</li>
+<li><p><strong>资源并未释放</strong>：被暂停的容器虽然不再使用 CPU，但它占用的<strong>内存会被完整保留</strong>。这一点与 <code>stop</code> 不同，<code>stop</code> 会释放所有资源。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker pause</code> 和 <code>docker unpause</code> 是 Docker 命令集中一对非常独特且强大的工具。</p>
+<ul>
+<li><strong>它们提供了“暂停”而非“停止”的精细控制</strong>，实现了对容器进程的瞬时冻结与恢复。</li>
+<li><strong>其底层依赖于 Linux cgroup freezer</strong>，保证了操作的无损性和即时性。</li>
+<li><strong>核心应用场景是故障排查和资源调度</strong>，允许你在不丢失现场的情况下解决问题。</li>
+<li><strong>使用时需谨慎评估对业务连续性的影响</strong>，特别是对于有状态和有连接的服务。</li>
+</ul>
+<h3><span id="docker-rm">docker rm</span></h3><p>在 Docker 的日常使用中，我们会创建大量的容器用于测试、开发和学习。这些容器在完成任务后，如果一直保留，会逐渐占用大量的磁盘空间。<code>docker rm</code>（remove 的缩写）就是 Docker 世界的“回收站清理”工具，它的作用非常简单直接：<strong>删除一个或多个已停止的容器</strong>。</p>
+<h4><span id="什么是-docker-rm">什么是 <code>docker rm</code>？</span></h4><p><code>docker rm</code> 命令用于<strong>删除一个或多个已停止的容器</strong>。</p>
+<p>删除容器会一并移除与其关联的可写层（容器层），从而释放磁盘空间。这是一个清理环境、保持系统整洁的核心命令。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>你可以同时删除多个容器，只需将它们的名称或 ID 用空格隔开。</p>
+<h4><span id="如何使用简单示例">如何使用？简单示例</span></h4><p><strong>1. 删除一个已停止的容器：</strong><br>这是最常用的场景。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先停止容器</span></span><br><span class="line">docker stop my_container</span><br><span class="line"><span class="comment"># 然后删除它</span></span><br><span class="line">docker <span class="built_in">rm</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用容器ID（取前几位即可）</span></span><br><span class="line">docker <span class="built_in">rm</span> a1b2c3d4</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. 删除多个已停止的容器：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> container_1 container_2 container_3</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 强制删除一个运行中的容器（不推荐常规使用）：</strong><br>如果你想强制删除一个还在运行的容器，可以使用 <code>-f</code> 或 <code>--force</code> 选项。但这相当于先执行 <code>docker kill</code>，再执行 <code>docker rm</code>，是一种粗暴的操作。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> -f my_running_container</span><br></pre></td></tr></table></figure>
+
+<p><strong>4. 清理所有已停止的容器（实用技巧）：</strong><br>使用命令替换一次性删除所有已停止的容器，这是非常高效的清理方式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> $(docker ps -aq)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>docker ps -aq</code>：列出所有容器（包括已停止的）的 ID。</li>
+<li><code>docker rm</code>：删除这些 ID 对应的容器。</li>
+</ul>
+<h4><span id="核心注意事项">核心注意事项</span></h4><p>虽然命令简单，但以下几点必须牢记，否则可能导致数据丢失：</p>
+<ol>
+<li><p><strong>数据会永久丢失！</strong>：这是最重要的一点。删除容器会<strong>销毁存储在其容器层中的所有数据</strong>。这包括任何创建或修改的文件、安装的软件等。如果这些数据没有通过 <strong>Docker 数据卷（Volumes）</strong> 或<strong>绑定挂载（Bind Mounts）</strong> 持久化到宿主机上，那么删除后数据将无法恢复。</p>
+</li>
+<li><p><strong>无法删除运行中的容器</strong>：默认情况下，Docker 会保护运行中的容器不被意外删除。如果你尝试删除一个 <code>Up</code> 状态的容器，会收到一个错误提示。你必须先 <code>docker stop</code> 它，或者使用 <code>-f</code> 选项强制删除。</p>
+</li>
+<li><p><strong>谨慎使用 <code>-f</code> (force) 选项</strong>：<code>docker rm -f</code> 虽然方便，但应避免成为习惯。它不会给容器内进程 gracefully shutdown 的机会，可能会中断正在进行的操作（如数据库写入），导致数据损坏。<strong>最佳实践永远是先停止，再删除。</strong></p>
+</li>
+<li><p><strong>卷不会被自动删除</strong>：<code>docker rm</code> <strong>不会删除</strong>与容器关联的<strong>匿名卷</strong>。这是 Docker 的一种保护机制，防止你意外删除重要的持久化数据。如果你确认某个匿名卷也不再需要，必须使用 <code>docker volume rm</code> 手动删除它。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker rm</code> 是一个简单但至关重要的容器生命周期管理命令。</p>
+<ul>
+<li><strong>它的核心职责是清理已停止的容器，释放磁盘空间。</strong></li>
+<li><strong>操作前务必确认</strong>容器内的数据已通过卷正确持久化，否则会造成<strong>永久性数据丢失</strong>。</li>
+<li><strong>养成先停后删的好习惯</strong>，谨慎使用 <code>-f</code> 选项。</li>
+<li><strong>结合 <code>docker ps -aq</code> 可以高效地进行批量清理</strong>，保持开发环境的整洁。</li>
+</ul>
+<p>把它当作一个需要谨慎使用的回收站——在按下回车键前，永远记得确认里面的东西是否真的不再需要了。</p>
+<h3><span id="docker-export-和-docker-import">docker export 和 docker import</span></h3><p>在 Docker 的镜像和容器管理中，我们通常使用 <code>docker commit</code> 来创建新镜像，使用仓库来分发镜像。但有时我们需要一种更底层、更直接的方式来迁移或备份一个容器的<strong>纯粹的文件系统</strong>，而不关心其历史、层状结构或元数据。这时，<code>docker export</code> 和 <code>docker import</code> 这一对命令就派上了用场。它们像是为容器文件系统制作了一个“快照”并将其“还原”为一个扁平化的镜像。</p>
+<hr>
+<p>这是一对用于<strong>将容器的文件系统导出为一个压缩包，再将该压缩包导入成为一个新镜像</strong>的命令。</p>
+<ul>
+<li><strong><code>docker export</code></strong>：将一个<strong>容器的文件系统</strong>导出为一个 tar 归档文件（压缩包）。这个包只包含容器当时的文件系统快照，不包含任何镜像历史、层信息或元数据（如 <code>CMD</code>, <code>ENV</code> 等）。</li>
+<li><strong><code>docker import</code></strong>：将一个由 <code>docker export</code> 或其他方式生成的 tar 归档文件，导入并<strong>创建一个新的 Docker 镜像</strong>。这个新镜像只有一层（扁平化），并且会丢失所有原始的历史和大部分元数据。</li>
+</ul>
+<p><strong>简单比喻：</strong></p>
+<ul>
+<li><strong><code>docker export</code></strong>：就像把一台电脑的整个硬盘<strong>克隆</strong>并打包成一个巨大的 <code>.gho</code> 文件。</li>
+<li><strong><code>docker import</code></strong>：就像是把那个 <code>.gho</code> 文件<strong>恢复到一块新硬盘</strong>上。你得到了一个完全一样的系统，但丢失了原来的分区信息、安装日志等。</li>
+</ul>
+<h4><span id="为什么需要它们核心价值与应用场景">为什么需要它们？核心价值与应用场景</span></h4><p>这对命令的使用场景相对特殊，但在以下情况下非常有用：</p>
+<ol>
+<li><strong>跨环境迁移容器状态</strong>：将一个在本地开发环境中配置好的复杂容器（安装了大量依赖和软件），完整地迁移到另一台无法直接连接 Docker 仓库的生产机器上。你可以导出 tar 包， physically（物理地）复制过去，再导入。</li>
+<li><strong>制作极简的基础镜像</strong>：从一个大而全的发行版（如 Ubuntu）容器开始，精心配置和瘦身后，导出其文件系统，再导入为一个新的镜像。这个新镜像不包含任何中间层，可能比通过 Dockerfile 构建的镜像体积更小。</li>
+<li><strong>备份与恢复</strong>：作为一种<strong>容器级别的备份手段</strong>。虽然不推荐作为数据库等有状态服务的主要备份方式（因为无法保证导出时数据一致性），但可以用于备份静态文件或整个环境。</li>
+<li><strong>与非 Docker 系统交换文件系统</strong>：导出的 tar 包是一个标准的文件系统归档，可以被 <code>chroot</code>、虚拟机器或其他容器运行时使用，实现了某种程度的“互通”。</li>
+</ol>
+<h4><span id="实战示例">实战示例</span></h4><p><strong>第 1 步：导出（Export）一个容器</strong><br>假设我们有一个名为 <code>my_configured_container</code> 的容器，里面装好了我们需要的所有软件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器的文件系统导出为 tar.gz 压缩包</span></span><br><span class="line">docker <span class="built_in">export</span> my_configured_container &gt; my_container_backup.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用 -o (--output) 选项</span></span><br><span class="line">docker <span class="built_in">export</span> -o my_container_backup.tar my_configured_container</span><br></pre></td></tr></table></figure>
+
+<p>现在，你得到了一个 <code>my_container_backup.tar.gz</code> 文件，它包含了容器某时刻的完整文件系统快照。</p>
+<p><strong>第 2 步：导入（Import）为一个新镜像</strong><br>将这个 tar 包拿到另一台机器上，或者在本机将其导入为一个全新的镜像。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从 tar 包导入，并为新镜像指定仓库名和标签</span></span><br><span class="line"><span class="built_in">cat</span> my_container_backup.tar.gz | docker import - my_custom_image:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者从文件直接导入</span></span><br><span class="line">docker import my_container_backup.tar.gz my_custom_image:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以在导入时添加提交信息</span></span><br><span class="line">docker import --message <span class="string">&quot;Imported from backup on <span class="subst">$(date)</span>&quot;</span> my_container_backup.tar.gz my_custom_image:latest</span><br></pre></td></tr></table></figure>
+
+<p>导入成功后，你就可以像使用其他镜像一样，使用 <code>my_custom_image:latest</code> 来运行新的容器了。</p>
+<h4><span id="核心注意事项与局限性非常重要">核心注意事项与局限性（非常重要！）</span></h4><ol>
+<li><p><strong>只导出文件系统，不导出元数据</strong>：这是最大的限制。<code>export</code> <strong>不会</strong>包含：</p>
+<ul>
+<li>镜像的构建历史（<code> layers</code>）。</li>
+<li>原始的 <code>CMD</code>、<code>ENTRYPOINT</code>、<code>ENV</code>、<code>EXPOSE</code>、<code>WORKDIR</code> 等<strong>元数据配置</strong>。</li>
+<li>容器的运行状态、内存中的数据。</li>
+<li>使用 <code>-v</code> 挂载的<strong>数据卷</strong>中的内容。</li>
+</ul>
+</li>
+<li><p><strong>数据一致性问题</strong>：<code>export</code> 命令<strong>不会暂停容器</strong>。如果在你导出的瞬间，容器内的进程正在写入文件，可能会导致导出的归档文件出现<strong>数据不一致</strong>或<strong>文件损坏</strong>。对于数据库等活跃容器，这是一个高风险操作。</p>
+</li>
+<li><p><strong>扁平化与历史丢失</strong>：通过 <code>import</code> 创建的镜像<strong>只有一层</strong>。你丢失了所有层缓存的优势，也无法查看镜像的构建历史。这使得新镜像的构建和存储效率可能更低。</p>
+</li>
+<li><p><strong>需要手动指定运行时配置</strong>：由于元数据丢失，基于新镜像运行容器时，你很可能需要<strong>手动指定所有配置</strong>，例如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --<span class="built_in">rm</span> \</span><br><span class="line">  -p 8080:80 \</span><br><span class="line">  -e <span class="string">&quot;MY_VAR=value&quot;</span> \</span><br><span class="line">  my_custom_image:latest \</span><br><span class="line">  /bin/bash -c <span class="string">&quot;/usr/sbin/nginx&quot;</span> <span class="comment"># 必须手动指定启动命令！</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="与-docker-save-x2f-docker-load-的区别">与 <code>docker save</code> &#x2F; <code>docker load</code> 的区别</span></h4><p>这是一个非常常见的困惑点：</p>
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left"><code>export / import</code></th>
+<th align="left"><code>save / load</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>操作对象</strong></td>
+<td align="left"><strong>容器</strong> -&gt; tar -&gt; <strong>镜像</strong></td>
+<td align="left"><strong>镜像</strong> -&gt; tar -&gt; <strong>镜像</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>内容</strong></td>
+<td align="left">仅容器的<strong>文件系统</strong>快照</td>
+<td align="left"><strong>完整的镜像</strong>（包括所有层、历史、元数据）</td>
+</tr>
+<tr>
+<td align="left"><strong>元数据</strong></td>
+<td align="left"><strong>不保留</strong>（<code>CMD</code>, <code>ENV</code> 等丢失）</td>
+<td align="left"><strong>完整保留</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>层级</strong></td>
+<td align="left">合并为<strong>单层</strong>（扁平化）</td>
+<td align="left">保留所有<strong>多层结构</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>主要用途</strong></td>
+<td align="left">迁移或备份<strong>容器的当前状态</strong></td>
+<td align="left">迁移或备份<strong>完整的镜像</strong></td>
+</tr>
+</tbody></table>
+<p><strong>简单总结：用 <code>save/load</code> 来完整地“复制-粘贴”镜像；用 <code>export/import</code> 来“克隆”一个容器的硬盘。</strong></p>
+<hr>
+<p><code>docker export</code> 和 <code>docker import</code> 是一对强大但略显“粗暴”的工具。</p>
+<ul>
+<li><strong>它们提供了容器文件系统级别的快速快照和迁移能力</strong>，绕过了镜像层的概念。</li>
+<li><strong>其核心代价是元数据的丢失</strong>，导致新镜像需要手动配置才能正常运行。</li>
+<li><strong>主要适用于特殊场景</strong>，如环境迁移、制作特定基础镜像或与外部系统交互。</li>
+<li><strong>对于大多数日常需要备份和迁移镜像的场景，应优先使用 <code>docker save</code> 和 <code>docker load</code></strong>。</li>
+</ul>
+<h3><span id="docker-wait">docker wait</span></h3><p>在 Docker 的自动化脚本和 CI&#x2F;CD 流水线中，我们经常需要启动一个容器执行任务，并等待这个任务完成后再进行下一步操作。容器任务完成的标准就是<strong>容器退出</strong>。那么，如何让脚本自动等待容器退出并获取其结果呢？这就是 <code>docker wait</code> 命令的用武之地。它是一个简单、专注且对自动化极其有用的工具。</p>
+<hr>
+<p><code>docker wait</code> 命令用于<strong>阻塞（等待）一个或多个容器退出，然后打印它们的退出代码</strong>。</p>
+<p>它的行为非常纯粹：调用这个命令后，Shell 会在此处等待，直到指定的容器停止运行。一旦容器退出，<code>docker wait</code> 会立即返回该容器的退出状态码（Exit Code），然后脚本才可以继续执行。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">wait</span> CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<p>你可以同时等待多个容器退出，命令会阻塞直到所有指定容器都退出，并分别返回它们的退出码。</p>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><p><code>docker wait</code> 的核心价值在于<strong>自动化脚本和任务编排</strong>。</p>
+<ol>
+<li><strong>同步任务执行</strong>：在 Shell 脚本中，你需要确保一个容器（可能是一个数据库迁移脚本、一个批处理任务）完全执行成功后，再启动下一个依赖它的容器。<code>docker wait</code> 提供了这种同步能力。</li>
+<li><strong>获取执行结果</strong>：容器内进程的退出状态码（0 通常表示成功，非 0 表示失败）是判断任务是否成功的标准依据。<code>docker wait</code> 是获取这个状态码最直接的方式之一。</li>
+<li><strong>非交互式操作</strong>：它不需要像 <code>docker logs</code> 那样持续输出信息，也不会像 <code>docker attach</code> 那样占用标准输入。它只是安静地等待，非常适合在后台脚本中使用。</li>
+</ol>
+<h4><span id="实战示例">实战示例</span></h4><p><strong>场景：</strong> 你有一个名为 <code>batch_job</code> 的容器，它运行着一个数据处理任务。你需要在脚本中启动它，并等待任务完成，根据成功与否决定后续步骤。</p>
+<p><strong>示例脚本：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 启动一个执行后台任务的容器，并将其放入后台运行</span></span><br><span class="line">docker run --name batch_job my_data_processor:latest &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 使用 docker wait 等待这个容器执行完毕。</span></span><br><span class="line"><span class="comment">#    脚本会在此处阻塞，直到 batch_job 容器退出。</span></span><br><span class="line">EXIT_CODE=$(docker <span class="built_in">wait</span> batch_job)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 根据退出代码判断任务是否成功</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$EXIT_CODE</span> -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;✅ 任务执行成功！&quot;</span></span><br><span class="line">    <span class="comment"># 执行成功后的后续操作，例如通知、启动下一个服务等</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;❌ 任务执行失败，退出代码：<span class="variable">$EXIT_CODE</span>&quot;</span></span><br><span class="line">    <span class="comment"># 执行失败后的处理，例如错误处理、日志收集、报警等</span></span><br><span class="line">    docker logs batch_job <span class="comment"># 可以立刻获取日志来排查错误</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 清理容器</span></span><br><span class="line">docker <span class="built_in">rm</span> batch_job</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;脚本继续执行...&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>等待多个容器：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时启动多个任务容器</span></span><br><span class="line">docker run --name worker_1 my_worker &amp;</span><br><span class="line">docker run --name worker_2 my_worker &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等待所有worker容器退出</span></span><br><span class="line">EXIT_CODE_1=$(docker <span class="built_in">wait</span> worker_1)</span><br><span class="line">EXIT_CODE_2=$(docker <span class="built_in">wait</span> worker_2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Worker 1 退出代码: <span class="variable">$EXIT_CODE_1</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Worker 2 退出代码: <span class="variable">$EXIT_CODE_2</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="核心注意事项">核心注意事项</span></h4><ol>
+<li><strong>它只等待已存在的容器</strong>：<code>docker wait</code> 只能作用于已经创建的容器（无论状态是运行中还是已停止）。如果指定的容器不存在，命令会报错。</li>
+<li><strong>阻塞特性</strong>：命令会阻塞当前 Shell 或脚本的进程。这意味着在等待期间，你的脚本什么都做不了。请确保这是在预期内的行为。</li>
+<li><strong>与 <code>docker run</code> 的分离模式（<code>-d</code>）是绝配</strong>：最经典的用法就是使用 <code>docker run -d</code> 在后台启动容器，然后立即使用 <code>docker wait</code> 等待它的结果。这样既能实现后台启动，又能同步等待。</li>
+<li><strong>退出代码是关键</strong>：<code>docker wait</code> 的核心输出就是退出代码。容器内的主进程必须正确地返回退出代码（例如，在脚本中使用 <code>exit 0</code> 或 <code>exit 1</code>），这个机制才有意义。</li>
+<li><strong>它不输出日志</strong>：<code>docker wait</code> 非常“安静”，它不会像 <code>docker logs -f</code> 那样向你实时展示容器的输出。你通常需要在其之后配合 <code>docker logs</code> 来获取详细日志。</li>
+</ol>
+<hr>
+<p><code>docker wait</code> 是一个“人狠话不多”的实用命令。</p>
+<ul>
+<li><strong>它的功能极其专注</strong>：安静地等待容器退出并返回结果码。</li>
+<li><strong>它是自动化脚本的“粘合剂”</strong>：实现了容器任务的同步执行，是 CI&#x2F;CD 流水线和运维脚本中的无名英雄。</li>
+<li><strong>使用时需注意其阻塞特性</strong>，并确保与 <code>docker run -d</code> 配合使用以达到最佳效果。</li>
+<li><strong>它的价值体现在退出代码上</strong>，因此要求容器内的应用程序有良好的退出状态管理。</li>
+</ul>
+<h3><span id="docker-rename">docker rename</span></h3><p><code>docker rename</code> 命令用于<strong>修改一个容器的名称</strong>。</p>
+<hr>
+<p>容器创建时，我们会通过 <code>--name</code> 为其指定一个名称。但之后可能发现名称不合适、有拼写错误，或者想遵循新的命名规范。<code>docker rename</code> 就是为了解决这个问题，它允许你在容器创建后<strong>重新命名</strong>，而无需删除和重新创建容器。</p>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rename OLD_NAME NEW_NAME</span><br></pre></td></tr></table></figure>
+
+<h4><span id="实战示例">实战示例</span></h4><ol>
+<li><p><strong>纠正拼写错误</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不小心把名字打错了</span></span><br><span class="line">docker run -d --name ngixn nginx:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用 rename 修正它</span></span><br><span class="line">docker rename ngixn nginx</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>根据新的命名规范重命名</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 旧名称：web</span></span><br><span class="line"><span class="comment"># 新名称：希望加上项目前缀 prod-frontend-web</span></span><br><span class="line">docker rename web prod-frontend-web</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>为匿名容器命名</strong>：<br>如果最初运行容器时忘了使用 <code>--name</code> 参数，Docker 会随机分配一个名字（如 <code>dreamy_curie</code>）。你可以给它一个更有意义的名字。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rename dreamy_curie my-app</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4><span id="核心注意事项">核心注意事项</span></h4><ul>
+<li><strong>新旧名称不能重复</strong>：新的容器名称必须在当前 Docker 环境中是唯一的，不能与其他任何容器或镜像重名。</li>
+<li><strong>容器状态不限</strong>：此命令对容器的状态没有要求，无论是<strong>运行中（Up）</strong>、<strong>已停止（Exited）</strong> 还是<strong>已暂停（Paused）</strong>，都可以成功重命名。</li>
+<li><strong>即时生效</strong>：重命名操作是立即生效的。之后所有 Docker 命令（<code>docker start</code>, <code>docker stop</code>, <code>docker logs</code>等）都需要使用新的名称来操作这个容器。</li>
+</ul>
+<hr>
+<p><code>docker rename</code> 是一个简单到极致的命令，它就做一件事：<strong>给容器改个名</strong>。它是一个非常方便的管理工具，让你能轻松地维护容器的标识符，保持环境的整洁和规范。</p>
+<h3><span id="docker-container-prune">docker container prune</span></h3><p><code>docker container prune</code> 是一个高效的清理命令，它的功能非常简单粗暴：<strong>一键删除所有已停止的容器</strong>。</p>
+<hr>
+<p>执行这个命令后，Docker 会找出所有处于 <code>exited</code> 状态的容器，并将其全部删除，释放磁盘空间。</p>
+<p><strong>基本用法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接执行会要求确认</span></span><br><span class="line">docker container prune</span><br><span class="line"></span><br><span class="line"><span class="comment"># 跳过确认提示，直接删除</span></span><br><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
+
+<h4><span id="为什么需要它">为什么需要它？</span></h4><p>在开发和测试过程中，我们会频繁地创建和停止大量临时容器。手动一个个删除 (<code>docker rm</code>) 非常繁琐。这个命令极大地简化了清理工作，让环境保持整洁。</p>
+<h4><span id="️-核心注意事项重中之重">⚠️ 核心注意事项（重中之重）</span></h4><p>这个命令的便利性背后藏着巨大的数据风险，请务必牢记以下几点：</p>
+<ol>
+<li><p><strong>数据会永久丢失！</strong><br>这是最重要的一点。删除容器会<strong>同时删除其产生的所有数据</strong>。如果这些数据没有通过 <strong>Docker 数据卷（Volumes）</strong> 或<strong>绑定挂载（Bind Mounts）</strong> 持久化到宿主机上，那么删除后数据将<strong>无法恢复</strong>。</p>
+</li>
+<li><p><strong>它不问青红皂白</strong><br>命令会删除<strong>所有</strong>已停止的容器。它不会区分哪个容器是重要的，哪个是临时的。你可能一不小心就删除了一个包含重要配置或日志的已停止容器。</p>
+</li>
+<li><p><strong>谨慎使用 <code>-f</code> (force) 选项</strong><br><code>-f</code> 选项让你跳过最后的确认提示。虽然方便，但这也移除了最后一道安全屏障。<strong>强烈建议不要将 <code>docker container prune -f</code> 放入自动化脚本或设为定时任务</strong>，除非你完全确信所有已停止容器都毫无价值。</p>
+</li>
+<li><p><strong>它不删除关联的匿名卷</strong><br>这是唯一的安全措施。<code>prune</code> <strong>不会自动删除</strong>与这些容器关联的匿名卷。如果你确认这些卷也不再需要，必须使用 <code>docker volume prune</code> 进行二次清理。</p>
+</li>
+</ol>
+<h4><span id="安全使用准则">安全使用准则</span></h4><ul>
+<li><strong>清理前，请务必使用 <code>docker ps -a</code> 清单所有已停止的容器</strong>，确认其中没有包含重要数据的容器。</li>
+<li><strong>对于重要容器，养成使用具名卷或绑定挂载的习惯</strong>，这是避免数据丢失的根本方法。</li>
+<li>可以先使用 <code>docker rm $(docker ps -aq)</code> 手动选择要删除的容器，控制力更强。</li>
+</ul>
+<hr>
+<p><code>docker container prune</code> 是一把锋利的“双刃剑”。</p>
+<ul>
+<li><strong>它是什么</strong>：一个一键清理所有已停止容器的便捷工具。</li>
+<li><strong>它的价值</strong>：快速释放资源，保持环境整洁。</li>
+<li><strong>最大的风险</strong>：<strong>永久性数据丢失</strong>。</li>
+<li><strong>最佳实践</strong>：<strong>谨慎使用</strong>。每次执行前，请务必确认即将被删除的容器列表，确保没有你需要保留的任何数据。</li>
+</ul>
+<h3><span id="docker-update">docker update</span></h3><p>在容器化应用的日常运维中，我们经常会遇到这样的场景：一个正在运行的容器突然需要更多内存来处理高峰流量，或者某个容器占用了过多 CPU 资源需要被限制。如果不想停止和重启服务，该怎么办？Docker 提供的 <code>docker update</code> 命令正是为了解决这个问题，它允许我们<strong>动态地修改一个或多个运行中容器的配置</strong>，是实现弹性伸缩和资源优化的关键工具。</p>
+<hr>
+<p><code>docker update</code> 命令用于<strong>动态更新一个或多个运行中容器的配置</strong>。</p>
+<p>其核心功能是调整容器的资源限制（如 CPU、内存）和部分运行时参数，而无需停止和重新启动容器。这实现了对应用服务的“在线热调整”，对于保证服务的连续性和可用性至关重要。</p>
+<p><strong>基本语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker update [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>应用弹性伸缩</strong>：应对流量波动，在业务高峰时临时为容器增加 CPU 或内存配额，高峰过后再降低，从而高效利用资源。</li>
+<li><strong>故障排查与资源限制</strong>：当某个容器因 bug 导致资源耗尽（如内存泄漏），可以立即降低其资源上限，防止它拖垮整个宿主系统，为排查问题争取时间。</li>
+<li><strong>避免服务中断</strong>：对于有状态服务（如数据库）或难以重启的服务，<code>docker update</code> 提供了无需停服即可调整资源配置的能力，最大程度保证业务连续性。</li>
+<li><strong>成本优化</strong>：根据监控数据，将过度分配的容器资源下调到合理水平，节省云计算成本。</li>
+</ol>
+<h4><span id="核心选项options详解">核心选项（OPTIONS）详解</span></h4><p><code>docker update</code> 的强大之处在于其丰富的选项，主要用于调整资源限制：</p>
+<p><strong>1. CPU 资源调整：</strong></p>
+<ul>
+<li><strong><code>-c, --cpu-shares int</code></strong>：调整 CPU 份额（相对权重）。默认是 1024。提高或降低这个值可以增加或减少容器在 CPU 竞争时的优先级。</li>
+<li><strong><code>--cpus decimal</code></strong>：<strong>最常用</strong>。限制容器可以使用的 CPU 核心数。例如，<code>--cpus 1.5</code> 表示限制容器最多使用 1.5 个 CPU 核心的计算能力。</li>
+<li><strong><code>--cpuset-cpus string</code></strong>：限制容器只能运行在哪些特定的 CPU 核心上。例如，<code>--cpuset-cpus &quot;0-2&quot;</code> 表示只使用前三个核心。</li>
+</ul>
+<p><strong>2. 内存资源调整：</strong></p>
+<ul>
+<li><strong><code>-m, --memory bytes</code></strong>：<strong>最常用</strong>。限制容器能使用的最大内存。例如，<code>-m 512m</code> 或 <code>-m 2g</code>。</li>
+<li><strong><code>--memory-swap bytes</code></strong>：限制容器能使用的内存+交换分区（Swap）的总大小。必须与 <code>-m</code> 参数一起使用。</li>
+</ul>
+<p><strong>3. 重启策略调整：</strong></p>
+<ul>
+<li><strong><code>--restart string</code></strong>：修改容器的重启策略（如 <code>no</code>, <code>on-failure</code>, <code>always</code>, <code>unless-stopped</code>）。这在容器持续崩溃需要修改恢复策略时非常有用。</li>
+</ul>
+<h4><span id="实战示例">实战示例</span></h4><p><strong>场景 1：应对流量高峰，临时增加资源</strong><br>一个 Web 容器在促销期间需要更多计算能力。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器 my_web 的 CPU 限制提升到 2 个核心，内存限制提升到 2GB</span></span><br><span class="line">docker update --cpus 2 -m 2g my_web</span><br></pre></td></tr></table></figure>
+
+<p><strong>场景 2：限制失控的容器</strong><br>监控发现一个容器内存泄漏，占用了过多资源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 立即将容器的内存上限硬限制为 512MB，防止它耗尽主机内存</span></span><br><span class="line">docker update -m 512m my_buggy_container</span><br></pre></td></tr></table></figure>
+
+<p><strong>场景 3：批量调整多个容器</strong><br>为整个应用栈的所有容器降低资源配额。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时更新 nginx, web_app, cache 三个容器的 CPU 份额</span></span><br><span class="line">docker update --cpus 0.5 nginx web_app cache</span><br></pre></td></tr></table></figure>
+
+<h4><span id="最佳实践与重要注意事项">最佳实践与重要注意事项</span></h4><ol>
+<li><p><strong>主要针对运行中的容器</strong>：虽然也可用于已停止的容器，但其主要价值体现在<strong>不中断运行中服务</strong>的动态调整上。</p>
+</li>
+<li><p><strong>资源限制的生效方式</strong>：</p>
+<ul>
+<li><strong>调低限制（如减少内存）</strong>：<strong>立即生效</strong>。如果容器当前使用量已超过新限制，操作系统内核会强制其释放内存，可能会触发容器内的 OOM（内存不足）机制。</li>
+<li><strong>调高限制（如增加 CPU）</strong>：<strong>立即生效</strong>。容器可以立即开始使用新分配的资源。</li>
+</ul>
+</li>
+<li><p><strong>理解“硬限制”与“软限制”</strong>：<code>-m</code> 设置的是硬性上限，容器进程绝对不能超过此值。而 <code>--cpu-shares</code> 是软性权重，只在 CPU 资源发生竞争时起作用。</p>
+</li>
+<li><p><strong>无法更新所有配置</strong>：<code>docker update</code> <strong>不能</strong>修改与容器架构相关的核心配置，例如：</p>
+<ul>
+<li>网络模式（<code>--network</code>）</li>
+<li>端口映射（<code>-p</code>）</li>
+<li>卷挂载（<code>-v</code>）</li>
+<li>环境变量（<code>-e</code>）</li>
+<li>这些修改必须通过<code>docker commit</code>创建新镜像或重建容器来实现。</li>
+</ul>
+</li>
+<li><p><strong>监控调整结果</strong>：更新后，使用 <code>docker stats</code> 命令观察容器的实际资源使用情况，确认调整是否达到预期效果。</p>
+</li>
+</ol>
+<hr>
+<p><code>docker update</code> 是 Docker 运维中实现<strong>精细化资源管理</strong>和<strong>快速故障响应</strong>的利器。</p>
+<ul>
+<li><strong>它是什么</strong>：一个可以动态调整运行中容器资源限制的命令。</li>
+<li><strong>它的核心价值</strong>：<strong>无需重启服务</strong>即可实现资源的弹性伸缩和故障隔离，极大保障了业务的可用性。</li>
+<li><strong>它的主要能力</strong>：调整 CPU、内存限制和重启策略。</li>
+<li><strong>它的局限性</strong>：无法修改网络、存储等核心配置。</li>
+<li><strong>最佳实践</strong>：与监控系统结合，根据 metrics 指标动态调整资源配置，是实现容器化环境高效、稳定运行的高级技巧</li>
+</ul>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>

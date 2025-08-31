@@ -17,8 +17,6 @@ namespace
 dd 命令
 mkfs 命令
 df 命令
-需要注意的要点
-总结
 mount 命令
 unshare 命令
 mount 隔离
@@ -26,7 +24,7 @@ mount 隔离
 
 cgroup
 管理基础：挂载与目录操作
-实战：使,"> 
+实战：使用 cgroup v2,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -44,8 +42,6 @@ namespace
 dd 命令
 mkfs 命令
 df 命令
-需要注意的要点
-总结
 mount 命令
 unshare 命令
 mount 隔离
@@ -53,7 +49,7 @@ mount 隔离
 
 cgroup
 管理基础：挂载与目录操作
-实战：使,"/>
+实战：使用 cgroup v2,"/>
     
     
     
@@ -68,8 +64,6 @@ namespace
 dd 命令
 mkfs 命令
 df 命令
-需要注意的要点
-总结
 mount 命令
 unshare 命令
 mount 隔离
@@ -77,7 +71,7 @@ mount 隔离
 
 cgroup
 管理基础：挂载与目录操作
-实战：使,"/>
+实战：使用 cgroup v2,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -248,7 +242,7 @@ cgroup
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">59</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">60</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -257,7 +251,7 @@ cgroup
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/30/Docker/docker_image/">Docker Image</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li></ul>
+            <ul><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image 使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container 使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -294,8 +288,6 @@ cgroup
 <li><a href="#dd-%E5%91%BD%E4%BB%A4">dd 命令</a></li>
 <li><a href="#mkfs-%E5%91%BD%E4%BB%A4">mkfs 命令</a></li>
 <li><a href="#df-%E5%91%BD%E4%BB%A4">df 命令</a></li>
-<li><a href="#%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E8%A6%81%E7%82%B9">需要注意的要点</a></li>
-<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
 <li><a href="#mount-%E5%91%BD%E4%BB%A4">mount 命令</a></li>
 <li><a href="#unshare-%E5%91%BD%E4%BB%A4">unshare 命令</a></li>
 <li><a href="#mount-%E9%9A%94%E7%A6%BB">mount 隔离</a></li>
@@ -703,13 +695,13 @@ cgroup
 
 <p>（这个输出通常会很长，包含很多内核虚拟的文件系统。）</p>
 <hr>
-<h3><span id="需要注意的要点">需要注意的要点</span></h3><ol>
+<h4><span id="需要注意的要点">需要注意的要点</span></h4><ol>
 <li><strong>“可用”空间</strong>： 通常，根文件系统 (<code>/</code>) 会保留约 5% 的磁盘空间（可由 <code>tune2fs -m</code> 调整）仅供 root 用户使用，以防止系统完全崩溃。所以普通用户看到的“可用”空间可能比实际计算的少一点点。</li>
 <li><strong>伪文件系统</strong>： 像 <code>tmpfs</code>, <code>udev</code>, <code>proc</code> 这些并不是真正的物理磁盘，它们是内核在内存中创建的<strong>虚拟文件系统</strong>，用于管理设备、进程信息等。它们的空间使用是动态变化的。</li>
 <li><strong>网络文件系统</strong>： <code>df</code> 也会显示通过网络挂载的文件系统，如 NFS 或 Samba 共享。</li>
 <li><strong>挂载点</strong>： 理解挂载点的概念至关重要。<code>/home</code> 目录可能是一个独立的大分区，而 <code>/boot</code> 通常是一个较小的独立分区。</li>
 </ol>
-<h3><span id="总结">总结</span></h3><ul>
+<h4><span id="总结">总结</span></h4><ul>
 <li><strong><code>df</code></strong> 是查看<strong>磁盘空间总体使用情况</strong>的命令。</li>
 <li><strong><code>du</code></strong> 是查看<strong>某个目录或文件具体占用多少空间</strong>的命令。它们两个通常配合使用：先用 <code>df</code> 发现哪个盘空间紧张，再用 <code>du</code> 去那个盘下找是哪个目录或文件占用了大量空间。</li>
 <li><strong><code>df -h</code></strong> 是你最应该记住的命令。</li>
@@ -978,7 +970,6 @@ cgroup
 <li><p><strong>验证隔离性</strong>：<strong>这是最关键的一步。</strong> 此时，在宿主系统或其他任何终端窗口中使用 <code>mount</code> 或 <code>df -h</code> 命令查看，<strong>都无法发现</strong> <code>my-disk.img</code> 被挂载到了 <code>./mnt</code>。这个挂载操作完全被限制在了新创建的 Mount Namespace 内部，对外部系统不可见。</p>
 </li>
 </ol>
-<p>好的，这是一份为您博客准备的关于 cgroup v2 的讲解和演示内容。</p>
 <h2><span id="cgroup">cgroup</span></h2><p>cgroup（Control Groups）是 Linux 内核提供的一种机制，用于对一组进程进行统一的资源限制、隔离和统计。它是容器化技术（如 Docker 和 Kubernetes）最核心的基石之一。</p>
 <p>与早期的 cgroup v1 相比，cgroup v2 带来了更清晰统一的管理模型、更一致的组织结构以及更强大的功能（如原子化资源分配）。目前主流的 Linux 发行版均已默认采用 cgroup v2。</p>
 <p>其核心思想可以通过下图来理解：</p>
@@ -1616,6 +1607,28 @@ A1 -.->|继承父组限制并可叠加| LA1[进程列表 A1]</pre>
   .recommendations::-webkit-scrollbar{ width: 0; }
   .recommendations:hover::-webkit-scrollbar{ width: 8px; }
   */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
     </style>
     </div>
 
