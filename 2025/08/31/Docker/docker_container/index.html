@@ -251,7 +251,7 @@ dock,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/30/Docker/docker_image/">Docker Image 使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li></ul>
+            <ul><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image 使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -412,14 +412,89 @@ dock,"/>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个已创建的容器</span></span><br><span class="line">docker start my_web</span><br></pre></td></tr></table></figure>
 
 <p>这条命令会将容器从 <code>Created</code> 状态转为 <code>Running</code> 状态，启动容器内的主进程（如 Nginx 服务）。</p>
-<h3><span id="docker-run">docker run</span></h3><p>如果想要直接创建并启动容器，可以使用 <code>docker run</code> 命令。</p>
+<h3><span id="docker-run">docker run</span></h3><p>如果说 Docker 镜像是一个静态的、可执行的软件包（包含代码、运行时、库、环境变量和配置文件），那么 <code>docker run</code> 就是让这个软件包<strong>活起来</strong>的魔法咒语。它是 Docker 中最核心、最常用的命令，是创建和启动容器的唯一入口。理解 <code>docker run</code>，就掌握了开启容器化之旅的钥匙。</p>
+<hr>
+<p><code>docker run</code> 命令用于<strong>从指定的镜像创建并启动一个新的容器</strong>。</p>
+<p>它的工作流程可以拆解为两个核心步骤：</p>
+<ol>
+<li><strong>创建</strong>：基于指定的镜像，创建一个新的可写容器层（Container Layer）。</li>
+<li><strong>启动</strong>：执行镜像中定义的默认命令（如 <code>CMD</code> 或 <code>ENTRYPOINT</code>），让容器内的应用进程运行起来。</li>
+</ol>
+<p><strong>基本语法：</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
 
-<p>在选项方面，<code>docker run</code> 比 <code>docker create</code> 多了一个 <code>-d</code>（后台运行）选项。</p>
-<p>示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建并启动一个 Nginx 容器</span></span><br><span class="line">docker run --name my_web -d nginx:latest</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>IMAGE</code>：用于创建容器的镜像名称（如 <code>nginx:latest</code>、<code>ubuntu:20.04</code>）。</li>
+<li><code>[COMMAND] [ARG...]</code>：（可选）覆盖镜像中定义的默认启动命令。</li>
+<li><code>[OPTIONS]</code>：<strong>这是命令的灵魂</strong>，用于配置容器的几乎所有方面，包括网络、存储、资源限制等。</li>
+</ul>
+<h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
+<li><strong>应用标准化部署</strong>：只需一个包含所有依赖的镜像和一条 <code>docker run</code> 命令，就能在任何安装了 Docker 的环境中一致地运行应用，彻底解决“在我这儿是好的”的环境问题。</li>
+<li><strong>资源隔离与安全</strong>：通过选项轻松为应用分配和限制 CPU、内存等资源，并通过隔离机制保证安全性。</li>
+<li><strong>极致的可配置性</strong>：通过丰富的选项，可以灵活配置容器的网络、存储、日志、重启策略等，满足各种复杂场景的需求。</li>
+</ol>
+<h4><span id="核心选项options分类详解">核心选项（OPTIONS）分类详解</span></h4><p><code>docker run</code> 的威力体现在其数十个选项上，以下是其中最常用和关键的几类：</p>
+<p><strong>1. 容器运行模式与交互：</strong></p>
+<ul>
+<li><p><strong><code>-d</code>， <code>--detach</code></strong>：在<strong>后台</strong>运行容器（守护进程模式）。这是运行后台服务（如 Nginx、MySQL）的标准方式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d nginx</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>-it</code></strong>：<strong>组合使用</strong>，用于启动一个<strong>交互式</strong>容器。<code>-i</code>（保持标准输入打开）和 <code>-t</code>（分配一个伪终端） together 让你可以像使用普通 Shell 一样与容器交互。这是运行临时工具容器（如 Ubuntu、Alpine）的标准方式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it ubuntu /bin/bash</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>2. 名称与标识：</strong></p>
+<ul>
+<li><p><strong><code>--name</code></strong>：为容器指定一个自定义名称，而不是使用 Docker 随机生成的名字。这对于后续的管理操作（如 <code>docker stop</code>、<code>docker logs</code>）至关重要。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name my_web -d nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>3. 网络配置：</strong></p>
+<ul>
+<li><p><strong><code>-p</code>， <code>--publish</code></strong>：<strong>映射端口</strong>，将容器的端口发布到宿主机的端口上。这是从外部访问容器内服务的基础。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器的80端口映射到宿主机的8080端口</span></span><br><span class="line">docker run -p 8080:80 nginx</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong><code>--network</code></strong>：指定容器的网络模式（如 <code>bridge</code>、<code>host</code>、<code>none</code> 或自定义网络），实现容器间的隔离或通信。</p>
+</li>
+</ul>
+<p><strong>4. 存储与数据持久化：</strong></p>
+<ul>
+<li><p><strong><code>-v</code>， <code>--volume</code></strong>：<strong>挂载数据卷</strong>或<strong>绑定宿主机目录</strong>。这是实现数据持久化的核心方法，避免数据随着容器的删除而丢失。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 绑定挂载：将宿主机的 /host/data 挂载到容器的 /container/data</span></span><br><span class="line">docker run -v /host/data:/container/data nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用命名的数据卷</span></span><br><span class="line">docker run -v my_volume:/container/data nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>5. 环境变量配置：</strong></p>
+<ul>
+<li><p><strong><code>-e</code>， <code>--env</code></strong>：设置容器内的环境变量。常用于传递配置参数（如密码、运行模式）给容器内的应用。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -e MODE=production -e DB_HOST=db.example.com my_app</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>6. 资源管理：</strong></p>
+<ul>
+<li><p><strong><code>--cpus</code></strong>：限制容器能使用的 CPU 核心数。</p>
+</li>
+<li><p><strong><code>-m</code>， <code>--memory</code></strong>：限制容器能使用的最大内存。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --cpus=<span class="string">&quot;1.5&quot;</span> -m <span class="string">&quot;512m&quot;</span> my_app</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>7. 重启策略：</strong></p>
+<ul>
+<li><p><strong><code>--restart</code></strong>：配置容器的自动重启策略，如 <code>no</code>（不重启）、<code>on-failure</code>（失败时重启）、<code>always</code>（总是重启）。这是保证服务高可用的关键配置。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart unless-stopped my_app</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4><span id="实战示例组合使用选项">实战示例：组合使用选项</span></h4><p>一个典型的后台 Web 服务启动命令可能结合了上述所有选项：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \                  <span class="comment"># 后台运行</span></span><br><span class="line">  --name my-app \                <span class="comment"># 指定容器名</span></span><br><span class="line">  -p 80:80 \                     <span class="comment"># 端口映射</span></span><br><span class="line">  -v /app/config:/etc/config \   <span class="comment"># 挂载配置文件目录</span></span><br><span class="line">  -e DATABASE_URL=postgresql://... \ <span class="comment"># 设置环境变量</span></span><br><span class="line">  --cpus=2 \                     <span class="comment"># 资源限制</span></span><br><span class="line">  -m=1g \</span><br><span class="line">  --restart on-failure \         <span class="comment"># 重启策略</span></span><br><span class="line">  my-app-image:latest           <span class="comment"># 镜像名</span></span><br></pre></td></tr></table></figure>
 
-<p>这条命令会拉取 <code>nginx:latest</code> 镜像（如果本地不存在），创建一个名为 <code>my_web</code> 的容器，并在后台运行它。</p>
+<h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
+<li><strong>总是使用 <code>--name</code></strong>：为容器命名是良好的习惯，这让管理变得更加简单和清晰。</li>
+<li><strong>理解前台与后台运行</strong>：交互式工具用 <code>-it</code>，后台服务用 <code>-d</code>。</li>
+<li><strong>数据持久化是必须的</strong>：任何需要保留的数据都必须通过 <code>-v</code> 挂载到宿主机或数据卷中，<strong>切勿依赖容器的可写层</strong>。</li>
+<li><strong>使用特定版本标签</strong>：尽量不要使用 <code>latest</code> 标签，而应使用明确的版本（如 <code>nginx:1.25-alpine</code>），以保证部署的一致性。</li>
+<li><strong>优先使用 <code>docker compose</code></strong>：当选项变得复杂时（需要启动多个关联容器），使用 <code>docker compose</code> 来管理这些配置是更佳实践。</li>
+</ol>
+<hr>
+<p><code>docker run</code> 远不止是一个启动命令，它是<strong>容器生命的起点</strong>，是<strong>应用环境的编织者</strong>。</p>
+<ul>
+<li><strong>它是 Docker 功能的集大成者</strong>，通过数十个选项将镜像、网络、存储、资源等模块串联起来。</li>
+<li><strong>它的灵活性</strong>使得同一个镜像可以通过不同的参数，轻松适应开发、测试、生产等各种环境。</li>
+<li><strong>掌握其常用选项</strong>是熟练使用 Docker 的必经之路。</li>
+</ul>
+<p>从一条简单的 <code>docker run hello-world</code> 到复杂的企业级应用部署，<code>docker run</code> 贯穿始终，是每个 Docker 用户必须深刻理解和掌握的核心命令。</p>
 <h3><span id="docker-ps">docker ps</span></h3><p>该命令在之前的文章中已经介绍过，用于查看当前运行的容器，若需要了解请展开：</p>
 <div class="spoiler collapsed">
     <div class="spoiler-title">
