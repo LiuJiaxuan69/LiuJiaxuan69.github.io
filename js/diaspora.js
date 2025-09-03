@@ -310,90 +310,101 @@ $(function() {
     })
 	
 	//搜搜
-	var searchFunc = function(path, search_id, content_id) {
-		'use strict'; //使用严格模式
-		$.ajax({
-			url: path,
-			dataType: "xml",
-			success: function( xmlResponse ) {
-				// 从xml中获取相应的标题等数据
-				var datas = $( "entry", xmlResponse ).map(function() {
-					return {
-						title: $( "title", this ).text(),
-						content: $("content",this).text(),
-						url: $( "url" , this).text()
-					};
-				}).get();
-				//ID选择器
-				var $input = document.getElementById(search_id);
-				var $resultContent = document.getElementById(content_id);
-				$input.addEventListener('input', function(){
-					var str='<ul class=\"search-result-list\">';                
-					var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
-					$resultContent.innerHTML = "";
-					if (this.value.trim().length <= 0) {
-						return;
-					}
-					// 本地搜索主要部分
-					datas.forEach(function(data) {
-						var isMatch = true;
-						var content_index = [];
-						var data_title = data.title.trim().toLowerCase();
-						var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
-						var data_url = data.url;
-						var index_title = -1;
-						var index_content = -1;
-						var first_occur = -1;
-						// 只匹配非空文章
-						if(data_title != '' && data_content != '') {
-							keywords.forEach(function(keyword, i) {
-								index_title = data_title.indexOf(keyword);
-								index_content = data_content.indexOf(keyword);
-								if( index_title < 0 && index_content < 0 ){
-									isMatch = false;
-								} else {
-									if (index_content < 0) {
-										index_content = 0;
-									}
-									if (i == 0) {
-										first_occur = index_content;
-									}
-								}
-							});
-						}
-						// 返回搜索结果
-						if (isMatch) {
-						//结果标签
-							str += "<li><a href='"+ data_url +"' class='search-result-title' target='_blank'>"+ data_title +"</a>";
-							var content = data.content.trim().replace(/<[^>]+>/g,"");
-							if (first_occur >= 0) {
-								// 拿出含有搜索字的部分
-								var start = first_occur - 6;
-								var end = first_occur + 6;
-								if(start < 0){
-									start = 0;
-								}
-								if(start == 0){
-									end = 10;
-								}
-								if(end > content.length){
-									end = content.length;
-								}
-								var match_content = content.substr(start, end); 
-								// 列出搜索关键字，定义class加高亮
-								keywords.forEach(function(keyword){
-									var regS = new RegExp(keyword, "gi");
-									match_content = match_content.replace(regS, "<em class=\"search-keyword\">"+keyword+"</em>");
-								})
-								str += "<p class=\"search-result\">" + match_content +"...</p>"
-							}
-						}
-					})
-					$resultContent.innerHTML = str;
-				})
-			}
-		})
-	};
+	// ...existing code...
+    //搜搜
+    var searchFunc = function(path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function(xmlResponse) {
+                // 解析 XML
+                var datas = $("entry", xmlResponse).map(function() {
+                    return {
+                        title: $("title", this).text() || '',
+                        content: $("content", this).text() || '',
+                        url: $("url", this).text() || '#'
+                    };
+                }).get();
+
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                if (!$input || !$resultContent) return; // 页面缺元素则跳过
+
+                // 安全截断：按码点，总长不超过 maxLen（含省略号）
+                function cutByCodePoints(text, maxLen) {
+                    var plain = (text || '')
+                        .replace(/<!--[\s\S]*?-->/g, '')
+                        .replace(/<[^>]+>/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    var arr = Array.from(plain);
+                    return arr.length > maxLen ? arr.slice(0, Math.max(0, maxLen - 1)).join('') + '…' : plain;
+                }
+                function escReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+                function highlight(text, tokens){
+                    if (!tokens || !tokens.length) return text;
+                    var uniq = Array.from(new Set(tokens.filter(Boolean))).sort(function(a,b){return b.length-a.length;});
+                    var re = new RegExp('(' + uniq.map(escReg).join('|') + ')', 'ig');
+                    return text.replace(re, '<em class="search-keyword">$1</em>');
+                }
+
+                $input.addEventListener('input', function() {
+                    var q = this.value.trim().toLowerCase();
+                    var keywords = q.split(/[\s\-]+/).filter(Boolean);
+                    if (!q) { $resultContent.innerHTML = ''; return; }
+
+                    var html = '<ul class="search-result-list">';
+                    var found = 0;
+
+                    datas.forEach(function(data) {
+                        var title = (data.title || '').trim();
+                        var url = data.url;
+                        var content = data.content || '';
+
+                        // 建索引文本
+                        var t = title.toLowerCase();
+                        var c = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+
+                        // 匹配所有关键词（任一也可改为 some）
+                        var ok = keywords.every(function(k){ return t.indexOf(k) >= 0 || c.indexOf(k) >= 0; });
+                        if (!ok) return;
+
+                        // 片段窗口的起点（取最早命中）
+                        var first = -1;
+                        keywords.forEach(function(k){
+                            var i1 = t.indexOf(k), i2 = c.indexOf(k);
+                            var i = (i1 >= 0) ? i1 : i2;
+                            if (i >= 0 && (first === -1 || i < first)) first = i;
+                        });
+
+                        // 原文纯文本，用于截断（先从 first 左右开始，再总长 200）
+                        var plain = content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                        var start = Math.max(0, first - 80);
+                        var windowed = plain.slice(start);
+                        var snippet = cutByCodePoints(windowed, 200);
+
+                        // 高亮
+                        var hTitle = highlight(title, keywords);
+                        var hSnippet = highlight(snippet, keywords);
+
+                        html += "<li>"
+                            + "<a href='" + url + "' class='search-result-title'>" + hTitle + "</a>"
+                            + "<p class='search-result'>" + hSnippet + "</p>"
+                            + "</li>";
+                        found++;
+                    });
+
+                    if (!found) {
+                        html += "<li>未找到相关结果</li>";
+                    }
+                    html += "</ul>"; // 补全闭合
+                    $resultContent.innerHTML = html;
+                });
+            }
+        });
+    };
+// ...existing code...
 	var path = window.searchDbPath || "/search.xml";
 	if(document.getElementById('local-search-input') !== null){
 		searchFunc(path, 'local-search-input', 'local-search-result');
