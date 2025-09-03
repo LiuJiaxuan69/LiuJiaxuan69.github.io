@@ -1,0 +1,2220 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker Network（网络）使用指南 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+Docker 为什么需要网络管理
+Docker 网络架构简介
+1. CNM（Container Network Model）
+2. Libnetwork
+3. 网络驱动（Drivers）
+
+
+,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Docker Network（网络）使用指南 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+Docker 为什么需要网络管理
+Docker 网络架构简介
+1. CNM（Container Network Model）
+2. Libnetwork
+3. 网络驱动（Drivers）
+
+
+,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Docker Network（网络）使用指南 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+Docker 为什么需要网络管理
+Docker 网络架构简介
+1. CNM（Container Network Model）
+2. Libnetwork
+3. 网络驱动（Drivers）
+
+
+,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Docker Network（网络）使用指南</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">62</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/">自定义协议 &amp;&amp; 序列化与反序列化</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/">Linux 基于 Epoll 的主从 Reactor 多线程模型</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">Docker Network（网络）使用指南</h1>
+            <div class="stuff">
+                <span>九月 03, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#docker-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86">Docker 为什么需要网络管理</a></li>
+<li><a href="#docker-%E7%BD%91%E7%BB%9C%E6%9E%B6%E6%9E%84%E7%AE%80%E4%BB%8B">Docker 网络架构简介</a><ul>
+<li><a href="#1-cnmcontainer-network-model">1. CNM（Container Network Model）</a></li>
+<li><a href="#2-libnetwork">2. Libnetwork</a></li>
+<li><a href="#3-%E7%BD%91%E7%BB%9C%E9%A9%B1%E5%8A%A8drivers">3. 网络驱动（Drivers）</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E7%BD%91%E7%BB%9C%E7%B1%BB%E5%9E%8B">常见网络类型</a><ul>
+<li><a href="#1-bridge-%E7%BD%91%E7%BB%9C%E9%BB%98%E8%AE%A4%E7%BD%91%E7%BB%9C">1. <strong>Bridge 网络（默认网络）</strong></a></li>
+<li><a href="#2-host-%E7%BD%91%E7%BB%9C">2. <strong>Host 网络</strong></a></li>
+<li><a href="#3-container-%E7%BD%91%E7%BB%9C">3. <strong>Container 网络</strong></a></li>
+<li><a href="#4-none-%E7%BD%91%E7%BB%9C">4. <strong>None 网络</strong></a></li>
+<li><a href="#5-overlay-%E7%BD%91%E7%BB%9C">5. <strong>Overlay 网络</strong></a></li>
+</ul>
+</li>
+<li><a href="#docker-%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86%E5%91%BD%E4%BB%A4">docker 网络管理命令</a><ul>
+<li><a href="#%E5%91%BD%E4%BB%A4%E6%B8%85%E5%8D%95">命令清单</a></li>
+<li><a href="#docker-network-create">docker network create</a></li>
+<li><a href="#docker-network-inspect">docker network inspect</a></li>
+<li><a href="#docker-network-connect">docker network connect</a></li>
+<li><a href="#docker-network-disconnect">docker network disconnect</a></li>
+<li><a href="#docker-network-prune">docker network prune</a></li>
+<li><a href="#docker-network-rm">docker network rm</a></li>
+<li><a href="#docker-network-ls">docker network ls</a></li>
+<li><a href="#%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB">指令汇总</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BD%91%E7%BB%9C%E8%AF%A6%E8%A7%A3">网络详解</a><ul>
+<li><a href="#docker-bridge-%E7%BD%91%E7%BB%9C">docker Bridge 网络</a></li>
+<li><a href="#docker-host-%E7%BD%91%E7%BB%9C">docker Host 网络</a></li>
+<li><a href="#docker-container-%E7%BD%91%E7%BB%9C">docker Container 网络</a></li>
+<li><a href="#docker-none-%E7%BD%91%E7%BB%9C">docker none 网络</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="docker-为什么需要网络管理">Docker 为什么需要网络管理</span></h2><p>容器的网络默认与宿主机及其他容器相互隔离，这样能够确保容器运行环境的独立性与安全性。但在实际应用中，我们往往不仅仅需要“隔离”，还会遇到一系列与网络相关的需求与挑战，例如：</p>
+<ul>
+<li><strong>容器间通信</strong>：当应用被拆分为多个微服务部署在不同容器中时，这些容器必须能够彼此通信，例如 Web 服务需要调用数据库容器。</li>
+<li><strong>容器与宿主机通信</strong>：开发、调试或日志收集场景下，往往需要容器与宿主机建立交互通道。</li>
+<li><strong>容器与外部主机通信</strong>：如果容器中运行的是 Web 应用、Nginx、数据库等服务，就必须让外部客户端能够访问容器内部的网络应用。</li>
+<li><strong>容器网络隔离与共享</strong>：有些容器需要完全独立的网络空间以确保安全，而另一些容器则可能需要共享网络（如与宿主机使用同一个网络栈）以实现更直接的通信。</li>
+<li><strong>无网络模式</strong>：部分场景下，容器完全不需要网络访问，此时可以选择禁用网络以进一步提升安全性与轻量化。</li>
+<li><strong>定制化网络需求</strong>：在复杂的分布式架构或集群环境中，我们可能需要构建定制化的网络，例如跨主机的容器集群网络、虚拟局域网 (VLAN)、服务发现与负载均衡等。</li>
+</ul>
+<p>正是因为存在以上多样化的需求，Docker 提供了灵活的 <strong>网络管理机制</strong>。通过不同的网络模式（如 <strong>bridge、host、none、overlay、自定义网络</strong> 等），我们能够针对不同的应用场景选择合适的方案：</p>
+<ul>
+<li>使用 <strong>bridge 网络</strong> 解决单机多容器通信问题；</li>
+<li>使用 <strong>host 网络</strong> 让容器与宿主机共享网络栈；</li>
+<li>使用 <strong>none 网络</strong> 禁止网络访问，提升安全性；</li>
+<li>使用 <strong>overlay 网络</strong> 跨主机搭建集群网络；</li>
+<li>使用 <strong>自定义网络</strong>，实现更精细的网络控制与隔离。</li>
+</ul>
+<p>因此，容器网络不仅仅是基础设施的一部分，更是 <strong>容器编排、服务治理和系统安全的核心环节</strong>。合理的网络管理，能够让 Docker 容器真正成为灵活、可扩展的微服务运行环境。</p>
+<hr>
+<h2><span id="docker-网络架构简介">Docker 网络架构简介</span></h2><p>Docker 容器网络是容器虚拟化环境中至关重要的一环。它让应用程序能够在隔离的网络环境中运行，拥有独立的 <strong>网络设备、IP 协议栈、端口套接字、路由表、防火墙规则以及 DNS 配置</strong>。通过这种方式，容器可以与宿主机网络解耦，同时实现灵活的网络通信与隔离。</p>
+<p>为了实现这一目标，Docker 网络架构主要由三大核心部分组成：<strong>CNM（Container Network Model）、Libnetwork 和 网络驱动（Drivers）</strong>。</p>
+<hr>
+<h3><span id="1-cnmcontainer-network-model">1. CNM（Container Network Model）</span></h3><p>CNM 是 Docker 采用的容器网络设计规范，它定义了容器网络的基础组成元素和交互方式。CNM 包含三个核心组件：</p>
+<ul>
+<li><p><strong>Sandbox（沙箱）</strong><br>Sandbox 提供容器的虚拟网络栈，包括端口、套接字、IP 地址、路由表、防火墙、DNS 配置等。它的主要作用是将容器网络与宿主机网络隔离开，确保每个容器拥有独立的网络环境。</p>
+</li>
+<li><p><strong>Network（网络）</strong><br>Network 可以理解为 Docker 内部的虚拟子网，它将多个容器组织在同一个逻辑网络空间内，使其能够直接通信。一个 Network 就像传统网络中的一个局域网。</p>
+</li>
+<li><p><strong>Endpoint（端点）</strong><br>Endpoint 是连接 Sandbox 与 Network 的接口，相当于虚拟网卡。一个容器如果需要加入多个网络，就必须拥有多个 Endpoint。<br>例如，容器 B 有两个 Endpoint，分别接入 Network A 和 Network B。那么容器 A 和 B 可以通过 Network A 通信，而容器 B 和 C 可以通过 Network B 通信，但容器 A 和 C 不能通过 B 的两个 Endpoint 间接通信。</p>
+</li>
+</ul>
+<p>通过 CNM 的定义，Docker 能够以模块化的方式管理容器的网络栈，实现 <strong>灵活的连接方式</strong> 与 <strong>清晰的网络拓扑结构</strong>。</p>
+<hr>
+<h3><span id="2-libnetwork">2. Libnetwork</span></h3><p><strong>Libnetwork</strong> 是 CNM 的官方标准实现。它是一个开源库，由 Go 语言编写，Docker 网络的核心逻辑均基于此实现。</p>
+<p>Libnetwork 完整实现了 CNM 的三个组件（Sandbox、Network、Endpoint），并在此基础上提供了更多高级功能：</p>
+<hr>
+<p><img src="/img/Docker/network/cnm.png" alt="cnm"></p>
+<hr>
+<ul>
+<li><strong>本地服务发现</strong>：容器之间可以通过名字互相访问，而不必依赖固定的 IP 地址。</li>
+<li><strong>负载均衡（Ingress）</strong>：对接入同一服务的多个容器自动分配请求，实现内置的负载均衡机制。</li>
+<li><strong>网络管理与控制层</strong>：提供对容器网络的统一管理接口，使得用户能够通过 Docker CLI 或 API 灵活操作网络。</li>
+</ul>
+<p>Libnetwork 的出现让 Docker 网络不再是一个“黑盒”，而是一个 <strong>可扩展、可编排的网络平台</strong>。</p>
+<hr>
+<h3><span id="3-网络驱动drivers">3. 网络驱动（Drivers）</span></h3><p>驱动是 Docker 网络的实际执行者，负责 <strong>数据层</strong> 的实现，例如容器之间的连通性、网络隔离、安全策略等。不同驱动对应不同的网络模式，Docker 内置了多种原生驱动：</p>
+<ul>
+<li><p><strong>Bridge Driver（桥接网络）</strong><br>默认网络驱动，在单机环境下最常用。容器之间通过虚拟网桥（docker0）互联，外部访问则通过端口映射实现。</p>
+</li>
+<li><p><strong>Host Driver（主机网络）</strong><br>容器与宿主机共享同一个网络命名空间，没有额外的虚拟层，性能较好，但隔离性较差。</p>
+</li>
+<li><p><strong>Overlay Driver（覆盖网络）</strong><br>用于跨主机容器通信，依赖 VXLAN 技术构建虚拟的二层网络，是 Docker Swarm 和 Kubernetes 集群中常用的网络模式。</p>
+</li>
+<li><p><strong>Macvlan Driver（MACVLAN 网络）</strong><br>为容器分配独立的 MAC 地址，使其像真实物理机一样接入物理网络。适合需要直接暴露在局域网中的应用。</p>
+</li>
+<li><p><strong>Ipvlan Driver（IPVLAN 网络）</strong><br>与 Macvlan 类似，但容器共享父接口的 MAC 地址，仅分配独立 IP。性能更高，适合大规模网络场景。</p>
+</li>
+<li><p><strong>None Driver（无网络）</strong><br>容器启动后完全没有网络接口，适用于安全需求极高或只需本地计算的场景。</p>
+</li>
+</ul>
+<p>除了内置驱动外，Docker 还支持通过插件机制扩展网络驱动，例如接入 <strong>Calico、Weave、Flannel</strong> 等第三方网络方案，以满足云原生和大规模分布式场景的需求。</p>
+<hr>
+<p>Docker 网络架构通过 <strong>CNM 规范 → Libnetwork 实现 → 驱动执行</strong> 的层层分工，构建出一个既灵活又可扩展的网络系统。</p>
+<ul>
+<li>CNM 定义了模型，提供抽象；</li>
+<li>Libnetwork 作为实现，负责管理；</li>
+<li>驱动作为底层，保障网络连通性与隔离性。</li>
+</ul>
+<p>这种分层设计让 Docker 网络既能满足 <strong>单机开发环境的简单需求</strong>，也能扩展到 <strong>分布式集群的复杂网络场景</strong>，为容器化应用的广泛落地奠定了坚实的基础。</p>
+<hr>
+<h2><span id="常见网络类型">常见网络类型</span></h2><p>Docker 提供了多种网络模式，以满足不同场景下的通信与隔离需求。常见的网络类型如下：</p>
+<hr>
+<h3><span id="1-bridge-网络默认网络">1. <strong>Bridge 网络（默认网络）</strong></span></h3><ul>
+<li><p><strong>原理</strong>：Bridge 驱动会在宿主机上创建一个 Linux 网桥（默认是 <code>docker0</code>）。同一主机上的容器如果加入同一个 bridge 网络，就可以直接互相通信。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>容器拥有独立的 IP 地址（由 Docker 分配）。</li>
+<li>容器与外部通信时需要通过端口映射 (<code>-p</code>)。</li>
+<li>默认创建容器时，如果不指定 <code>--network</code>，就会加入 <code>bridge</code> 网络。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：多个容器运行在同一台宿主机上，需要互相通信时使用。</p>
+</li>
+<li><p><strong>示例命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动容器并加入默认 bridge 网络</span></span><br><span class="line">docker run -d --name web1 nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建自定义 bridge 网络</span></span><br><span class="line">docker network create --driver bridge my_bridge</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动容器并加入自定义网络</span></span><br><span class="line">docker run -d --name web2 --network my_bridge nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>在宿主机上，<code>docker0</code> 网桥可以通过 <code>ifconfig</code> 或 <code>ip addr</code> 查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>172.17.0.1</code> 就是宿主机在容器内部网络中的网关地址。</p>
+<hr>
+<h3><span id="2-host-网络">2. <strong>Host 网络</strong></span></h3><ul>
+<li><p><strong>原理</strong>：容器直接使用宿主机的网络栈，没有独立的 IP 地址和网卡。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>容器与宿主机共享网络命名空间。</li>
+<li>端口不再需要映射，容器内暴露的端口即宿主机端口。</li>
+<li>性能较好，但容器间隔离性降低。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：需要高性能网络访问，或需要让容器直接暴露在宿主机网络中的场景（如运行监控代理）。</p>
+</li>
+<li><p><strong>示例命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name web --network host nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3><span id="3-container-网络">3. <strong>Container 网络</strong></span></h3><ul>
+<li><p><strong>原理</strong>：新容器共享已有容器的网络命名空间（包括 IP、端口）。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>新容器不会分配新的 IP，而是直接与目标容器共享网络栈。</li>
+<li>两个容器之间通过 <code>lo</code>（回环接口）通信。</li>
+<li>除了网络共享外，文件系统、进程等依旧隔离。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：运行调试工具容器（如 tcpdump、curl），直接进入目标容器的网络环境。</p>
+</li>
+<li><p><strong>示例命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先运行一个容器</span></span><br><span class="line">docker run -d --name web nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新容器共享 web 的网络</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> --network container:web busybox sh</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3><span id="4-none-网络">4. <strong>None 网络</strong></span></h3><ul>
+<li><p><strong>原理</strong>：容器拥有独立的 Network Namespace，但不做任何网络配置。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>容器没有网卡、IP、路由等信息。</li>
+<li>处于完全网络隔离状态。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：对安全性要求极高，或容器仅需执行纯计算、文件处理而无需网络时。</p>
+</li>
+<li><p><strong>示例命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --network none nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<h3><span id="5-overlay-网络">5. <strong>Overlay 网络</strong></span></h3><ul>
+<li><p><strong>原理</strong>：基于 VXLAN 技术，在多个 Docker 主机之间创建虚拟的二层网络。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<ul>
+<li>允许运行在不同主机上的容器进行通信。</li>
+<li>常用于 Docker Swarm、Kubernetes 等容器编排场景。</li>
+<li>需要启用集群管理（Swarm 或其他插件）。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：跨主机容器集群通信、多服务协同工作。</p>
+</li>
+<li><p><strong>示例命令</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化 Swarm</span></span><br><span class="line">docker swarm init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 overlay 网络</span></span><br><span class="line">docker network create -d overlay my_overlay</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在集群中运行服务并加入 overlay 网络</span></span><br><span class="line">docker service create --name web --network my_overlay nginx</span><br></pre></td></tr></table></figure></li>
+</ul>
+<hr>
+<p><img src="/img/Docker/network/Libnetwork.png" alt="libnetwork"></p>
+<hr>
+<ul>
+<li><strong>bridge</strong>：单机容器间通信的默认选择。</li>
+<li><strong>host</strong>：高性能，直接复用宿主机网络。</li>
+<li><strong>container</strong>：共享已有容器的网络环境。</li>
+<li><strong>none</strong>：完全隔离，无网络。</li>
+<li><strong>overlay</strong>：跨主机通信，是集群和分布式系统的核心网络方案。</li>
+</ul>
+<p>通过这些网络模式的灵活组合，Docker 能够同时支持 <strong>单机开发、生产部署、分布式集群</strong> 等不同应用场景。</p>
+<hr>
+<h2><span id="docker-网络管理命令">docker 网络管理命令</span></h2><h3><span id="命令清单">命令清单</span></h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>别名</th>
+<th>功能</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>docker network create</td>
+<td></td>
+<td>创建网络</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network connect</td>
+<td></td>
+<td>连接网络</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network disconnect</td>
+<td></td>
+<td>断开网络</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network ls</td>
+<td>docker network list</td>
+<td>列出网络</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network prune</td>
+<td></td>
+<td>删除不使用的网络</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network inspect</td>
+<td></td>
+<td>查看网络详情</td>
+<td></td>
+</tr>
+<tr>
+<td>docker network rm</td>
+<td>docker network remove</td>
+<td>删除 1 个或多个网络</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3><span id="docker-network-create">docker network create</span></h3><p><code>docker network create</code> 用于创建自定义网络，便于容器间通信和网络隔离。通过不同的选项，可以灵活配置网络类型、子网、网关等参数。</p>
+<p>该指令功能如下：</p>
+<ul>
+<li>创建自定义 Docker 网络</li>
+<li>支持多种网络驱动（如 <code>bridge</code>、<code>overlay</code> 等）</li>
+<li>可以指定子网、网关等，满足不同应用场景</li>
+</ul>
+<h4><span id="语法">语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create [OPTIONS] NETWORK</span><br></pre></td></tr></table></figure>
+
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-d, --driver</code>：指定网络驱动（默认是 <code>bridge</code>）</li>
+<li><code>--subnet</code>：CIDR 格式的子网（例如 <code>192.168.0.0/16</code>）</li>
+<li><code>--gateway</code>：指定网关地址</li>
+<li><code>--ipv6</code>：启用 IPv6 支持</li>
+<li><code>--attachable</code>：允许独立容器连接到 Swarm 网络</li>
+</ul>
+<h4><span id="示例">示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建一个名为 br0 的 bridge 网络，并指定子网和网关</span></span><br><span class="line">docker network create \</span><br><span class="line">  --driver=bridge \</span><br><span class="line">  --subnet=192.168.0.0/16 \</span><br><span class="line">  --gateway=192.168.0.1 \</span><br><span class="line">  br0</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建成功后，可以使用 <code>docker network ls</code> 查看网络列表。</li>
+<li>新建容器时通过 <code>--network br0</code> 参数指定容器加入该网络。</li>
+</ul>
+<hr>
+<h3><span id="docker-network-inspect">docker network inspect</span></h3><p><code>docker network inspect</code> 用于查看一个或多个 Docker 网络的详细信息，包括网络 ID、驱动类型、子网、网关以及与其连接的容器等内容。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect [OPTIONS] NETWORK [NETWORK...]</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-f, --format</code>：以 Go 模板的方式指定输出格式，便于只提取需要的信息。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li>查看某个网络的详细信息：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect mynetwork</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用 <code>--format</code> 参数过滤输出，只显示容器信息：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect --format=&#x27;&#123;&#123;json .Containers&#125;&#125;&#x27; mynetwork</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>通过 <code>docker network inspect</code>，不仅可以了解网络本身的属性，还能查看网络中与容器之间的关联关系，便于调试与排错。</p>
+<hr>
+<h3><span id="docker-network-connect">docker network connect</span></h3><p><code>docker network connect</code> 用于将已有的容器连接到指定的网络（可以是网络名称或 ID）。<br>连接成功后，容器就能与该网络中的其他容器进行通信。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect [OPTIONS] NETWORK CONTAINER</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>--ip</code>：指定容器在该网络中的 IPv4 地址。</li>
+<li><code>--ip6</code>：指定容器在该网络中的 IPv6 地址。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li><strong>将正在运行的容器连接到网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>容器启动时直接连接到网络</strong><br>使用 <code>--network</code> 选项可以在容器启动时直接加入某个网络：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --network=multi-host-network busybox-container</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>指定容器的 IP 地址</strong><br>连接容器时，可以手动分配其在网络中的 IP 地址：</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect --ip 10.10.36.122 multi-host-network container2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>通过 <code>docker network connect</code>，可以灵活地将容器加入到多个网络，从而实现更复杂的网络拓扑结构和容器间通信管理。</p>
+<hr>
+<h3><span id="docker-network-disconnect">docker network disconnect</span></h3><p><code>docker network disconnect</code> 用于将容器从指定网络中断开连接。<br>断开后，该容器将无法再与该网络中的其他容器进行通信。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect [OPTIONS] NETWORK CONTAINER</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-f</code>：强制断开，即使容器当前正在使用该网络。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li><strong>普通断开容器与网络的连接</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>强制断开容器与网络的连接</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect -f multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>通过 <code>docker network disconnect</code>，可以灵活管理容器的网络连接，避免不必要的通信，也能在容器生命周期中动态调整网络拓扑结构。</p>
+<hr>
+<h3><span id="docker-network-prune">docker network prune</span></h3><p><code>docker network prune</code> 用于清理并删除当前未被任何容器使用的网络。<br>该命令常用于释放系统资源，保持 Docker 环境整洁。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune [OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-f, --force</code>：跳过确认提示，直接删除未使用的网络。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li><strong>交互式删除未使用的网络（会提示确认）</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>强制删除未使用的网络（无确认提示）</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -f</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>通过 <code>docker network prune</code>，可以快速清理掉未使用的网络，避免累积占用存储空间或影响环境整洁。</p>
+<hr>
+<h3><span id="docker-network-rm">docker network rm</span></h3><p><code>docker network rm</code> 用于删除一个或多个 Docker 网络。<br>删除前，确保网络没有被任何容器使用，否则需要使用强制参数。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm NETWORK [NETWORK...]</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-f</code>：强制删除网络，即使有容器当前连接该网络。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li><strong>删除单个网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm br0</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>强制删除网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm -f br0</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>一次删除多个网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm net1 net2 net3</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><code>docker network rm</code> 可以灵活地删除不再需要的网络，结合 <code>-f</code> 参数可以处理仍被容器使用的网络，从而便于网络管理和环境清理。</p>
+<hr>
+<h3><span id="docker-network-ls">docker network ls</span></h3><h4><span id="功能说明">功能说明</span></h4><p><code>docker network ls</code> 用于列出 Docker 主机上的所有网络，包括默认网络和用户创建的网络。<br>它可以快速查看网络名称、ID、驱动类型以及作用范围。</p>
+<hr>
+<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls [OPTIONS]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>别名：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network list</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="常用参数">常用参数</span></h4><ul>
+<li><code>-f, --filter</code>：按照条件过滤网络，例如按驱动类型或名称过滤。</li>
+<li><code>--format</code>：指定输出格式，如 <code>table</code>、<code>json</code> 等。</li>
+<li><code>--no-trunc</code>：显示完整的网络 ID，不截断。</li>
+<li><code>-q, --quiet</code>：只显示网络 ID，适合脚本使用。</li>
+</ul>
+<hr>
+<h4><span id="使用示例">使用示例</span></h4><ol>
+<li><strong>列出所有网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>仅显示网络 ID</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls -q</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><strong>按驱动类型过滤</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls -f driver=bridge</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>通过 <code>docker network ls</code>，可以快速查看 Docker 网络信息，配合过滤和格式化选项，便于网络管理和自动化脚本使用。</p>
+<hr>
+<h3><span id="指令汇总">指令汇总</span></h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>功能说明</th>
+<th>常用参数&#x2F;选项</th>
+<th>示例</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>docker network create</code></td>
+<td>创建自定义网络</td>
+<td><code>-d/--driver</code> 指定驱动类型<br><code>--subnet</code> 指定子网<br><code>--gateway</code> 指定网关</td>
+<td><code>docker network create mynetwork</code></td>
+<td>创建自定义网络，可为容器提供隔离或自定义拓扑</td>
+</tr>
+<tr>
+<td><code>docker network ls</code></td>
+<td>列出所有网络</td>
+<td><code>-f/--filter</code> 过滤<br><code>--format</code> 指定输出格式<br><code>-q/--quiet</code> 只显示 ID</td>
+<td><code>docker network ls</code> <br> <code>docker network ls -q</code></td>
+<td>支持别名 <code>docker network list</code></td>
+</tr>
+<tr>
+<td><code>docker network inspect</code></td>
+<td>查看网络详情</td>
+<td><code>-f/--format</code> 格式化输出</td>
+<td><code>docker network inspect mynetwork</code></td>
+<td>可以查看网络配置、子网、容器连接信息</td>
+</tr>
+<tr>
+<td><code>docker network connect</code></td>
+<td>将容器连接到网络</td>
+<td><code>--ip</code> 指定 IPv4<br><code>--ip6</code> 指定 IPv6</td>
+<td><code>docker network connect multi-host-network my_container1</code></td>
+<td>容器连接后可以与该网络内其他容器通信</td>
+</tr>
+<tr>
+<td><code>docker network disconnect</code></td>
+<td>将容器从网络断开</td>
+<td><code>-f</code> 强制断开</td>
+<td><code>docker network disconnect multi-host-network my_container1</code></td>
+<td>动态管理容器网络连接，避免不必要的通信</td>
+</tr>
+<tr>
+<td><code>docker network rm</code></td>
+<td>删除 1 个或多个网络</td>
+<td><code>-f</code> 强制删除</td>
+<td><code>docker network rm br0</code> <br> <code>docker network rm -f br0</code></td>
+<td>删除前请确保网络未被容器使用</td>
+</tr>
+<tr>
+<td><code>docker network prune</code></td>
+<td>删除未被容器使用的网络</td>
+<td><code>-f/--force</code> 跳过确认提示</td>
+<td><code>docker network prune</code> <br> <code>docker network prune -f</code></td>
+<td>清理无用网络，释放资源</td>
+</tr>
+</tbody></table>
+<h2><span id="网络详解">网络详解</span></h2><h3><span id="docker-bridge-网络">docker Bridge 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>Docker Bridge 网络采用内置的 bridge 驱动，bridge 驱动底层采用的是 Linux 内核中 Linux bridge 技术。就网络而言，bridge 网络是在网络段之间转发流量的链路层设备，而网桥可以是在主机内核中运行的硬件设备或软件设备；就 Docker 而言，桥接网络使用软件网桥 docker0，它允许连接到同一网桥网络的容器进行通信，同时提供与未连接到该网桥网络容器的隔离。Docker Container 的 bridge 桥接模式可以参考下图：</p>
+<p><img src="/img/Docker/network/bridge.png" alt="network"></p>
+<p>默认情况下，创建的容器在没有使用–network 参数指定要加入的 docker 网络时，默认都是加入 Docker 默认的单机桥接网络，即下面的 name 为 bridge 的网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 docker 支持的网络</span></span><br><span class="line">docker network ls</span><br><span class="line">NETWORK ID     NAME      DRIVER    SCOPE</span><br><span class="line">0cb86abb53fb   bridge    bridge    local</span><br><span class="line">bdd23adf8d35   host      host      local</span><br><span class="line">6a68de0c74cb   none      null      local</span><br></pre></td></tr></table></figure>
+
+<p>默认的 bridge 网络会被映射到内核中为 docker0 的网桥上。Docker 默认的 bridge 网络和 Linux 内核中的 docker0 网桥是一一对应的关系。bridge 是 Docker 对网络的命名，而 docker0 是内核中网桥的名字。</p>
+<p><img src="/img/Docker/network/top_net.png" alt="cnet"></p>
+<p>说人话，就是 docker0 和 回环网络、宿主机网络坐一桌，他是你在安装 Docker 时自动创建的网络。</p>
+<h4><span id="操作案例">操作案例</span></h4><h5><span id="容器间的网络通信">容器间的网络通信</span></h5><p>回忆一下之前学到网络知识：多台主机是如何通过网络中进行通信的？如果是两台主机可以直接通过连接网线的两端进行通信。那多台主机通信怎么处理呢？这就需要新增路由器&#x2F;交换机，把多台主机连接到路由器&#x2F;交换机上， 通过路由器&#x2F;交换机来达到交换数据， 即通信的目的。</p>
+<p><img src="/img/Docker/network/host_connect.png" alt="host connect"></p>
+<p>其实容器之间的通信也和上面主机通信的方式如出一辙， 之前我们提到了安装 Docker 的时候会默认 docker0 这个网桥软件设备， 这个 docker0 设备可以类比成上图的交换机&#x2F;路由器设备，当我们创建好容器之后， 如果不手动指定网络模式，默认会使用 bridge 网络， 容器会自动连接到 docker0 这个网桥设备， 然后通过这个网桥来进行容器间的通信。</p>
+<p>下面我们来做一个实验验证一下：</p>
+<p><strong>1. 容器创建与默认网络连接</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c1 busybox:stable-glibc</span><br><span class="line">docker run -itd --name c2 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>使用 <code>-itd</code> 参数：以交互模式、终端分配、后台运行方式创建容器</li>
+<li>未指定 <code>--network</code> 参数：容器自动连接到 Docker 的<strong>默认 bridge 网络</strong>（docker0）</li>
+<li>两个容器共享同一个网络命名空间下的默认网络环境</li>
+</ul>
+<p><strong>2. 网络接口信息检查</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">exec</span> -it c1 ip a</span><br><span class="line">docker container <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+
+<p>输出显示：</p>
+<ul>
+<li><strong>c1 容器</strong>：IP 地址 <code>172.17.0.2/16</code></li>
+<li><strong>c2 容器</strong>：IP 地址 <code>172.17.0.3/16</code></li>
+<li>网络接口：均为 <code>eth0</code>，通过 veth pair 与宿主机 docker0 网桥连接</li>
+<li>子网掩码：<code>/16</code>（255.255.0.0），属于 B 类私有地址范围</li>
+</ul>
+<p><strong>3. 容器间网络连通性测试</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">exec</span> -it c1 ping 172.17.0.3  <span class="comment"># c1 ping c2</span></span><br><span class="line">docker container <span class="built_in">exec</span> -it c2 ping 172.17.0.2  <span class="comment"># c2 ping c1</span></span><br></pre></td></tr></table></figure>
+
+<p>测试结果：</p>
+<ul>
+<li>双向 ping 通成功，平均延迟约 0.07ms</li>
+<li>10 个数据包零丢包，证明网络连接稳定</li>
+<li>确认容器在同一个子网内可直接通信</li>
+</ul>
+<p><strong>4. 网络配置详细分析</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge</span><br></pre></td></tr></table></figure>
+
+<p>网络配置信息揭示：</p>
+<ul>
+<li><strong>子网范围</strong>：<code>172.17.0.0/16</code>（Docker 自动分配的默认子网）</li>
+<li><strong>网关地址</strong>：<code>172.17.0.1</code>（docker0 网桥的 IP 地址）</li>
+<li><strong>容器连接</strong>：明确显示 c1 和 c2 都连接到该网络</li>
+<li><strong>MAC 地址</strong>：每个容器有唯一的 MAC 地址（<code>e2:12:71:88:b8:12</code> 和 <code>a6:67:b2:49:c6:e2</code>）</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">网络配置的容器相关信息</span></span><br><span class="line"> &quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;a6:67:b2:49:c6:e2&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;a762babced39202b7a637f2c674d24d5d3a6f729cd555e8029377504525f1424&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c1&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;8eda16569ac629bca03d2192be481ebc37170cc4f5600f06d65eba38f7169768&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;e2:12:71:88:b8:12&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+
+<p><strong>5. 网络状态动态变化演示</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container stop c1</span><br><span class="line">docker network inspect bridge</span><br></pre></td></tr></table></figure>
+
+<p>状态变化：</p>
+<ul>
+<li>停止 c1 容器后，网络配置中的 Containers 部分仅剩 c2</li>
+<li>演示了 Docker 网络的动态管理特性：容器退出时自动从网络中解除连接</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只剩下容器 c2</span></span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;a6:67:b2:49:c6:e2&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h5><span id="创建自定义-bridge">创建自定义 bridge</span></h5><p>本实验展示了如何在 Docker 中创建一个自定义桥接网络（bridge），并在该网络上启动容器。下面是实验的详细过程解析及实际验证数据。</p>
+<hr>
+<ol>
+<li><strong>创建自定义桥接网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d bridge bridge1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-d bridge</code> 指定网络驱动为桥接（bridge）。</li>
+<li><code>bridge1</code> 是自定义网络的名称。</li>
+<li>命令返回网络 ID：<br><code>45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4</code></li>
+</ul>
+<hr>
+<ol start="2">
+<li><strong>查看自定义网络详情</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1</span><br></pre></td></tr></table></figure>
+
+<p>输出结果（核心字段）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;bridge1&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;bridge&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;EnableIPv4&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;EnableIPv6&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;IPAM&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;default&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;Subnet&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.0/16&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.1&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Containers&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>Subnet</code> 和 <code>Gateway</code> 显示自定义网络的 IPv4 地址段。</li>
+<li><code>Containers</code> 为空，说明当前网络没有容器连接。</li>
+</ul>
+<hr>
+<ol start="3">
+<li><strong>在自定义网络上启动容器</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>--network bridge1</code> 指定容器连接到自定义桥接网络。</li>
+<li>容器启动后分配到该网络的 IP 地址为 <code>172.18.0.2</code>。</li>
+<li>容器 ID：<code>07dd0135e6aa3328064a5e5379f175faaba4585cba3fe1d1ab421d1299752465</code></li>
+</ul>
+<hr>
+<ol start="4">
+<li><strong>验证容器网络配置</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect c1 | grep &quot;Networks&quot; -A 17</span><br></pre></td></tr></table></figure>
+
+<p>输出核心部分：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Networks&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;bridge1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;4a:94:20:87:ff:f6&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;NetworkID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;EndpointID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.2&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPPrefixLen&quot;</span><span class="punctuation">:</span> <span class="number">16</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;DNSNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;c1&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以看到容器 <code>c1</code> 已连接到 <code>bridge1</code> 网络。</li>
+<li><code>IPAddress</code> 为 <code>172.18.0.2</code>，<code>Gateway</code> 为 <code>172.18.0.1</code>。</li>
+<li><code>MacAddress</code> 与 <code>EndpointID</code> 显示网络接口的唯一标识。</li>
+</ul>
+<hr>
+<ol start="5">
+<li><strong>验证网络容器列表</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1 | grep &quot;Containers&quot; -A 20</span><br></pre></td></tr></table></figure>
+
+<p>输出核心部分：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Containers&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;07dd0135e6aa3328064a5e5379f175faaba4585cba3fe1d1ab421d1299752465&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;c1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;EndpointID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;4a:94:20:87:ff:f6&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPv4Address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.2/16&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPv6Address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过 <code>Containers</code> 字段可以确认容器 <code>c1</code> 已成功连接到自定义桥接网络。</li>
+<li><code>IPv4Address</code> 与前面 <code>inspect</code> 输出一致，验证了网络分配的正确性。</li>
+</ul>
+<hr>
+<ul>
+<li>Docker 允许用户创建自定义桥接网络，通过 <code>docker network create -d bridge &lt;name&gt;</code> 实现。</li>
+<li>容器连接到自定义桥接网络后，可以在该网络内部进行通信，IP 地址由 Docker 自动分配。</li>
+<li>使用 <code>docker network inspect &lt;network&gt;</code> 可以查看网络拓扑、IP 段以及连接的容器信息。</li>
+</ul>
+<hr>
+<h5><span id="dns-解析实验">DNS 解析实验</span></h5><p>本实验旨在验证 Docker 容器内部的 DNS 解析功能，以及默认网桥（bridge）网络下的 DNS 行为。实验通过在自定义 bridge 和默认 bridge 网络上启动容器并尝试通过容器名互相 ping，观察 DNS 是否可用。下面是详细实验过程解析及事实依据。</p>
+<hr>
+<ol>
+<li><strong>创建自定义桥接网络</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d bridge bridge1</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>-d bridge</code> 指定网络类型为桥接。</li>
+<li><code>bridge1</code> 是自定义网络名称。</li>
+<li>创建成功返回网络 ID：<br><code>7901308cf3c5b1af9a1dd6bb6a147c6b7e5ee582d72f2484ba610a8d495190ed</code></li>
+</ul>
+<hr>
+<ol start="2">
+<li><strong>在自定义网络上启动容器</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc</span><br><span class="line">docker container run -itd --name c2 --network bridge1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1 | grep &quot;Containers&quot; -A 20</span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">    &quot;11483dc55da7ec1caad1f1034c59713a5b58a82b2ba1eb2c2e98bba2e40c6711&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;6d570105ac556afb400c09664bb9d9b43b9a58641d29e1b1b3b1f3e1f64ef869&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;c2:8b:1b:c7:38:d7&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.18.0.3/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;6aacf832a36e81f5081aa65e120bddab119c2e8c775667f89a0f293e8574df30&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c1&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;cd17740ebed4d03176a47e148472539aa64acd3c82970f10aa69e61839151754&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;86:5f:df:c0:c4:92&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.18.0.2/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>容器 <code>c1</code> 和 <code>c2</code> 连接到自定义网络 <code>bridge1</code>。</p>
+</li>
+<li><p>分配 IP 地址分别为：</p>
+<ul>
+<li><code>c1</code> → <code>172.18.0.2</code></li>
+<li><code>c2</code> → <code>172.18.0.3</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ol start="3">
+<li><strong>验证容器互通（自定义网络）</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c1 ping c2</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PING c2 (172.18.0.3): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.086 ms</span><br><span class="line">64 bytes from 172.18.0.3: seq=1 ttl=64 time=0.090 ms</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c2 ping c1</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PING c1 (172.18.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.044 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.069 ms</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>结论：在自定义桥接网络中，容器可以通过名称相互解析 IP 并通信，DNS 解析可用。</li>
+</ul>
+<hr>
+<ol start="4">
+<li><strong>在默认 bridge 网络上启动容器</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c3 busybox:stable-glibc</span><br><span class="line">docker container run -itd --name c4 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge | grep &quot;Containers&quot; -A 20</span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">    &quot;12f82693d0ff14dc42898759dc0c9ee834180b43459ef437eb82ac07a2972e59&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c4&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;e1f56c1067c73ac70d8f3f178bae22d3aac8942fccc47946de4f50ea1f34811d&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;8a:c7:39:b2:a2:d9&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;c8bf0c6d3fa3c36a3fefb4307083b89af9be3c531e1a3f2fb48345d0e095ab67&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c3&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;d7a05b4995fe7e8b11e212f66ac3293df3a6ba7e4582b7b610416b18cfdd6b64&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;1a:26:32:dc:09:5d&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&quot;Options&quot;: &#123;</span><br><span class="line">    &quot;com.docker.network.bridge.default_bridge&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.enable_icc&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.enable_ip_masquerade&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.host_binding_ipv4&quot;: &quot;0.0.0.0&quot;,</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>容器 <code>c3</code> 和 <code>c4</code> 默认连接到 Docker 默认 <code>bridge</code> 网络。</p>
+</li>
+<li><p>分配 IP 地址分别为：</p>
+<ul>
+<li><code>c3</code> → <code>172.17.0.2</code></li>
+<li><code>c4</code> → <code>172.17.0.3</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<ol start="5">
+<li><strong>验证容器互通（默认网络）</strong></li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c3 ping c4</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping: bad address &#x27;c4&#x27;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c4 ping c3</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping: bad address &#x27;c3&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>结论：在 Docker 默认桥接网络下，容器名无法进行 DNS 解析，必须使用 IP 地址通信。</li>
+</ul>
+<hr>
+<p><strong>总结：</strong></p>
+<ol>
+<li>自定义桥接网络（bridge1）支持容器通过名称互相 DNS 解析。</li>
+<li>Docker 默认桥接网络（bridge）不支持容器名 DNS 解析，只能通过 IP 地址通信。</li>
+<li>实验通过 <code>ping</code> 验证和 <code>docker network inspect</code> 输出数据为实验事实依据，展示了 DNS 行为的差异。</li>
+</ol>
+<hr>
+<h3><span id="docker-host-网络">docker Host 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>Docker 容器运行默认都会分配独立的 Network Namespace 隔离子系统， 但是如果基于 host 网络模式，容器将不会获得一个独立的 Network Namespace，而是和宿主机共用同一个 Network Namespace，容器将不会虚拟出自己的网卡，IP 等，而是直接使用宿主机的 IP 和端口。</p>
+<p><img src="/img/Docker/network/host.png" alt="host"></p>
+<p>连接到 host 网络的容器共享宿主机的网络栈，容器的网络配置与宿主机完全一样。我们可以通过 –network&#x3D;host 指定使用 host 网络</p>
+<p>下面我们通过实验来验证 host 网络的行为。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过 Host 方式创建并启动容器 c1</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2169]</span><br><span class="line">└─[$] docker container run -itd --name c1 --network=host busybox:stable-glibc</span><br><span class="line">ffd86b4df415e69582595858f038ab72cd219da6cb47f0433253652243434fa3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看容器的网络信息</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2170]</span><br><span class="line">└─[$] docker exec -it c1 ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host noprefixroute</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq qlen 1000</span><br><span class="line">    link/ether 52:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.16.15/22 brd 10.0.19.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::5054:ff:fe57:45ed/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: lxcbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue qlen 1000</span><br><span class="line">    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.3.1/24 brd 10.0.3.255 scope global lxcbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::216:3eff:fe00:0/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">7: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue</span><br><span class="line">    link/ether 56:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::543e:dff:fe4b:c9bc/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">容器的网络信息和宿主机网络信息完全一样</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2171]</span><br><span class="line">└─[$] ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host noprefixroute</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000</span><br><span class="line">    link/ether 52:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    altname enp0s5</span><br><span class="line">    altname ens5</span><br><span class="line">    inet 10.0.16.15/22 brd 10.0.19.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::5054:ff:fe57:45ed/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: lxcbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000</span><br><span class="line">    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.3.1/24 brd 10.0.3.255 scope global lxcbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::216:3eff:fe00:0/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">7: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default</span><br><span class="line">    link/ether 56:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::543e:dff:fe4b:c9bc/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<h4><span id="使用场景">使用场景</span></h4><p>• 之前我们提到 bridge 网络在通信的时候需要进行端口转发以及 NAT 地址转换，这势必会消耗掉一些资源以及性能。<br>• 那么直接使用 host 网络最大的好处就是性能好，如果容器对网络传输效率有较高的要求，建议选择 host 网络。当然也会牺牲一些东西，比如要考虑端口冲突问题，其它服务已经被占用的端口就不能再使用了</p>
+<h3><span id="docker-container-网络">docker Container 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>Docker Container 的 other container 网络模式是 Docker 中一种较为特别的网络的模式。之所以称为“other container 模式”，是因为这个模式下的 Docker Container，会使用其他容器的网络环境。之所以称为“特别”，是因为这个模式下容器的网络隔离性会处于 bridge 桥接模式与 host 模式之间。Docker Container 共享其他容器的网络环境，则至少这两个容器之间不存在网络隔离，而这两个容器又与宿主机以及除此之外其他的容器存在网络隔离。</p>
+<p>Docker Container 的 other container 网络模式可以参考下图：</p>
+<p><img src="/img/Docker/network/container.png" alt="container"></p>
+<h4><span id="docker-container-的-networkcontainerltother_containergt-模式实现逻辑">Docker Container 的 <code>--network=container:&lt;other_container&gt;</code> 模式实现逻辑</span></h4><p>在 Docker 中，容器可以使用其他容器的网络命名空间（network namespace），实现共享网络配置的效果。这种模式通常使用 <code>--network=container:&lt;other_container&gt;</code> 指定。其实现逻辑如下：</p>
+<ol>
+<li><p><strong>查找目标容器的网络命名空间</strong></p>
+<ul>
+<li>Docker 会首先定位 <code>&lt;other_container&gt;</code> 容器的 network namespace。</li>
+<li>network namespace 是 Linux 内核提供的机制，用于隔离容器的网络栈，包括 IP 地址、路由表、端口等。</li>
+</ul>
+</li>
+<li><p><strong>将新容器绑定到目标网络命名空间</strong></p>
+<ul>
+<li>新创建的容器不会创建自己的网络 namespace。</li>
+<li>相反，它会共享 <code>&lt;other_container&gt;</code> 的 network namespace，包括 IP、端口映射、路由等。</li>
+<li>这样，两个容器就像共享同一个网络接口，可以互相访问，并且对外表现为同一个网络实体。</li>
+</ul>
+</li>
+<li><p><strong>实现效果</strong></p>
+<ul>
+<li>新容器与 <code>&lt;other_container&gt;</code> 容器拥有完全相同的网络环境。</li>
+<li>新容器内使用 <code>ifconfig</code> 或 <code>ip a</code> 查看 IP 时，会显示与 <code>&lt;other_container&gt;</code> 一致。</li>
+<li>端口占用也是共享的，如果 <code>&lt;other_container&gt;</code> 已绑定端口，新容器不能再绑定同样的端口。</li>
+</ul>
+</li>
+</ol>
+<ul>
+<li>在这个模式下，<code>new_container</code> 并没有独立的 IP 地址，它完全依赖 <code>other_container</code> 的网络配置。</li>
+<li>常用于 sidecar 容器模式，例如日志收集或代理容器需要与主业务容器共享网络。</li>
+</ul>
+<p>这个模式与普通 bridge 或 host 网络模式不同，它本质上是直接复用已有容器的网络命名空间，而不是创建新的网络栈或桥接。</p>
+<h4><span id="操作案例">操作案例</span></h4><p>在本实验中，验证了 Docker 容器共享网络命名空间的行为及其对容器生命周期的依赖。实验步骤与数据如下：</p>
+<ol>
+<li><strong>创建第一个容器 c1</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<p>输出容器 ID：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0908b5475c78a131c558880d921838df028a44ed5950ae0e4eba4d78127b35dc</span><br></pre></td></tr></table></figure>
+
+<p>查看 c1 的网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c1 ip a</span><br></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if183: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   link/ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>创建第二个容器 c2，使用 c1 的网络 namespace</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c2 --network container:c1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+
+<p>输出容器 ID：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e18ed7418a91b1ae782502c13cb7a666822904fca5945f20d92ba0e2806a51f0</span><br></pre></td></tr></table></figure>
+
+<p>查看 c2 网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+
+<p>结果显示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if183: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   <span class="built_in">link</span>/ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，c1 与 c2 的 <code>eth0</code> IP 信息完全一致，说明 c2 成功共享了 c1 的网络 namespace。</p>
+<ol start="3">
+<li><strong>停止 c1 容器</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop c1</span><br></pre></td></tr></table></figure>
+
+<p>查看 c2 网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+
+<p>结果显示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>c1 停止后，c2 的 <code>eth0</code> 消失，说明共享网络命名空间依赖于源容器的运行状态。</p>
+<ol start="4">
+<li><strong>重新启动 c1</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start c1</span><br></pre></td></tr></table></figure>
+
+<p>查看 c2 网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+
+<p>结果显示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>即便 c1 已重启，c2 仍然没有 <code>eth0</code>，共享网络未自动恢复。</p>
+<ol start="5">
+<li><strong>重启 c2 容器</strong></li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart c2</span><br></pre></td></tr></table></figure>
+
+<p>查看网络信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+
+<p>结果显示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if185: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   <span class="built_in">link</span>/ether 4e:2b:53:0a:a9:99 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<p>重启 c2 后，<code>eth0</code> 恢复，与 c1 再次共享网络 namespace，实验验证了 Docker 的容器网络共享逻辑。</p>
+<hr>
+<p><strong>实验结论：</strong></p>
+<ol>
+<li>使用 <code>--network container:&lt;other_container&gt;</code> 时，目标容器和新容器完全共享网络 namespace，包括 IP 和端口映射。</li>
+<li>源容器停止会导致共享容器网络接口丢失。</li>
+<li>源容器重启不会自动恢复共享网络，必须重启共享容器以重新绑定网络 namespace。</li>
+</ol>
+<h3><span id="docker-none-网络">docker none 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>none 网络就是指没有网络。挂在这个网络下的容器除了 lo(本地回环)，没有其他任何网卡</p>
+<p>如下所示：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2190]</span><br><span class="line">└─[$] docker container run -itd --name c1 --network=none busybox:stable-glibc</span><br><span class="line">064824ac172793be62616e267e7d2edaf24108e853be2abace4d522178183761</span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2191]</span><br><span class="line">└─[$] docker <span class="built_in">exec</span> -it c1 ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+
+<h4><span id="使用场景">使用场景</span></h4><p>• 针对一些对安全性要求比较高并且不需要联网的应用， 可以使用 none 网络， 比如生成随机密码， 避免生成密码被第三方获取。<br>• 一些第三方的应用可能需要 docker 帮忙创建一个没有网络的容器， 网络由第三方自己来配置</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
