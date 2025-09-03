@@ -1,0 +1,2122 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker Volume 使用指南 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是存储卷？
+为什么需要存储卷？
+1. 数据丢失问题
+2. 性能问题
+3. 宿主机与容器之间的数据交互不便
+4. 多容器之间的数据共享困难
+
+
+存储卷的分类
+1. Volume（卷）
+2. ,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Docker Volume 使用指南 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是存储卷？
+为什么需要存储卷？
+1. 数据丢失问题
+2. 性能问题
+3. 宿主机与容器之间的数据交互不便
+4. 多容器之间的数据共享困难
+
+
+存储卷的分类
+1. Volume（卷）
+2. ,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Docker Volume 使用指南 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是存储卷？
+为什么需要存储卷？
+1. 数据丢失问题
+2. 性能问题
+3. 宿主机与容器之间的数据交互不便
+4. 多容器之间的数据共享困难
+
+
+存储卷的分类
+1. Volume（卷）
+2. ,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Docker Volume 使用指南</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">61</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/30/Docker/docker_image/">Docker Image 使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container 使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">Docker Volume 使用指南</h1>
+            <div class="stuff">
+                <span>九月 02, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%AD%98%E5%82%A8%E5%8D%B7/" rel="tag">存储卷</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E5%AD%98%E5%82%A8%E5%8D%B7">什么是存储卷？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%AD%98%E5%82%A8%E5%8D%B7">为什么需要存储卷？</a><ul>
+<li><a href="#1-%E6%95%B0%E6%8D%AE%E4%B8%A2%E5%A4%B1%E9%97%AE%E9%A2%98">1. 数据丢失问题</a></li>
+<li><a href="#2-%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98">2. 性能问题</a></li>
+<li><a href="#3-%E5%AE%BF%E4%B8%BB%E6%9C%BA%E4%B8%8E%E5%AE%B9%E5%99%A8%E4%B9%8B%E9%97%B4%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BA%A4%E4%BA%92%E4%B8%8D%E4%BE%BF">3. 宿主机与容器之间的数据交互不便</a></li>
+<li><a href="#4-%E5%A4%9A%E5%AE%B9%E5%99%A8%E4%B9%8B%E9%97%B4%E7%9A%84%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB%E5%9B%B0%E9%9A%BE">4. 多容器之间的数据共享困难</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AD%98%E5%82%A8%E5%8D%B7%E7%9A%84%E5%88%86%E7%B1%BB">存储卷的分类</a><ul>
+<li><a href="#1-volume%E5%8D%B7">1. Volume（卷）</a></li>
+<li><a href="#2-bind-mount%E7%BB%91%E5%AE%9A%E6%8C%82%E8%BD%BD">2. Bind Mount（绑定挂载）</a></li>
+<li><a href="#3-tmpfs-mount%E5%86%85%E5%AD%98%E6%8C%82%E8%BD%BD">3. tmpfs Mount（内存挂载）</a></li>
+</ul>
+</li>
+<li><a href="#%E5%88%9B%E5%BB%BA%E5%92%8C%E7%AE%A1%E7%90%86%E5%AD%98%E5%82%A8%E5%8D%B7">创建和管理存储卷</a><ul>
+<li><a href="#%E6%96%B9%E5%BC%8F%E4%B8%80%E9%80%9A%E8%BF%87-volume-%E5%91%BD%E4%BB%A4%E6%93%8D%E4%BD%9C">方式一：通过 Volume 命令操作</a></li>
+<li><a href="#%E5%B0%8F%E7%BB%93">小结</a></li>
+<li><a href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%E5%9C%A8%E8%BF%90%E8%A1%8C%E5%AE%B9%E5%99%A8%E6%97%B6%E6%8C%82%E8%BD%BD%E5%8D%B7">方式二：在运行容器时挂载卷</a></li>
+<li><a href="#%E6%96%B9%E5%BC%8F%E4%B8%89dockerfile-%E5%8C%BF%E5%90%8D%E5%8D%B7">方式三：Dockerfile 匿名卷</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89%E7%A7%8D%E5%AD%98%E5%82%A8%E5%8D%B7%E6%93%8D%E4%BD%9C%E5%AE%9E%E4%BE%8B">三种存储卷操作实例</a><ul>
+<li><a href="#docker-%E5%91%BD%E4%BB%A4%E5%88%9B%E5%BB%BA%E7%AE%A1%E7%90%86%E5%8D%B7">Docker 命令创建管理卷</a></li>
+<li><a href="#docker-v-%E5%88%9B%E5%BB%BA%E7%AE%A1%E7%90%86%E5%8D%B7">Docker -v 创建管理卷</a></li>
+<li><a href="#docker-mount-%E5%88%9B%E5%BB%BA%E7%AE%A1%E7%90%86%E5%8D%B7">Docker –mount 创建管理卷</a></li>
+<li><a href="#%E7%BB%91%E5%AE%9A%E5%8D%B7-bind-mount">绑定卷 bind mount</a></li>
+<li><a href="#%E4%B8%B4%E6%97%B6%E5%8D%B7-tmpfs">临时卷 tmpfs</a></li>
+<li><a href="#%E5%8D%B7%E4%BD%BF%E7%94%A8%E7%89%B9%E6%AE%8A%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">卷使用特殊注意事项</a></li>
+</ul>
+</li>
+<li><a href="#mysql%E7%81%BE%E9%9A%BE%E6%81%A2%E5%A4%8D%E5%AE%9E%E9%AA%8C">MySQL灾难恢复实验</a><ul>
+<li><a href="#%E5%AE%9E%E9%AA%8C%E6%AD%A5%E9%AA%A4">实验步骤</a></li>
+<li><a href="#%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90">原理解析</a></li>
+<li><a href="#%E5%AE%9E%E9%AA%8C%E7%BB%93%E8%AE%BA">实验结论</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="什么是存储卷">什么是存储卷？</span></h2><p>  在 Docker 中，存储卷（Volume）是容器持久化数据的核心机制。简单来说，存储卷就是将<strong>宿主机文件系统中的某个目录</strong>与<strong>容器文件系统中的某个目录</strong>建立绑定关系。这样一来，当容器内部程序在该目录下写入数据时，数据会<strong>直接写入宿主机的绑定目录</strong>。</p>
+<p>  在宿主机上，这个与容器绑定的目录就被称为存储卷。卷的本质就是宿主机上的一个文件或目录，它绕过了默认的联合文件系统（Union File System），能够直接存在于宿主机上。这样做的好处是数据不会随着容器的删除而丢失，同时还能实现宿主机与容器之间的数据共享。</p>
+<p>举个例子：<br>  如果将宿主机的 <code>/data/web</code> 目录与容器内部的 <code>/container/data/web</code> 目录绑定，那么当容器内的进程往 <code>/container/data/web</code> 中写入数据时，实际上数据是写在宿主机的 <code>/data/web</code> 目录里。反之亦然——宿主机中对 <code>/data/web</code> 的操作，也会同步到容器内部目录。这使得容器和宿主机之间的数据读写保持一致，实现了跨环境的数据共享。</p>
+<hr>
+<p>  我们可以把存储卷类比为“房子外的地下室”。容器就像是房子，卷就是地下室。当我们把卷绑定到容器里，就好比我们拥有了地下室的钥匙，可以把房子以外的空间也利用起来。</p>
+<p>  假设有一天龙卷风来了，房子被摧毁了，但地下室依然完好无损。这就好比容器被删除了，但存储卷中的数据依然存在，不会受到影响。等新房子（新的容器）建好以后，依然可以用同一把钥匙进入地下室继续使用原来的数据。<br>  此外，地下室（存储卷）还可以被多个房子（容器）共享使用。这样，不同的房子可以通过地下室来交换物品，实现数据的共享和协作。  </p>
+<hr>
+<h2><span id="为什么需要存储卷">为什么需要存储卷？</span></h2><p>  容器天生适合运行无状态应用，但在实际生产中，很多业务都需要持久化数据。如果仅依赖容器自身的文件系统，就会遇到很多问题。存储卷的出现，正是为了解决这些痛点。</p>
+<h3><span id="1-数据丢失问题">1. 数据丢失问题</span></h3><p>  容器从业务角度可以分为两类：</p>
+<ul>
+<li><strong>无状态容器</strong>：数据无需持久化，例如 Nginx、前端应用等。</li>
+<li><strong>有状态容器</strong>：数据需要持久化，例如 MySQL、Kafka、Redis 等。</li>
+</ul>
+<p>  容器文件系统的本质，是在镜像层之上临时创建一个读写层。运行中容器对文件的所有修改，都发生在这个读写层。但当容器被删除时，读写层也会随之消失，导致数据无法保留。</p>
+<p>  虽然容器的设计初衷是尽量保持无状态，方便快速部署和迁移，但实际业务离不开持久化需求。因此，Docker 引入了卷（Volume）的概念，专门用于解决数据持久化的问题。</p>
+<h3><span id="2-性能问题">2. 性能问题</span></h3><p>  容器默认的联合文件系统（UnionFS）在处理<strong>文件修改和删除</strong>操作时性能较低。如果是对 I&#x2F;O 性能要求较高的应用（如 Redis 持久化、数据库写入操作），UnionFS 的效率会成为瓶颈。而卷直接绕过 UnionFS，与宿主机文件系统交互，极大提升了读写性能。</p>
+<h3><span id="3-宿主机与容器之间的数据交互不便">3. 宿主机与容器之间的数据交互不便</span></h3><p>  如果没有卷，宿主机和容器之间的数据传输需要通过 <code>docker cp</code> 等命令完成。这种方式繁琐、效率低，也不利于应用自动化管理。而通过卷，宿主机和容器可以直接共享同一份数据，交互更加自然。</p>
+<h3><span id="4-多容器之间的数据共享困难">4. 多容器之间的数据共享困难</span></h3><p>  在复杂业务场景下，往往有多个容器需要访问同一份数据。例如，一个应用容器需要与一个日志采集容器共享日志文件。如果不借助卷，容器之间共享数据会变得非常困难。而卷可以轻松解决这个问题，让多个容器挂载同一个目录，从而实现高效的数据共享。</p>
+<h2><span id="存储卷的分类">存储卷的分类</span></h2><p>  在 Docker 中，存储卷是实现数据持久化与共享的关键机制。目前，Docker 提供了三种主要的方式将宿主机的数据挂载到容器中：</p>
+<h3><span id="1-volume卷">1. Volume（卷）</span></h3><ul>
+<li><p><strong>特点</strong>：由 Docker 引擎统一管理，默认存放在宿主机的 <code>/var/lib/docker/volumes</code> 目录下。</p>
+</li>
+<li><p><strong>使用方式</strong>：用户只需在容器中指定挂载点，至于宿主机上的实际目录位置，由 Docker 自动创建或使用已有目录完成绑定。</p>
+</li>
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li>简化了用户操作，不需要手动管理宿主机目录。</li>
+<li>与宿主机文件系统的耦合度低，容器迁移更方便。</li>
+<li>可以配合 Volume Driver（如 NFS、云存储插件）扩展功能。</li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：用户无法直接指定宿主机目录位置，可见性和可控性相对较低。</p>
+</li>
+<li><p><strong>适用场景</strong>：适合大多数需要持久化数据的容器，尤其在生产环境下使用最为普遍。</p>
+</li>
+</ul>
+<h3><span id="2-bind-mount绑定挂载">2. Bind Mount（绑定挂载）</span></h3><ul>
+<li><p><strong>特点</strong>：将宿主机上的<strong>指定目录或文件</strong>与容器内目录直接绑定。</p>
+</li>
+<li><p><strong>使用方式</strong>：需要在宿主机和容器中同时指定路径，建立明确的映射关系。</p>
+</li>
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li>灵活性强，用户可以精确控制宿主机与容器共享的目录。</li>
+<li>容器可以直接访问宿主机上的已有文件和目录。</li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li>与宿主机文件系统耦合度高，不利于容器在不同环境间迁移。</li>
+<li>如果宿主机路径错误，可能导致容器挂载失败或不可用。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：常用于开发调试阶段，例如代码热更新、日志调试等场景，或者需要指定目录来存储数据的场景，如 <code>MySQL</code> 等需要独立的大块空间。</p>
+</li>
+</ul>
+<h3><span id="3-tmpfs-mount内存挂载">3. tmpfs Mount（内存挂载）</span></h3><ul>
+<li><p><strong>特点</strong>：将数据直接挂载到宿主机的内存中，而不是持久化到磁盘。</p>
+</li>
+<li><p><strong>使用方式</strong>：通过 <code>--mount type=tmpfs</code> 指定挂载点，数据只存在于内存里。</p>
+</li>
+<li><p><strong>优点</strong>：</p>
+<ul>
+<li>读写速度快，性能极高。</li>
+<li>数据不会落盘，安全性更高（适合存放敏感数据）。</li>
+</ul>
+</li>
+<li><p><strong>缺点</strong>：</p>
+<ul>
+<li>容器停止后数据即会丢失，无法持久化。</li>
+</ul>
+</li>
+<li><p><strong>适用场景</strong>：适合需要高性能临时存储的场景，例如存放缓存文件、临时会话数据等。</p>
+</li>
+</ul>
+<hr>
+<p><img src="/img/Docker/volume/compare.png" alt="compare"></p>
+<hr>
+<p>下面是对三种存储方式的一个表格直观对比：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>Volume（卷）</th>
+<th>Bind Mount（绑定挂载）</th>
+<th>tmpfs Mount（内存挂载）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>管理方式</strong></td>
+<td>由 Docker 引擎统一管理，默认存放在 <code>/var/lib/docker/volumes</code></td>
+<td>用户手动指定宿主机目录或文件</td>
+<td>数据存放在宿主机内存中</td>
+</tr>
+<tr>
+<td><strong>宿主机耦合度</strong></td>
+<td>低，目录位置由 Docker 管理，迁移方便</td>
+<td>高，依赖宿主机具体路径</td>
+<td>无（只依赖宿主机内存）</td>
+</tr>
+<tr>
+<td><strong>是否持久化</strong></td>
+<td>✅ 是，容器删除后数据仍在</td>
+<td>✅ 是，容器删除后数据仍在</td>
+<td>❌ 否，容器停止后数据丢失</td>
+</tr>
+<tr>
+<td><strong>性能</strong></td>
+<td>中等（绕过 UnionFS，性能较好）</td>
+<td>中等（直接访问宿主机目录）</td>
+<td>高（纯内存读写，最快）</td>
+</tr>
+<tr>
+<td><strong>优点</strong></td>
+<td>简单、解耦、适合生产环境，可支持 Volume Driver</td>
+<td>灵活，可直接使用宿主机已有目录或文件</td>
+<td>高速读写，数据不落盘，安全性好</td>
+</tr>
+<tr>
+<td><strong>缺点</strong></td>
+<td>无法自定义宿主机目录，透明度较低</td>
+<td>与宿主机耦合度高，迁移不便，易出错</td>
+<td>数据不可持久化，容量受内存限制</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>数据库、持久化业务（MySQL、Kafka 等）</td>
+<td>开发调试、代码热更新、日志共享、指定目录</td>
+<td>缓存、会话、临时文件、高性能应用</td>
+</tr>
+</tbody></table>
+<hr>
+<h2><span id="创建和管理存储卷">创建和管理存储卷</span></h2><p>Docker 提供了一套命令来专门管理卷（Volume）。这些命令可以帮助我们创建、查看、删除以及清理卷。下面我们详细看一下。</p>
+<hr>
+<h3><span id="方式一通过-volume-命令操作">方式一：通过 Volume 命令操作</span></h3><h4><span id="1-创建卷docker-volume-create">1. 创建卷：<code>docker volume create</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create my_volume</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>功能</strong>：创建一个新的存储卷。</p>
+</li>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>-d, --driver</code>：指定存储驱动，默认是 <code>local</code>。</li>
+<li><code>--label</code>：为卷添加元数据标签，方便管理。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong>：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个默认卷</span></span><br><span class="line">docker volume create my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个带标签的卷</span></span><br><span class="line">docker volume create --label project=blog_data blog_volume</span><br></pre></td></tr></table></figure>
+
+<p>创建完成后，可以在宿主机 <code>/var/lib/docker/volumes/</code> 目录下找到对应的卷。</p>
+<hr>
+<h4><span id="2-查看卷信息docker-volume-inspect">2. 查看卷信息：<code>docker volume inspect</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect my_volume</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>功能</strong>：查看卷的详细信息，例如挂载点、驱动、标签等。</p>
+</li>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>-f</code>：指定输出格式，例如 <code>json</code>。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong>：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看卷的详细信息</span></span><br><span class="line">docker volume inspect my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 只输出卷的挂载路径</span></span><br><span class="line">docker volume inspect -f <span class="string">&#x27;&#123;&#123; .Mountpoint &#125;&#125;&#x27;</span> my_volume</span><br></pre></td></tr></table></figure>
+
+<p>输出结果通常会包含卷的具体路径（Mountpoint），我们可以确认卷和宿主机之间的真实绑定位置。</p>
+<hr>
+<h4><span id="3-列出卷docker-volume-ls">3. 列出卷：<code>docker volume ls</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>功能</strong>：显示当前所有的卷。</p>
+</li>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>--format</code>：指定输出格式，例如 <code>json</code>、<code>table</code>。</li>
+<li><code>--filter, -f</code>：按条件过滤卷，例如驱动类型或标签。</li>
+<li><code>-q</code>：仅显示卷的名称（安静模式）。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong>：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有卷</span></span><br><span class="line">docker volume <span class="built_in">ls</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示卷的名称</span></span><br><span class="line">docker volume <span class="built_in">ls</span> -q  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 过滤出使用 local 驱动的卷</span></span><br><span class="line">docker volume <span class="built_in">ls</span> -f driver=<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="4-删除卷docker-volume-rm">4. 删除卷：<code>docker volume rm</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">rm</span> my_volume</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>功能</strong>：删除指定卷（前提是该卷没有被任何容器使用）。</p>
+</li>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>-f, --force</code>：强制删除正在使用的卷。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong>：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除一个卷</span></span><br><span class="line">docker volume <span class="built_in">rm</span> my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 强制删除卷</span></span><br><span class="line">docker volume <span class="built_in">rm</span> -f blog_volume</span><br></pre></td></tr></table></figure>
+
+<p>⚠️ 注意：如果卷被容器使用，直接删除会失败。除非使用 <code>-f</code> 强制删除，但这可能导致容器数据丢失。</p>
+<hr>
+<h4><span id="5-清理未使用的卷docker-volume-prune">5. 清理未使用的卷：<code>docker volume prune</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>功能</strong>：清理掉所有未被容器使用的卷。</p>
+</li>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>--filter</code>：按条件过滤要删除的卷。</li>
+<li><code>-f, --force</code>：跳过确认提示，直接删除。</li>
+</ul>
+</li>
+<li><p><strong>示例</strong>：</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除所有未使用的卷（执行前会有确认提示）</span></span><br><span class="line">docker volume prune  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 强制删除所有未使用的卷</span></span><br><span class="line">docker volume prune -f  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除创建时间早于 24 小时的卷</span></span><br><span class="line">docker volume prune --filter <span class="string">&quot;until=24h&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个命令在日常开发中非常有用，尤其是反复测试创建容器后会产生很多孤立卷，通过 <code>prune</code> 可以一键清理，避免宿主机磁盘空间被占满。</p>
+<hr>
+<h3><span id="小结">小结</span></h3><p>通过这些命令，我们可以完成存储卷的<strong>生命周期管理</strong>：</p>
+<ul>
+<li><code>create</code> → 创建卷</li>
+<li><code>inspect</code> → 查看卷信息</li>
+<li><code>ls</code> → 列出所有卷</li>
+<li><code>rm</code> → 删除指定卷</li>
+<li><code>prune</code> → 清理未使用卷</li>
+</ul>
+<p>📌 建议在开发调试时，定期使用 <code>docker volume ls</code> 和 <code>docker volume prune</code>，保持宿主机的磁盘空间整洁。</p>
+<hr>
+<h3><span id="方式二在运行容器时挂载卷">方式二：在运行容器时挂载卷</span></h3><p>除了通过 <code>docker volume create</code> 命令手动创建卷外，我们还可以在运行容器时直接指定挂载，这样会自动创建并绑定卷。Docker 提供了两种常见方式：<code>-v</code> 和 <code>--mount</code>。</p>
+<hr>
+<h4><span id="1-使用-v-参数">1. 使用 <code>-v</code> 参数</span></h4><p><code>-v</code> 是 Docker 早期提供的挂载方式，语法相对简洁。</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v [卷名或宿主机路径]:[容器内路径][:选项] ...</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>参数说明</strong>：</p>
+<ul>
+<li>第一个参数：卷名称（如 <code>myvol</code>）或宿主机目录（如 <code>/data/logs</code>）。</li>
+<li>第二个参数：容器内挂载目录。</li>
+<li>第三个参数（可选）：挂载选项，例如 <code>ro</code> 表示只读。</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例 1：挂载命名卷</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest \</span><br><span class="line">  -v myvol2:/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>这条命令会自动创建一个名为 <code>myvol2</code> 的卷，并挂载到容器的 <code>/app</code> 目录。</p>
+<p>通过 <code>docker inspect devtest</code> 可以看到挂载详情：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myvol2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/myvol2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：挂载宿主机目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest2 \</span><br><span class="line">  -v /home/user/logs:/var/log/nginx \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>这里将宿主机的 <code>/home/user/logs</code> 目录映射到容器的 <code>/var/log/nginx</code>，日志会直接写入宿主机目录。</p>
+<p><strong>示例 3：只读挂载</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest3 \</span><br><span class="line">  -v myvol3:/data:ro \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>这里的卷挂载到容器内 <code>/data</code>，但容器只能读取，无法写入。</p>
+<hr>
+<h4><span id="2-使用-mount-参数">2. 使用 <code>--mount</code> 参数</span></h4><p><code>--mount</code> 是 Docker 较新的推荐方式，语法比 <code>-v</code> 更加<strong>明确和可读</strong>。</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount <span class="built_in">type</span>=&lt;类型&gt;,<span class="built_in">source</span>=&lt;卷名或宿主机路径&gt;,target=&lt;容器内路径&gt;[,选项]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>type</code>：挂载类型（<code>volume</code>、<code>bind</code> 或 <code>tmpfs</code>）。</li>
+<li><code>source</code> &#x2F; <code>src</code>：卷名或宿主机目录。</li>
+<li><code>destination</code> &#x2F; <code>dst</code> &#x2F; <code>target</code>：容器内的挂载路径。</li>
+<li><code>readonly</code> &#x2F; <code>ro</code>：只读挂载。</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例 1：挂载命名卷</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest \</span><br><span class="line">  --mount <span class="built_in">type</span>=volume,<span class="built_in">source</span>=myvol2,target=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>输出 <code>docker inspect devtest</code> 的结果与 <code>-v</code> 类似：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myvol2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/myvol2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>示例 2：挂载宿主机目录（bind mount）</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest2 \</span><br><span class="line">  --mount <span class="built_in">type</span>=<span class="built_in">bind</span>,<span class="built_in">source</span>=/home/user/logs,target=/var/log/nginx \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>这和 <code>-v /home/user/logs:/var/log/nginx</code> 等价，但语法更清晰。</p>
+<p><strong>示例 3：只读挂载</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest3 \</span><br><span class="line">  --mount <span class="built_in">type</span>=volume,<span class="built_in">source</span>=myvol3,target=/data,<span class="built_in">readonly</span> \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>容器内 <code>/data</code> 目录为只读。</p>
+<hr>
+<h4><span id="3-v-与-mount-的区别">3. <code>-v</code> 与 <code>--mount</code> 的区别</span></h4><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th><code>-v</code> 参数</th>
+<th><code>--mount</code> 参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>语法</strong></td>
+<td>简洁，但容易出错（顺序重要）</td>
+<td>结构化，语义更清晰</td>
+</tr>
+<tr>
+<td><strong>功能覆盖</strong></td>
+<td>支持 <code>volume</code> 和 <code>bind</code></td>
+<td>支持 <code>volume</code>、<code>bind</code>、<code>tmpfs</code></td>
+</tr>
+<tr>
+<td><strong>可读性</strong></td>
+<td>相对较差</td>
+<td>更好，推荐生产环境使用</td>
+</tr>
+<tr>
+<td><strong>常见用途</strong></td>
+<td>开发测试、快速挂载</td>
+<td>生产环境，复杂挂载场景</td>
+</tr>
+</tbody></table>
+<p>📌 建议：</p>
+<ul>
+<li>在 <strong>开发阶段</strong> 可以图方便用 <code>-v</code>。</li>
+<li>在 <strong>生产环境</strong> 建议统一使用 <code>--mount</code>，避免出错，也方便团队成员理解配置。</li>
+</ul>
+<hr>
+<h3><span id="方式三dockerfile-匿名卷">方式三：Dockerfile 匿名卷</span></h3><p>通过 Dockerfile 的 VOLUME 可以创建 docker 管理卷，我将在后面的 Dockerfile 章节中详细介绍</p>
+<hr>
+<h2><span id="三种存储卷操作实例">三种存储卷操作实例</span></h2><h3><span id="docker-命令创建管理卷">Docker 命令创建管理卷</span></h3><h4><span id="1-创建存储卷">1. 创建存储卷</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create test_volume</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test_volume</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="2-使用卷运行容器">2. 使用卷运行容器</span></h4><p>将刚才创建的卷挂载到 Nginx 容器中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx1 -d -p 5566:80 \</span><br><span class="line">  -v test_volume:/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+
+<p>同样，我们也可以运行另一个容器，挂载到同一个卷：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx2 -d -p 5577:80 \</span><br><span class="line">  -v test_volume:/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+
+<p>这样两个容器共享同一个卷，数据会同步。</p>
+<hr>
+<h4><span id="3-查看存储卷列表">3. 查看存储卷列表</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DRIVER    VOLUME NAME</span><br><span class="line"><span class="built_in">local</span>     test_volume</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="4-查看卷的详细信息">4. 查看卷的详细信息</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect test_volume</span><br></pre></td></tr></table></figure>
+
+<p>输出结果（部分）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-02T12:23:12+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Options&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到 <code>Mountpoint</code> 对应宿主机上的真实目录。</p>
+<hr>
+<h4><span id="5-查看宿主机目录">5. 查看宿主机目录</span></h4><p>进入卷对应的目录，可以看到 Nginx 默认的网页文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /data/var/lib/docker/volumes/test_volume/_data</span><br><span class="line"><span class="built_in">ls</span> -l</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">total 16</span><br><span class="line">drwxr-xr-x 2 root root 4096 Mar 16 12:32 ./</span><br><span class="line">drwx-----x 3 root root 4096 Mar 16 12:16 ../</span><br><span class="line">-rw-r--r-- 1 root root  497 Oct 19 16:02 50x.html</span><br><span class="line">-rw-r--r-- 1 root root  615 Oct 19 16:02 index.html</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="6-查看容器挂载信息">6. 查看容器挂载信息</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect nginx1</span><br></pre></td></tr></table></figure>
+
+<p>输出结果（部分）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/share/nginx/html&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;z&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>说明 <code>test_volume</code> 已经挂载到容器的 <code>/usr/share/nginx/html</code> 目录中。</p>
+<hr>
+<h4><span id="7-修改宿主机文件并同步到容器">7. 修改宿主机文件并同步到容器</span></h4><p>修改宿主机上的 <code>index.html</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /data/var/lib/docker/volumes/test_volume/_data</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello Volume&quot;</span> &gt; index.html</span><br></pre></td></tr></table></figure>
+
+<p>然后通过浏览器访问 <code>http://宿主机IP:5566</code>，即可看到更新后的内容，证明宿主机和容器数据同步：</p>
+<p><img src="/img/Docker/volume/volume_url.png" alt="volume_url"></p>
+<hr>
+<h4><span id="8-停止并删除容器">8. 停止并删除容器</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx1</span><br><span class="line">docker <span class="built_in">rm</span> nginx1</span><br></pre></td></tr></table></figure>
+
+<p>卷不会随着容器的删除而消失，数据依然存在。</p>
+<hr>
+<p>通过以上实验可以得出：</p>
+<ul>
+<li><strong>宿主机和容器之间数据是实时同步的</strong>。</li>
+<li><strong>容器删除后，卷仍然保留，数据不会丢失</strong>。</li>
+</ul>
+<h3><span id="docker-v-创建管理卷">Docker -v 创建管理卷</span></h3><p>下面演示如何使用 <code>-v</code> 参数创建和挂载存储卷，并验证 <strong>只读模式 (ro)</strong> 的效果。</p>
+<hr>
+<h4><span id="1-使用-v-创建卷并启动容器">1. 使用 -v 创建卷并启动容器</span></h4><p>通过 <code>-v</code> 指定一个新卷 <code>test_volume2</code>，挂载到 Nginx 容器的 <code>/usr/share/nginx/html</code> 目录，并设置为只读模式：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx2 -d -p 5566:80 \</span><br><span class="line">  -v test_volume2:/usr/share/nginx/html:ro \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="2-查看卷信息">2. 查看卷信息</span></h4><p>使用 <code>docker inspect</code> 查看卷对应的宿主机目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect test_volume2</span><br></pre></td></tr></table></figure>
+
+<p>输出结果（部分）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-02T12:23:35+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<p>进入宿主机目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /data/var/lib/docker/volumes/test_volume2/_data</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">50x.html  index.html</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="3-修改宿主机中的文件">3. 修改宿主机中的文件</span></h4><p>在宿主机上修改 <code>index.html</code> 内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;Hello Volume -v&quot; &gt; index.html</span><br><span class="line">cat index.html</span><br></pre></td></tr></table></figure>
+
+<p>通过浏览器访问 <code>http://宿主机IP:5566</code>，可以看到页面内容已更新：</p>
+<p><img src="/img/Docker/volume/volume_v.png" alt="volume_v"></p>
+<hr>
+<h4><span id="4-在容器中尝试修改文件">4. 在容器中尝试修改文件</span></h4><p>进入容器，尝试删除 <code>index.html</code>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it nginx2 bash</span><br><span class="line">cd /usr/share/nginx/html/</span><br><span class="line">rm index.html</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span>: cannot remove <span class="string">&#x27;index.html&#x27;</span>: Read-only file system</span><br></pre></td></tr></table></figure>
+
+<p>说明容器内的该目录是只读的，无法修改文件。</p>
+<hr>
+<h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx2</span><br><span class="line">docker rm nginx2</span><br></pre></td></tr></table></figure>
+
+<hr>
+<ul>
+<li>使用 <code>-v</code> 挂载卷时，如果添加 <code>:ro</code> 参数，则表示挂载目录为 <strong>只读模式</strong>。</li>
+<li>在 <strong>宿主机</strong> 上可以修改文件；但在 <strong>容器内</strong> 无法修改，保证了数据的安全性。</li>
+</ul>
+<hr>
+<h3><span id="docker-mount-创建管理卷">Docker –mount 创建管理卷</span></h3><p>下面演示如何使用 <code>--mount</code> 参数创建并挂载存储卷，验证宿主机和容器的数据同步效果。</p>
+<hr>
+<h4><span id="1-使用-mount-创建卷并启动容器">1. 使用 –mount 创建卷并启动容器</span></h4><p>通过 <code>--mount</code> 指定一个新卷 <code>test_volume3</code>，并挂载到 Nginx 容器的 <code>/usr/share/nginx/html</code> 目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx3 -d -p 5566:80 \</span><br><span class="line">  --mount type=volume,source=test_volume3,target=/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="2-查看卷是否创建成功">2. 查看卷是否创建成功</span></h4><p>使用 <code>docker volume ls</code> 查看已创建的卷：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume ls</span><br></pre></td></tr></table></figure>
+
+<p>示例输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DRIVER    VOLUME NAME</span><br><span class="line"><span class="built_in">local</span>     test_volume3</span><br><span class="line"><span class="built_in">local</span>     myvoltest1</span><br><span class="line"><span class="built_in">local</span>     myvoltest2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 <code>test_volume3</code> 已经在卷列表中。</p>
+<hr>
+<h4><span id="3-查看卷的挂载点">3. 查看卷的挂载点</span></h4><p>使用 <code>docker volume inspect</code> 查看卷对应的宿主机目录：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect test_volume3</span><br></pre></td></tr></table></figure>
+
+<p>输出结果（部分）：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-03T00:05:13+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume3/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume3&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h4><span id="4-修改宿主机中的文件内容">4. 修改宿主机中的文件内容</span></h4><p>进入卷目录并修改 <code>index.html</code> 文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /data/var/lib/docker/volumes/test_volume3/_data</span><br><span class="line">echo &quot;Hello Volume - mount&quot; &gt; index.html</span><br><span class="line">cat index.html</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hello Volume - mount</span><br></pre></td></tr></table></figure>
+
+<p>此时浏览器访问 <code>http://宿主机IP:5566</code>，即可看到页面内容已更新：</p>
+<p><img src="/img/Docker/volume/volume_mount.png" alt="volume_mount"></p>
+<hr>
+<h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><p>实验完成后，可以停止并删除容器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx3</span><br><span class="line">docker rm nginx3</span><br></pre></td></tr></table></figure>
+
+<hr>
+<ul>
+<li>使用 <code>--mount</code> 创建卷时，可以显式指定 <code>type</code>、<code>source</code> 和 <code>target</code>，比 <code>-v</code> 更加清晰和可读。</li>
+<li>卷中的数据会在宿主机和容器之间实时同步，适合持久化存储场景。</li>
+</ul>
+<hr>
+<h3><span id="绑定卷-bind-mount">绑定卷 bind mount</span></h3><p>绑定卷（bind mount）是将宿主机的一个目录直接挂载到容器内，与管理卷不同，它直接使用宿主机指定的目录，而不是由 Docker 自动管理。</p>
+<hr>
+<h4><span id="1-使用-v-创建绑定卷">1. 使用 -v 创建绑定卷</span></h4><p><strong>功能：</strong> 将宿主机目录映射到容器目录，实现数据共享。</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v &lt;宿主机目录&gt;:&lt;容器目录&gt;[:options] ...</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>参数说明</strong>：</p>
+<ul>
+<li>第一个参数：宿主机目录（与管理卷不同，需要手动指定路径）</li>
+<li>第二个参数：容器内挂载目录</li>
+<li>第三个参数（可选）：挂载选项，如 <code>ro</code> 表示只读</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name devtest \</span><br><span class="line">  -v &quot;$(pwd)&quot;/target:/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>说明：宿主机当前目录下的 <code>target</code> 会挂载到容器的 <code>/app</code>，容器可以直接访问宿主机的文件。</p>
+<hr>
+<h4><span id="2-使用-mount-创建绑定卷">2. 使用 –mount 创建绑定卷</span></h4><p><strong>功能：</strong> 与 <code>-v</code> 类似，但语法更清晰，推荐在生产环境使用。</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount type=bind,source=&lt;宿主机目录&gt;,target=&lt;容器目录&gt;[,readonly]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>关键参数：</strong></p>
+<ul>
+<li><code>type</code>：<code>bind</code> 表示绑定卷</li>
+<li><code>source</code> &#x2F; <code>src</code>：宿主机目录（与管理卷不同，需要指定路径）</li>
+<li><code>target</code> &#x2F; <code>dst</code>：容器挂载路径</li>
+<li><code>readonly</code> &#x2F; <code>ro</code>：只读挂载（可选）</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name devtest \</span><br><span class="line">  --mount type=bind,source=&quot;$(pwd)&quot;/target,target=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>说明：效果与 <code>-v</code> 类似，但参数更直观，适合团队协作和复杂挂载场景。</p>
+<hr>
+<ul>
+<li><strong>管理卷 (volume)</strong>：由 Docker 管理，适合数据持久化和容器间共享。</li>
+<li><strong>绑定卷 (bind mount)</strong>：直接使用宿主机目录，灵活，但需要手动管理路径。</li>
+<li>对比来看，绑定卷更适合开发调试或访问宿主机已有数据，管理卷更适合生产环境和数据持久化。</li>
+</ul>
+<hr>
+<h3><span id="临时卷-tmpfs">临时卷 tmpfs</span></h3><p>临时卷（tmpfs）是将数据存储在 <strong>内存中</strong>，不落在宿主机或容器文件系统上，因此速度非常快，但有一定局限性：</p>
+<ul>
+<li><p><strong>局限性</strong></p>
+<ul>
+<li>不同于卷和绑定卷，<strong>不能在容器之间共享 tmpfs 挂载</strong></li>
+<li>仅在 Linux 系统上运行 Docker 时可用</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h4><span id="1-使用-tmpfs-创建临时卷">1. 使用 <code>--tmpfs</code> 创建临时卷</span></h4><p><strong>功能：</strong> 将容器目录映射到内存中，实现高速临时存储</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--tmpfs &lt;容器目录&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name tmptest \</span><br><span class="line">  --tmpfs /app \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+
+<p>说明：容器内的 <code>/app</code> 目录完全位于内存中，容器停止后数据会消失。</p>
+<hr>
+<h4><span id="2-使用-mount-创建临时卷">2. 使用 <code>--mount</code> 创建临时卷</span></h4><p><strong>功能：</strong> 与 <code>--tmpfs</code> 类似，但语法更灵活，可指定更多参数</p>
+<p><strong>语法：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount type=tmpfs,destination=&lt;容器目录&gt;[,tmpfs-size=&lt;大小&gt;,tmpfs-mode=&lt;权限&gt;]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>关键参数</strong>：</p>
+<ul>
+<li><code>type</code>：<code>tmpfs</code></li>
+<li><code>destination</code> &#x2F; <code>target</code>：挂载到容器的目录</li>
+<li><code>tmpfs-size</code>：tmpfs 容量（以字节为单位），默认无限制</li>
+<li><code>tmpfs-mode</code>：文件权限（八进制），默认 1777</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name tmptest \</span><br><span class="line">  --mount type=tmpfs,destination=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+
+<p>说明：<code>/app</code> 目录位于内存中，高速且临时，容器停止后数据会丢失。</p>
+<hr>
+<ul>
+<li><strong>临时卷 tmpfs</strong> 适合存放<strong>高速临时数据</strong>，如缓存、会话文件等</li>
+<li>数据存放在内存中，<strong>容器停止或重启后会消失</strong></li>
+<li>不适合需要持久化或跨容器共享的场景</li>
+</ul>
+<hr>
+<h3><span id="卷使用特殊注意事项">卷使用特殊注意事项</span></h3><h4><span id="1-普通卷volume">1. 普通卷（Volume）</span></h4><ul>
+<li><p><strong>行为说明</strong>：</p>
+<ul>
+<li>当使用 <code>-v</code> 或 <code>--mount</code> 指定卷名时，如果该卷已经存在，容器直接挂载这个卷。</li>
+<li>如果卷不存在，Docker 会自动在管理目录下创建该卷，并<strong>将容器挂载点的初始文件内容复制到卷目录中</strong>。</li>
+</ul>
+</li>
+<li><p><strong>注意点</strong>：保证卷一开始不是空的，方便数据持久化和初始化。</p>
+</li>
+</ul>
+<hr>
+<h4><span id="2-绑定卷bind-mount">2. 绑定卷（Bind mount）</span></h4><ul>
+<li><p><strong>行为说明</strong>：</p>
+<ul>
+<li>使用 <code>-v</code> 指定宿主机目录不存在时，Docker 会自动创建这个目录，但目录内容为空，不会复制容器挂载点的文件。</li>
+<li>使用 <code>--mount type=bind</code> 指定不存在的宿主机目录时，会报错，需要手动创建。</li>
+</ul>
+</li>
+<li><p><strong>注意点</strong>：绑定卷依赖宿主机目录结构，适合直接访问宿主机已有文件。</p>
+</li>
+</ul>
+<hr>
+<h4><span id="3-临时卷tmpfs">3. 临时卷（tmpfs）</span></h4><ul>
+<li><p><strong>行为说明</strong>：</p>
+<ul>
+<li>容器内挂载目录是空目录，数据完全存储在内存中。</li>
+<li>容器停止或删除后，数据会完全丢失。</li>
+</ul>
+</li>
+<li><p><strong>注意点</strong>：适合高速临时数据存储，不能持久化，也不能跨容器共享。</p>
+</li>
+</ul>
+<hr>
+<h4><span id="卷类型特殊行为总结表">卷类型特殊行为总结表</span></h4><table>
+<thead>
+<tr>
+<th>卷类型</th>
+<th>容器挂载时是否存在数据</th>
+<th>宿主机目录不存在时处理</th>
+<th>是否复制容器目录初始内容</th>
+<th>数据持久化</th>
+<th>跨容器共享</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>普通卷 Volume</td>
+<td>如果卷已存在，则继承</td>
+<td>Docker 自动创建卷</td>
+<td>会复制</td>
+<td>是</td>
+<td>是</td>
+</tr>
+<tr>
+<td>绑定卷 Bind</td>
+<td>直接使用宿主机目录</td>
+<td>-v：自动创建空目录</td>
+<td>不会复制</td>
+<td>否</td>
+<td>否</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>–mount：报错</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>临时卷 tmpfs</td>
+<td>总是空目录</td>
+<td>不适用</td>
+<td>不适用</td>
+<td>否</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<h2><span id="mysql灾难恢复实验">MySQL灾难恢复实验</span></h2><p>本实验旨在验证使用Docker部署MySQL时，如何通过挂载宿主机目录实现数据的持久化存储，以及在容器异常删除后如何依旧能够完成数据恢复。</p>
+<h3><span id="实验步骤">实验步骤</span></h3><ol>
+<li><p><strong>初始化前准备</strong><br>在宿主机上创建一个空目录作为MySQL数据挂载点：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mydata/datadir</span><br><span class="line">ll /mydata/datadir</span><br></pre></td></tr></table></figure>
+
+<p>此时目录下无任何文件。</p>
+</li>
+<li><p><strong>运行MySQL容器并挂载目录</strong><br>使用<code>-v</code>参数将宿主机目录挂载到容器的<code>/var/lib/mysql</code>路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql3 -v /mydata/datadir:/var/lib/mysql \</span><br><span class="line">  -e MYSQL_ROOT_PASSWORD=ljx@docker -d mysql:8.0.41</span><br></pre></td></tr></table></figure>
+
+<p>启动后，可以看到<code>/mydata/datadir</code>目录中立即生成了MySQL系统数据库文件和相关配置。</p>
+</li>
+<li><p><strong>向数据库中插入数据</strong><br>进入容器并操作数据库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mysql3 bash</span><br><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+
+<p>创建数据库和表，并插入一条数据：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> database test;</span><br><span class="line">use test;</span><br><span class="line"><span class="keyword">create table</span> t1(name <span class="type">varchar</span>(<span class="number">50</span>), age <span class="type">int</span>);</span><br><span class="line"><span class="keyword">insert into</span> t1 <span class="keyword">values</span>(<span class="string">&#x27;ljx&#x27;</span>, <span class="number">19</span>);</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1;</span><br></pre></td></tr></table></figure>
+
+<p>查询结果显示数据已成功写入。</p>
+</li>
+<li><p><strong>模拟容器被异常中断和删除</strong><br>模拟类似公司突然断电的情况，直接删除容器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop mysql3</span><br><span class="line">docker <span class="built_in">rm</span> mysql3</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>重新创建新容器并挂载同一目录</strong><br>重新运行MySQL容器，仍挂载之前的目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql4 -v /mydata/datadir:/var/lib/mysql \</span><br><span class="line">  -e MYSQL_ROOT_PASSWORD=ljx@docker -d mysql:8.0.41</span><br></pre></td></tr></table></figure>
+
+<p>登录数据库后，发现数据依旧存在：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> databases;</span><br><span class="line">use test;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到之前插入的数据<code>(&#39;ljx&#39;, 19)</code>仍然保留。</p>
+</li>
+</ol>
+<h3><span id="原理解析">原理解析</span></h3><ul>
+<li><p><strong>为什么空目录会被写入数据？</strong><br>这是因为MySQL官方镜像在启动时会检查挂载的目录是否为空。如果为空，它会自动进行<strong>初始化</strong>，将系统数据库（如<code>mysql</code>、<code>sys</code>、<code>performance_schema</code>）从镜像内置的模板复制到挂载目录中，以保证MySQL能够正常启动。</p>
+</li>
+<li><p><strong>数据持久化的原因</strong><br>数据实际存储在宿主机的<code>/mydata/datadir</code>目录中，而不是容器内部。当容器被删除时，宿主机上的数据不会受到影响。因此，只要再次挂载同一目录，新容器就能直接读取并继续使用原有数据。</p>
+</li>
+</ul>
+<h3><span id="实验结论">实验结论</span></h3><p>通过本实验可以看出：</p>
+<ul>
+<li><strong>挂载宿主机目录</strong>是实现MySQL数据持久化的关键。</li>
+<li>即使容器因故障被删除，只要数据目录未丢失，创建新的MySQL容器并挂载同一目录，即可实现数据恢复。</li>
+<li>这为生产环境下的<strong>灾难恢复</strong>提供了保障，也是容器化数据库部署中必须重视的操作方式。</li>
+</ul>
+<p>在实际生产环境中，仅依赖宿主机目录挂载虽然能够实现数据持久化，但仍然存在一定风险，例如：宿主机磁盘损坏、误操作删除目录、迁移时路径不一致等。因此在部署MySQL时，可以结合以下最佳实践来增强可靠性和可维护性：</p>
+<ol>
+<li><p><strong>优先使用Volume</strong><br>Docker原生的Volume由引擎统一管理，解耦了容器与宿主机的路径关系，迁移和跨环境使用更方便。如果需要指定存储位置，可以通过Volume Driver（如NFS、Ceph、云盘插件）实现，将卷存储到独立的存储介质上。</p>
+</li>
+<li><p><strong>定期备份数据库</strong><br>即使数据存储在持久化目录中，也难以完全避免硬件损坏、误删或勒索软件攻击。应通过 <code>mysqldump</code>、<code>mysqlpump</code> 或者物理备份工具（如 <code>xtrabackup</code>）进行定期备份，并将备份文件存放到独立存储设备或远程服务器。</p>
+</li>
+<li><p><strong>数据与容器分离</strong><br>养成“无状态化容器”的习惯，应用容器和数据存储应彻底分离。容器随时可以销毁重建，而数据应稳定存在于卷或外部存储中。</p>
+</li>
+<li><p><strong>多副本与高可用</strong><br>在关键业务中，单节点的挂载和持久化并不足以保障数据安全。建议部署MySQL主从复制（Replication）、MGR（Group Replication）或借助Kubernetes StatefulSet，结合PV（Persistent Volume）实现多副本存储与自动恢复。</p>
+</li>
+</ol>
+<p>通过以上措施，可以在容器化环境中既保持MySQL的高性能和灵活性，又确保数据安全与可恢复性，从而满足生产环境对可靠性的要求。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
