@@ -251,7 +251,7 @@ RU,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li></ul>
+            <ul><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -314,12 +314,6 @@ RU,"/>
 <li><a href="#ignore-%E6%96%87%E4%BB%B6%E4%BD%BF%E7%94%A8">ignore 文件使用</a></li>
 </ul>
 </li>
-</ul>
-<ul>
-<li><a href="#%E5%BF%BD%E7%95%A5%E4%B8%B4%E6%97%B6%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95">忽略临时文件和目录</a></li>
-<li><a href="#%E5%BF%BD%E7%95%A5%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6%E7%9B%AE%E5%BD%95">忽略版本控制目录</a></li>
-<li><a href="#%E5%BF%BD%E7%95%A5%E7%BC%96%E8%AF%91%E7%94%9F%E6%88%90%E7%9A%84%E6%96%87%E4%BB%B6">忽略编译生成的文件</a></li>
-<li><a href="#%E5%BF%BD%E7%95%A5%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%94%9F%E6%88%90%E7%9A%84%E6%96%87%E4%BB%B6">忽略操作系统生成的文件</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -1555,19 +1549,19 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
 <h3><span id="ignore-文件使用">ignore 文件使用</span></h3><p>在构建 Docker 镜像时，Docker 会将当前目录下的所有文件和子目录发送到 Docker 守护进程作为构建上下文。如果上下文中包含不必要的文件（如日志文件、临时文件、版本控制目录等），不仅会增加构建时间，还会导致镜像体积变大。为了解决这个问题，可以使用 <code>.dockerignore</code> 文件来指定哪些文件和目录应该被忽略，从而优化构建过程。</p>
 <p><code>.dockerignore</code> 文件的语法类似于 <code>.gitignore</code> 文件，可以使用通配符和注释来定义忽略规则。以下是一些常见的用法示例：</p>
 <p>下面是一个示例 <code>.dockerignore</code> 文件：</p>
-<pre class="line-numbers language-none"><code class="language-none"># 忽略所有的日志文件
-*.log
-# 忽略临时文件和目录
-tmp&#x2F;
-*.tmp
-# 忽略版本控制目录
-.git&#x2F;
-.gitignore
-# 忽略编译生成的文件
-build&#x2F;
-# 忽略操作系统生成的文件
-.DS_Store
-Thumbs.db<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-ignore" data-language="ignore"><code class="language-ignore"><span class="token comment"># 忽略所有的日志文件</span>
+<span class="token entry string"><span class="token operator">*</span>.log</span>
+<span class="token comment"># 忽略临时文件和目录</span>
+<span class="token entry string">tmp<span class="token punctuation">/</span></span>
+<span class="token entry string"><span class="token operator">*</span>.tmp</span>
+<span class="token comment"># 忽略版本控制目录</span>
+<span class="token entry string">.git<span class="token punctuation">/</span></span>
+<span class="token entry string">.gitignore</span>
+<span class="token comment"># 忽略编译生成的文件</span>
+<span class="token entry string">build<span class="token punctuation">/</span></span>
+<span class="token comment"># 忽略操作系统生成的文件</span>
+<span class="token entry string">.DS_Store</span>
+<span class="token entry string">Thumbs.db</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>在这个示例中，我们忽略了所有的 <code>.log</code> 文件、<code>tmp</code> 目录、<code>.git</code> 目录以及其他一些常见的临时文件和操作系统生成的文件，当我们构建 Docker 镜像时，这些文件和目录将不会被包含在构建上下文中，你可以理解成它们被 “隐藏” 了。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
