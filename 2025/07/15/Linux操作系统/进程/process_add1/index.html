@@ -68,6 +68,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -231,7 +233,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -240,7 +242,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li></ul>
+            <ul><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -281,30 +283,185 @@
 <h2><span id="高级语言地址划分复习">高级语言地址划分复习</span></h2><p>下面是一张进程地址空间的分布图，相信学过 C 语言的各位肯定不会陌生：</p>
 <p><img src="/img/Linux/process_add/vm_addr.png" alt="addr"></p>
 <p>我们先验证一下进程地址空间是不是这样排布的，先写一个程序：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstdlib&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局变量（模拟原始C代码）</span></span><br><span class="line"><span class="type">int</span> g_val_1;        <span class="comment">// 未初始化的全局变量</span></span><br><span class="line"><span class="type">int</span> g_val_2 = <span class="number">42</span>;   <span class="comment">// 已初始化的全局变量</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>* argv[], <span class="type">char</span>* env[])</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 打印代码段地址（函数存储位置）</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;代码段地址: &quot;</span> &lt;&lt; <span class="built_in">reinterpret_cast</span>&lt;<span class="type">void</span>*&gt;(main) &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印只读字符串常量地址（存储在.rodata段）</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* str = <span class="string">&quot;hello linux&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;只读字符串地址: &quot;</span> &lt;&lt; <span class="built_in">reinterpret_cast</span>&lt;<span class="type">const</span> <span class="type">void</span>*&gt;(str) &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印已初始化全局变量地址</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;已初始化全局变量地址: &quot;</span> &lt;&lt; &amp;g_val_2 &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印未初始化全局变量地址</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;未初始化全局变量地址: &quot;</span> &lt;&lt; &amp;g_val_1 &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 在堆上分配内存并打印其地址</span></span><br><span class="line">    <span class="type">char</span>* mem = <span class="built_in">static_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="built_in">malloc</span>(<span class="number">100</span>));</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;堆内存地址: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(mem) &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印栈地址（局部变量str的地址）</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;栈地址: &quot;</span> &lt;&lt; &amp;str &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印程序名称地址(argv[0])</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;argv[0]地址: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(argv[<span class="number">0</span>]) &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 打印第一个环境变量地址</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;env[0]地址: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(env[<span class="number">0</span>]) &lt;&lt; std::endl;</span><br><span class="line">    <span class="comment">// 释放分配的内存</span></span><br><span class="line">    <span class="built_in">free</span>(mem);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstdlib&gt;
+
+&#x2F;&#x2F; 全局变量（模拟原始C代码）
+int g_val_1;        &#x2F;&#x2F; 未初始化的全局变量
+int g_val_2 &#x3D; 42;   &#x2F;&#x2F; 已初始化的全局变量
+
+int main(int argc, char* argv[], char* env[]) &#123;
+    &#x2F;&#x2F; 打印代码段地址（函数存储位置）
+    std::cout &lt;&lt; &quot;代码段地址: &quot; &lt;&lt; reinterpret_cast&lt;void*&gt;(main) &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印只读字符串常量地址（存储在.rodata段）
+    const char* str &#x3D; &quot;hello linux&quot;;
+    std::cout &lt;&lt; &quot;只读字符串地址: &quot; &lt;&lt; reinterpret_cast&lt;const void*&gt;(str) &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印已初始化全局变量地址
+    std::cout &lt;&lt; &quot;已初始化全局变量地址: &quot; &lt;&lt; &amp;g_val_2 &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印未初始化全局变量地址
+    std::cout &lt;&lt; &quot;未初始化全局变量地址: &quot; &lt;&lt; &amp;g_val_1 &lt;&lt; std::endl;
+    &#x2F;&#x2F; 在堆上分配内存并打印其地址
+    char* mem &#x3D; static_cast&lt;char*&gt;(malloc(100));
+    std::cout &lt;&lt; &quot;堆内存地址: &quot; &lt;&lt; static_cast&lt;void*&gt;(mem) &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印栈地址（局部变量str的地址）
+    std::cout &lt;&lt; &quot;栈地址: &quot; &lt;&lt; &amp;str &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印程序名称地址(argv[0])
+    std::cout &lt;&lt; &quot;argv[0]地址: &quot; &lt;&lt; static_cast&lt;void*&gt;(argv[0]) &lt;&lt; std::endl;
+    &#x2F;&#x2F; 打印第一个环境变量地址
+    std::cout &lt;&lt; &quot;env[0]地址: &quot; &lt;&lt; static_cast&lt;void*&gt;(env[0]) &lt;&lt; std::endl;
+    &#x2F;&#x2F; 释放分配的内存
+    free(mem);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果输出如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  </span><br><span class="line">╰─➤  ./pro_add.o</span><br><span class="line">代码段地址: 0x56398dc17199</span><br><span class="line">只读字符串地址: 0x56398dc1801a</span><br><span class="line">已初始化全局变量地址: 0x56398dc1a048</span><br><span class="line">未初始化全局变量地址: 0x56398dc1a194</span><br><span class="line">堆内存地址: 0x56398eacf2c0</span><br><span class="line">栈地址: 0x7fffe4125f60</span><br><span class="line">argv[0]地址: 0x7fffe4128245</span><br><span class="line">env[0]地址: 0x7fffe4128251</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  
+╰─➤  ./pro_add.o
+代码段地址: 0x56398dc17199
+只读字符串地址: 0x56398dc1801a
+已初始化全局变量地址: 0x56398dc1a048
+未初始化全局变量地址: 0x56398dc1a194
+堆内存地址: 0x56398eacf2c0
+栈地址: 0x7fffe4125f60
+argv<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>地址: 0x7fffe4128245
+env<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>地址: 0x7fffe4128251<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>你会发现，这些地址的排列和上面那张图预期是一样的</p>
 <p>当然，还有一个我们没有验证，那就是堆向上增长，栈向下增长：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;memory&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 全局变量</span></span><br><span class="line"><span class="type">int</span> g_val_1;</span><br><span class="line"><span class="type">int</span> g_val_2 = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 打印代码段地址（使用reinterpret_cast进行类型转换）</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;code addr: &quot;</span> &lt;&lt; <span class="built_in">reinterpret_cast</span>&lt;<span class="type">const</span> <span class="type">void</span>*&gt;(main) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 字符串常量（使用string_view避免不必要的拷贝）</span></span><br><span class="line">    <span class="keyword">constexpr</span> std::string_view str = <span class="string">&quot;hello bit&quot;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;read only string addr: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">const</span> <span class="type">void</span>*&gt;(str.<span class="built_in">data</span>()) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 打印全局变量地址</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;init global value addr: &quot;</span> &lt;&lt; &amp;g_val_2 &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;uninit global value addr: &quot;</span> &lt;&lt; &amp;g_val_1 &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 堆区分配（使用智能指针自动管理内存）</span></span><br><span class="line">    <span class="keyword">auto</span> mem = std::<span class="built_in">make_unique</span>&lt;<span class="type">char</span>[]&gt;(<span class="number">100</span>);</span><br><span class="line">    <span class="keyword">auto</span> mem1 = std::<span class="built_in">make_unique</span>&lt;<span class="type">char</span>[]&gt;(<span class="number">100</span>);</span><br><span class="line">    <span class="keyword">auto</span> mem2 = std::<span class="built_in">make_unique</span>&lt;<span class="type">char</span>[]&gt;(<span class="number">100</span>);</span><br><span class="line">    </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;heap addr: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(mem.<span class="built_in">get</span>()) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;heap addr: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(mem<span class="number">1.</span><span class="built_in">get</span>()) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;heap addr: &quot;</span> &lt;&lt; <span class="built_in">static_cast</span>&lt;<span class="type">void</span>*&gt;(mem<span class="number">2.</span><span class="built_in">get</span>()) &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 栈区变量（使用结构化绑定处理多个变量）</span></span><br><span class="line">    <span class="keyword">auto</span> [a, b, c, d, f] = std::<span class="built_in">make_tuple</span>(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;stack addr: &quot;</span> &lt;&lt; &amp;a &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;stack addr: &quot;</span> &lt;&lt; &amp;b &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;stack addr: &quot;</span> &lt;&lt; &amp;c &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;stack addr: &quot;</span> &lt;&lt; &amp;d &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;stack addr: &quot;</span> &lt;&lt; &amp;f &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;memory&gt;
+#include &lt;vector&gt;
+
+&#x2F;&#x2F; 全局变量
+int g_val_1;
+int g_val_2 &#x3D; 100;
+
+int main() &#123;
+    &#x2F;&#x2F; 打印代码段地址（使用reinterpret_cast进行类型转换）
+    std::cout &lt;&lt; &quot;code addr: &quot; &lt;&lt; reinterpret_cast&lt;const void*&gt;(main) &lt;&lt; &#39;\n&#39;;
+    
+    &#x2F;&#x2F; 字符串常量（使用string_view避免不必要的拷贝）
+    constexpr std::string_view str &#x3D; &quot;hello bit&quot;;
+    std::cout &lt;&lt; &quot;read only string addr: &quot; &lt;&lt; static_cast&lt;const void*&gt;(str.data()) &lt;&lt; &#39;\n&#39;;
+    
+    &#x2F;&#x2F; 打印全局变量地址
+    std::cout &lt;&lt; &quot;init global value addr: &quot; &lt;&lt; &amp;g_val_2 &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;uninit global value addr: &quot; &lt;&lt; &amp;g_val_1 &lt;&lt; &#39;\n&#39;;
+    
+    &#x2F;&#x2F; 堆区分配（使用智能指针自动管理内存）
+    auto mem &#x3D; std::make_unique&lt;char[]&gt;(100);
+    auto mem1 &#x3D; std::make_unique&lt;char[]&gt;(100);
+    auto mem2 &#x3D; std::make_unique&lt;char[]&gt;(100);
+    
+    std::cout &lt;&lt; &quot;heap addr: &quot; &lt;&lt; static_cast&lt;void*&gt;(mem.get()) &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;heap addr: &quot; &lt;&lt; static_cast&lt;void*&gt;(mem1.get()) &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;heap addr: &quot; &lt;&lt; static_cast&lt;void*&gt;(mem2.get()) &lt;&lt; &#39;\n&#39;;
+    
+    &#x2F;&#x2F; 栈区变量（使用结构化绑定处理多个变量）
+    auto [a, b, c, d, f] &#x3D; std::make_tuple(0, 0, 0, 0, 0);
+    
+    std::cout &lt;&lt; &quot;stack addr: &quot; &lt;&lt; &amp;a &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;stack addr: &quot; &lt;&lt; &amp;b &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;stack addr: &quot; &lt;&lt; &amp;c &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;stack addr: &quot; &lt;&lt; &amp;d &lt;&lt; &#39;\n&#39;;
+    std::cout &lt;&lt; &quot;stack addr: &quot; &lt;&lt; &amp;f &lt;&lt; &#39;\n&#39;;
+    
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>编译后运行发现结果符合预期：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  </span><br><span class="line">╰─➤  ./pro_add.o                </span><br><span class="line">code addr: 0x55de7a3341a9</span><br><span class="line">read only string addr: 0x55de7a335018</span><br><span class="line">init global value addr: 0x55de7a337050</span><br><span class="line">uninit global value addr: 0x55de7a337194</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">堆向上增长</span></span><br><span class="line">heap addr: 0x55de7b9402c0</span><br><span class="line">heap addr: 0x55de7b940330</span><br><span class="line">heap addr: 0x55de7b9403a0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">栈向下增长</span></span><br><span class="line">stack addr: 0x7ffef6ed95a0</span><br><span class="line">stack addr: 0x7ffef6ed959c</span><br><span class="line">stack addr: 0x7ffef6ed9598</span><br><span class="line">stack addr: 0x7ffef6ed9594</span><br><span class="line">stack addr: 0x7ffef6ed9590</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  
+╰─➤  ./pro_add.o                
+code addr: 0x55de7a3341a9
+<span class="token builtin class-name">read</span> only string addr: 0x55de7a335018
+init global value addr: 0x55de7a337050
+uninit global value addr: 0x55de7a337194
+<span class="token comment"># 堆向上增长</span>
+heap addr: 0x55de7b9402c0
+heap addr: 0x55de7b940330
+heap addr: 0x55de7b9403a0
+<span class="token comment"># 栈向下增长</span>
+stack addr: 0x7ffef6ed95a0
+stack addr: 0x7ffef6ed959c
+stack addr: 0x7ffef6ed9598
+stack addr: 0x7ffef6ed9594
+stack addr: 0x7ffef6ed9590<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们再做一个实验，我们在代码的最后加上一个静态变量，打印一下它的地址：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># 附加代码</span><br><span class="line"><span class="type">static</span> <span class="keyword">auto</span> e = <span class="number">0</span>;</span><br><span class="line">std::cout &lt;&lt; <span class="string">&quot;static int addr: &quot;</span> &lt;&lt; &amp;e &lt;&lt; std::endl;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++"># 附加代码
+static auto e &#x3D; 0;
+std::cout &lt;&lt; &quot;static int addr: &quot; &lt;&lt; &amp;e &lt;&lt; std::endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>编译后运行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  </span><br><span class="line">╰─➤  ./pro_add.o                </span><br><span class="line">code addr: 0x5577c42971b9</span><br><span class="line">read only string addr: 0x5577c4298018</span><br><span class="line">init global value addr: 0x5577c429a058</span><br><span class="line">uninit global value addr: 0x5577c429a194</span><br><span class="line">heap addr: 0x5577c5e962c0</span><br><span class="line">heap addr: 0x5577c5e96330</span><br><span class="line">heap addr: 0x5577c5e963a0</span><br><span class="line">stack addr: 0x7fffaf91fa60</span><br><span class="line">stack addr: 0x7fffaf91fa5c</span><br><span class="line">stack addr: 0x7fffaf91fa58</span><br><span class="line">stack addr: 0x7fffaf91fa54</span><br><span class="line">stack addr: 0x7fffaf91fa50</span><br><span class="line">static int addr: 0x5577c429a19c</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  
+╰─➤  ./pro_add.o                
+code addr: 0x5577c42971b9
+<span class="token builtin class-name">read</span> only string addr: 0x5577c4298018
+init global value addr: 0x5577c429a058
+uninit global value addr: 0x5577c429a194
+heap addr: 0x5577c5e962c0
+heap addr: 0x5577c5e96330
+heap addr: 0x5577c5e963a0
+stack addr: 0x7fffaf91fa60
+stack addr: 0x7fffaf91fa5c
+stack addr: 0x7fffaf91fa58
+stack addr: 0x7fffaf91fa54
+stack addr: 0x7fffaf91fa50
+static int addr: 0x5577c429a19c<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>你会发现，a的地址变得很小，可以看到其地址在全局变量地址的范围内，这说明操作系统将 static 变量地址放到全局变量区，从而使得 static 生命周期变为全局有效</p>
 <h2><span id="进程地址空间">进程地址空间</span></h2><p>我们知道，通过fork()函数可以创建子进程，子进程和父进程会共同享用这一份代码方案，但数据段是不共享的，接下来我将用一个函数创建子进程，但子进程会更改全局变量的值，看看修改前后父子进程对这个全局变量的读取有何变化。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> g_val = <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span> (id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> cnt = <span class="number">2</span>;</span><br><span class="line">        <span class="comment">// 子进程</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;I am child, pid: %d, ppid: %d, g_val: %d, &amp;g_val: %p\n&quot;</span>, <span class="built_in">getpid</span>(), <span class="built_in">getppid</span>(), g_val, &amp;g_val);</span><br><span class="line">            <span class="comment">// 两秒后修改cnt的值</span></span><br><span class="line">            <span class="keyword">if</span> (cnt)</span><br><span class="line">                --cnt;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                g_val = <span class="number">200</span>;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;g_val changed\n&quot;</span>);</span><br><span class="line">                cnt--;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 父进程</span></span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;I am parent, pid: %d, ppid: %d, g_val: %d, &amp;g_val: %p\n&quot;</span>, <span class="built_in">getpid</span>(), <span class="built_in">getppid</span>(), g_val, &amp;g_val);</span><br><span class="line">            <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+
+int g_val &#x3D; 100;
+
+int main()
+&#123;
+    pid_t id &#x3D; fork();
+    if (id &#x3D;&#x3D; 0)
+    &#123;
+        int cnt &#x3D; 2;
+        &#x2F;&#x2F; 子进程
+        while (1)
+        &#123;
+            printf(&quot;I am child, pid: %d, ppid: %d, g_val: %d, &amp;g_val: %p\n&quot;, getpid(), getppid(), g_val, &amp;g_val);
+            &#x2F;&#x2F; 两秒后修改cnt的值
+            if (cnt)
+                --cnt;
+            else
+            &#123;
+                g_val &#x3D; 200;
+                printf(&quot;g_val changed\n&quot;);
+                cnt--;
+            &#125;
+            sleep(1);
+        &#125;
+    &#125;
+    else
+    &#123;
+        &#x2F;&#x2F; 父进程
+        while (1)
+        &#123;
+            printf(&quot;I am parent, pid: %d, ppid: %d, g_val: %d, &amp;g_val: %p\n&quot;, getpid(), getppid(), g_val, &amp;g_val);
+            sleep(1);
+        &#125;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>输出如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  </span><br><span class="line">╰─➤  ./pro_add.o                </span><br><span class="line">I am parent, pid: 2302657, ppid: 2225383, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am child, pid: 2302658, ppid: 2302657, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am parent, pid: 2302657, ppid: 2225383, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am child, pid: 2302658, ppid: 2302657, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am parent, pid: 2302657, ppid: 2225383, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am child, pid: 2302658, ppid: 2302657, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">g_val changed</span><br><span class="line">I am parent, pid: 2302657, ppid: 2225383, g_val: 100, &amp;g_val: 0x5611f94d3050</span><br><span class="line">I am child, pid: 2302658, ppid: 2302657, g_val: 200, &amp;g_val: 0x5611f94d3050</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1  
+╰─➤  ./pro_add.o                
+I am parent, pid: <span class="token number">2302657</span>, ppid: <span class="token number">2225383</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am child, pid: <span class="token number">2302658</span>, ppid: <span class="token number">2302657</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am parent, pid: <span class="token number">2302657</span>, ppid: <span class="token number">2225383</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am child, pid: <span class="token number">2302658</span>, ppid: <span class="token number">2302657</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am parent, pid: <span class="token number">2302657</span>, ppid: <span class="token number">2225383</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am child, pid: <span class="token number">2302658</span>, ppid: <span class="token number">2302657</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+g_val changed
+I am parent, pid: <span class="token number">2302657</span>, ppid: <span class="token number">2225383</span>, g_val: <span class="token number">100</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050
+I am child, pid: <span class="token number">2302658</span>, ppid: <span class="token number">2302657</span>, g_val: <span class="token number">200</span>, <span class="token operator">&amp;</span>g_val: 0x5611f94d3050<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这里我们会发现，子进程和父进程所指向的地址是“相同”的，但是子进程把全局变量修改后，父进程的值不变，这是为什么呢？</p>
 <p>首先根据这种现象我们可以推出，这个地址一定不是物理地址，同一个物理地址是不可能有两个不同的值的，这个地址是线性地址or虚拟地址，而我们平时在C&#x2F;C++等语言里面的地址也不是物理地址。</p>
@@ -318,12 +475,33 @@
 <p>因为一个页表存储的信息有虚拟地址，所映射的物理地址，访问权限，以及是否在内存中存储，这样的话我们就可以通过判断进程是否在内存中从而对是否需要运行该进程和如何运行该进程做出判断，因此进程管理模块和内存管理模块就可以分开进行管理，不会因为内存管理出现问题而导致进程管理受到限制，这种现象就叫做解耦合。</p>
 <p>下面我们来具体看一下进程地址空间：</p>
 <p>描述linux下进程的地址空间的所有的信息的结构体是 mm_struct （内存描述符）。每个进程只有⼀个mm_struct结构，在每个进程的 task_struct 结构中，有⼀个<br>指向该进程的mm_struct结构体指针，核心结构大概如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="comment">/*...*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span> *<span class="title">mm</span>;</span> <span class="comment">//对于普通的用户进程来说该字段指向他</span></span><br><span class="line">的虚拟地址空间的用户空间部分，对于内核线程来说这部分为<span class="literal">NULL</span>。</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span> *<span class="title">active_mm</span>;</span> <span class="comment">// 该字段是内核线程使⽤的。当</span></span><br><span class="line">该进程是内核线程时，它的mm字段为<span class="literal">NULL</span>，表⽰没有内存地址空间，可也并不是真正的没有，这是因</span><br><span class="line">为所有进程关于内核的映射都是⼀样的，内核线程可以使⽤任意进程的地址空间。</span><br><span class="line"><span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">task_struct</span>
+<span class="token punctuation">&#123;</span>
+<span class="token comment">/*...*/</span>
+<span class="token keyword">struct</span> <span class="token class-name">mm_struct</span> <span class="token operator">*</span>mm<span class="token punctuation">;</span> <span class="token comment">//对于普通的用户进程来说该字段指向他</span>
+的虚拟地址空间的用户空间部分，对于内核线程来说这部分为<span class="token constant">NULL</span>。
+<span class="token keyword">struct</span> <span class="token class-name">mm_struct</span> <span class="token operator">*</span>active_mm<span class="token punctuation">;</span> <span class="token comment">// 该字段是内核线程使⽤的。当</span>
+该进程是内核线程时，它的mm字段为<span class="token constant">NULL</span>，表⽰没有内存地址空间，可也并不是真正的没有，这是因
+为所有进程关于内核的映射都是⼀样的，内核线程可以使⽤任意进程的地址空间。
+<span class="token comment">/*...*/</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以说， mm_struct 结构是对整个⽤⼾空间的描述。每⼀个进程都会有⾃⼰独⽴的 mm_struct ，<br>这样每⼀个进程都会有⾃⼰独⽴的地址空间才能互不⼲扰。先来看看由 task_struct 到<br>mm_struct ，进程的地址空间的分布情况</p>
 <p><img src="/img/Linux/process_add/task_mm_struct.png" alt="addr"></p>
 <p>mm_struct 针对每一个独立的内存区域都会划分一个界限，确定其上界和下界：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line"><span class="comment">/*...*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vm_area_struct</span> *<span class="title">mmap</span>;</span> <span class="comment">/* 指向虚拟区间(VMA)链表 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rb_root</span> <span class="title">mm_rb</span>;</span> <span class="comment">/* red_black树 */</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> task_size; <span class="comment">/*具有该结构体的进程的虚拟地址空间的⼤⼩*/</span></span><br><span class="line"><span class="comment">/*...*/</span></span><br><span class="line"><span class="comment">// 代码段、数据段、堆栈段、参数段及环境段的起始和结束地址。</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> start_code, end_code, start_data, end_data;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> start_brk, brk, start_stack;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> arg_start, arg_end, env_start, env_end;</span><br><span class="line"><span class="comment">/*...*/</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">mm_struct</span>
+<span class="token punctuation">&#123;</span>
+<span class="token comment">/*...*/</span>
+<span class="token keyword">struct</span> <span class="token class-name">vm_area_struct</span> <span class="token operator">*</span>mmap<span class="token punctuation">;</span> <span class="token comment">/* 指向虚拟区间(VMA)链表 */</span>
+<span class="token keyword">struct</span> <span class="token class-name">rb_root</span> mm_rb<span class="token punctuation">;</span> <span class="token comment">/* red_black树 */</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> task_size<span class="token punctuation">;</span> <span class="token comment">/*具有该结构体的进程的虚拟地址空间的⼤⼩*/</span>
+<span class="token comment">/*...*/</span>
+<span class="token comment">// 代码段、数据段、堆栈段、参数段及环境段的起始和结束地址。</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> start_code<span class="token punctuation">,</span> end_code<span class="token punctuation">,</span> start_data<span class="token punctuation">,</span> end_data<span class="token punctuation">;</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> start_brk<span class="token punctuation">,</span> brk<span class="token punctuation">,</span> start_stack<span class="token punctuation">;</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> arg_start<span class="token punctuation">,</span> arg_end<span class="token punctuation">,</span> env_start<span class="token punctuation">,</span> env_end<span class="token punctuation">;</span>
+<span class="token comment">/*...*/</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>既然每⼀个进程都会有⾃⼰独⽴的 mm_struct ，操作系统肯定是要将这么多进程的 mm_struct<br>组织起来的，虚拟空间的组织⽅式有两种：</p>
 <ol>
@@ -331,7 +509,34 @@
 <li>当虚拟区间多时采取红⿊树进⾏管理，由mm_rb指向这棵树。</li>
 </ol>
 <p>linux内核使⽤ vm_area_struct 结构来表⽰⼀个独⽴的虚拟内存区域(VMA)，由于每个不同质的虚<br>拟内存区域功能和内部机制都不同，因此⼀个进程使⽤多个vm_area_struct结构来分别表⽰不同类型<br>的虚拟内存区域。上⾯提到的两种组织⽅式使⽤的就是vm_area_struct结构来连接各个VMA，⽅便进<br>程快速访问</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vm_area_struct</span> &#123;</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> vm_start; <span class="comment">//虚存区起始</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> vm_end; <span class="comment">//虚存区结束</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vm_area_struct</span> *<span class="title">vm_next</span>, *<span class="title">vm_prev</span>;</span> <span class="comment">//前后指针</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span> <span class="title">vm_rb</span>;</span> <span class="comment">//红⿊树中的位置</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> rb_subtree_gap;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span> *<span class="title">vm_mm</span>;</span> <span class="comment">//所属的 mm_struct</span></span><br><span class="line"><span class="type">pgprot_t</span> vm_page_prot;</span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> vm_flags; <span class="comment">//标志位</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span> <span class="title">rb</span>;</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> rb_subtree_last;</span><br><span class="line">&#125; shared;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">anon_vma_chain</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">anon_vma</span> *<span class="title">anon_vma</span>;</span></span><br><span class="line"><span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">vm_operations_struct</span> *<span class="title">vm_ops</span>;</span> <span class="comment">//vma对应的实际操作</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">long</span> vm_pgoff; <span class="comment">//⽂件映射偏移量</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">file</span> * <span class="title">vm_file</span>;</span> <span class="comment">//映射的⽂件</span></span><br><span class="line"><span class="type">void</span> * vm_private_data; <span class="comment">//私有数据</span></span><br><span class="line"><span class="type">atomic_long_t</span> swap_readahead_info;</span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> CONFIG_MMU</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vm_region</span> *<span class="title">vm_region</span>;</span> <span class="comment">/* NOMMU mapping region */</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_NUMA</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mempolicy</span> *<span class="title">vm_policy</span>;</span> <span class="comment">/* NUMA policy for the VMA */</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">vm_userfaultfd_ctx</span> <span class="title">vm_userfaultfd_ctx</span>;</span></span><br><span class="line">&#125; __randomize_layout;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">vm_area_struct</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> vm_start<span class="token punctuation">;</span> <span class="token comment">//虚存区起始</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> vm_end<span class="token punctuation">;</span> <span class="token comment">//虚存区结束</span>
+<span class="token keyword">struct</span> <span class="token class-name">vm_area_struct</span> <span class="token operator">*</span>vm_next<span class="token punctuation">,</span> <span class="token operator">*</span>vm_prev<span class="token punctuation">;</span> <span class="token comment">//前后指针</span>
+<span class="token keyword">struct</span> <span class="token class-name">rb_node</span> vm_rb<span class="token punctuation">;</span> <span class="token comment">//红⿊树中的位置</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> rb_subtree_gap<span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">mm_struct</span> <span class="token operator">*</span>vm_mm<span class="token punctuation">;</span> <span class="token comment">//所属的 mm_struct</span>
+<span class="token class-name">pgprot_t</span> vm_page_prot<span class="token punctuation">;</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> vm_flags<span class="token punctuation">;</span> <span class="token comment">//标志位</span>
+<span class="token keyword">struct</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">struct</span> <span class="token class-name">rb_node</span> rb<span class="token punctuation">;</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> rb_subtree_last<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> shared<span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">list_head</span> anon_vma_chain<span class="token punctuation">;</span>
+<span class="token keyword">struct</span> <span class="token class-name">anon_vma</span> <span class="token operator">*</span>anon_vma<span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">vm_operations_struct</span> <span class="token operator">*</span>vm_ops<span class="token punctuation">;</span> <span class="token comment">//vma对应的实际操作</span>
+<span class="token keyword">unsigned</span> <span class="token keyword">long</span> vm_pgoff<span class="token punctuation">;</span> <span class="token comment">//⽂件映射偏移量</span>
+<span class="token keyword">struct</span> <span class="token class-name">file</span> <span class="token operator">*</span> vm_file<span class="token punctuation">;</span> <span class="token comment">//映射的⽂件</span>
+<span class="token keyword">void</span> <span class="token operator">*</span> vm_private_data<span class="token punctuation">;</span> <span class="token comment">//私有数据</span>
+<span class="token class-name">atomic_long_t</span> swap_readahead_info<span class="token punctuation">;</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifndef</span> <span class="token expression">CONFIG_MMU</span></span>
+<span class="token keyword">struct</span> <span class="token class-name">vm_region</span> <span class="token operator">*</span>vm_region<span class="token punctuation">;</span> <span class="token comment">/* NOMMU mapping region */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifdef</span> <span class="token expression">CONFIG_NUMA</span></span>
+<span class="token keyword">struct</span> <span class="token class-name">mempolicy</span> <span class="token operator">*</span>vm_policy<span class="token punctuation">;</span> <span class="token comment">/* NUMA policy for the VMA */</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">endif</span></span>
+<span class="token keyword">struct</span> <span class="token class-name">vm_userfaultfd_ctx</span> vm_userfaultfd_ctx<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span> __randomize_layout<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>因此，我们可以通过下面这两张图来更好的理解进程地址空间的结构分布：</p>
 <p><img src="/img/Linux/process_add/vm_addr2.png" alt="addr"></p>
@@ -405,7 +610,8 @@
 <li>程序从虚拟地址 <code>0x400000</code> 开始执行，无需关心实际物理地址。</li>
 </ol>
 <p><strong>(2) <code>malloc</code> 的工作原理</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *p = <span class="built_in">malloc</span>(<span class="number">1</span>GB); <span class="comment">// 仅分配1GB的虚拟地址空间</span></span><br><span class="line">*p = <span class="string">&#x27;a&#x27;</span>;              <span class="comment">// 首次访问时触发缺页异常，分配物理页</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">char</span> <span class="token operator">*</span>p <span class="token operator">=</span> <span class="token function">malloc</span><span class="token punctuation">(</span><span class="token number">1</span>GB<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 仅分配1GB的虚拟地址空间</span>
+<span class="token operator">*</span>p <span class="token operator">=</span> <span class="token char">'a'</span><span class="token punctuation">;</span>              <span class="token comment">// 首次访问时触发缺页异常，分配物理页</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>(3) 共享库（如<code>libc.so</code>）</strong></p>
 <ul>

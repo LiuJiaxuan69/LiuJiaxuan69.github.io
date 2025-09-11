@@ -71,6 +71,8 @@ Docker Image 介绍
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -234,7 +236,7 @@ Docker Image 介绍
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -243,7 +245,7 @@ Docker Image 介绍
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li></ul>
+            <ul><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -323,7 +325,10 @@ Docker Image 介绍
 <h2><span id="镜像的组成分层存储体系">镜像的组成：分层存储体系</span></h2><p>这是理解镜像最关键、最精髓的部分。</p>
 <h3><span id="什么是分层">什么是分层？</span></h3><p>Docker 镜像并非一个巨大的单体文件，而是由一系列<strong>层</strong>堆叠而成的。每一层代表了 Dockerfile 中的一条指令。</p>
 <p><strong>举个例子，一个简单的 Dockerfile：</strong></p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> ubuntu:<span class="number">20.04</span>         <span class="comment"># 层 1： 拉取基础镜像层</span></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> . /app               <span class="comment"># 层 2： 添加当前目录文件到镜像的 /app 目录</span></span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> make /app             <span class="comment"># 层 3： 使用 make 构建应用</span></span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> python /app/app.py    <span class="comment"># 层 4： 设置容器启动时的默认命令</span></span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">FROM</span> ubuntu:20.04         # 层 1： 拉取基础镜像层</span>
+<span class="token instruction"><span class="token keyword">COPY</span> . /app               # 层 2： 添加当前目录文件到镜像的 /app 目录</span>
+<span class="token instruction"><span class="token keyword">RUN</span> make /app             # 层 3： 使用 make 构建应用</span>
+<span class="token instruction"><span class="token keyword">CMD</span> python /app/app.py    # 层 4： 设置容器启动时的默认命令</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这个 Dockerfile 构建的镜像至少包含 4 层（实际上基础镜像 <code>ubuntu:20.04</code> 本身也是由多层组成的）。</p>
 <h3><span id="分层的好处">分层的好处</span></h3><ol>
@@ -405,7 +410,16 @@ Docker Image 介绍
 <li><p><strong>选择小巧的基础镜像</strong>： 优先选择 Alpine Linux 等小型镜像，可以极大减小最终镜像体积和安全攻击面。</p>
 </li>
 <li><p><strong>多阶段构建</strong>： 这是构建高效、小体积镜像的<strong>黄金法则</strong>。在一个 Dockerfile 中使用多个 <code>FROM</code> 指令。你可以在一个阶段（“构建阶段”）使用包含编译器等重型工具的镜像来构建应用，然后在另一个阶段（“运行阶段”）只复制构建好的二进制文件到一个非常精简的基础镜像中。</p>
-<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 阶段一：构建阶段</span></span><br><span class="line"><span class="keyword">FROM</span> golang:<span class="number">1.19</span> AS builder</span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /app</span></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> . .</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> go build -o myapp .</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 阶段二：运行阶段</span></span><br><span class="line"><span class="keyword">FROM</span> alpine:latest</span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> --from=builder /app/myapp /usr/local/bin/</span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;myapp&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token comment"># 阶段一：构建阶段</span>
+<span class="token instruction"><span class="token keyword">FROM</span> golang:1.19 <span class="token keyword">AS</span> builder</span>
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /app</span>
+<span class="token instruction"><span class="token keyword">COPY</span> . .</span>
+<span class="token instruction"><span class="token keyword">RUN</span> go build -o myapp .</span>
+
+<span class="token comment"># 阶段二：运行阶段</span>
+<span class="token instruction"><span class="token keyword">FROM</span> alpine:latest</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">builder</span></span> /app/myapp /usr/local/bin/</span>
+<span class="token instruction"><span class="token keyword">CMD</span> [<span class="token string">"myapp"</span>]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>合并 RUN 指令</strong>： 将多个 <code>RUN</code> 指令用 <code>&amp;&amp;</code> 连接成一个，减少镜像层数（虽然层数限制现在已不是大问题，但仍能减少一些元数据开销）。</p>
 </li>
@@ -417,10 +431,11 @@ Docker Image 介绍
 <li><p><strong>功能</strong><br>列出本地存储的 Docker 镜像。</p>
 </li>
 <li><p><strong>语法</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images [OPTIONS] [REPOSITORY[:TAG]]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> images <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>REPOSITORY<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>别名</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker image <span class="built_in">ls</span></span><br><span class="line">docker image list</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image <span class="token function">ls</span>
+<span class="token function">docker</span> image list<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>关键参数</strong></p>
 <ul>
@@ -433,20 +448,47 @@ Docker Image 介绍
 </ul>
 </li>
 <li><p><strong>使用示例</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出本地所有镜像</span></span><br><span class="line">docker images</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出特定的镜像（ubuntu 仓库的所有版本）</span></span><br><span class="line">docker images ubuntu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示所有镜像（包括中间层）</span></span><br><span class="line">docker images -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示镜像ID</span></span><br><span class="line">docker images -q</span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示完整的镜像信息（不截断）</span></span><br><span class="line">docker images --no-trunc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用过滤器显示特定标签的镜像</span></span><br><span class="line">docker images -f <span class="string">&quot;reference=nginx:*&quot;</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出本地所有镜像</span>
+<span class="token function">docker</span> images
+
+<span class="token comment"># 列出特定的镜像（ubuntu 仓库的所有版本）</span>
+<span class="token function">docker</span> images ubuntu
+
+<span class="token comment"># 显示所有镜像（包括中间层）</span>
+<span class="token function">docker</span> images <span class="token parameter variable">-a</span>
+
+<span class="token comment"># 只显示镜像ID</span>
+<span class="token function">docker</span> images <span class="token parameter variable">-q</span>
+
+<span class="token comment"># 显示完整的镜像信息（不截断）</span>
+<span class="token function">docker</span> images --no-trunc
+
+<span class="token comment"># 使用过滤器显示特定标签的镜像</span>
+<span class="token function">docker</span> images <span class="token parameter variable">-f</span> <span class="token string">"reference=nginx:*"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <hr>
 <h3><span id="docker-tag">docker tag</span></h3><ul>
 <li><p><strong>功能</strong><br>为本地镜像创建新的标签，通常用于为镜像添加仓库地址前缀，为推送镜像到仓库做准备。</p>
 </li>
 <li><p><strong>语法</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> tag SOURCE_IMAGE<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span> TARGET_IMAGE<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>别名</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image tag</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image tag<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>使用示例</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为本地镜像添加新的标签</span></span><br><span class="line">docker tag ubuntu:22.04 myregistry.com/myubuntu:22.04</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为镜像添加版本标签</span></span><br><span class="line">docker tag nginx nginx:1.23.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为镜像添加多个标签</span></span><br><span class="line">docker tag myapp:latest myregistry.com/myapp:v1.0</span><br><span class="line">docker tag myapp:latest myregistry.com/myapp:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送到私有仓库前的标签准备</span></span><br><span class="line">docker tag local-image:tag your-private-registry.com/username/repository:tag</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 为本地镜像添加新的标签</span>
+<span class="token function">docker</span> tag ubuntu:22.04 myregistry.com/myubuntu:22.04
+
+<span class="token comment"># 为镜像添加版本标签</span>
+<span class="token function">docker</span> tag nginx nginx:1.23.3
+
+<span class="token comment"># 为镜像添加多个标签</span>
+<span class="token function">docker</span> tag myapp:latest myregistry.com/myapp:v1.0
+<span class="token function">docker</span> tag myapp:latest myregistry.com/myapp:latest
+
+<span class="token comment"># 推送到私有仓库前的标签准备</span>
+<span class="token function">docker</span> tag local-image:tag your-private-registry.com/username/repository:tag<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>注意事项</strong></p>
 <ul>
@@ -460,7 +502,7 @@ Docker Image 介绍
 <hr>
 <h3><span id="docker-pull">docker pull</span></h3><p><strong>功能</strong>：从镜像仓库拉取（下载）镜像或仓库到本地。这是获取和运行容器的基础。</p>
 <p><strong>语法</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull [OPTIONS] NAME[:TAG|@DIGEST]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> pull <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NAME<span class="token punctuation">[</span>:TAG<span class="token operator">|</span>@DIGEST<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>NAME</code>：镜像名称，格式通常为 <code>[仓库地址/]用户名/仓库名</code>。</li>
@@ -468,7 +510,17 @@ Docker Image 介绍
 <li><code>DIGEST</code>：镜像的数字摘要，用于精确指定某个版本的镜像，比 TAG 更唯一、安全。</li>
 </ul>
 <p><strong>示例</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从 Docker Hub 拉取最新的 Ubuntu 镜像</span></span><br><span class="line">docker pull ubuntu</span><br><span class="line"></span><br><span class="line"><span class="comment"># 拉取指定标签的 Nginx 镜像（版本为 1.25-alpine）</span></span><br><span class="line">docker pull nginx:1.25-alpine</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从私有仓库拉取镜像</span></span><br><span class="line">docker pull myregistry.com:5000/myapp:v1.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 通过镜像摘要拉取，确保内容绝对一致</span></span><br><span class="line">docker pull ubuntu@sha256:abc123...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 从 Docker Hub 拉取最新的 Ubuntu 镜像</span>
+<span class="token function">docker</span> pull ubuntu
+
+<span class="token comment"># 拉取指定标签的 Nginx 镜像（版本为 1.25-alpine）</span>
+<span class="token function">docker</span> pull nginx:1.25-alpine
+
+<span class="token comment"># 从私有仓库拉取镜像</span>
+<span class="token function">docker</span> pull myregistry.com:5000/myapp:v1.0
+
+<span class="token comment"># 通过镜像摘要拉取，确保内容绝对一致</span>
+<span class="token function">docker</span> pull ubuntu@sha256:abc123<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>注意事项</strong>：</p>
 <ul>
@@ -477,13 +529,20 @@ Docker Image 介绍
 <hr>
 <h3><span id="docker-push">docker push</span></h3><p><strong>功能</strong>：将本地的镜像标签推送到镜像仓库。这是分享和部署自定义镜像的关键步骤。</p>
 <p><strong>语法</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker push [OPTIONS] NAME[:TAG]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> push <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NAME<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li>推送前，必须先用 <code>docker tag</code> 命令将本地镜像命名为符合目标仓库规范的名称（<code>仓库地址/用户名/仓库名:标签</code>）。</li>
 </ul>
 <p><strong>示例</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 首先，为本地镜像打上符合仓库规范的标签</span></span><br><span class="line">docker tag my_local_image:latest your_username/your_repo:v1.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 然后，推送到仓库</span></span><br><span class="line">docker push your_username/your_repo:v1.0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送到私有仓库</span></span><br><span class="line">docker push myregistry.com:5000/your_repo:v1.0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 首先，为本地镜像打上符合仓库规范的标签</span>
+<span class="token function">docker</span> tag my_local_image:latest your_username/your_repo:v1.0
+
+<span class="token comment"># 2. 然后，推送到仓库</span>
+<span class="token function">docker</span> push your_username/your_repo:v1.0
+
+<span class="token comment"># 推送到私有仓库</span>
+<span class="token function">docker</span> push myregistry.com:5000/your_repo:v1.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>注意事项</strong>：</p>
 <ul>
@@ -493,13 +552,17 @@ Docker Image 介绍
 <hr>
 <h3><span id="docker-rmi">docker rmi</span></h3><p><strong>功能</strong>：删除本地的一个或多个 Docker 镜像。释放磁盘空间或清理不再需要的镜像。</p>
 <p><strong>语法</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rmi [OPTIONS] IMAGE [IMAGE...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> rmi <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>IMAGE<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>IMAGE</code>：要删除的镜像名称或 ID。</li>
 </ul>
 <p><strong>示例</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除单个镜像</span></span><br><span class="line">docker rmi ubuntu:22.04</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除多个镜像</span></span><br><span class="line">docker rmi nginx:1.23.3 myapp:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除单个镜像</span>
+<span class="token function">docker</span> rmi ubuntu:22.04
+
+<span class="token comment"># 删除多个镜像</span>
+<span class="token function">docker</span> rmi nginx:1.23.3 myapp:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>注意事项</strong>：</p>
 <ul>
@@ -509,14 +572,19 @@ Docker Image 介绍
 <hr>
 <h3><span id="docker-save-docker-load">docker save、docker load</span></h3><p><strong>功能</strong>：<code>docker save</code> 用于将一个或多个镜像保存为 tar 文件，方便迁移或备份；<code>docker load</code> 则用于从 tar 文件中加载镜像。</p>
 <p><strong>语法</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker save [OPTIONS] IMAGE [IMAGE...] &gt; image.tar</span><br><span class="line">docker load [OPTIONS] &lt; image.tar</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> save <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>IMAGE<span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token operator">></span> image.tar
+<span class="token function">docker</span> load <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token operator">&lt;</span> image.tar<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ul>
 <li><code>IMAGE</code>：要保存或加载的镜像名称或 ID。</li>
 <li><code>OPTIONS</code>：可选参数，如 <code>-o</code> 指定输出文件。</li>
 </ul>
 <p><strong>示例</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 保存镜像为 tar 文件</span></span><br><span class="line">docker save -o myimage.tar myapp:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从 tar 文件加载镜像</span></span><br><span class="line">docker load -i myimage.tar</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 保存镜像为 tar 文件</span>
+<span class="token function">docker</span> save <span class="token parameter variable">-o</span> myimage.tar myapp:latest
+
+<span class="token comment"># 从 tar 文件加载镜像</span>
+<span class="token function">docker</span> load <span class="token parameter variable">-i</span> myimage.tar<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>注意事项</strong>：</p>
 <ul>
@@ -528,7 +596,7 @@ Docker Image 介绍
 <li><p><strong>功能</strong><br>显示镜像的详细信息，包括元数据、配置信息、层信息等。</p>
 </li>
 <li><p><strong>语法</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image inspect [OPTIONS] IMAGE [IMAGE...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image inspect <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>IMAGE<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>关键参数</strong></p>
 <ul>
@@ -536,14 +604,27 @@ Docker Image 介绍
 </ul>
 </li>
 <li><p><strong>使用示例</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看指定镜像的详细信息</span></span><br><span class="line">docker image inspect nginx:1.23.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看多个镜像的信息</span></span><br><span class="line">docker image inspect ubuntu:22.04 alpine:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用格式输出只查看镜像的架构信息</span></span><br><span class="line">docker image inspect -f <span class="string">&#x27;&#123;&#123;.Architecture&#125;&#125;&#x27;</span> nginx:1.23.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看镜像的创建时间</span></span><br><span class="line">docker image inspect -f <span class="string">&#x27;&#123;&#123;.Created&#125;&#125;&#x27;</span> nginx:1.23.3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看镜像的所有层（Layer）</span></span><br><span class="line">docker image inspect -f <span class="string">&#x27;&#123;&#123;.RootFS.Layers&#125;&#125;&#x27;</span> nginx:1.23.3</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看指定镜像的详细信息</span>
+<span class="token function">docker</span> image inspect nginx:1.23.3
+
+<span class="token comment"># 查看多个镜像的信息</span>
+<span class="token function">docker</span> image inspect ubuntu:22.04 alpine:latest
+
+<span class="token comment"># 使用格式输出只查看镜像的架构信息</span>
+<span class="token function">docker</span> image inspect <span class="token parameter variable">-f</span> <span class="token string">'&#123;&#123;.Architecture&#125;&#125;'</span> nginx:1.23.3
+
+<span class="token comment"># 查看镜像的创建时间</span>
+<span class="token function">docker</span> image inspect <span class="token parameter variable">-f</span> <span class="token string">'&#123;&#123;.Created&#125;&#125;'</span> nginx:1.23.3
+
+<span class="token comment"># 查看镜像的所有层（Layer）</span>
+<span class="token function">docker</span> image inspect <span class="token parameter variable">-f</span> <span class="token string">'&#123;&#123;.RootFS.Layers&#125;&#125;'</span> nginx:1.23.3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <hr>
 <h3><span id="docker-history">docker history</span></h3><ul>
 <li><p><strong>功能</strong><br>查看镜像的历史记录，包括每一层的创建时间、作者、命令等信息。</p>
 </li>
 <li><p><strong>语法</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">history</span> [OPTIONS] IMAGE</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">history</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>关键参数</strong></p>
 <ul>
@@ -553,7 +634,55 @@ Docker Image 介绍
 </ul>
 </li>
 <li><p><strong>使用示例</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看指定镜像的历史记录</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/docker_test/namespace_test/test_dir2] - [1634]</span><br><span class="line">└─[$] docker <span class="built_in">history</span> nginx:stable-alpine3.21-perl                                                            [12:45:03]</span><br><span class="line">IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT</span><br><span class="line">0b65b64c7d04   4 months ago   RUN /bin/sh -c <span class="built_in">set</span> -x     &amp;&amp; apkArch=<span class="string">&quot;<span class="subst">$(cat …   38.4MB    buildkit.dockerfile.v0</span></span></span><br><span class="line"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   RUN /bin/sh -c set -x     &amp;&amp; apkArch=<span class="string">&quot;<span class="subst">$(cat …   36.3MB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NJS_RELEASE=1                               0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NJS_VERSION=0.8.10                          0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   CMD [<span class="string">&quot;nginx&quot;</span> <span class="string">&quot;-g&quot;</span> <span class="string">&quot;daemon off;&quot;</span>]                0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   STOPSIGNAL SIGQUIT                              0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   EXPOSE map[80/tcp:&#123;&#125;]                           0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENTRYPOINT [<span class="string">&quot;/docker-entrypoint.sh&quot;</span>]            0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 30-tune-worker-processes.sh /docker-ent…   4.62kB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 20-envsubst-on-templates.sh /docker-ent…   3.02kB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 15-local-resolvers.envsh /docker-entryp…   389B      buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 10-listen-on-ipv6-by-default.sh /docker…   2.12kB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY docker-entrypoint.sh / # buildkit          1.62kB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   RUN /bin/sh -c set -x     &amp;&amp; addgroup -g 101…   4.05MB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV DYNPKG_RELEASE=1                            0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV PKG_RELEASE=1                               0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NGINX_VERSION=1.28.0                        0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   LABEL maintainer=NGINX Docker Maintainers &lt;d…   0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   CMD [<span class="string">&quot;/bin/sh&quot;</span>]                                 0B        buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ADD alpine-minirootfs-3.21.4-x86_64.tar.gz /…   7.82MB    buildkit.dockerfile.v0</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"># 以人类可读的格式查看历史记录</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">┌─[root@VM-16-15-debian] - [/home/ljx/docker_test/namespace_test/test_dir2] - [1633]</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">└─[$] docker history -H nginx:stable-alpine3.21-perl</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT</span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string">0b65b64c7d04   4 months ago   RUN /bin/sh -c set -x     &amp;&amp; apkArch=<span class="string">&quot;<span class="subst">$(cat …   38.4MB    buildkit.dockerfile.v0</span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   RUN /bin/sh -c set -x     &amp;&amp; apkArch=<span class="string">&quot;<span class="subst">$(cat …   36.3MB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NJS_RELEASE=1                               0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NJS_VERSION=0.8.10                          0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   CMD [<span class="string">&quot;nginx&quot;</span> <span class="string">&quot;-g&quot;</span> <span class="string">&quot;daemon off;&quot;</span>]                0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   STOPSIGNAL SIGQUIT                              0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   EXPOSE map[80/tcp:&#123;&#125;]                           0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENTRYPOINT [<span class="string">&quot;/docker-entrypoint.sh&quot;</span>]            0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 30-tune-worker-processes.sh /docker-ent…   4.62kB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 20-envsubst-on-templates.sh /docker-ent…   3.02kB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 15-local-resolvers.envsh /docker-entryp…   389B      buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY 10-listen-on-ipv6-by-default.sh /docker…   2.12kB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   COPY docker-entrypoint.sh / # buildkit          1.62kB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   RUN /bin/sh -c set -x     &amp;&amp; addgroup -g 101…   4.05MB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV DYNPKG_RELEASE=1                            0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV PKG_RELEASE=1                               0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ENV NGINX_VERSION=1.28.0                        0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   LABEL maintainer=NGINX Docker Maintainers &lt;d…   0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   CMD [<span class="string">&quot;/bin/sh&quot;</span>]                                 0B        buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br><span class="line"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string"><span class="subst"><span class="string">&lt;missing&gt;      4 months ago   ADD alpine-minirootfs-3.21.4-x86_64.tar.gz /…   7.82MB    buildkit.dockerfile.v0</span></span></span></span></span></span></span></span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看指定镜像的历史记录</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/docker_test/namespace_test/test_dir2<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">1634</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> <span class="token function">history</span> nginx:stable-alpine3.21-perl                                                            <span class="token punctuation">[</span><span class="token number">12</span>:45:03<span class="token punctuation">]</span>
+IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT
+0b65b64c7d04   <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">apkArch</span><span class="token operator">=</span>"<span class="token punctuation">$(</span>cat …   <span class="token number">38</span>.4MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">apkArch</span><span class="token operator">=</span>"<span class="token punctuation">$(</span>cat …   <span class="token number">36</span>.3MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NJS_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                               0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NJS_VERSION</span><span class="token operator">=</span><span class="token number">0.8</span>.10                          0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   CMD <span class="token punctuation">[</span><span class="token string">"nginx"</span> <span class="token string">"-g"</span> <span class="token string">"daemon off;"</span><span class="token punctuation">]</span>                0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   STOPSIGNAL SIGQUIT                              0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   EXPOSE map<span class="token punctuation">[</span><span class="token number">80</span>/tcp:<span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span>                           0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENTRYPOINT <span class="token punctuation">[</span><span class="token string">"/docker-entrypoint.sh"</span><span class="token punctuation">]</span>            0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">30</span>-tune-worker-processes.sh /docker-ent…   <span class="token number">4</span>.62kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">20</span>-envsubst-on-templates.sh /docker-ent…   <span class="token number">3</span>.02kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">15</span>-local-resolvers.envsh /docker-entryp…   389B      buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">10</span>-listen-on-ipv6-by-default.sh /docker…   <span class="token number">2</span>.12kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY docker-entrypoint.sh / <span class="token comment"># buildkit          1.62kB    buildkit.dockerfile.v0</span>
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> addgroup <span class="token parameter variable">-g</span> <span class="token number">101</span>…   <span class="token number">4</span>.05MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">DYNPKG_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                            0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">PKG_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                               0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NGINX_VERSION</span><span class="token operator">=</span><span class="token number">1.28</span>.0                        0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   LABEL <span class="token assign-left variable">maintainer</span><span class="token operator">=</span>NGINX Docker Maintainers <span class="token operator">&lt;</span>d…   0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   CMD <span class="token punctuation">[</span><span class="token string">"/bin/sh"</span><span class="token punctuation">]</span>                                 0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ADD alpine-minirootfs-3.21.4-x86_64.tar.gz /…   <span class="token number">7</span>.82MB    buildkit.dockerfile.v0
+
+<span class="token comment"># 以人类可读的格式查看历史记录</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/docker_test/namespace_test/test_dir2<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">1633</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> <span class="token function">history</span> <span class="token parameter variable">-H</span> nginx:stable-alpine3.21-perl
+IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT
+0b65b64c7d04   <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">apkArch</span><span class="token operator">=</span>"<span class="token punctuation">$(</span>cat …   <span class="token number">38</span>.4MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> <span class="token assign-left variable">apkArch</span><span class="token operator">=</span>"<span class="token punctuation">$(</span>cat …   <span class="token number">36</span>.3MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NJS_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                               0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NJS_VERSION</span><span class="token operator">=</span><span class="token number">0.8</span>.10                          0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   CMD <span class="token punctuation">[</span><span class="token string">"nginx"</span> <span class="token string">"-g"</span> <span class="token string">"daemon off;"</span><span class="token punctuation">]</span>                0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   STOPSIGNAL SIGQUIT                              0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   EXPOSE map<span class="token punctuation">[</span><span class="token number">80</span>/tcp:<span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span>                           0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENTRYPOINT <span class="token punctuation">[</span><span class="token string">"/docker-entrypoint.sh"</span><span class="token punctuation">]</span>            0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">30</span>-tune-worker-processes.sh /docker-ent…   <span class="token number">4</span>.62kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">20</span>-envsubst-on-templates.sh /docker-ent…   <span class="token number">3</span>.02kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">15</span>-local-resolvers.envsh /docker-entryp…   389B      buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY <span class="token number">10</span>-listen-on-ipv6-by-default.sh /docker…   <span class="token number">2</span>.12kB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   COPY docker-entrypoint.sh / <span class="token comment"># buildkit          1.62kB    buildkit.dockerfile.v0</span>
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   RUN /bin/sh <span class="token parameter variable">-c</span> <span class="token builtin class-name">set</span> <span class="token parameter variable">-x</span>     <span class="token operator">&amp;&amp;</span> addgroup <span class="token parameter variable">-g</span> <span class="token number">101</span>…   <span class="token number">4</span>.05MB    buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">DYNPKG_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                            0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">PKG_RELEASE</span><span class="token operator">=</span><span class="token number">1</span>                               0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ENV <span class="token assign-left variable">NGINX_VERSION</span><span class="token operator">=</span><span class="token number">1.28</span>.0                        0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   LABEL <span class="token assign-left variable">maintainer</span><span class="token operator">=</span>NGINX Docker Maintainers <span class="token operator">&lt;</span>d…   0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   CMD <span class="token punctuation">[</span><span class="token string">"/bin/sh"</span><span class="token punctuation">]</span>                                 0B        buildkit.dockerfile.v0
+<span class="token operator">&lt;</span>missing<span class="token operator">></span>      <span class="token number">4</span> months ago   ADD alpine-minirootfs-3.21.4-x86_64.tar.gz /…   <span class="token number">7</span>.82MB    buildkit.dockerfile.v0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <p>可以看出来，<code>docker history</code> 是自带 <code>-H</code> 选项的，默认就是以人类可读的格式显示历史记录。</p>
 <h3><span id="docker-image-prune">docker image prune</span></h3><p>Docker 用久了，磁盘空间容易不足，<code>docker image prune</code> 💾 正是用来清理未使用的镜像，帮助释放磁盘空间的命令。我来为你详细讲解一下它的用法和注意事项。</p>
@@ -563,7 +692,7 @@ Docker Image 介绍
 <li><strong>所有未使用的镜像</strong> ：使用 <code>-a</code> 或 <code>--all</code> 参数时，此命令会删除所有未被任何容器引用的镜像，无论其是否有标签。这包括了那些你有名有姓但当前没有任何容器使用的镜像（例如，旧版本的 <code>my-app:v1.0</code>）。</li>
 </ul>
 <h4><span id="命令语法和常用选项">命令语法和常用选项</span></h4><p><code>docker image prune</code> 的基本语法是：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune [OPTIONS]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>常用的 <code>[OPTIONS]</code> 包括：</p>
 <table>
@@ -592,27 +721,28 @@ Docker Image 介绍
 </tbody></table>
 <h4><span id="常用操作示例">常用操作示例</span></h4><ol>
 <li><p><strong>安全清理悬空镜像（推荐日常使用）</strong><br>这是最安全的做法，因为它只清理那些明确不再需要的“悬空”镜像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>执行后，Docker 会列出待删除的镜像并请求确认（除非使用 <code>-f</code> 强制跳过）。</p>
 </li>
 <li><p><strong>清理所有未使用的镜像（彻底清理，需谨慎）</strong><br>这个命令会删除所有未被任何容器引用的镜像，包括有标签但未被使用的。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune <span class="token parameter variable">-a</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>注意</strong>：此操作可能会删除一些你以后可能还会用到的镜像，下次使用前需要重新拉取或构建。</p>
 </li>
 <li><p><strong>按条件过滤清理镜像</strong><br>你可以使用 <code>--filter</code> 来精确控制要删除的镜像。例如，删除所有创建时间超过 24 小时的未使用镜像：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a --filter <span class="string">&quot;until=24h&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune <span class="token parameter variable">-a</span> <span class="token parameter variable">--filter</span> <span class="token string">"until=24h"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>或者，删除所有创建时间超过 7 天的未使用镜像：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -a --filter <span class="string">&quot;until=168h&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune <span class="token parameter variable">-a</span> <span class="token parameter variable">--filter</span> <span class="token string">"until=168h"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>强制清理（用于脚本）</strong><br>如果你希望在脚本中自动执行清理，而不被交互提示打断，可以加上 <code>-f</code> 或 <code>--force</code> 选项。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker image prune -f  <span class="comment"># 强制删除悬空镜像</span></span><br><span class="line">docker image prune -a -f <span class="comment"># 强制删除所有未使用的镜像</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> image prune <span class="token parameter variable">-f</span>  <span class="token comment"># 强制删除悬空镜像</span>
+<span class="token function">docker</span> image prune <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token comment"># 强制删除所有未使用的镜像</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ol>
 <h4><span id="注意事项">注意事项</span></h4><ul>
 <li><p><strong>数据无价，操作前确认</strong> ：在执行 <code>docker image prune -a</code> 前，建议先确认哪些镜像会被删除。可以使用以下命令查看所有悬空镜像：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images -f dangling=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> images <span class="token parameter variable">-f</span> <span class="token assign-left variable">dangling</span><span class="token operator">=</span>true<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>若要查看所有镜像及其依赖关系，需仔细评估。</p>
 </li>
@@ -622,16 +752,16 @@ Docker Image 介绍
 <h4><span id="清理操作的建议流程">清理操作的建议流程</span></h4><p>一个比较安全的清理操作流程可以参考：</p>
 <ol>
 <li><p><strong>停止所有容器</strong>（如果希望清理更彻底）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container stop $(docker container <span class="built_in">ls</span> -aq)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container stop <span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> container <span class="token function">ls</span> <span class="token parameter variable">-aq</span><span class="token variable">)</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>执行系统级清理</strong>（根据需求选择是否加 <code>--volumes</code>）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system prune -af --volumes</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> system prune <span class="token parameter variable">-af</span> <span class="token parameter variable">--volumes</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>重启需要的服务</strong>（例如使用 Docker Compose）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> compose up <span class="token parameter variable">-d</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ol>
 <h4><span id="查看磁盘空间">查看磁盘空间</span></h4><p>在清理前后，你可以使用以下命令查看 Docker 的磁盘使用情况，了解清理效果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker system <span class="built_in">df</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> system <span class="token function">df</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h2><span id="docker-image-综合实践">Docker Image 综合实践</span></h2><h3><span id="离线迁移镜像">离线迁移镜像</span></h3><p>在日常开发、部署或环境迁移中，我们经常会遇到这样的场景：生产服务器无法访问外部网络（ air-gapped environment）、需要快速部署一个特定版本的环境，或者只是想将开发好的应用镜像简单地“复制”到另一台机器上。这时，Docker 镜像的离线迁移就成了一项必备技能。</p>
 <p>这里小编将通过一个完整的实验，带你一步步实践如何将一台主机上的 Docker 镜像打包、传输并加载到另一台主机上。</p>
@@ -650,15 +780,15 @@ Docker Image 介绍
 <h4><span id="第一步在主机-1-上查找并打包镜像">第一步：在主机 1 上查找并打包镜像</span></h4><p>首先，我们需要在源主机上找到想要迁移的镜像。</p>
 <ol>
 <li><p><strong>查找镜像</strong>：<br>使用 <code>docker images</code> 配合 <code>grep</code> 命令精确查找我们需要的 <code>busybox</code> 镜像及其唯一的 Image ID。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep busybox</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> images <span class="token operator">|</span> <span class="token function">grep</span> busybox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">busybox  stable-glibc  1827167fde90  2 years ago  4.42MB</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">busybox  stable-glibc  1827167fde90  <span class="token number">2</span> years ago  <span class="token number">4</span>.42MB<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>我们记下这个关键的 Image ID：<code>1827167fde90</code>。</p>
 </li>
 <li><p><strong>打包镜像</strong>：<br>使用 <code>docker save</code> 命令将镜像打包成一个单一的 <code>.tar</code> 文件。这个文件包含了镜像的所有层（Layers）、元数据（Metadata）和标签（Tags）信息。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker save -o myimage.tar 1827167fde90</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> save <span class="token parameter variable">-o</span> myimage.tar 1827167fde90<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>-o myimage.tar</code>：指定输出文件名为 <code>myimage.tar</code>。</li>
@@ -668,7 +798,7 @@ Docker Image 介绍
 </li>
 </ol>
 <h4><span id="第二步将镜像包传输到主机-2">第二步：将镜像包传输到主机 2</span></h4><p>我们使用 <code>scp</code> 命令，通过 SSH 协议安全地将文件从主机 1 拷贝到主机 2 的指定目录。这是跨主机操作的关键一步。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scp myimage.tar ljx@82.156.255.140:/home/ljx/docker_test/image_test/</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">scp</span> myimage.tar ljx@82.156.255.140:/home/ljx/docker_test/image_test/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>myimage.tar</code>：要传输的文件。</li>
@@ -679,23 +809,26 @@ Docker Image 介绍
 <h4><span id="第三步在主机-2-上加载并验证镜像">第三步：在主机 2 上加载并验证镜像</span></h4><p>现在，我们切换到主机 2 上进行操作。</p>
 <ol>
 <li><p><strong>验证文件已接收</strong>：<br>首先确认文件已成功传输并位于正确的目录下。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ll ~/docker_test/image_test/</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ll ~/docker_test/image_test/<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">total 4560</span><br><span class="line">-rw------- 1 ljx ljx 4668416 Aug 30 16:21 myimage.tar</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">total <span class="token number">4560</span>
+-rw------- <span class="token number">1</span> ljx ljx <span class="token number">4668416</span> Aug <span class="token number">30</span> <span class="token number">16</span>:21 myimage.tar<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>可以看到，一个约 4.5MB 的 <code>myimage.tar</code> 文件已经存在。</p>
 </li>
 <li><p><strong>加载镜像</strong>：<br>使用 <code>docker load</code> 命令将打包文件还原为 Docker 镜像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker load -i myimage.tar</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> load <span class="token parameter variable">-i</span> myimage.tar<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Loaded image ID: sha256:1827167fde90df99d9341a27fbce2b445550eb2b18105e03f98102f00c0ec35e</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Loaded image ID: sha256:1827167fde90df99d9341a27fbce2b445550eb2b18105e03f98102f00c0ec35e<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>恭喜！输出中的 <code>Loaded image ID</code> 表明镜像已成功加载到主机 2 的 Docker 镜像库中。</strong></p>
 </li>
 <li><p><strong>验证镜像</strong>：<br>最后，让我们检查一下镜像是否真的可以正常使用。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep 1827167fde90</span><br><span class="line"><span class="comment"># 或者直接运行一个新的容器来测试</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> 1827167fde90 <span class="built_in">echo</span> <span class="string">&quot;Hello from the migrated image!&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> images <span class="token operator">|</span> <span class="token function">grep</span> 1827167fde90
+<span class="token comment"># 或者直接运行一个新的容器来测试</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-it</span> <span class="token parameter variable">--rm</span> 1827167fde90 <span class="token builtin class-name">echo</span> <span class="token string">"Hello from the migrated image!"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>如果能看到镜像列表和成功的输出，就证明整个离线迁移实验大功告成！</p>
 </li>
@@ -715,23 +848,44 @@ Docker Image 介绍
 <li><strong>标签丢失</strong>：有时 <code>docker save</code> 通过 Image ID 打包可能会丢失原有的镜像名和标签（Tag），加载后镜像可能变为 <code>&lt;none&gt;:&lt;none&gt;</code>。此时可以使用 <code>docker tag &lt;image_id&gt; &lt;new_name&gt;:&lt;new_tag&gt;</code> 为其重新打 tag。更推荐使用 <code>docker save -o myimage.tar busybox:stable-glibc</code> 这种<strong>镜像名:标签</strong>的方式来保存，可以保留所有信息。</li>
 </ul>
 <h3><span id="镜像存储的压缩与共享">镜像存储的压缩与共享</span></h3><p>在容器镜像的分发过程中，存储压缩与共享机制对于提升效率、节省带宽至关重要。本次实验通过操作同一镜像的不同版本，直观展示了这一机制的工作原理。</p>
-<h4><span id="从远程仓库拉取标签为-v10-的镜像到本地">从远程仓库拉取标签为 v1.0 的镜像到本地</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br></pre></td></tr></table></figure>
+<h4><span id="从远程仓库拉取标签为-v10-的镜像到本地">从远程仓库拉取标签为 v1.0 的镜像到本地</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> pull crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>拉取过程显示完整的下载流程，包括分层信息的获取：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">v1.0: Pulling from liujiaxuan/busybox_by_liujiaxuan</span><br><span class="line">Digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">v1.0: Pulling from liujiaxuan/busybox_by_liujiaxuan
+Digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268
+Status: Downloaded newer image <span class="token keyword">for</span> crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="查看本地镜像信息注意到解压后的镜像大小为-442mb">查看本地镜像信息，注意到解压后的镜像大小为 4.42MB</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker images | grep busybox</span><br></pre></td></tr></table></figure>
+<h4><span id="查看本地镜像信息注意到解压后的镜像大小为-442mb">查看本地镜像信息，注意到解压后的镜像大小为 4.42MB</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> images <span class="token operator">|</span> <span class="token function">grep</span> busybox<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果显示本地存储的实际大小：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan   v1.0   1827167fde90   2 years ago    4.42MB</span><br><span class="line">busybox                                                                                       stable-glibc   1827167fde90   2 years ago    4.42MB</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan   v1.0   1827167fde90   <span class="token number">2</span> years ago    <span class="token number">4</span>.42MB
+busybox                                                                                       stable-glibc   1827167fde90   <span class="token number">2</span> years ago    <span class="token number">4</span>.42MB<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-<h4><span id="为演示共享机制删除本地镜像后重新拉取">为演示共享机制，删除本地镜像后重新拉取</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 细节：删除是先去标签再删除</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [~] - [1687]</span><br><span class="line">└─[$] docker rmi 1827167fde90 -f</span><br><span class="line">Untagged: crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br><span class="line">Untagged: crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan@sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268</span><br><span class="line">Untagged: busybox:stable-glibc</span><br><span class="line">Untagged: busybox@sha256:fea9e0f09e8cbbe7b2d2ca2ebb6e8da1e2e1d7c6ca7a4cf297eb2fcf5afda5ed</span><br><span class="line">Deleted: sha256:1827167fde90df99d9341a27fbce2b445550eb2b18105e03f98102f00c0ec35e</span><br><span class="line">Deleted: sha256:b4cb8796a924c1fe5cf7031b67a551c63f9236c5cb0e0d51af962285ae361db7</span><br><span class="line">┌─[root@VM-16-15-debian] - [~] - [1688]</span><br><span class="line">└─[$] docker pull crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br><span class="line">v1.0: Pulling from liujiaxuan/busybox_by_liujiaxuan</span><br><span class="line">2dc65973bc71: Pull complete</span><br><span class="line">Digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268</span><br><span class="line">Status: Downloaded newer image <span class="keyword">for</span> crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br><span class="line">crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0</span><br></pre></td></tr></table></figure>
+<h4><span id="为演示共享机制删除本地镜像后重新拉取">为演示共享机制，删除本地镜像后重新拉取</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 细节：删除是先去标签再删除</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>~<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">1687</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> rmi 1827167fde90 <span class="token parameter variable">-f</span>
+Untagged: crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0
+Untagged: crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan@sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268
+Untagged: busybox:stable-glibc
+Untagged: busybox@sha256:fea9e0f09e8cbbe7b2d2ca2ebb6e8da1e2e1d7c6ca7a4cf297eb2fcf5afda5ed
+Deleted: sha256:1827167fde90df99d9341a27fbce2b445550eb2b18105e03f98102f00c0ec35e
+Deleted: sha256:b4cb8796a924c1fe5cf7031b67a551c63f9236c5cb0e0d51af962285ae361db7
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>~<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">1688</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> pull crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0
+v1.0: Pulling from liujiaxuan/busybox_by_liujiaxuan
+2dc65973bc71: Pull complete
+Digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268
+Status: Downloaded newer image <span class="token keyword">for</span> crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0
+crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>重新拉取时观察到完整的分层下载过程。</p>
-<h4><span id="创建新版本标签并推送到仓库">创建新版本标签并推送到仓库</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker tag crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0 crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v2.0</span><br><span class="line">docker push crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v2.0</span><br></pre></td></tr></table></figure>
+<h4><span id="创建新版本标签并推送到仓库">创建新版本标签并推送到仓库</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> tag crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v1.0 crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v2.0
+<span class="token function">docker</span> push crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan:v2.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>推送过程显示分层已存在，无需重复上传：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The push refers to repository [crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan]</span><br><span class="line">b4cb8796a924: Layer already exists</span><br><span class="line">v2.0: digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268 size: 527</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">The push refers to repository <span class="token punctuation">[</span>crpi-x6zeb1ynyh83ir4y.cn-hangzhou.personal.cr.aliyuncs.com/liujiaxuan/busybox_by_liujiaxuan<span class="token punctuation">]</span>
+b4cb8796a924: Layer already exists
+v2.0: digest: sha256:800a83edaed8daab01f81f408912d121d175066900dd422bdcb6c8c91dbb3268 size: <span class="token number">527</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>通过仓库管理界面查看，可以发现实际存储的镜像数据大小仅为 2.172MB，显著小于本地解压后的 4.42MB：<br><img src="/img/Docker/image/image.png" alt="image"></p>
 <p>这一差异体现了镜像存储的压缩机制：镜像在传输和存储时采用压缩格式（2.172MB），而在本地运行时需要解压为可用的文件系统格式（4.42MB）。同时，基于相同镜像层（Digest 相同）的多个标签可以共享存储空间，推送新版本时只需上传元数据信息，大幅节省了网络带宽和存储成本。</p>

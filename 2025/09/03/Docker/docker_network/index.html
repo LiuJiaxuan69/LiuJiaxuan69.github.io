@@ -68,6 +68,8 @@ Docker 网络架构简介
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -231,7 +233,7 @@ Docker 网络架构简介
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -240,7 +242,7 @@ Docker 网络架构简介
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/">Linux IO 多路转接--Epoll</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/">Socket 套接字编程-TCP</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li></ul>
+            <ul><li><a href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a></li><li><a href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/">自定义协议 &amp;&amp; 序列化与反序列化</a></li><li><a href="/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/">Socket 套接字编程-UDP</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -395,10 +397,18 @@ Docker 网络架构简介
 <li><p><strong>适用场景</strong>：多个容器运行在同一台宿主机上，需要互相通信时使用。</p>
 </li>
 <li><p><strong>示例命令</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动容器并加入默认 bridge 网络</span></span><br><span class="line">docker run -d --name web1 nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建自定义 bridge 网络</span></span><br><span class="line">docker network create --driver bridge my_bridge</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动容器并加入自定义网络</span></span><br><span class="line">docker run -d --name web2 --network my_bridge nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动容器并加入默认 bridge 网络</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> web1 nginx
+
+<span class="token comment"># 创建自定义 bridge 网络</span>
+<span class="token function">docker</span> network create <span class="token parameter variable">--driver</span> bridge my_bridge
+
+<span class="token comment"># 启动容器并加入自定义网络</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> web2 <span class="token parameter variable">--network</span> my_bridge nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <p>在宿主机上，<code>docker0</code> 网桥可以通过 <code>ifconfig</code> 或 <code>ip addr</code> 查看：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">docker0: <span class="token assign-left variable">flags</span><span class="token operator">=</span><span class="token number">416</span><span class="token operator"><span class="token file-descriptor important">3</span>&lt;</span>UP,BROADCAST,RUNNING,MULTICAST<span class="token operator">></span>  mtu <span class="token number">1500</span>
+        inet <span class="token number">172.17</span>.0.1  netmask <span class="token number">255.255</span>.0.0  broadcast <span class="token number">172.17</span>.255.255<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>这里的 <code>172.17.0.1</code> 就是宿主机在容器内部网络中的网关地址。</p>
 <hr>
@@ -415,7 +425,7 @@ Docker 网络架构简介
 <li><p><strong>适用场景</strong>：需要高性能网络访问，或需要让容器直接暴露在宿主机网络中的场景（如运行监控代理）。</p>
 </li>
 <li><p><strong>示例命令</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name web --network host nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> web <span class="token parameter variable">--network</span> <span class="token function">host</span> nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <hr>
 <h3><span id="3-container-网络">3. <strong>Container 网络</strong></span></h3><ul>
@@ -431,7 +441,11 @@ Docker 网络架构简介
 <li><p><strong>适用场景</strong>：运行调试工具容器（如 tcpdump、curl），直接进入目标容器的网络环境。</p>
 </li>
 <li><p><strong>示例命令</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先运行一个容器</span></span><br><span class="line">docker run -d --name web nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 新容器共享 web 的网络</span></span><br><span class="line">docker run -it --<span class="built_in">rm</span> --network container:web busybox sh</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先运行一个容器</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> web nginx
+
+<span class="token comment"># 新容器共享 web 的网络</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-it</span> <span class="token parameter variable">--rm</span> <span class="token parameter variable">--network</span> container:web busybox <span class="token function">sh</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <hr>
 <h3><span id="4-none-网络">4. <strong>None 网络</strong></span></h3><ul>
@@ -446,7 +460,7 @@ Docker 网络架构简介
 <li><p><strong>适用场景</strong>：对安全性要求极高，或容器仅需执行纯计算、文件处理而无需网络时。</p>
 </li>
 <li><p><strong>示例命令</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --network none nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--network</span> none nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <hr>
 <h3><span id="5-overlay-网络">5. <strong>Overlay 网络</strong></span></h3><ul>
@@ -462,7 +476,14 @@ Docker 网络架构简介
 <li><p><strong>适用场景</strong>：跨主机容器集群通信、多服务协同工作。</p>
 </li>
 <li><p><strong>示例命令</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化 Swarm</span></span><br><span class="line">docker swarm init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 overlay 网络</span></span><br><span class="line">docker network create -d overlay my_overlay</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在集群中运行服务并加入 overlay 网络</span></span><br><span class="line">docker service create --name web --network my_overlay nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 初始化 Swarm</span>
+<span class="token function">docker</span> swarm init
+
+<span class="token comment"># 创建 overlay 网络</span>
+<span class="token function">docker</span> network create <span class="token parameter variable">-d</span> overlay my_overlay
+
+<span class="token comment"># 在集群中运行服务并加入 overlay 网络</span>
+<span class="token function">docker</span> <span class="token function">service</span> create <span class="token parameter variable">--name</span> web <span class="token parameter variable">--network</span> my_overlay nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <hr>
 <p><img src="/img/Docker/network/Libnetwork.png" alt="libnetwork"></p>
@@ -535,7 +556,7 @@ Docker 网络架构简介
 <li>支持多种网络驱动（如 <code>bridge</code>、<code>overlay</code> 等）</li>
 <li>可以指定子网、网关等，满足不同应用场景</li>
 </ul>
-<h4><span id="语法">语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create [OPTIONS] NETWORK</span><br></pre></td></tr></table></figure>
+<h4><span id="语法">语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> network create <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> NETWORK<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="常用参数">常用参数</span></h4><ul>
 <li><code>-d, --driver</code>：指定网络驱动（默认是 <code>bridge</code>）</li>
@@ -544,7 +565,12 @@ Docker 网络架构简介
 <li><code>--ipv6</code>：启用 IPv6 支持</li>
 <li><code>--attachable</code>：允许独立容器连接到 Swarm 网络</li>
 </ul>
-<h4><span id="示例">示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建一个名为 br0 的 bridge 网络，并指定子网和网关</span></span><br><span class="line">docker network create \</span><br><span class="line">  --driver=bridge \</span><br><span class="line">  --subnet=192.168.0.0/16 \</span><br><span class="line">  --gateway=192.168.0.1 \</span><br><span class="line">  br0</span><br></pre></td></tr></table></figure>
+<h4><span id="示例">示例</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个名为 br0 的 bridge 网络，并指定子网和网关</span>
+<span class="token function">docker</span> network create <span class="token punctuation">\</span>
+  <span class="token parameter variable">--driver</span><span class="token operator">=</span>bridge <span class="token punctuation">\</span>
+  <span class="token parameter variable">--subnet</span><span class="token operator">=</span><span class="token number">192.168</span>.0.0/16 <span class="token punctuation">\</span>
+  <span class="token parameter variable">--gateway</span><span class="token operator">=</span><span class="token number">192.168</span>.0.1 <span class="token punctuation">\</span>
+  br0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li>创建成功后，可以使用 <code>docker network ls</code> 查看网络列表。</li>
@@ -553,7 +579,7 @@ Docker 网络架构简介
 <hr>
 <h3><span id="docker-network-inspect">docker network inspect</span></h3><p><code>docker network inspect</code> 用于查看一个或多个 Docker 网络的详细信息，包括网络 ID、驱动类型、子网、网关以及与其连接的容器等内容。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect [OPTIONS] NETWORK [NETWORK...]</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network inspect [OPTIONS] NETWORK [NETWORK...]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -563,19 +589,19 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li>查看某个网络的详细信息：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect mynetwork</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network inspect mynetwork<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li>使用 <code>--format</code> 参数过滤输出，只显示容器信息：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect --format=&#x27;&#123;&#123;json .Containers&#125;&#125;&#x27; mynetwork</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network inspect --format&#x3D;&#39;&#123;&#123;json .Containers&#125;&#125;&#39; mynetwork<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p>通过 <code>docker network inspect</code>，不仅可以了解网络本身的属性，还能查看网络中与容器之间的关联关系，便于调试与排错。</p>
 <hr>
 <h3><span id="docker-network-connect">docker network connect</span></h3><p><code>docker network connect</code> 用于将已有的容器连接到指定的网络（可以是网络名称或 ID）。<br>连接成功后，容器就能与该网络中的其他容器进行通信。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect [OPTIONS] NETWORK CONTAINER</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network connect [OPTIONS] NETWORK CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -586,24 +612,24 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li><strong>将正在运行的容器连接到网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network connect multi-host-network my_container1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>容器启动时直接连接到网络</strong><br>使用 <code>--network</code> 选项可以在容器启动时直接加入某个网络：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --network=multi-host-network busybox-container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker run -itd --network&#x3D;multi-host-network busybox-container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>指定容器的 IP 地址</strong><br>连接容器时，可以手动分配其在网络中的 IP 地址：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network connect --ip 10.10.36.122 multi-host-network container2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network connect --ip 10.10.36.122 multi-host-network container2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p>通过 <code>docker network connect</code>，可以灵活地将容器加入到多个网络，从而实现更复杂的网络拓扑结构和容器间通信管理。</p>
 <hr>
 <h3><span id="docker-network-disconnect">docker network disconnect</span></h3><p><code>docker network disconnect</code> 用于将容器从指定网络中断开连接。<br>断开后，该容器将无法再与该网络中的其他容器进行通信。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect [OPTIONS] NETWORK CONTAINER</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network disconnect [OPTIONS] NETWORK CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -613,19 +639,19 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li><strong>普通断开容器与网络的连接</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network disconnect multi-host-network my_container1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>强制断开容器与网络的连接</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network disconnect -f multi-host-network my_container1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network disconnect -f multi-host-network my_container1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p>通过 <code>docker network disconnect</code>，可以灵活管理容器的网络连接，避免不必要的通信，也能在容器生命周期中动态调整网络拓扑结构。</p>
 <hr>
 <h3><span id="docker-network-prune">docker network prune</span></h3><p><code>docker network prune</code> 用于清理并删除当前未被任何容器使用的网络。<br>该命令常用于释放系统资源，保持 Docker 环境整洁。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune [OPTIONS]</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network prune [OPTIONS]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -635,19 +661,19 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li><strong>交互式删除未使用的网络（会提示确认）</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network prune<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>强制删除未使用的网络（无确认提示）</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network prune -f</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network prune -f<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p>通过 <code>docker network prune</code>，可以快速清理掉未使用的网络，避免累积占用存储空间或影响环境整洁。</p>
 <hr>
 <h3><span id="docker-network-rm">docker network rm</span></h3><p><code>docker network rm</code> 用于删除一个或多个 Docker 网络。<br>删除前，确保网络没有被任何容器使用，否则需要使用强制参数。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm NETWORK [NETWORK...]</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network rm NETWORK [NETWORK...]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -657,29 +683,29 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li><strong>删除单个网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm br0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network rm br0<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>强制删除网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm -f br0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network rm -f br0<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>一次删除多个网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network rm net1 net2 net3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network rm net1 net2 net3<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p><code>docker network rm</code> 可以灵活地删除不再需要的网络，结合 <code>-f</code> 参数可以处理仍被容器使用的网络，从而便于网络管理和环境清理。</p>
 <hr>
 <h3><span id="docker-network-ls">docker network ls</span></h3><h4><span id="功能说明">功能说明</span></h4><p><code>docker network ls</code> 用于列出 Docker 主机上的所有网络，包括默认网络和用户创建的网络。<br>它可以快速查看网络名称、ID、驱动类型以及作用范围。</p>
 <hr>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls [OPTIONS]</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network ls [OPTIONS]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li>别名：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network list</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network list<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="常用参数">常用参数</span></h4><ul>
@@ -692,17 +718,17 @@ Docker 网络架构简介
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li><strong>列出所有网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network ls<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>仅显示网络 ID</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls -q</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network ls -q<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>按驱动类型过滤</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network ls -f driver=bridge</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network ls -f driver&#x3D;bridge<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <p>通过 <code>docker network ls</code>，可以快速查看 Docker 网络信息，配合过滤和格式化选项，便于网络管理和自动化脚本使用。</p>
@@ -770,7 +796,12 @@ Docker 网络架构简介
 <h2><span id="网络详解">网络详解</span></h2><h3><span id="docker-bridge-网络">docker Bridge 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>Docker Bridge 网络采用内置的 bridge 驱动，bridge 驱动底层采用的是 Linux 内核中 Linux bridge 技术。就网络而言，bridge 网络是在网络段之间转发流量的链路层设备，而网桥可以是在主机内核中运行的硬件设备或软件设备；就 Docker 而言，桥接网络使用软件网桥 docker0，它允许连接到同一网桥网络的容器进行通信，同时提供与未连接到该网桥网络容器的隔离。Docker Container 的 bridge 桥接模式可以参考下图：</p>
 <p><img src="/img/Docker/network/bridge.png" alt="network"></p>
 <p>默认情况下，创建的容器在没有使用–network 参数指定要加入的 docker 网络时，默认都是加入 Docker 默认的单机桥接网络，即下面的 name 为 bridge 的网络</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 docker 支持的网络</span></span><br><span class="line">docker network ls</span><br><span class="line">NETWORK ID     NAME      DRIVER    SCOPE</span><br><span class="line">0cb86abb53fb   bridge    bridge    local</span><br><span class="line">bdd23adf8d35   host      host      local</span><br><span class="line">6a68de0c74cb   none      null      local</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看 docker 支持的网络</span>
+<span class="token function">docker</span> network <span class="token function">ls</span>
+NETWORK ID     NAME      DRIVER    SCOPE
+0cb86abb53fb   bridge    bridge    <span class="token builtin class-name">local</span>
+bdd23adf8d35   <span class="token function">host</span>      <span class="token function">host</span>      <span class="token builtin class-name">local</span>
+6a68de0c74cb   none      null      <span class="token builtin class-name">local</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>默认的 bridge 网络会被映射到内核中为 docker0 的网桥上。Docker 默认的 bridge 网络和 Linux 内核中的 docker0 网桥是一一对应的关系。bridge 是 Docker 对网络的命名，而 docker0 是内核中网桥的名字。</p>
 <p><img src="/img/Docker/network/top_net.png" alt="cnet"></p>
@@ -780,7 +811,8 @@ Docker 网络架构简介
 <p>其实容器之间的通信也和上面主机通信的方式如出一辙， 之前我们提到了安装 Docker 的时候会默认 docker0 这个网桥软件设备， 这个 docker0 设备可以类比成上图的交换机&#x2F;路由器设备，当我们创建好容器之后， 如果不手动指定网络模式，默认会使用 bridge 网络， 容器会自动连接到 docker0 这个网桥设备， 然后通过这个网桥来进行容器间的通信。</p>
 <p>下面我们来做一个实验验证一下：</p>
 <p><strong>1. 容器创建与默认网络连接</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c1 busybox:stable-glibc</span><br><span class="line">docker run -itd --name c2 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c1 busybox:stable-glibc
+<span class="token function">docker</span> run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c2 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ul>
 <li>使用 <code>-itd</code> 参数：以交互模式、终端分配、后台运行方式创建容器</li>
@@ -788,7 +820,8 @@ Docker 网络架构简介
 <li>两个容器共享同一个网络命名空间下的默认网络环境</li>
 </ul>
 <p><strong>2. 网络接口信息检查</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">exec</span> -it c1 ip a</span><br><span class="line">docker container <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c1 <span class="token function">ip</span> a
+<span class="token function">docker</span> container <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>输出显示：</p>
 <ul>
@@ -798,7 +831,8 @@ Docker 网络架构简介
 <li>子网掩码：<code>/16</code>（255.255.0.0），属于 B 类私有地址范围</li>
 </ul>
 <p><strong>3. 容器间网络连通性测试</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">exec</span> -it c1 ping 172.17.0.3  <span class="comment"># c1 ping c2</span></span><br><span class="line">docker container <span class="built_in">exec</span> -it c2 ping 172.17.0.2  <span class="comment"># c2 ping c1</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c1 <span class="token function">ping</span> <span class="token number">172.17</span>.0.3  <span class="token comment"># c1 ping c2</span>
+<span class="token function">docker</span> container <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ping</span> <span class="token number">172.17</span>.0.2  <span class="token comment"># c2 ping c1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>测试结果：</p>
 <ul>
@@ -807,7 +841,7 @@ Docker 网络架构简介
 <li>确认容器在同一个子网内可直接通信</li>
 </ul>
 <p><strong>4. 网络配置详细分析</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> network inspect bridge<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>网络配置信息揭示：</p>
 <ul>
@@ -816,17 +850,43 @@ Docker 网络架构简介
 <li><strong>容器连接</strong>：明确显示 c1 和 c2 都连接到该网络</li>
 <li><strong>MAC 地址</strong>：每个容器有唯一的 MAC 地址（<code>e2:12:71:88:b8:12</code> 和 <code>a6:67:b2:49:c6:e2</code>）</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">网络配置的容器相关信息</span></span><br><span class="line"> &quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;a6:67:b2:49:c6:e2&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;,</span><br><span class="line">            &quot;a762babced39202b7a637f2c674d24d5d3a6f729cd555e8029377504525f1424&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c1&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;8eda16569ac629bca03d2192be481ebc37170cc4f5600f06d65eba38f7169768&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;e2:12:71:88:b8:12&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 网络配置的容器相关信息</span>
+ <span class="token string">"Containers"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+            <span class="token string">"1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+                <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c2"</span>,
+                <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa"</span>,
+                <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"a6:67:b2:49:c6:e2"</span>,
+                <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.17.0.3/16"</span>,
+                <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+            <span class="token punctuation">&#125;</span>,
+            <span class="token string">"a762babced39202b7a637f2c674d24d5d3a6f729cd555e8029377504525f1424"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+                <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c1"</span>,
+                <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"8eda16569ac629bca03d2192be481ebc37170cc4f5600f06d65eba38f7169768"</span>,
+                <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"e2:12:71:88:b8:12"</span>,
+                <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.17.0.2/16"</span>,
+                <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>,<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>5. 网络状态动态变化演示</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container stop c1</span><br><span class="line">docker network inspect bridge</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container stop c1
+<span class="token function">docker</span> network inspect bridge<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>状态变化：</p>
 <ul>
 <li>停止 c1 容器后，网络配置中的 Containers 部分仅剩 c2</li>
 <li>演示了 Docker 网络的动态管理特性：容器退出时自动从网络中解除连接</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只剩下容器 c2</span></span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">            &quot;1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787&quot;: &#123;</span><br><span class="line">                &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">                &quot;EndpointID&quot;: &quot;829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa&quot;,</span><br><span class="line">                &quot;MacAddress&quot;: &quot;a6:67:b2:49:c6:e2&quot;,</span><br><span class="line">                &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">                &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 只剩下容器 c2</span>
+<span class="token string">"Containers"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+            <span class="token string">"1a85c7a4042e55ca7bfe387e783690e9896473c3177cd7c153367e9b0c0ab787"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+                <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c2"</span>,
+                <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"829b047a4dacae8e6586d6538e8876d654ead877625d6c350d3fddf3e94444fa"</span>,
+                <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"a6:67:b2:49:c6:e2"</span>,
+                <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.17.0.3/16"</span>,
+                <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>,<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h5><span id="创建自定义-bridge">创建自定义 bridge</span></h5><p>本实验展示了如何在 Docker 中创建一个自定义桥接网络（bridge），并在该网络上启动容器。下面是实验的详细过程解析及实际验证数据。</p>
@@ -834,7 +894,7 @@ Docker 网络架构简介
 <ol>
 <li><strong>创建自定义桥接网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d bridge bridge1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network create -d bridge bridge1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>-d bridge</code> 指定网络驱动为桥接（bridge）。</li>
@@ -845,10 +905,26 @@ Docker 网络架构简介
 <ol start="2">
 <li><strong>查看自定义网络详情</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network inspect bridge1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果（核心字段）：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;bridge1&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;bridge&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;EnableIPv4&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;EnableIPv6&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;IPAM&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;default&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;Subnet&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.0/16&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.1&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Containers&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+  <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"bridge1"</span><span class="token punctuation">,</span>
+  <span class="token property">"Id"</span><span class="token operator">:</span> <span class="token string">"45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4"</span><span class="token punctuation">,</span>
+  <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"bridge"</span><span class="token punctuation">,</span>
+  <span class="token property">"EnableIPv4"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"EnableIPv6"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"IPAM"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"default"</span><span class="token punctuation">,</span>
+    <span class="token property">"Config"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">&#123;</span>
+        <span class="token property">"Subnet"</span><span class="token operator">:</span> <span class="token string">"172.18.0.0/16"</span><span class="token punctuation">,</span>
+        <span class="token property">"Gateway"</span><span class="token operator">:</span> <span class="token string">"172.18.0.1"</span>
+      <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+  <span class="token property">"Containers"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><code>Subnet</code> 和 <code>Gateway</code> 显示自定义网络的 IPv4 地址段。</li>
@@ -858,7 +934,7 @@ Docker 网络架构简介
 <ol start="3">
 <li><strong>在自定义网络上启动容器</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>--network bridge1</code> 指定容器连接到自定义桥接网络。</li>
@@ -869,10 +945,20 @@ Docker 网络架构简介
 <ol start="4">
 <li><strong>验证容器网络配置</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect c1 | grep &quot;Networks&quot; -A 17</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker container inspect c1 | grep &quot;Networks&quot; -A 17<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出核心部分：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Networks&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;bridge1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;4a:94:20:87:ff:f6&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;NetworkID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;EndpointID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.2&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPPrefixLen&quot;</span><span class="punctuation">:</span> <span class="number">16</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;DNSNames&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;c1&quot;</span><span class="punctuation">]</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Networks"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token property">"bridge1"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token property">"MacAddress"</span><span class="token operator">:</span> <span class="token string">"4a:94:20:87:ff:f6"</span><span class="token punctuation">,</span>
+        <span class="token property">"NetworkID"</span><span class="token operator">:</span> <span class="token string">"45518f3ee838699c7fcad67939d4164d05293c938345fdec30596af98a1707d4"</span><span class="token punctuation">,</span>
+        <span class="token property">"EndpointID"</span><span class="token operator">:</span> <span class="token string">"132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff"</span><span class="token punctuation">,</span>
+        <span class="token property">"Gateway"</span><span class="token operator">:</span> <span class="token string">"172.18.0.1"</span><span class="token punctuation">,</span>
+        <span class="token property">"IPAddress"</span><span class="token operator">:</span> <span class="token string">"172.18.0.2"</span><span class="token punctuation">,</span>
+        <span class="token property">"IPPrefixLen"</span><span class="token operator">:</span> <span class="token number">16</span><span class="token punctuation">,</span>
+        <span class="token property">"DNSNames"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"c1"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li>可以看到容器 <code>c1</code> 已连接到 <code>bridge1</code> 网络。</li>
@@ -883,10 +969,18 @@ Docker 网络架构简介
 <ol start="5">
 <li><strong>验证网络容器列表</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1 | grep &quot;Containers&quot; -A 20</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network inspect bridge1 | grep &quot;Containers&quot; -A 20<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出核心部分：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Containers&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;07dd0135e6aa3328064a5e5379f175faaba4585cba3fe1d1ab421d1299752465&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;c1&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;EndpointID&quot;</span><span class="punctuation">:</span> <span class="string">&quot;132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;4a:94:20:87:ff:f6&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPv4Address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.18.0.2/16&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;IPv6Address&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Containers"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token property">"07dd0135e6aa3328064a5e5379f175faaba4585cba3fe1d1ab421d1299752465"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"c1"</span><span class="token punctuation">,</span>
+        <span class="token property">"EndpointID"</span><span class="token operator">:</span> <span class="token string">"132b5f7e178cc1208768bed4f6b0c22db979c46673e74493824d86f3377dacff"</span><span class="token punctuation">,</span>
+        <span class="token property">"MacAddress"</span><span class="token operator">:</span> <span class="token string">"4a:94:20:87:ff:f6"</span><span class="token punctuation">,</span>
+        <span class="token property">"IPv4Address"</span><span class="token operator">:</span> <span class="token string">"172.18.0.2/16"</span><span class="token punctuation">,</span>
+        <span class="token property">"IPv6Address"</span><span class="token operator">:</span> <span class="token string">""</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li>通过 <code>Containers</code> 字段可以确认容器 <code>c1</code> 已成功连接到自定义桥接网络。</li>
@@ -904,7 +998,7 @@ Docker 网络架构简介
 <ol>
 <li><strong>创建自定义桥接网络</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create -d bridge bridge1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker network create -d bridge bridge1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>-d bridge</code> 指定网络类型为桥接。</li>
@@ -915,9 +1009,26 @@ Docker 网络架构简介
 <ol start="2">
 <li><strong>在自定义网络上启动容器</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc</span><br><span class="line">docker container run -itd --name c2 --network bridge1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker container run -itd --name c1 --network bridge1 busybox:stable-glibc
+docker container run -itd --name c2 --network bridge1 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge1 | grep &quot;Containers&quot; -A 20</span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">    &quot;11483dc55da7ec1caad1f1034c59713a5b58a82b2ba1eb2c2e98bba2e40c6711&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c2&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;6d570105ac556afb400c09664bb9d9b43b9a58641d29e1b1b3b1f3e1f64ef869&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;c2:8b:1b:c7:38:d7&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.18.0.3/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;6aacf832a36e81f5081aa65e120bddab119c2e8c775667f89a0f293e8574df30&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c1&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;cd17740ebed4d03176a47e148472539aa64acd3c82970f10aa69e61839151754&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;86:5f:df:c0:c4:92&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.18.0.2/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> network inspect bridge1 <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"Containers"</span> <span class="token parameter variable">-A</span> <span class="token number">20</span>
+<span class="token string">"Containers"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"11483dc55da7ec1caad1f1034c59713a5b58a82b2ba1eb2c2e98bba2e40c6711"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c2"</span>,
+        <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"6d570105ac556afb400c09664bb9d9b43b9a58641d29e1b1b3b1f3e1f64ef869"</span>,
+        <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"c2:8b:1b:c7:38:d7"</span>,
+        <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.18.0.3/16"</span>,
+        <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"6aacf832a36e81f5081aa65e120bddab119c2e8c775667f89a0f293e8574df30"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c1"</span>,
+        <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"cd17740ebed4d03176a47e148472539aa64acd3c82970f10aa69e61839151754"</span>,
+        <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"86:5f:df:c0:c4:92"</span>,
+        <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.18.0.2/16"</span>,
+        <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><p>容器 <code>c1</code> 和 <code>c2</code> 连接到自定义网络 <code>bridge1</code>。</p>
@@ -933,15 +1044,19 @@ Docker 网络架构简介
 <ol start="3">
 <li><strong>验证容器互通（自定义网络）</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c1 ping c2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker exec -it c1 ping c2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PING c2 (172.18.0.3): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.3: seq=0 ttl=64 time=0.086 ms</span><br><span class="line">64 bytes from 172.18.0.3: seq=1 ttl=64 time=0.090 ms</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">PING c2 (172.18.0.3): 56 data bytes
+64 bytes from 172.18.0.3: seq&#x3D;0 ttl&#x3D;64 time&#x3D;0.086 ms
+64 bytes from 172.18.0.3: seq&#x3D;1 ttl&#x3D;64 time&#x3D;0.090 ms<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c2 ping c1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker exec -it c2 ping c1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PING c1 (172.18.0.2): 56 data bytes</span><br><span class="line">64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.044 ms</span><br><span class="line">64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.069 ms</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">PING c1 (172.18.0.2): 56 data bytes
+64 bytes from 172.18.0.2: seq&#x3D;0 ttl&#x3D;64 time&#x3D;0.044 ms
+64 bytes from 172.18.0.2: seq&#x3D;1 ttl&#x3D;64 time&#x3D;0.069 ms<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li>结论：在自定义桥接网络中，容器可以通过名称相互解析 IP 并通信，DNS 解析可用。</li>
@@ -950,9 +1065,31 @@ Docker 网络架构简介
 <ol start="4">
 <li><strong>在默认 bridge 网络上启动容器</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker container run -itd --name c3 busybox:stable-glibc</span><br><span class="line">docker container run -itd --name c4 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker container run -itd --name c3 busybox:stable-glibc
+docker container run -itd --name c4 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">docker network inspect bridge | grep &quot;Containers&quot; -A 20</span><br><span class="line">&quot;Containers&quot;: &#123;</span><br><span class="line">    &quot;12f82693d0ff14dc42898759dc0c9ee834180b43459ef437eb82ac07a2972e59&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c4&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;e1f56c1067c73ac70d8f3f178bae22d3aac8942fccc47946de4f50ea1f34811d&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;8a:c7:39:b2:a2:d9&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.17.0.3/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;c8bf0c6d3fa3c36a3fefb4307083b89af9be3c531e1a3f2fb48345d0e095ab67&quot;: &#123;</span><br><span class="line">        &quot;Name&quot;: &quot;c3&quot;,</span><br><span class="line">        &quot;EndpointID&quot;: &quot;d7a05b4995fe7e8b11e212f66ac3293df3a6ba7e4582b7b610416b18cfdd6b64&quot;,</span><br><span class="line">        &quot;MacAddress&quot;: &quot;1a:26:32:dc:09:5d&quot;,</span><br><span class="line">        &quot;IPv4Address&quot;: &quot;172.17.0.2/16&quot;,</span><br><span class="line">        &quot;IPv6Address&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&quot;Options&quot;: &#123;</span><br><span class="line">    &quot;com.docker.network.bridge.default_bridge&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.enable_icc&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.enable_ip_masquerade&quot;: &quot;true&quot;,</span><br><span class="line">    &quot;com.docker.network.bridge.host_binding_ipv4&quot;: &quot;0.0.0.0&quot;,</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> network inspect bridge <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">"Containers"</span> <span class="token parameter variable">-A</span> <span class="token number">20</span>
+<span class="token string">"Containers"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"12f82693d0ff14dc42898759dc0c9ee834180b43459ef437eb82ac07a2972e59"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c4"</span>,
+        <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"e1f56c1067c73ac70d8f3f178bae22d3aac8942fccc47946de4f50ea1f34811d"</span>,
+        <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"8a:c7:39:b2:a2:d9"</span>,
+        <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.17.0.3/16"</span>,
+        <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+    <span class="token punctuation">&#125;</span>,
+    <span class="token string">"c8bf0c6d3fa3c36a3fefb4307083b89af9be3c531e1a3f2fb48345d0e095ab67"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+        <span class="token string">"Name"</span><span class="token builtin class-name">:</span> <span class="token string">"c3"</span>,
+        <span class="token string">"EndpointID"</span><span class="token builtin class-name">:</span> <span class="token string">"d7a05b4995fe7e8b11e212f66ac3293df3a6ba7e4582b7b610416b18cfdd6b64"</span>,
+        <span class="token string">"MacAddress"</span><span class="token builtin class-name">:</span> <span class="token string">"1a:26:32:dc:09:5d"</span>,
+        <span class="token string">"IPv4Address"</span><span class="token builtin class-name">:</span> <span class="token string">"172.17.0.2/16"</span>,
+        <span class="token string">"IPv6Address"</span><span class="token builtin class-name">:</span> <span class="token string">""</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token string">"Options"</span><span class="token builtin class-name">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token string">"com.docker.network.bridge.default_bridge"</span><span class="token builtin class-name">:</span> <span class="token string">"true"</span>,
+    <span class="token string">"com.docker.network.bridge.enable_icc"</span><span class="token builtin class-name">:</span> <span class="token string">"true"</span>,
+    <span class="token string">"com.docker.network.bridge.enable_ip_masquerade"</span><span class="token builtin class-name">:</span> <span class="token string">"true"</span>,
+    <span class="token string">"com.docker.network.bridge.host_binding_ipv4"</span><span class="token builtin class-name">:</span> <span class="token string">"0.0.0.0"</span>,<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><p>容器 <code>c3</code> 和 <code>c4</code> 默认连接到 Docker 默认 <code>bridge</code> 网络。</p>
@@ -968,15 +1105,15 @@ Docker 网络架构简介
 <ol start="5">
 <li><strong>验证容器互通（默认网络）</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c3 ping c4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker exec -it c3 ping c4<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping: bad address &#x27;c4&#x27;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">ping: bad address &#39;c4&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it c4 ping c3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-Shell" data-language="Shell"><code class="language-Shell">docker exec -it c4 ping c3<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping: bad address &#x27;c3&#x27;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">ping: bad address &#39;c3&#39;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li>结论：在 Docker 默认桥接网络下，容器名无法进行 DNS 解析，必须使用 IP 地址通信。</li>
@@ -993,7 +1130,66 @@ Docker 网络架构简介
 <p><img src="/img/Docker/network/host.png" alt="host"></p>
 <p>连接到 host 网络的容器共享宿主机的网络栈，容器的网络配置与宿主机完全一样。我们可以通过 –network&#x3D;host 指定使用 host 网络</p>
 <p>下面我们通过实验来验证 host 网络的行为。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过 Host 方式创建并启动容器 c1</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2169]</span><br><span class="line">└─[$] docker container run -itd --name c1 --network=host busybox:stable-glibc</span><br><span class="line">ffd86b4df415e69582595858f038ab72cd219da6cb47f0433253652243434fa3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看容器的网络信息</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2170]</span><br><span class="line">└─[$] docker exec -it c1 ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host noprefixroute</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq qlen 1000</span><br><span class="line">    link/ether 52:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.16.15/22 brd 10.0.19.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::5054:ff:fe57:45ed/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: lxcbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue qlen 1000</span><br><span class="line">    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.3.1/24 brd 10.0.3.255 scope global lxcbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::216:3eff:fe00:0/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">7: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue</span><br><span class="line">    link/ether 56:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::543e:dff:fe4b:c9bc/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">容器的网络信息和宿主机网络信息完全一样</span></span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2171]</span><br><span class="line">└─[$] ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host noprefixroute</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000</span><br><span class="line">    link/ether 52:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    altname enp0s5</span><br><span class="line">    altname ens5</span><br><span class="line">    inet 10.0.16.15/22 brd 10.0.19.255 scope global eth0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::5054:ff:fe57:45ed/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: lxcbr0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default qlen 1000</span><br><span class="line">    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 10.0.3.1/24 brd 10.0.3.255 scope global lxcbr0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::216:3eff:fe00:0/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">7: docker0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc noqueue state DOWN group default</span><br><span class="line">    link/ether 56:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 172.17.0.1/16 brd 172.17.255.255 scope global docker0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::543e:dff:fe4b:c9bc/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 通过 Host 方式创建并启动容器 c1</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/lib<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">2169</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> container run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c1 <span class="token parameter variable">--network</span><span class="token operator">=</span>host busybox:stable-glibc
+ffd86b4df415e69582595858f038ab72cd219da6cb47f0433253652243434fa3
+<span class="token comment"># 查看容器的网络信息</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/lib<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">2170</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c1 <span class="token function">ip</span> a
+<span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope <span class="token function">host</span> noprefixroute
+       valid_lft forever preferred_lft forever
+<span class="token number">2</span>: eth0: <span class="token operator">&lt;</span>BROADCAST,MULTICAST,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc mq qlen <span class="token number">1000</span>
+    link/ether <span class="token number">52</span>:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff
+    inet <span class="token number">10.0</span>.16.15/22 brd <span class="token number">10.0</span>.19.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe57:45ed/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever
+<span class="token number">3</span>: lxcbr0: <span class="token operator">&lt;</span>NO-CARRIER,BROADCAST,MULTICAST,UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue qlen <span class="token number">1000</span>
+    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff
+    inet <span class="token number">10.0</span>.3.1/24 brd <span class="token number">10.0</span>.3.255 scope global lxcbr0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:3eff:fe00:0/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever
+<span class="token number">7</span>: docker0: <span class="token operator">&lt;</span>NO-CARRIER,BROADCAST,MULTICAST,UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue
+    link/ether <span class="token number">56</span>:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff
+    inet <span class="token number">172.17</span>.0.1/16 brd <span class="token number">172.17</span>.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::543e:dff:fe4b:c9bc/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever
+<span class="token comment"># 容器的网络信息和宿主机网络信息完全一样</span>
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/lib<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">2171</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">ip</span> a
+<span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue state UNKNOWN group default qlen <span class="token number">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope <span class="token function">host</span> noprefixroute
+       valid_lft forever preferred_lft forever
+<span class="token number">2</span>: eth0: <span class="token operator">&lt;</span>BROADCAST,MULTICAST,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc mq state UP group default qlen <span class="token number">1000</span>
+    link/ether <span class="token number">52</span>:54:00:57:45:ed brd ff:ff:ff:ff:ff:ff
+    altname enp0s5
+    altname ens5
+    inet <span class="token number">10.0</span>.16.15/22 brd <span class="token number">10.0</span>.19.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::5054:ff:fe57:45ed/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever
+<span class="token number">3</span>: lxcbr0: <span class="token operator">&lt;</span>NO-CARRIER,BROADCAST,MULTICAST,UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue state DOWN group default qlen <span class="token number">1000</span>
+    link/ether 00:16:3e:00:00:00 brd ff:ff:ff:ff:ff:ff
+    inet <span class="token number">10.0</span>.3.1/24 brd <span class="token number">10.0</span>.3.255 scope global lxcbr0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:3eff:fe00:0/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever
+<span class="token number">7</span>: docker0: <span class="token operator">&lt;</span>NO-CARRIER,BROADCAST,MULTICAST,UP<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue state DOWN group default
+    link/ether <span class="token number">56</span>:3e:0d:4b:c9:bc brd ff:ff:ff:ff:ff:ff
+    inet <span class="token number">172.17</span>.0.1/16 brd <span class="token number">172.17</span>.255.255 scope global docker0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::543e:dff:fe4b:c9bc/64 scope <span class="token function">link</span>
+       valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="使用场景">使用场景</span></h4><p>• 之前我们提到 bridge 网络在通信的时候需要进行端口转发以及 NAT 地址转换，这势必会消耗掉一些资源以及性能。<br>• 那么直接使用 host 网络最大的好处就是性能好，如果容器对网络传输效率有较高的要求，建议选择 host 网络。当然也会牺牲一些东西，比如要考虑端口冲突问题，其它服务已经被占用的端口就不能再使用了</p>
 <h3><span id="docker-container-网络">docker Container 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>Docker Container 的 other container 网络模式是 Docker 中一种较为特别的网络的模式。之所以称为“other container 模式”，是因为这个模式下的 Docker Container，会使用其他容器的网络环境。之所以称为“特别”，是因为这个模式下容器的网络隔离性会处于 bridge 桥接模式与 host 模式之间。Docker Container 共享其他容器的网络环境，则至少这两个容器之间不存在网络隔离，而这两个容器又与宿主机以及除此之外其他的容器存在网络隔离。</p>
@@ -1031,66 +1227,103 @@ Docker 网络架构简介
 <ol>
 <li><strong>创建第一个容器 c1</strong></li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c1 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出容器 ID：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0908b5475c78a131c558880d921838df028a44ed5950ae0e4eba4d78127b35dc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">0908b5475c78a131c558880d921838df028a44ed5950ae0e4eba4d78127b35dc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>查看 c1 的网络信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c1 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c1 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>结果：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if183: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   link/ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000
+   link&#x2F;loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet 127.0.0.1&#x2F;8 scope host lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1&#x2F;128 scope host
+      valid_lft forever preferred_lft forever
+2: eth0@if183: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue
+   link&#x2F;ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff
+   inet 172.17.0.2&#x2F;16 brd 172.17.255.255 scope global eth0
+      valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>创建第二个容器 c2，使用 c1 的网络 namespace</strong></li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -itd --name c2 --network container:c1 busybox:stable-glibc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c2 <span class="token parameter variable">--network</span> container:c1 busybox:stable-glibc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出容器 ID：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">e18ed7418a91b1ae782502c13cb7a666822904fca5945f20d92ba0e2806a51f0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">e18ed7418a91b1ae782502c13cb7a666822904fca5945f20d92ba0e2806a51f0<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>查看 c2 网络信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>结果显示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if183: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   <span class="built_in">link</span>/ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope <span class="token function">host</span>
+      valid_lft forever preferred_lft forever
+<span class="token number">2</span>: eth0@if183: <span class="token operator">&lt;</span>BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue
+   link/ether fa:03:a5:9a:33:41 brd ff:ff:ff:ff:ff:ff
+   inet <span class="token number">172.17</span>.0.2/16 brd <span class="token number">172.17</span>.255.255 scope global eth0
+      valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，c1 与 c2 的 <code>eth0</code> IP 信息完全一致，说明 c2 成功共享了 c1 的网络 namespace。</p>
 <ol start="3">
 <li><strong>停止 c1 容器</strong></li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop c1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop c1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>查看 c2 网络信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>结果显示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope <span class="token function">host</span>
+      valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>c1 停止后，c2 的 <code>eth0</code> 消失，说明共享网络命名空间依赖于源容器的运行状态。</p>
 <ol start="4">
 <li><strong>重新启动 c1</strong></li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start c1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> start c1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>查看 c2 网络信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>结果显示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope <span class="token function">host</span>
+      valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>即便 c1 已重启，c2 仍然没有 <code>eth0</code>，共享网络未自动恢复。</p>
 <ol start="5">
 <li><strong>重启 c2 容器</strong></li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart c2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> restart c2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>查看网络信息：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it c2 ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c2 <span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>结果显示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">   <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">   inet 127.0.0.1/8 scope host lo</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">   inet6 ::1/128 scope host</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0@if185: &lt;BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN&gt; mtu 1500 qdisc noqueue</span><br><span class="line">   <span class="built_in">link</span>/ether 4e:2b:53:0a:a9:99 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">   inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0</span><br><span class="line">      valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+   link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+   inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+      valid_lft forever preferred_lft forever
+   inet6 ::1/128 scope <span class="token function">host</span>
+      valid_lft forever preferred_lft forever
+<span class="token number">2</span>: eth0@if185: <span class="token operator">&lt;</span>BROADCAST,MULTICAST,UP,LOWER_UP,M-DOWN<span class="token operator">></span> mtu <span class="token number">1500</span> qdisc noqueue
+   link/ether 4e:2b:53:0a:a9:99 brd ff:ff:ff:ff:ff:ff
+   inet <span class="token number">172.17</span>.0.2/16 brd <span class="token number">172.17</span>.255.255 scope global eth0
+      valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>重启 c2 后，<code>eth0</code> 恢复，与 c1 再次共享网络 namespace，实验验证了 Docker 的容器网络共享逻辑。</p>
 <hr>
@@ -1102,7 +1335,17 @@ Docker 网络架构简介
 </ol>
 <h3><span id="docker-none-网络">docker none 网络</span></h3><h4><span id="网络介绍">网络介绍</span></h4><p>none 网络就是指没有网络。挂在这个网络下的容器除了 lo(本地回环)，没有其他任何网卡</p>
 <p>如下所示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2190]</span><br><span class="line">└─[$] docker container run -itd --name c1 --network=none busybox:stable-glibc</span><br><span class="line">064824ac172793be62616e267e7d2edaf24108e853be2abace4d522178183761</span><br><span class="line">┌─[root@VM-16-15-debian] - [/home/ljx/lib] - [2191]</span><br><span class="line">└─[$] docker <span class="built_in">exec</span> -it c1 ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue qlen 1000</span><br><span class="line">    <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/lib<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">2190</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> container run <span class="token parameter variable">-itd</span> <span class="token parameter variable">--name</span> c1 <span class="token parameter variable">--network</span><span class="token operator">=</span>none busybox:stable-glibc
+064824ac172793be62616e267e7d2edaf24108e853be2abace4d522178183761
+┌─<span class="token punctuation">[</span>root@VM-16-15-debian<span class="token punctuation">]</span> - <span class="token punctuation">[</span>/home/ljx/lib<span class="token punctuation">]</span> - <span class="token punctuation">[</span><span class="token number">2191</span><span class="token punctuation">]</span>
+└─<span class="token punctuation">[</span>$<span class="token punctuation">]</span> <span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> c1 <span class="token function">ip</span> a
+<span class="token number">1</span>: lo: <span class="token operator">&lt;</span>LOOPBACK,UP,LOWER_UP<span class="token operator">></span> mtu <span class="token number">65536</span> qdisc noqueue qlen <span class="token number">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet <span class="token number">127.0</span>.0.1/8 scope <span class="token function">host</span> lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope <span class="token function">host</span>
+       valid_lft forever preferred_lft forever<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="使用场景">使用场景</span></h4><p>• 针对一些对安全性要求比较高并且不需要联网的应用， 可以使用 none 网络， 比如生成随机密码， 避免生成密码被第三方获取。<br>• 一些第三方的应用可能需要 docker 帮忙创建一个没有网络的容器， 网络由第三方自己来配置</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

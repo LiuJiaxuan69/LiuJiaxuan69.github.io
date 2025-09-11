@@ -83,6 +83,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -246,7 +248,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -255,7 +257,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a></li><li><a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li></ul>
+            <ul><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li><li><a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a></li><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -308,14 +310,227 @@
 
 <h2><span id="传统线程池设计">传统线程池设计</span></h2><h3><span id="1-线程池概述">1. 线程池概述</span></h3><p>线程池是一种多线程处理形式，它维护一组线程等待分配可并发执行的任务。这种技术避免了频繁创建和销毁线程的开销，提高了系统性能，特别是在需要处理大量短时任务的场景中。</p>
 <p>完整代码如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _THREAD_POOL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _THREAD_POOL_HPP_ 1;  <span class="comment">// 防止头文件重复包含</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span>          <span class="comment">// POSIX线程库</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span>      <span class="comment">// 哈希表，用于存储线程信息</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;queue&gt;</span>              <span class="comment">// 任务队列</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">size_t</span> default_cap = <span class="number">20</span>; <span class="comment">// 默认线程池容量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 自动加解锁的RAII封装类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LockGuard</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数自动加锁</span></span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">LockGuard</span><span class="params">(<span class="type">pthread_mutex_t</span> &amp;mtx)</span></span></span><br><span class="line"><span class="function">        : mtx_(mtx)</span></span><br><span class="line"><span class="function">    &#123;</span></span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;mtx_);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 析构函数自动解锁</span></span><br><span class="line">    ~<span class="built_in">LockGuard</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;mtx_);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值操作</span></span><br><span class="line">    <span class="built_in">LockGuard</span>(<span class="type">const</span> LockGuard &amp;) = <span class="keyword">delete</span>;            </span><br><span class="line">    LockGuard &amp;<span class="keyword">operator</span>=(<span class="type">const</span> LockGuard &amp;) = <span class="keyword">delete</span>; </span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">pthread_mutex_t</span> &amp;mtx_;  <span class="comment">// 引用管理的互斥锁</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 线程池模板类</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPool</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 检查任务队列是否为空</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">IsEmptyQueue</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tasks_.<span class="built_in">empty</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 从任务队列头部取出一个任务</span></span><br><span class="line">    <span class="function">T <span class="title">Pop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        T task = tasks_.<span class="built_in">front</span>();</span><br><span class="line">        tasks_.<span class="built_in">pop</span>();</span><br><span class="line">        <span class="keyword">return</span> task;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 线程数据传递结构体</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">thread_data</span></span><br><span class="line">    &#123;</span><br><span class="line">        std::string name;    <span class="comment">// 线程名称</span></span><br><span class="line">        ThreadPool&lt;T&gt; *tp;   <span class="comment">// 所属线程池指针</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 获取线程池单例（线程安全）</span></span><br><span class="line">    <span class="function"><span class="type">static</span> ThreadPool&lt;T&gt; &amp;<span class="title">GetInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// C++11后静态局部变量初始化是线程安全的</span></span><br><span class="line">        <span class="type">static</span> ThreadPool&lt;T&gt; tp;</span><br><span class="line">        <span class="keyword">return</span> tp;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启动线程池</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        running_ = <span class="literal">true</span>;  <span class="comment">// 设置运行标志</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 创建指定数量的工作线程</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= cap_; ++i)</span><br><span class="line">        &#123;</span><br><span class="line">            std::string name = <span class="string">&quot;thread-&quot;</span> + std::<span class="built_in">to_string</span>(i);  <span class="comment">// 生成线程名</span></span><br><span class="line">            <span class="type">pthread_t</span> tid;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 创建线程数据</span></span><br><span class="line">            thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">                name : name,</span><br><span class="line">                tp : <span class="keyword">this</span></span><br><span class="line">            &#125;;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 创建线程</span></span><br><span class="line">            <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, ThreadHandler, (<span class="type">void</span> *)(td));</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 记录线程信息</span></span><br><span class="line">            threads_[tid] = name;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 向线程池添加任务</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Push</span><span class="params">(<span class="type">const</span> T &amp;task)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">lg</span><span class="params">(mtx_)</span></span>;  <span class="comment">// 加锁保护</span></span><br><span class="line">            tasks_.<span class="built_in">push</span>(task);   <span class="comment">// 任务入队</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 先释放锁后唤醒，提高并发效率</span></span><br><span class="line">        <span class="built_in">pthread_cond_signal</span>(&amp;cond_);  <span class="comment">// 唤醒一个等待线程</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 结束线程池</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">End</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">lg</span><span class="params">(mtx_)</span></span>;</span><br><span class="line">            running_ = <span class="literal">false</span>;  <span class="comment">// 设置停止标志</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 广播唤醒所有等待线程</span></span><br><span class="line">        <span class="built_in">pthread_cond_broadcast</span>(&amp;cond_);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 等待所有线程结束</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;[tid, name] : threads_)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        threads_.<span class="built_in">clear</span>();  <span class="comment">// 清空线程记录</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 线程处理函数（静态成员函数）</span></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span> *<span class="title">ThreadHandler</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="comment">// 获取线程数据</span></span><br><span class="line">        thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">        ThreadPool&lt;T&gt; *tp = td-&gt;tp;</span><br><span class="line">        std::string thread_name = td-&gt;name;</span><br><span class="line">        T task;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="function">LockGuard <span class="title">lg</span><span class="params">(tp-&gt;mtx_)</span></span>;  <span class="comment">// 加锁</span></span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 等待条件：任务队列不为空或线程池停止</span></span><br><span class="line">                <span class="keyword">while</span> (tp-&gt;<span class="built_in">IsEmptyQueue</span>())</span><br><span class="line">                &#123;</span><br><span class="line">                    <span class="keyword">if</span> (tp-&gt;running_)</span><br><span class="line">                        <span class="built_in">pthread_cond_wait</span>(&amp;tp-&gt;cond_, &amp;tp-&gt;mtx_);  <span class="comment">// 等待任务</span></span><br><span class="line">                    <span class="keyword">else</span></span><br><span class="line">                    &#123;</span><br><span class="line">                        <span class="keyword">delete</span> td;  <span class="comment">// 清理线程数据</span></span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">nullptr</span>;  <span class="comment">// 线程退出</span></span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 获取任务</span></span><br><span class="line">                task = tp-&gt;<span class="built_in">Pop</span>();</span><br><span class="line">            &#125;  <span class="comment">// 自动解锁</span></span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 执行任务</span></span><br><span class="line">            <span class="built_in">task</span>();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 输出任务结果（假设T类型有GetResult方法）</span></span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;%s: %s\n&quot;</span>, thread_name.<span class="built_in">c_str</span>(), task.<span class="built_in">GetResult</span>().<span class="built_in">c_str</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">delete</span> td;  <span class="comment">// 理论上不会执行到这里</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有构造函数（单例模式）</span></span><br><span class="line">    <span class="built_in">ThreadPool</span>(<span class="type">size_t</span> cap = default_cap)</span><br><span class="line">        : <span class="built_in">cap_</span>(cap),          <span class="comment">// 线程容量</span></span><br><span class="line">          <span class="built_in">running_</span>(<span class="literal">false</span>)     <span class="comment">// 初始状态为未运行</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_init</span>(&amp;mtx_, <span class="literal">nullptr</span>);    <span class="comment">// 初始化互斥锁</span></span><br><span class="line">        <span class="built_in">pthread_cond_init</span>(&amp;cond_, <span class="literal">nullptr</span>);    <span class="comment">// 初始化条件变量</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 析构函数</span></span><br><span class="line">    ~<span class="built_in">ThreadPool</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (running_)</span><br><span class="line">            <span class="built_in">End</span>();  <span class="comment">// 如果还在运行，先停止</span></span><br><span class="line">        </span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;mtx_);   <span class="comment">// 销毁互斥锁</span></span><br><span class="line">        <span class="built_in">pthread_cond_destroy</span>(&amp;cond_);   <span class="comment">// 销毁条件变量</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值操作</span></span><br><span class="line">    <span class="built_in">ThreadPool</span>(<span class="type">const</span> ThreadPool&lt;T&gt; &amp;) = <span class="keyword">delete</span>;</span><br><span class="line">    <span class="type">const</span> ThreadPool&lt;T&gt; &amp;<span class="keyword">operator</span>=(<span class="type">const</span> ThreadPool&lt;T&gt; &amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::unordered_map&lt;<span class="type">pthread_t</span>, std::string&gt; threads_;  <span class="comment">// 线程ID与名称映射</span></span><br><span class="line">    <span class="type">size_t</span> cap_;                     <span class="comment">// 线程池容量</span></span><br><span class="line">    std::queue&lt;T&gt; tasks_;            <span class="comment">// 任务队列</span></span><br><span class="line">    <span class="type">pthread_mutex_t</span> mtx_;            <span class="comment">// 保护任务队列的互斥锁</span></span><br><span class="line">    <span class="type">pthread_cond_t</span> cond_;            <span class="comment">// 任务通知条件变量</span></span><br><span class="line">    <span class="type">bool</span> running_;                   <span class="comment">// 线程池运行标志</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 静态成员初始化</span></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="type">pthread_mutex_t</span> lock_ = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#ifndef _THREAD_POOL_HPP_
+#define _THREAD_POOL_HPP_ 1;  &#x2F;&#x2F; 防止头文件重复包含
+
+#include &lt;iostream&gt;
+#include &lt;pthread.h&gt;          &#x2F;&#x2F; POSIX线程库
+#include &lt;unordered_map&gt;      &#x2F;&#x2F; 哈希表，用于存储线程信息
+#include &lt;queue&gt;              &#x2F;&#x2F; 任务队列
+
+const size_t default_cap &#x3D; 20; &#x2F;&#x2F; 默认线程池容量
+
+&#x2F;&#x2F; 自动加解锁的RAII封装类
+class LockGuard
+&#123;
+public:
+    &#x2F;&#x2F; 构造函数自动加锁
+    explicit LockGuard(pthread_mutex_t &amp;mtx)
+        : mtx_(mtx)
+    &#123;
+        pthread_mutex_lock(&amp;mtx_);
+    &#125;
+    &#x2F;&#x2F; 析构函数自动解锁
+    ~LockGuard()
+    &#123;
+        pthread_mutex_unlock(&amp;mtx_);
+    &#125;
+
+    &#x2F;&#x2F; 禁用拷贝构造和赋值操作
+    LockGuard(const LockGuard &amp;) &#x3D; delete;            
+    LockGuard &amp;operator&#x3D;(const LockGuard &amp;) &#x3D; delete; 
+
+private:
+    pthread_mutex_t &mtx_;  &#x2F;&#x2F; 引用管理的互斥锁
+&#125;;
+
+&#x2F;&#x2F; 线程池模板类
+template &lt;class T&gt;
+class ThreadPool
+&#123;
+private:
+    &#x2F;&#x2F; 检查任务队列是否为空
+    bool IsEmptyQueue()
+    &#123;
+        return tasks_.empty();
+    &#125;
+    
+    &#x2F;&#x2F; 从任务队列头部取出一个任务
+    T Pop()
+    &#123;
+        T task &#x3D; tasks_.front();
+        tasks_.pop();
+        return task;
+    &#125;
+
+private:
+    &#x2F;&#x2F; 线程数据传递结构体
+    struct thread_data
+    &#123;
+        std::string name;    &#x2F;&#x2F; 线程名称
+        ThreadPool&lt;T&gt; *tp;   &#x2F;&#x2F; 所属线程池指针
+    &#125;;
+
+public:
+    &#x2F;&#x2F; 获取线程池单例（线程安全）
+    static ThreadPool&lt;T&gt; &amp;GetInstance()
+    &#123;
+        &#x2F;&#x2F; C++11后静态局部变量初始化是线程安全的
+        static ThreadPool&lt;T&gt; tp;
+        return tp;
+    &#125;
+    
+    &#x2F;&#x2F; 启动线程池
+    void Start()
+    &#123;
+        running_ &#x3D; true;  &#x2F;&#x2F; 设置运行标志
+        
+        &#x2F;&#x2F; 创建指定数量的工作线程
+        for (int i &#x3D; 1; i &lt;&#x3D; cap_; ++i)
+        &#123;
+            std::string name &#x3D; &quot;thread-&quot; + std::to_string(i);  &#x2F;&#x2F; 生成线程名
+            pthread_t tid;
+            
+            &#x2F;&#x2F; 创建线程数据
+            thread_data *td &#x3D; new thread_data&#123;
+                name : name,
+                tp : this
+            &#125;;
+            
+            &#x2F;&#x2F; 创建线程
+            pthread_create(&amp;tid, nullptr, ThreadHandler, (void *)(td));
+            
+            &#x2F;&#x2F; 记录线程信息
+            threads_[tid] &#x3D; name;
+        &#125;
+    &#125;
+    
+    &#x2F;&#x2F; 向线程池添加任务
+    void Push(const T &amp;task)
+    &#123;
+        &#123;
+            LockGuard lg(mtx_);  &#x2F;&#x2F; 加锁保护
+            tasks_.push(task);   &#x2F;&#x2F; 任务入队
+        &#125;
+        &#x2F;&#x2F; 先释放锁后唤醒，提高并发效率
+        pthread_cond_signal(&amp;cond_);  &#x2F;&#x2F; 唤醒一个等待线程
+    &#125;
+    
+    &#x2F;&#x2F; 结束线程池
+    void End()
+    &#123;
+        &#123;
+            LockGuard lg(mtx_);
+            running_ &#x3D; false;  &#x2F;&#x2F; 设置停止标志
+        &#125;
+        
+        &#x2F;&#x2F; 广播唤醒所有等待线程
+        pthread_cond_broadcast(&amp;cond_);
+        
+        &#x2F;&#x2F; 等待所有线程结束
+        for (auto &amp;[tid, name] : threads_)
+        &#123;
+            pthread_join(tid, nullptr);
+        &#125;
+        
+        threads_.clear();  &#x2F;&#x2F; 清空线程记录
+    &#125;
+    
+    &#x2F;&#x2F; 线程处理函数（静态成员函数）
+    static void *ThreadHandler(void *args)
+    &#123;
+        &#x2F;&#x2F; 获取线程数据
+        thread_data *td &#x3D; static_cast&lt;thread_data *&gt;(args);
+        ThreadPool&lt;T&gt; *tp &#x3D; td-&gt;tp;
+        std::string thread_name &#x3D; td-&gt;name;
+        T task;
+        
+        while (true)
+        &#123;
+            &#123;
+                LockGuard lg(tp-&gt;mtx_);  &#x2F;&#x2F; 加锁
+                
+                &#x2F;&#x2F; 等待条件：任务队列不为空或线程池停止
+                while (tp-&gt;IsEmptyQueue())
+                &#123;
+                    if (tp-&gt;running_)
+                        pthread_cond_wait(&amp;tp-&gt;cond_, &amp;tp-&gt;mtx_);  &#x2F;&#x2F; 等待任务
+                    else
+                    &#123;
+                        delete td;  &#x2F;&#x2F; 清理线程数据
+                        return nullptr;  &#x2F;&#x2F; 线程退出
+                    &#125;
+                &#125;
+                
+                &#x2F;&#x2F; 获取任务
+                task &#x3D; tp-&gt;Pop();
+            &#125;  &#x2F;&#x2F; 自动解锁
+            
+            &#x2F;&#x2F; 执行任务
+            task();
+            
+            &#x2F;&#x2F; 输出任务结果（假设T类型有GetResult方法）
+            printf(&quot;%s: %s\n&quot;, thread_name.c_str(), task.GetResult().c_str());
+        &#125;
+        
+        delete td;  &#x2F;&#x2F; 理论上不会执行到这里
+        return nullptr;
+    &#125;
+
+private:
+    &#x2F;&#x2F; 私有构造函数（单例模式）
+    ThreadPool(size_t cap &#x3D; default_cap)
+        : cap_(cap),          &#x2F;&#x2F; 线程容量
+          running_(false)     &#x2F;&#x2F; 初始状态为未运行
+    &#123;
+        pthread_mutex_init(&amp;mtx_, nullptr);    &#x2F;&#x2F; 初始化互斥锁
+        pthread_cond_init(&amp;cond_, nullptr);    &#x2F;&#x2F; 初始化条件变量
+    &#125;
+    
+    &#x2F;&#x2F; 析构函数
+    ~ThreadPool()
+    &#123;
+        if (running_)
+            End();  &#x2F;&#x2F; 如果还在运行，先停止
+        
+        pthread_mutex_destroy(&amp;mtx_);   &#x2F;&#x2F; 销毁互斥锁
+        pthread_cond_destroy(&amp;cond_);   &#x2F;&#x2F; 销毁条件变量
+    &#125;
+    
+    &#x2F;&#x2F; 禁用拷贝构造和赋值操作
+    ThreadPool(const ThreadPool&lt;T&gt; &amp;) &#x3D; delete;
+    const ThreadPool&lt;T&gt; &amp;operator&#x3D;(const ThreadPool&lt;T&gt; &amp;) &#x3D; delete;
+
+private:
+    std::unordered_map&lt;pthread_t, std::string&gt; threads_;  &#x2F;&#x2F; 线程ID与名称映射
+    size_t cap_;                     &#x2F;&#x2F; 线程池容量
+    std::queue&lt;T&gt; tasks_;            &#x2F;&#x2F; 任务队列
+    pthread_mutex_t mtx_;            &#x2F;&#x2F; 保护任务队列的互斥锁
+    pthread_cond_t cond_;            &#x2F;&#x2F; 任务通知条件变量
+    bool running_;                   &#x2F;&#x2F; 线程池运行标志
+&#125;;
+
+&#x2F;&#x2F; 静态成员初始化
+template &lt;class T&gt;
+pthread_mutex_t lock_ &#x3D; PTHREAD_MUTEX_INITIALIZER;
+
+#endif<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="2-核心实现分析">2. 核心实现分析</span></h3><h4><span id="21-线程安全设计">2.1 线程安全设计</span></h4><ul>
 <li><strong>互斥锁保护</strong>：使用<code>pthread_mutex_t</code>保护共享资源（任务队列）</li>
 <li><strong>条件变量</strong>：<code>pthread_cond_t</code>实现线程间的任务通知机制</li>
 <li><strong>RAII锁</strong>：<code>LockGuard</code>类实现自动加解锁，防止死锁</li>
 </ul>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">LockGuard</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">LockGuard</span><span class="params">(<span class="type">pthread_mutex_t</span> &amp;mtx)</span> : mtx_(mtx) &#123;</span></span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;mtx_);</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">LockGuard</span>() &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;mtx_);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">LockGuard</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token keyword">explicit</span> <span class="token function">LockGuard</span><span class="token punctuation">(</span>pthread_mutex_t <span class="token operator">&amp;</span>mtx<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token function">mtx_</span><span class="token punctuation">(</span>mtx<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token operator">~</span><span class="token function">LockGuard</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token comment">// 禁用拷贝构造和赋值</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="22-任务管理">2.2 任务管理</span></h4><ul>
 <li>任务队列：使用<code>std::queue</code>存储待处理任务</li>
@@ -329,7 +544,10 @@
 </ul>
 <h3><span id="3-关键特性">3. 关键特性</span></h3><ol>
 <li><p><strong>单例模式</strong>：确保全局唯一线程池实例</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> ThreadPool&lt;T&gt; &amp;<span class="title">GetInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">static</span> ThreadPool&lt;T&gt; tp;</span><br><span class="line">    <span class="keyword">return</span> tp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">static</span> ThreadPool<span class="token operator">&lt;</span>T<span class="token operator">></span> <span class="token operator">&amp;</span><span class="token function">GetInstance</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">static</span> ThreadPool<span class="token operator">&lt;</span>T<span class="token operator">></span> tp<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> tp<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>优雅停机</strong>：</p>
 <ul>
@@ -339,29 +557,490 @@
 </ul>
 </li>
 <li><p><strong>高效唤醒机制</strong>：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Push</span><span class="params">(<span class="type">const</span> T &amp;task)</span> </span>&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="function">LockGuard <span class="title">lg</span><span class="params">(mtx_)</span></span>;</span><br><span class="line">        tasks_.<span class="built_in">push</span>(task);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">pthread_cond_signal</span>(&amp;cond_); <span class="comment">// 在锁外唤醒</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">Push</span><span class="token punctuation">(</span><span class="token keyword">const</span> T <span class="token operator">&amp;</span>task<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token punctuation">&#123;</span>
+        LockGuard <span class="token function">lg</span><span class="token punctuation">(</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        tasks_<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token function">pthread_cond_signal</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>cond_<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 在锁外唤醒</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ol>
 <h3><span id="4-使用示例">4. 使用示例</span></h3><p>我们仍然使用之前的任务类：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _TASK_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _TASK_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">calc_error</span>&#123;</span><br><span class="line">    division_by_zero_error = <span class="number">1</span>,</span><br><span class="line">    operator_error,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Task</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Task</span>(<span class="type">int</span> num1 = <span class="number">0</span>, <span class="type">int</span> num2 = <span class="number">0</span>, <span class="type">char</span> op = <span class="string">&#x27;+&#x27;</span>)</span><br><span class="line">    :<span class="built_in">num1_</span>(num1),</span><br><span class="line">    <span class="built_in">num2_</span>(num2),</span><br><span class="line">    <span class="built_in">op_</span>(op)&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Run</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        exitcode_ = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">switch</span> (op_)</span><br><span class="line">        &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;+&#x27;</span>:</span><br><span class="line">            result_ = num1_ + num2_;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;-&#x27;</span>:</span><br><span class="line">            result_ = num1_ - num2_;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;*&#x27;</span>:</span><br><span class="line">            result_ = num1_ * num2_;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;/&#x27;</span>:</span><br><span class="line">            <span class="keyword">if</span>(num2_ == <span class="number">0</span>)&#123;</span><br><span class="line">                result_ = <span class="number">0</span>;</span><br><span class="line">                exitcode_ = calc_error::division_by_zero_error;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> result_ = num1_ / num2_;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&#x27;%&#x27;</span>:</span><br><span class="line">            <span class="keyword">if</span>(num2_ == <span class="number">0</span>)&#123;</span><br><span class="line">                result_ = <span class="number">0</span>;</span><br><span class="line">                exitcode_ = calc_error::division_by_zero_error;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span> result_ = num1_ % num2_;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            result_ = <span class="number">0</span>;</span><br><span class="line">            exitcode_ = calc_error::operator_error;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">operator</span> <span class="params">()</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="built_in">Run</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">GetResult</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::string ret = std::<span class="built_in">to_string</span>(num1_);</span><br><span class="line">        ret += op_;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(num2_);</span><br><span class="line">        ret += <span class="string">&quot;=&quot;</span>;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(result_);</span><br><span class="line">        ret += <span class="string">&quot;[code: &quot;</span>;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(exitcode_);</span><br><span class="line">        ret += <span class="string">&quot;]&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">std::string <span class="title">GetTask</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        std::string ret = std::<span class="built_in">to_string</span>(num1_);</span><br><span class="line">        ret += op_;</span><br><span class="line">        ret += std::<span class="built_in">to_string</span>(num2_);</span><br><span class="line">        ret += <span class="string">&quot;=?&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> num1_, num2_;</span><br><span class="line">    <span class="type">char</span> op_;</span><br><span class="line">    <span class="type">int</span> result_;</span><br><span class="line">    <span class="type">int</span> exitcode_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#ifndef _TASK_HPP_
+#define _TASK_HPP_ 1
+
+#include &lt;iostream&gt;
+
+enum calc_error&#123;
+    division_by_zero_error &#x3D; 1,
+    operator_error,
+&#125;;
+
+class Task
+&#123;
+public:
+    Task(int num1 &#x3D; 0, int num2 &#x3D; 0, char op &#x3D; &#39;+&#39;)
+    :num1_(num1),
+    num2_(num2),
+    op_(op)&#123;&#125;
+
+    void Run()
+    &#123;
+        exitcode_ &#x3D; 0;
+        switch (op_)
+        &#123;
+        case &#39;+&#39;:
+            result_ &#x3D; num1_ + num2_;
+            break;
+        case &#39;-&#39;:
+            result_ &#x3D; num1_ - num2_;
+            break;
+        case &#39;*&#39;:
+            result_ &#x3D; num1_ * num2_;
+            break;
+        case &#39;&#x2F;&#39;:
+            if(num2_ &#x3D;&#x3D; 0)&#123;
+                result_ &#x3D; 0;
+                exitcode_ &#x3D; calc_error::division_by_zero_error;
+            &#125;
+            else result_ &#x3D; num1_ &#x2F; num2_;
+            break;
+        case &#39;%&#39;:
+            if(num2_ &#x3D;&#x3D; 0)&#123;
+                result_ &#x3D; 0;
+                exitcode_ &#x3D; calc_error::division_by_zero_error;
+            &#125;
+            else result_ &#x3D; num1_ % num2_;
+            break;
+        default:
+            result_ &#x3D; 0;
+            exitcode_ &#x3D; calc_error::operator_error;
+            break;
+        &#125;
+    &#125;
+
+    void operator ()()
+    &#123;
+        Run();
+    &#125;
+
+    std::string GetResult()
+    &#123;
+        std::string ret &#x3D; std::to_string(num1_);
+        ret +&#x3D; op_;
+        ret +&#x3D; std::to_string(num2_);
+        ret +&#x3D; &quot;&#x3D;&quot;;
+        ret +&#x3D; std::to_string(result_);
+        ret +&#x3D; &quot;[code: &quot;;
+        ret +&#x3D; std::to_string(exitcode_);
+        ret +&#x3D; &quot;]&quot;;
+
+        return ret;
+    &#125;
+
+    std::string GetTask()
+    &#123;
+        std::string ret &#x3D; std::to_string(num1_);
+        ret +&#x3D; op_;
+        ret +&#x3D; std::to_string(num2_);
+        ret +&#x3D; &quot;&#x3D;?&quot;;
+        return ret;
+    &#125;
+
+private:
+    int num1_, num2_;
+    char op_;
+    int result_;
+    int exitcode_;
+&#125;;
+
+#endif<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>测试主函数如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;chrono&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;Task.hpp&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;thread_pool.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">pthread_mutex_t</span> mutex = PTHREAD_MUTEX_INITIALIZER;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> thread_num = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> total_task = <span class="number">20</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">sem_t</span> sem_cons;</span><br><span class="line"><span class="type">sem_t</span> sem_pro;</span><br><span class="line"></span><br><span class="line"><span class="type">char</span> opers[] = &#123;<span class="string">&#x27;+&#x27;</span>, <span class="string">&#x27;-&#x27;</span>, <span class="string">&#x27;*&#x27;</span>, <span class="string">&#x27;/&#x27;</span>, <span class="string">&#x27;%&#x27;</span>&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">thread_data</span>&#123;</span><br><span class="line">    string name;</span><br><span class="line">    <span class="type">sem_t</span> sem;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Timer</span></span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; start_time;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">start</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">start</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        start_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">Timer</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="built_in">elapsed</span>() &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的毫秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsed</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> end_time = std::chrono::high_resolution_clock::<span class="built_in">now</span>();</span><br><span class="line">        <span class="keyword">return</span> std::chrono::<span class="built_in">duration</span>&lt;<span class="type">double</span>, std::milli&gt;(end_time - start_time).<span class="built_in">count</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回经过的秒数</span></span><br><span class="line">    <span class="function"><span class="type">double</span> <span class="title">elapsedSeconds</span><span class="params">()</span> <span class="type">const</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">elapsed</span>() / <span class="number">1000.0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> *<span class="title">Producer</span><span class="params">(<span class="type">void</span> *args)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">    string name = td-&gt;name;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sem_trywait</span>(&amp;sem_pro)) <span class="keyword">break</span>;</span><br><span class="line">        <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">        <span class="type">int</span> num1 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">int</span> num2 = <span class="built_in">rand</span>() % <span class="number">10</span>;</span><br><span class="line">        <span class="type">char</span> op = opers[<span class="built_in">rand</span>() % <span class="number">5</span>];</span><br><span class="line">        Task task&#123;num1, num2, op&#125;;</span><br><span class="line">        ThreadPool&lt;Task&gt;::<span class="built_in">GetInstance</span>().<span class="built_in">Push</span>(task);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s: %s\n&quot;</span>, name.<span class="built_in">c_str</span>(), task.<span class="built_in">GetTask</span>().<span class="built_in">c_str</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">srand</span>(<span class="built_in">time</span>(<span class="literal">nullptr</span>));</span><br><span class="line">    vector&lt;<span class="type">pthread_t</span>&gt; tids;</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_cons, <span class="number">0</span>, total_task);</span><br><span class="line">    <span class="built_in">sem_init</span>(&amp;sem_pro, <span class="number">0</span>, total_task);</span><br><span class="line">    ThreadPool&lt;Task&gt;::<span class="built_in">GetInstance</span>().<span class="built_in">Start</span>();</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; i &lt;= thread_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        string name = <span class="string">&quot;producer-&quot;</span> + <span class="built_in">to_string</span>(i);</span><br><span class="line">        thread_data *td = <span class="keyword">new</span> thread_data&#123;</span><br><span class="line">            name: name</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">pthread_t</span> tid;</span><br><span class="line">        <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, Producer, (<span class="type">void</span>*)(td));</span><br><span class="line">        tids.<span class="built_in">push_back</span>(tid);</span><br><span class="line">    &#125;</span><br><span class="line">    &#123;</span><br><span class="line">        Timer time;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">auto</span> tid: tids) <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;pthread.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;vector&gt;
+#include &lt;chrono&gt;
+#include &lt;semaphore.h&gt;
+#include &quot;Task.hpp&quot;
+#include &quot;thread_pool.hpp&quot;
+
+pthread_mutex_t mutex &#x3D; PTHREAD_MUTEX_INITIALIZER;
+
+using namespace std;
+
+const int thread_num &#x3D; 20;
+
+const int total_task &#x3D; 20;
+
+sem_t sem_cons;
+sem_t sem_pro;
+
+char opers[] &#x3D; &#123;&#39;+&#39;, &#39;-&#39;, &#39;*&#39;, &#39;&#x2F;&#39;, &#39;%&#39;&#125;;
+
+struct thread_data&#123;
+    string name;
+    sem_t sem;
+&#125;;
+
+class Timer
+&#123;
+private:
+    std::chrono::time_point&lt;std::chrono::high_resolution_clock&gt; start_time;
+
+public:
+    Timer()
+    &#123;
+        start();
+    &#125;
+
+    void start()
+    &#123;
+        start_time &#x3D; std::chrono::high_resolution_clock::now();
+    &#125;
+
+    ~Timer()
+    &#123;
+        std::cout &lt;&lt; elapsed() &lt;&lt; endl;
+    &#125;
+
+    &#x2F;&#x2F; 返回经过的毫秒数
+    double elapsed() const
+    &#123;
+        auto end_time &#x3D; std::chrono::high_resolution_clock::now();
+        return std::chrono::duration&lt;double, std::milli&gt;(end_time - start_time).count();
+    &#125;
+
+    &#x2F;&#x2F; 返回经过的秒数
+    double elapsedSeconds() const
+    &#123;
+        return elapsed() &#x2F; 1000.0;
+    &#125;
+&#125;;
+
+void *Producer(void *args)
+&#123;
+    thread_data *td &#x3D; static_cast&lt;thread_data *&gt;(args);
+    string name &#x3D; td-&gt;name;
+    while(true)
+    &#123;
+        if(sem_trywait(&amp;sem_pro)) break;
+        usleep(10);
+        int num1 &#x3D; rand() % 10;
+        int num2 &#x3D; rand() % 10;
+        char op &#x3D; opers[rand() % 5];
+        Task task&#123;num1, num2, op&#125;;
+        ThreadPool&lt;Task&gt;::GetInstance().Push(task);
+        printf(&quot;%s: %s\n&quot;, name.c_str(), task.GetTask().c_str());
+    &#125;
+    return nullptr;
+&#125;
+
+int main()
+&#123;
+    srand(time(nullptr));
+    vector&lt;pthread_t&gt; tids;
+    sem_init(&amp;sem_cons, 0, total_task);
+    sem_init(&amp;sem_pro, 0, total_task);
+    ThreadPool&lt;Task&gt;::GetInstance().Start();
+    for(int i &#x3D; 1; i &lt;&#x3D; thread_num; ++i)
+    &#123;
+        string name &#x3D; &quot;producer-&quot; + to_string(i);
+        thread_data *td &#x3D; new thread_data&#123;
+            name: name
+        &#125;;
+        pthread_t tid;
+        pthread_create(&amp;tid, nullptr, Producer, (void*)(td));
+        tids.push_back(tid);
+    &#125;
+    &#123;
+        Timer time;
+        for(auto tid: tids) pthread_join(tid, nullptr);
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>同样有一个计时器，不过这里的计时器用处不是很大，因为并没有值得对比的其他类型的线程池，不过我们可以和之前的阻塞队列和环形队列相对比，因为它们都属于是一种生产者-消费者模型。</p>
 <p>上面的测试用例是为了查看一下打印结果，验证该线程池是否能够正常工作，我们看一下打印结果：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">thread-1: 0*6=0[code: 0]</span><br><span class="line">thread-1: 2+7=9[code: 0]</span><br><span class="line">producer-1: 0*6=?</span><br><span class="line">producer-9: 2+7=?</span><br><span class="line">thread-3: 6+9=15[code: 0]</span><br><span class="line">producer-10: 6+9=?</span><br><span class="line">thread-4: 4/6=0[code: 0]</span><br><span class="line">producer-11: 4/6=?</span><br><span class="line">thread-5: 5+2=7[code: 0]</span><br><span class="line">producer-12: 5+2=?</span><br><span class="line">thread-6: 6*2=12[code: 0]</span><br><span class="line">producer-10: 6*2=?</span><br><span class="line">thread-8: 9-3=6[code: 0]</span><br><span class="line">thread-7: 4%8=4[code: 0]</span><br><span class="line">producer-1: 4%8=?</span><br><span class="line">producer-9: 9-3=?</span><br><span class="line">thread-9: 8-7=1[code: 0]</span><br><span class="line">producer-10: 8-7=?</span><br><span class="line">thread-10: 5*8=40[code: 0]</span><br><span class="line">producer-11: 5*8=?</span><br><span class="line">thread-11: 6/1=6[code: 0]</span><br><span class="line">producer-12: 6/1=?</span><br><span class="line">producer-1: 8*3=?</span><br><span class="line">thread-12: 8*3=24[code: 0]</span><br><span class="line">producer-9: 5%1=?</span><br><span class="line">thread-13: 5%1=0[code: 0]</span><br><span class="line">producer-15: 8*8=?</span><br><span class="line">thread-19: 8*8=64[code: 0]</span><br><span class="line">producer-10: 5+5=?</span><br><span class="line">thread-14: 5+5=10[code: 0]</span><br><span class="line">producer-1: 5%3=?</span><br><span class="line">thread-15: 5%3=2[code: 0]</span><br><span class="line">producer-11: 5*9=?</span><br><span class="line">thread-16: 5*9=45[code: 0]</span><br><span class="line">producer-13: 5+6=?</span><br><span class="line">thread-17: 5+6=11[code: 0]</span><br><span class="line">producer-14: 1+7=?</span><br><span class="line">thread-18: 1+7=8[code: 0]</span><br><span class="line">producer-2: 1/3=?</span><br><span class="line">thread-20: 1/3=0[code: 0]</span><br><span class="line">0.928079</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+thread-1: <span class="token number">0</span>*6<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+thread-1: <span class="token number">2</span>+7<span class="token operator">=</span><span class="token number">9</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-1: <span class="token number">0</span>*6<span class="token operator">=</span>?
+producer-9: <span class="token number">2</span>+7<span class="token operator">=</span>?
+thread-3: <span class="token number">6</span>+9<span class="token operator">=</span><span class="token number">15</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-10: <span class="token number">6</span>+9<span class="token operator">=</span>?
+thread-4: <span class="token number">4</span>/6<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-11: <span class="token number">4</span>/6<span class="token operator">=</span>?
+thread-5: <span class="token number">5</span>+2<span class="token operator">=</span><span class="token number">7</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-12: <span class="token number">5</span>+2<span class="token operator">=</span>?
+thread-6: <span class="token number">6</span>*2<span class="token operator">=</span><span class="token number">12</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-10: <span class="token number">6</span>*2<span class="token operator">=</span>?
+thread-8: <span class="token number">9</span>-3<span class="token operator">=</span><span class="token number">6</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+thread-7: <span class="token number">4</span>%8<span class="token operator">=</span><span class="token number">4</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-1: <span class="token number">4</span>%8<span class="token operator">=</span>?
+producer-9: <span class="token number">9</span>-3<span class="token operator">=</span>?
+thread-9: <span class="token number">8</span>-7<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-10: <span class="token number">8</span>-7<span class="token operator">=</span>?
+thread-10: <span class="token number">5</span>*8<span class="token operator">=</span><span class="token number">40</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-11: <span class="token number">5</span>*8<span class="token operator">=</span>?
+thread-11: <span class="token number">6</span>/1<span class="token operator">=</span><span class="token number">6</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-12: <span class="token number">6</span>/1<span class="token operator">=</span>?
+producer-1: <span class="token number">8</span>*3<span class="token operator">=</span>?
+thread-12: <span class="token number">8</span>*3<span class="token operator">=</span><span class="token number">24</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-9: <span class="token number">5</span>%1<span class="token operator">=</span>?
+thread-13: <span class="token number">5</span>%1<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-15: <span class="token number">8</span>*8<span class="token operator">=</span>?
+thread-19: <span class="token number">8</span>*8<span class="token operator">=</span><span class="token number">64</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-10: <span class="token number">5</span>+5<span class="token operator">=</span>?
+thread-14: <span class="token number">5</span>+5<span class="token operator">=</span><span class="token number">10</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-1: <span class="token number">5</span>%3<span class="token operator">=</span>?
+thread-15: <span class="token number">5</span>%3<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-11: <span class="token number">5</span>*9<span class="token operator">=</span>?
+thread-16: <span class="token number">5</span>*9<span class="token operator">=</span><span class="token number">45</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-13: <span class="token number">5</span>+6<span class="token operator">=</span>?
+thread-17: <span class="token number">5</span>+6<span class="token operator">=</span><span class="token number">11</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-14: <span class="token number">1</span>+7<span class="token operator">=</span>?
+thread-18: <span class="token number">1</span>+7<span class="token operator">=</span><span class="token number">8</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+producer-2: <span class="token number">1</span>/3<span class="token operator">=</span>?
+thread-20: <span class="token number">1</span>/3<span class="token operator">=</span><span class="token number">0</span><span class="token punctuation">[</span>code: <span class="token number">0</span><span class="token punctuation">]</span>
+<span class="token number">0.928079</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>接下来，我们和前面的阻塞队列和环形队列进行比较，我们修改一下测试用例，让生产者和消费者数量相等，任务数量也相等，然后我们比较一下它们的执行时间：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改了任务总量</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> total_task = <span class="number">100000</span>;</span><br><span class="line"><span class="comment">// 将打印信息屏蔽掉了</span></span><br><span class="line"><span class="comment">// main.cc</span></span><br><span class="line"><span class="comment">// printf(&quot;%s: %s\n&quot;, name.c_str(), task.GetTask().c_str());</span></span><br><span class="line"><span class="comment">// thread.hpp</span></span><br><span class="line"><span class="comment">// printf(&quot;%s: %s\n&quot;, thread_name.c_str(), task.GetResult().c_str());</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Task.hpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Run</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 给任务同样增加延迟，统一变数</span></span><br><span class="line">    <span class="built_in">usleep</span>(<span class="number">10</span>);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; 修改了任务总量
+const int total_task &#x3D; 100000;
+&#x2F;&#x2F; 将打印信息屏蔽掉了
+&#x2F;&#x2F; main.cc
+&#x2F;&#x2F; printf(&quot;%s: %s\n&quot;, name.c_str(), task.GetTask().c_str());
+&#x2F;&#x2F; thread.hpp
+&#x2F;&#x2F; printf(&quot;%s: %s\n&quot;, thread_name.c_str(), task.GetResult().c_str());
+
+&#x2F;&#x2F; Task.hpp
+void Run()
+&#123;
+    &#x2F;&#x2F; 给任务同样增加延迟，统一变数
+    usleep(10);
+    ...
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>测试后结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">676.78</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第二次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">905.2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第三次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">724.741</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第四次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">813.893</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第五次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">923.235</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 第一次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">676.78</span>
+<span class="token comment"># 第二次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">905.2</span>
+<span class="token comment"># 第三次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">724.741</span>
+<span class="token comment"># 第四次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">813.893</span>
+<span class="token comment"># 第五次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">923.235</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>平均用时：（676.78 + 905.2 + 724.741 + 813.893 + 923.235）&#x2F; 5 &#x3D; 811.8774</p>
 <p>可以看到，效率肯定不如环形队列，因为环形队列极大减少了消费者和生产者之间的冲突，只有在队列为空为满的时候才会等待</p>
 <p>既然如此，我们为何不试试利用环形队列来实现线程池呢？</p>
 <p>说干就干，利用信号量来大幅度降低 <code>Push</code> 和 <code>Pop</code> 锁冲突的开销，我们来实现一个基于环形队列的线程池</p>
-<h2><span id="基于环形队列信号量的线程池">基于环形队列（信号量）的线程池</span></h2><h3><span id="代码实现">代码实现</span></h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _THREAD_POOL_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _THREAD_POOL_HPP_ 1;  <span class="comment">// 头文件保护宏</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;pthread.h&gt;</span>          <span class="comment">// POSIX线程库</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unordered_map&gt;</span>      <span class="comment">// 线程管理容器</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;queue&gt;</span>              <span class="comment">// 任务队列（已弃用）</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;semaphore.h&gt;</span>        <span class="comment">// 信号量支持</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">size_t</span> default_cap = <span class="number">20</span>; <span class="comment">// 默认线程数量</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// RAII互斥锁封装类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">LockGuard</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">LockGuard</span><span class="params">(<span class="type">pthread_mutex_t</span> &amp;mtx)</span></span></span><br><span class="line"><span class="function">        : push_mtx_(mtx) &#123;</span></span><br><span class="line">        <span class="built_in">pthread_mutex_lock</span>(&amp;push_mtx_);  <span class="comment">// 构造时加锁</span></span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">LockGuard</span>() &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_unlock</span>(&amp;push_mtx_); <span class="comment">// 析构时解锁</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值</span></span><br><span class="line">    <span class="built_in">LockGuard</span>(<span class="type">const</span> LockGuard &amp;) = <span class="keyword">delete</span>;            </span><br><span class="line">    LockGuard &amp;<span class="keyword">operator</span>=(<span class="type">const</span> LockGuard &amp;) = <span class="keyword">delete</span>; </span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">pthread_mutex_t</span> &amp;push_mtx_;  <span class="comment">// 管理的互斥锁引用</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">class</span> <span class="title class_">T</span>&gt;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPool</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 从环形队列取出任务</span></span><br><span class="line">    <span class="function">T <span class="title">Pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        T task = tasks_[pop_pos_];       <span class="comment">// 获取当前读位置任务</span></span><br><span class="line">        pop_pos_ = (pop_pos_ + <span class="number">1</span>) % task_cap_; <span class="comment">// 环形递增读指针</span></span><br><span class="line">        <span class="keyword">return</span> task;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 封装sem_wait（P操作）</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">P</span><span class="params">(<span class="type">sem_t</span> &amp;sem)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">sem_wait</span>(&amp;sem);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 封装sem_post（V操作）</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">V</span><span class="params">(<span class="type">sem_t</span> &amp;sem)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">sem_post</span>(&amp;sem);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 线程上下文数据</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">thread_data</span> &#123;</span><br><span class="line">        std::string name;    <span class="comment">// 线程名称</span></span><br><span class="line">        ThreadPool&lt;T&gt; *tp;   <span class="comment">// 所属线程池指针</span></span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 获取单例实例（线程安全）</span></span><br><span class="line">    <span class="function"><span class="type">static</span> ThreadPool&lt;T&gt; &amp;<span class="title">GetInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="type">static</span> ThreadPool&lt;T&gt; tp;  <span class="comment">// C++11保证静态变量线程安全</span></span><br><span class="line">        <span class="keyword">return</span> tp;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动线程池</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        running_ = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= cap_; ++i) &#123;</span><br><span class="line">            std::string name = <span class="string">&quot;thread-&quot;</span> + std::<span class="built_in">to_string</span>(i);</span><br><span class="line">            <span class="type">pthread_t</span> tid;</span><br><span class="line">            <span class="comment">// 创建线程上下文数据</span></span><br><span class="line">            thread_data *td = <span class="keyword">new</span> thread_data&#123; name, <span class="keyword">this</span> &#125;;</span><br><span class="line">            <span class="built_in">pthread_create</span>(&amp;tid, <span class="literal">nullptr</span>, ThreadHandler, td);</span><br><span class="line">            threads_[tid] = name;  <span class="comment">// 记录线程信息</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提交任务到线程池</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">Push</span><span class="params">(<span class="type">const</span> T &amp;task)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">P</span>(push_sem_);  <span class="comment">// 等待空闲槽位</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">lg</span><span class="params">(push_mtx_)</span></span>;  <span class="comment">// 保护写指针</span></span><br><span class="line">            tasks_[push_pos_] = task; <span class="comment">// 写入任务</span></span><br><span class="line">            push_pos_ = (push_pos_ + <span class="number">1</span>) % task_cap_; <span class="comment">// 环形递增写指针</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">V</span>(pop_sem_);  <span class="comment">// 通知有新任务</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 停止线程池</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">End</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="function">LockGuard <span class="title">pop_lg</span><span class="params">(pop_mtx_)</span></span>;</span><br><span class="line">            running_ = <span class="literal">false</span>;  <span class="comment">// 设置停止标志</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 等待所有线程退出</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">auto</span> &amp;[tid, name] : threads_) &#123;</span><br><span class="line">            <span class="built_in">pthread_join</span>(tid, <span class="literal">nullptr</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        threads_.<span class="built_in">clear</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 线程处理函数（静态方法）</span></span><br><span class="line">    <span class="function"><span class="type">static</span> <span class="type">void</span> *<span class="title">ThreadHandler</span><span class="params">(<span class="type">void</span> *args)</span> </span>&#123;</span><br><span class="line">        thread_data *td = <span class="built_in">static_cast</span>&lt;thread_data *&gt;(args);</span><br><span class="line">        ThreadPool&lt;T&gt; *tp = td-&gt;tp;</span><br><span class="line">        T task;</span><br><span class="line">        <span class="type">int</span> wait_ret = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="comment">// 非阻塞式获取任务</span></span><br><span class="line">            <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">                wait_ret = <span class="built_in">sem_trywait</span>(&amp;tp-&gt;pop_sem_);  <span class="comment">// 尝试获取任务</span></span><br><span class="line">                <span class="keyword">if</span> (wait_ret == <span class="number">0</span>) <span class="keyword">break</span>;  <span class="comment">// 成功获取</span></span><br><span class="line">                </span><br><span class="line">                <span class="keyword">if</span> (errno == EAGAIN) &#123;     <span class="comment">// 无任务可用</span></span><br><span class="line">                    <span class="keyword">if</span> (!tp-&gt;running_) &#123;    <span class="comment">// 检查停止标志</span></span><br><span class="line">                        <span class="keyword">delete</span> td;</span><br><span class="line">                        <span class="keyword">return</span> <span class="literal">nullptr</span>;     <span class="comment">// 安全退出</span></span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="built_in">usleep</span>(<span class="number">1000</span>);          <span class="comment">// 避免忙等待</span></span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;                  <span class="comment">// 其他错误</span></span><br><span class="line">                    <span class="built_in">perror</span>(<span class="string">&quot;sem_trywait&quot;</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 处理任务</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="function">LockGuard <span class="title">lg</span><span class="params">(tp-&gt;pop_mtx_)</span></span>;  <span class="comment">// 保护读指针</span></span><br><span class="line">                task = tp-&gt;<span class="built_in">Pop</span>();           <span class="comment">// 取出任务</span></span><br><span class="line">            &#125;</span><br><span class="line">            tp-&gt;<span class="built_in">V</span>(tp-&gt;push_sem_);  <span class="comment">// 释放一个空槽位</span></span><br><span class="line">            <span class="built_in">task</span>();                <span class="comment">// 执行任务</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">delete</span> td;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 私有构造函数（单例模式）</span></span><br><span class="line">    <span class="built_in">ThreadPool</span>(<span class="type">size_t</span> cap = default_cap, <span class="type">size_t</span> task_cap = <span class="number">10</span>)</span><br><span class="line">        : <span class="built_in">cap_</span>(cap),              <span class="comment">// 线程数量</span></span><br><span class="line">          <span class="built_in">task_cap_</span>(task_cap),    <span class="comment">// 环形队列容量</span></span><br><span class="line">          <span class="built_in">running_</span>(<span class="literal">false</span>),        <span class="comment">// 初始状态</span></span><br><span class="line">          <span class="built_in">push_pos_</span>(<span class="number">0</span>),           <span class="comment">// 写指针初始化</span></span><br><span class="line">          <span class="built_in">pop_pos_</span>(<span class="number">0</span>),            <span class="comment">// 读指针初始化</span></span><br><span class="line">          <span class="built_in">tasks_</span>(task_cap)        <span class="comment">// 预分配队列空间</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">pthread_mutex_init</span>(&amp;push_mtx_, <span class="literal">nullptr</span>);  <span class="comment">// 写互斥锁初始化</span></span><br><span class="line">        <span class="built_in">pthread_mutex_init</span>(&amp;pop_mtx_, <span class="literal">nullptr</span>);   <span class="comment">// 读互斥锁初始化</span></span><br><span class="line">        <span class="built_in">sem_init</span>(&amp;push_sem_, <span class="number">0</span>, task_cap);       <span class="comment">// 空槽位信号量（初始=容量）</span></span><br><span class="line">        <span class="built_in">sem_init</span>(&amp;pop_sem_, <span class="number">0</span>, <span class="number">0</span>);               <span class="comment">// 任务信号量（初始=0）</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~<span class="built_in">ThreadPool</span>() &#123;</span><br><span class="line">        <span class="keyword">if</span> (running_) <span class="built_in">End</span>();  <span class="comment">// 确保资源释放</span></span><br><span class="line">        </span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;push_mtx_);</span><br><span class="line">        <span class="built_in">pthread_mutex_destroy</span>(&amp;pop_mtx_);</span><br><span class="line">        <span class="built_in">sem_destroy</span>(&amp;push_sem_);</span><br><span class="line">        <span class="built_in">sem_destroy</span>(&amp;pop_sem_);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 禁用拷贝构造和赋值</span></span><br><span class="line">    <span class="built_in">ThreadPool</span>(<span class="type">const</span> ThreadPool&lt;T&gt; &amp;) = <span class="keyword">delete</span>;</span><br><span class="line">    <span class="type">const</span> ThreadPool&lt;T&gt; &amp;<span class="keyword">operator</span>=(<span class="type">const</span> ThreadPool&lt;T&gt; &amp;) = <span class="keyword">delete</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">// 线程管理</span></span><br><span class="line">    std::unordered_map&lt;<span class="type">pthread_t</span>, std::string&gt; threads_;  <span class="comment">// 线程记录</span></span><br><span class="line">    <span class="type">size_t</span> cap_;          <span class="comment">// 线程数量上限</span></span><br><span class="line">    <span class="type">size_t</span> task_cap_;     <span class="comment">// 环形队列容量</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 环形队列控制</span></span><br><span class="line">    <span class="type">size_t</span> push_pos_;     <span class="comment">// 写位置指针</span></span><br><span class="line">    <span class="type">size_t</span> pop_pos_;      <span class="comment">// 读位置指针</span></span><br><span class="line">    std::vector&lt;T&gt; tasks_;<span class="comment">// 环形队列容器</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 同步机制</span></span><br><span class="line">    <span class="type">pthread_mutex_t</span> push_mtx_;  <span class="comment">// 写指针互斥锁</span></span><br><span class="line">    <span class="type">pthread_mutex_t</span> pop_mtx_;   <span class="comment">// 读指针互斥锁</span></span><br><span class="line">    <span class="type">sem_t</span> push_sem_;      <span class="comment">// 空槽位信号量（生产者）</span></span><br><span class="line">    <span class="type">sem_t</span> pop_sem_;       <span class="comment">// 任务信号量（消费者）</span></span><br><span class="line"></span><br><span class="line">    <span class="type">bool</span> running_;        <span class="comment">// 运行状态标志</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<h2><span id="基于环形队列信号量的线程池">基于环形队列（信号量）的线程池</span></h2><h3><span id="代码实现">代码实现</span></h3><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#ifndef _THREAD_POOL_HPP_
+#define _THREAD_POOL_HPP_ 1;  &#x2F;&#x2F; 头文件保护宏
+
+#include &lt;iostream&gt;
+#include &lt;pthread.h&gt;          &#x2F;&#x2F; POSIX线程库
+#include &lt;unordered_map&gt;      &#x2F;&#x2F; 线程管理容器
+#include &lt;queue&gt;              &#x2F;&#x2F; 任务队列（已弃用）
+#include &lt;semaphore.h&gt;        &#x2F;&#x2F; 信号量支持
+
+const size_t default_cap &#x3D; 20; &#x2F;&#x2F; 默认线程数量
+
+&#x2F;&#x2F; RAII互斥锁封装类
+class LockGuard &#123;
+public:
+    explicit LockGuard(pthread_mutex_t &amp;mtx)
+        : push_mtx_(mtx) &#123;
+        pthread_mutex_lock(&amp;push_mtx_);  &#x2F;&#x2F; 构造时加锁
+    &#125;
+    ~LockGuard() &#123;
+        pthread_mutex_unlock(&amp;push_mtx_); &#x2F;&#x2F; 析构时解锁
+    &#125;
+
+    &#x2F;&#x2F; 禁用拷贝构造和赋值
+    LockGuard(const LockGuard &amp;) &#x3D; delete;            
+    LockGuard &amp;operator&#x3D;(const LockGuard &amp;) &#x3D; delete; 
+
+private:
+    pthread_mutex_t &push_mtx_;  &#x2F;&#x2F; 管理的互斥锁引用
+&#125;;
+
+template &lt;class T&gt;
+class ThreadPool &#123;
+private:
+    &#x2F;&#x2F; 从环形队列取出任务
+    T Pop() &#123;
+        T task &#x3D; tasks_[pop_pos_];       &#x2F;&#x2F; 获取当前读位置任务
+        pop_pos_ &#x3D; (pop_pos_ + 1) % task_cap_; &#x2F;&#x2F; 环形递增读指针
+        return task;
+    &#125;
+
+    &#x2F;&#x2F; 封装sem_wait（P操作）
+    void P(sem_t &amp;sem) &#123;
+        sem_wait(&amp;sem);
+    &#125;
+
+    &#x2F;&#x2F; 封装sem_post（V操作）
+    void V(sem_t &amp;sem) &#123;
+        sem_post(&amp;sem);
+    &#125;
+
+private:
+    &#x2F;&#x2F; 线程上下文数据
+    struct thread_data &#123;
+        std::string name;    &#x2F;&#x2F; 线程名称
+        ThreadPool&lt;T&gt; *tp;   &#x2F;&#x2F; 所属线程池指针
+    &#125;;
+
+public:
+    &#x2F;&#x2F; 获取单例实例（线程安全）
+    static ThreadPool&lt;T&gt; &amp;GetInstance() &#123;
+        static ThreadPool&lt;T&gt; tp;  &#x2F;&#x2F; C++11保证静态变量线程安全
+        return tp;
+    &#125;
+
+    &#x2F;&#x2F; 启动线程池
+    void Start() &#123;
+        running_ &#x3D; true;
+        for (int i &#x3D; 1; i &lt;&#x3D; cap_; ++i) &#123;
+            std::string name &#x3D; &quot;thread-&quot; + std::to_string(i);
+            pthread_t tid;
+            &#x2F;&#x2F; 创建线程上下文数据
+            thread_data *td &#x3D; new thread_data&#123; name, this &#125;;
+            pthread_create(&amp;tid, nullptr, ThreadHandler, td);
+            threads_[tid] &#x3D; name;  &#x2F;&#x2F; 记录线程信息
+        &#125;
+    &#125;
+
+    &#x2F;&#x2F; 提交任务到线程池
+    void Push(const T &amp;task) &#123;
+        P(push_sem_);  &#x2F;&#x2F; 等待空闲槽位
+        &#123;
+            LockGuard lg(push_mtx_);  &#x2F;&#x2F; 保护写指针
+            tasks_[push_pos_] &#x3D; task; &#x2F;&#x2F; 写入任务
+            push_pos_ &#x3D; (push_pos_ + 1) % task_cap_; &#x2F;&#x2F; 环形递增写指针
+        &#125;
+        V(pop_sem_);  &#x2F;&#x2F; 通知有新任务
+    &#125;
+
+    &#x2F;&#x2F; 停止线程池
+    void End() &#123;
+        &#123;
+            LockGuard pop_lg(pop_mtx_);
+            running_ &#x3D; false;  &#x2F;&#x2F; 设置停止标志
+        &#125;
+        &#x2F;&#x2F; 等待所有线程退出
+        for (auto &amp;[tid, name] : threads_) &#123;
+            pthread_join(tid, nullptr);
+        &#125;
+        threads_.clear();
+    &#125;
+
+    &#x2F;&#x2F; 线程处理函数（静态方法）
+    static void *ThreadHandler(void *args) &#123;
+        thread_data *td &#x3D; static_cast&lt;thread_data *&gt;(args);
+        ThreadPool&lt;T&gt; *tp &#x3D; td-&gt;tp;
+        T task;
+        int wait_ret &#x3D; 0;
+
+        while (true) &#123;
+            &#x2F;&#x2F; 非阻塞式获取任务
+            while (true) &#123;
+                wait_ret &#x3D; sem_trywait(&amp;tp-&gt;pop_sem_);  &#x2F;&#x2F; 尝试获取任务
+                if (wait_ret &#x3D;&#x3D; 0) break;  &#x2F;&#x2F; 成功获取
+                
+                if (errno &#x3D;&#x3D; EAGAIN) &#123;     &#x2F;&#x2F; 无任务可用
+                    if (!tp-&gt;running_) &#123;    &#x2F;&#x2F; 检查停止标志
+                        delete td;
+                        return nullptr;     &#x2F;&#x2F; 安全退出
+                    &#125;
+                    usleep(1000);          &#x2F;&#x2F; 避免忙等待
+                    continue;
+                &#125; else &#123;                  &#x2F;&#x2F; 其他错误
+                    perror(&quot;sem_trywait&quot;);
+                    break;
+                &#125;
+            &#125;
+
+            &#x2F;&#x2F; 处理任务
+            &#123;
+                LockGuard lg(tp-&gt;pop_mtx_);  &#x2F;&#x2F; 保护读指针
+                task &#x3D; tp-&gt;Pop();           &#x2F;&#x2F; 取出任务
+            &#125;
+            tp-&gt;V(tp-&gt;push_sem_);  &#x2F;&#x2F; 释放一个空槽位
+            task();                &#x2F;&#x2F; 执行任务
+        &#125;
+
+        delete td;
+        return nullptr;
+    &#125;
+
+private:
+    &#x2F;&#x2F; 私有构造函数（单例模式）
+    ThreadPool(size_t cap &#x3D; default_cap, size_t task_cap &#x3D; 10)
+        : cap_(cap),              &#x2F;&#x2F; 线程数量
+          task_cap_(task_cap),    &#x2F;&#x2F; 环形队列容量
+          running_(false),        &#x2F;&#x2F; 初始状态
+          push_pos_(0),           &#x2F;&#x2F; 写指针初始化
+          pop_pos_(0),            &#x2F;&#x2F; 读指针初始化
+          tasks_(task_cap)        &#x2F;&#x2F; 预分配队列空间
+    &#123;
+        pthread_mutex_init(&amp;push_mtx_, nullptr);  &#x2F;&#x2F; 写互斥锁初始化
+        pthread_mutex_init(&amp;pop_mtx_, nullptr);   &#x2F;&#x2F; 读互斥锁初始化
+        sem_init(&amp;push_sem_, 0, task_cap);       &#x2F;&#x2F; 空槽位信号量（初始&#x3D;容量）
+        sem_init(&amp;pop_sem_, 0, 0);               &#x2F;&#x2F; 任务信号量（初始&#x3D;0）
+    &#125;
+
+    ~ThreadPool() &#123;
+        if (running_) End();  &#x2F;&#x2F; 确保资源释放
+        
+        pthread_mutex_destroy(&amp;push_mtx_);
+        pthread_mutex_destroy(&amp;pop_mtx_);
+        sem_destroy(&amp;push_sem_);
+        sem_destroy(&amp;pop_sem_);
+    &#125;
+
+    &#x2F;&#x2F; 禁用拷贝构造和赋值
+    ThreadPool(const ThreadPool&lt;T&gt; &amp;) &#x3D; delete;
+    const ThreadPool&lt;T&gt; &amp;operator&#x3D;(const ThreadPool&lt;T&gt; &amp;) &#x3D; delete;
+
+private:
+    &#x2F;&#x2F; 线程管理
+    std::unordered_map&lt;pthread_t, std::string&gt; threads_;  &#x2F;&#x2F; 线程记录
+    size_t cap_;          &#x2F;&#x2F; 线程数量上限
+    size_t task_cap_;     &#x2F;&#x2F; 环形队列容量
+
+    &#x2F;&#x2F; 环形队列控制
+    size_t push_pos_;     &#x2F;&#x2F; 写位置指针
+    size_t pop_pos_;      &#x2F;&#x2F; 读位置指针
+    std::vector&lt;T&gt; tasks_;&#x2F;&#x2F; 环形队列容器
+
+    &#x2F;&#x2F; 同步机制
+    pthread_mutex_t push_mtx_;  &#x2F;&#x2F; 写指针互斥锁
+    pthread_mutex_t pop_mtx_;   &#x2F;&#x2F; 读指针互斥锁
+    sem_t push_sem_;      &#x2F;&#x2F; 空槽位信号量（生产者）
+    sem_t pop_sem_;       &#x2F;&#x2F; 任务信号量（消费者）
+
+    bool running_;        &#x2F;&#x2F; 运行状态标志
+&#125;;
+
+#endif<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h3><span id="一-设计思想">一、设计思想</span></h3><ol>
@@ -390,19 +1069,27 @@
 </li>
 </ol>
 <hr>
-<h3><span id="二-关键组件解析">二、关键组件解析</span></h3><h4><span id="1-环形队列核心结构">1. 环形队列核心结构</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">size_t</span> push_pos_;        <span class="comment">// 写指针（生产者专用）</span></span><br><span class="line"><span class="type">size_t</span> pop_pos_;         <span class="comment">// 读指针（消费者专用）</span></span><br><span class="line">std::vector&lt;T&gt; tasks_;   <span class="comment">// 预分配环形缓冲区</span></span><br><span class="line"><span class="type">size_t</span> task_cap_;        <span class="comment">// 队列容量</span></span><br></pre></td></tr></table></figure>
+<h3><span id="二-关键组件解析">二、关键组件解析</span></h3><h4><span id="1-环形队列核心结构">1. 环形队列核心结构</span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">size_t push_pos_<span class="token punctuation">;</span>        <span class="token comment">// 写指针（生产者专用）</span>
+size_t pop_pos_<span class="token punctuation">;</span>         <span class="token comment">// 读指针（消费者专用）</span>
+std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>T<span class="token operator">></span> tasks_<span class="token punctuation">;</span>   <span class="token comment">// 预分配环形缓冲区</span>
+size_t task_cap_<span class="token punctuation">;</span>        <span class="token comment">// 队列容量</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>环形计算</strong>：<code>pos = (pos + 1) % task_cap_</code> 实现指针回绕</li>
 <li><strong>内存预分配</strong>：避免动态内存申请的开销</li>
 </ul>
-<h4><span id="2-同步机制">2. 同步机制</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">sem_t</span> push_sem_;         <span class="comment">// 空闲槽位信号量</span></span><br><span class="line"><span class="type">sem_t</span> pop_sem_;          <span class="comment">// 任务信号量</span></span><br><span class="line"><span class="type">pthread_mutex_t</span> push_mtx_;<span class="comment">// 写互斥锁（多生产者时需要）</span></span><br><span class="line"><span class="type">pthread_mutex_t</span> pop_mtx_; <span class="comment">// 读互斥锁（多消费者时需要）</span></span><br></pre></td></tr></table></figure>
+<h4><span id="2-同步机制">2. 同步机制</span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">sem_t push_sem_<span class="token punctuation">;</span>         <span class="token comment">// 空闲槽位信号量</span>
+sem_t pop_sem_<span class="token punctuation">;</span>          <span class="token comment">// 任务信号量</span>
+pthread_mutex_t push_mtx_<span class="token punctuation">;</span><span class="token comment">// 写互斥锁（多生产者时需要）</span>
+pthread_mutex_t pop_mtx_<span class="token punctuation">;</span> <span class="token comment">// 读互斥锁（多消费者时需要）</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>信号量初始化</strong>：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sem_init</span>(&amp;push_sem_, <span class="number">0</span>, task_cap_); <span class="comment">// 初始有task_cap_个空位</span></span><br><span class="line"><span class="built_in">sem_init</span>(&amp;pop_sem_, <span class="number">0</span>, <span class="number">0</span>);          <span class="comment">// 初始0个任务</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token function">sem_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>push_sem_<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> task_cap_<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 初始有task_cap_个空位</span>
+<span class="token function">sem_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>pop_sem_<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>          <span class="token comment">// 初始0个任务</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ul>
-<h4><span id="3-线程控制">3. 线程控制</span></h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">bool</span> running_;           <span class="comment">// 线程池启停标志</span></span><br><span class="line">unordered_map&lt;<span class="type">pthread_t</span>, string&gt; threads_; <span class="comment">// 线程记录表</span></span><br></pre></td></tr></table></figure>
+<h4><span id="3-线程控制">3. 线程控制</span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">bool</span> running_<span class="token punctuation">;</span>           <span class="token comment">// 线程池启停标志</span>
+unordered_map<span class="token operator">&lt;</span>pthread_t<span class="token punctuation">,</span> string<span class="token operator">></span> threads_<span class="token punctuation">;</span> <span class="token comment">// 线程记录表</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>优雅停止</strong>：<ul>
@@ -467,7 +1154,26 @@
 </li>
 </ol>
 <p>我们来看一下这个程序的效率：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">659.121</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第二次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">624.264</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第三次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">607.972</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第四次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">551.506</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第五次</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/thread  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">610.404</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 第一次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">659.121</span>
+<span class="token comment"># 第二次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">624.264</span>
+<span class="token comment"># 第三次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">607.972</span>
+<span class="token comment"># 第四次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">551.506</span>
+<span class="token comment"># 第五次</span>
+╭─ljx@VM-16-15-debian ~/linux_review/thread  
+╰─➤  ./main.o
+<span class="token number">610.404</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>平均用时：（659.121+624.264+607.972+551.506+610.404）&#x2F;5 &#x3D; 607.576ms</p>
 <p>与传统的线程池相比，性能提升了不少</p>

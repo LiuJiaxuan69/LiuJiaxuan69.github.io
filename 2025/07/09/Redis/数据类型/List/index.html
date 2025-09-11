@@ -89,6 +89,8 @@ Redis 阻塞列,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -252,7 +254,7 @@ Redis 阻塞列,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -261,7 +263,7 @@ Redis 阻塞列,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li></ul>
+            <ul><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a></li><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -327,6 +329,10 @@ Redis 阻塞列,"/>
 </ul>
 </li>
 </ul>
+<ul>
+<li><a href="#%E6%89%B9%E9%87%8F%E5%AD%98%E5%82%A8%E7%A4%BA%E4%BE%8B">批量存储示例</a></li>
+<li><a href="#%E9%85%8D%E5%90%88pipeline%E8%8E%B7%E5%8F%96%E8%AF%A6%E6%83%85">配合Pipeline获取详情</a></li>
+</ul>
 <!-- tocstop -->
 
 <h2><span id="类型简介">类型简介</span></h2><p>列表类型是⽤来存储多个有序的字符串，如图1所⽰，a、b、c、d、e 五个元素从左到右组成了⼀个有序的列表，列表中的每个<br>字符串称为元素（element），⼀个列表最多可以存储 2 − 32 1 个元素。在 Redis 中，可以对列表两端插⼊（push）和弹出（pop），<br>还可以获取指定范围的元素列表、获取指定索引下标的元素等（如图1和图2所⽰）。列表是⼀种⽐较灵活的数据结构，它可以<br>充当栈和队列的⻆⾊，在实际开发上有很多应⽤场景</p>
@@ -337,12 +343,25 @@ Redis 阻塞列,"/>
 <p><img src="/img/Redis/data_type/List/rem.png" alt="List"></p>
 <h2><span id="相关指令">相关指令</span></h2><h3><span id="lpush">lpush</span></h3><p>该指令用于将⼀个或者多个元素从左侧放⼊（头插）到 list 中</p>
 <p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LPUSH key element [element ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LPUSH key element <span class="token punctuation">[</span>element <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：只插⼊⼀个元素为 O(1), 插⼊多个元素为 O(N), N 为插⼊元素个数</p>
 <p>返回值：插⼊后 list 的⻓度</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; lpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; lpush k1 5 6 7 8</span><br><span class="line">(integer) 8</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">list 范围查询指令，后面会讲到，这里用于查询整个 list 的数据</span></span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;8&quot;</span><br><span class="line">2) &quot;7&quot;</span><br><span class="line">3) &quot;6&quot;</span><br><span class="line">4) &quot;5&quot;</span><br><span class="line">5) &quot;4&quot;</span><br><span class="line">6) &quot;3&quot;</span><br><span class="line">7) &quot;2&quot;</span><br><span class="line">8) &quot;1&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">8</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">8</span>
+<span class="token comment"># list 范围查询指令，后面会讲到，这里用于查询整个 list 的数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"8"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"7"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"1"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>需要注意的是每个 value 前面的序号并不是下标，只是起到序号的作用，用来表示第几个数据</p>
 <h3><span id="lrange">lrange</span></h3><p>为了方便讲解，这里先将 lrange 指令介绍一下：</p>
@@ -350,13 +369,27 @@ Redis 阻塞列,"/>
 <p>时间复杂度：O(N)</p>
 <p>返回值：指定区间的元素</p>
 <h4><span id="针对不合法范围的处理">针对不合法范围的处理</span></h4><p>(1) 索引超出实际范围<br>Redis 会 自动修正为最接近的有效索引：<br>如果 start 超出列表右边界（start &gt;&#x3D; N），返回空列表 []。<br>如果 end 超出列表右边界（end &gt;&#x3D; N），自动修正为 N-1（列表最后一个元素）。<br>如果 start 超出左边界（start &lt; -N），自动修正为 0（第一个元素）。<br>示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">列表: [<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]（索引 0~4）</span></span><br><span class="line">127.0.0.1:6379&gt; LRANGE mylist 10 15</span><br><span class="line">(empty array)  # start &gt;= N，返回空列表</span><br><span class="line">127.0.0.1:6379&gt; LRANGE mylist 2 100</span><br><span class="line">1) &quot;c&quot;                # end 超出，修正为 N-1=4</span><br><span class="line">2) &quot;d&quot;</span><br><span class="line">3) &quot;e&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列表: ["a", "b", "c", "d", "e"]（索引 0~4）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> LRANGE mylist <span class="token number">10</span> <span class="token number">15</span>
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span>  <span class="token comment"># start >= N，返回空列表</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> LRANGE mylist <span class="token number">2</span> <span class="token number">100</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"c"</span>                <span class="token comment"># end 超出，修正为 N-1=4</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"d"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"e"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>(2) start &gt; end<br>直接返回空列表 []，因为范围无效。<br>示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; LRANGE mylist 3 1</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> LRANGE mylist <span class="token number">3</span> <span class="token number">1</span>
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>(3) 负数索引<br>负数索引是合法的，表示从列表末尾开始计算（-1 是最后一个元素，-2 是倒数第二个，依此类推）。<br>如果负数索引超出左边界（如 -100），会修正为 0。<br>示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; LRANGE mylist -3 -1  # 最后三个元素</span><br><span class="line">1) &quot;c&quot;</span><br><span class="line">2) &quot;d&quot;</span><br><span class="line">3) &quot;e&quot;</span><br><span class="line">127.0.0.1:6379&gt; LRANGE mylist -100 2 # start 超出左边界，修正为 0</span><br><span class="line">1) &quot;a&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;c&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> LRANGE mylist <span class="token parameter variable">-3</span> <span class="token parameter variable">-1</span>  <span class="token comment"># 最后三个元素</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"c"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"d"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"e"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> LRANGE mylist <span class="token parameter variable">-100</span> <span class="token number">2</span> <span class="token comment"># start 超出左边界，修正为 0</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"a"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"b"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"c"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>总结如下：</p>
 <table>
@@ -482,7 +515,9 @@ Redis 阻塞列,"/>
 <ol>
 <li><strong>代码层面防御</strong><br>在业务逻辑中显式检查范围合法性（如先 <code>LLEN</code>），而非依赖 Redis 修正。</li>
 </ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">list_len = redis.llen(key)</span><br><span class="line">start = <span class="built_in">max</span>(<span class="number">0</span>, <span class="built_in">min</span>(start, list_len - <span class="number">1</span>))</span><br><span class="line">end = <span class="built_in">min</span>(end, list_len - <span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python">list_len <span class="token operator">=</span> redis<span class="token punctuation">.</span>llen<span class="token punctuation">(</span>key<span class="token punctuation">)</span>
+start <span class="token operator">=</span> <span class="token builtin">max</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token builtin">min</span><span class="token punctuation">(</span>start<span class="token punctuation">,</span> list_len <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+end <span class="token operator">=</span> <span class="token builtin">min</span><span class="token punctuation">(</span>end<span class="token punctuation">,</span> list_len <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><p><strong>监控与日志</strong><br>对频繁返回空列表的 <code>LRANGE</code> 操作打日志，帮助发现潜在逻辑错误。</p>
@@ -500,60 +535,193 @@ Redis 阻塞列,"/>
 <h3><span id="lpushx">lpushx</span></h3><p>在key 存在时，将⼀个或者多个元素从左侧放⼊（头插）到 list 中。不存在，直接返回</p>
 <p>时间复杂度：只插⼊—个元素为 O(1), 插⼊多个元素为 O(N), N 为插⼊元素个数<br>返回值：插⼊后 list 的⻓度</p>
 <p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LPUSHX key element [element ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LPUSHX key element <span class="token punctuation">[</span>element <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">k1 不存在，故无法 push</span></span><br><span class="line">127.0.0.1:6379&gt; lpushx k1 1 2 3 4</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可通过 lpush 创建新的 list</span></span><br><span class="line">127.0.0.1:6379&gt; lpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">lpush 创建后 list k1 存在，可利用 lpushx 继续插入新值</span></span><br><span class="line">127.0.0.1:6379&gt; lpushx k1 5 6 7 8</span><br><span class="line">(integer) 8</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看被插入 list 的元素</span></span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;8&quot;</span><br><span class="line">2) &quot;7&quot;</span><br><span class="line">3) &quot;6&quot;</span><br><span class="line">4) &quot;5&quot;</span><br><span class="line">5) &quot;4&quot;</span><br><span class="line">6) &quot;3&quot;</span><br><span class="line">7) &quot;2&quot;</span><br><span class="line">8) &quot;1&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># k1 不存在，故无法 push</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpushx k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token comment"># 可通过 lpush 创建新的 list</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># lpush 创建后 list k1 存在，可利用 lpushx 继续插入新值</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpushx k1 <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">8</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">8</span>
+<span class="token comment"># 查看被插入 list 的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"8"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"7"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"1"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="rpush-rpushx">rpush、rpushx</span></h3><p>用法和 lpush 和 lpushx 相同，只不过变成了尾插，这里不再过多赘述</p>
 <p>下面是使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接使用 rpushx 插入不存在的 list 失败</span></span><br><span class="line">127.0.0.1:6379&gt; rpushx k1 1 2 3 4</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先用 rpush 创建新的 list</span></span><br><span class="line">127.0.0.1:6379&gt; rpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再用 rpushx 插入新值成功</span></span><br><span class="line">127.0.0.1:6379&gt; rpushx k1 5 6 7 8</span><br><span class="line">(integer) 8</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 k1 中所有的元素</span></span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br><span class="line">5) &quot;5&quot;</span><br><span class="line">6) &quot;6&quot;</span><br><span class="line">7) &quot;7&quot;</span><br><span class="line">8) &quot;8&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接使用 rpushx 插入不存在的 list 失败</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpushx k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token comment"># 先用 rpush 创建新的 list</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 再用 rpushx 插入新值成功</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpushx k1 <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">8</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">8</span>
+<span class="token comment"># 查看 k1 中所有的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"7"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"8"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="lpop-rpop">lpop、rpop</span></h3><p>lpop 指令用于从 list 左侧取出元素（即头删）</p>
 <p>rpop 指令用于从 list 右侧取出元素（即尾删）</p>
 <p>时间复杂度：O(1)</p>
 <p>语法格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">LPOP key</span><br><span class="line">RPOP key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LPOP key
+RPOP key<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>返回值：取出的元素或者 nil。</p>
 <p>下面是使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">当前 list 中元素为 &#123;1,2,3,4&#125;</span></span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">头删获得元素1</span></span><br><span class="line">127.0.0.1:6379&gt; lpop k1</span><br><span class="line">&quot;1&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尾删获得元素4</span></span><br><span class="line">127.0.0.1:6379&gt; rpop k1</span><br><span class="line">&quot;4&quot;</span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;2&quot;</span><br><span class="line">2) &quot;3&quot;</span><br><span class="line">127.0.0.1:6379&gt; rpop k1</span><br><span class="line">&quot;3&quot;</span><br><span class="line">127.0.0.1:6379&gt; rpop k1</span><br><span class="line">&quot;2&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">list 中所有元素都被取完了，返回 nil</span></span><br><span class="line">127.0.0.1:6379&gt; rpop k1</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 当前 list 中元素为 &#123;1,2,3,4&#125;</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token comment"># 头删获得元素1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpop k1
+<span class="token string">"1"</span>
+<span class="token comment"># 尾删获得元素4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpop k1
+<span class="token string">"4"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpop k1
+<span class="token string">"3"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpop k1
+<span class="token string">"2"</span>
+<span class="token comment"># list 中所有元素都被取完了，返回 nil</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpop k1
+<span class="token punctuation">(</span>nil<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="lindex">lindex</span></h3><p>该指令用于获取从左数第 index 位置的元素</p>
 <p>语法如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LINDEX key index</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LINDEX key index<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N)</p>
 <p>返回值：取出的元素或者 nil</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">插入元素 1 2 3 4 到 list k1 中</span></span><br><span class="line">127.0.0.1:6379&gt; rpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取下标为 3 的元素</span></span><br><span class="line">127.0.0.1:6379&gt; lindex k1 3</span><br><span class="line">&quot;4&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取下标为 0 的元素</span></span><br><span class="line">127.0.0.1:6379&gt; lindex k1 0</span><br><span class="line">&quot;1&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">支持负数下标访问（表示获取倒数第几个元素）</span></span><br><span class="line">127.0.0.1:6379&gt; lindex k1 -1</span><br><span class="line">&quot;4&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">越界访问返回 nil</span></span><br><span class="line">127.0.0.1:6379&gt; lindex k1 6</span><br><span class="line">(nil)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">负数越界同理</span></span><br><span class="line">127.0.0.1:6379&gt; lindex k1 -5</span><br><span class="line">(nil)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 插入元素 1 2 3 4 到 list k1 中</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 获取下标为 3 的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lindex k1 <span class="token number">3</span>
+<span class="token string">"4"</span>
+<span class="token comment"># 获取下标为 0 的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lindex k1 <span class="token number">0</span>
+<span class="token string">"1"</span>
+<span class="token comment"># 支持负数下标访问（表示获取倒数第几个元素）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lindex k1 <span class="token parameter variable">-1</span>
+<span class="token string">"4"</span>
+<span class="token comment"># 越界访问返回 nil</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lindex k1 <span class="token number">6</span>
+<span class="token punctuation">(</span>nil<span class="token punctuation">)</span>
+<span class="token comment"># 负数越界同理</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lindex k1 <span class="token parameter variable">-5</span>
+<span class="token punctuation">(</span>nil<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="linsert">linsert</span></h3><p>该指令用于在特定位置插⼊元素</p>
 <p>语法如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LINSERT key &lt;BEFORE | AFTER&gt; pivot element</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LINSERT key <span class="token operator">&lt;</span>BEFORE <span class="token operator">|</span> AFTER<span class="token operator">></span> pivot element<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N)</p>
 <p>返回值：插⼊后的 list ⻓度</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成一个新的 list 插入 1</span></span><br><span class="line">127.0.0.1:6379&gt; lpush k1 1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在元素 1 的前面插入 2</span></span><br><span class="line">127.0.0.1:6379&gt; linsert k1 before 1 2</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在元素 2 的后面插入 3</span></span><br><span class="line">127.0.0.1:6379&gt; linsert k1 after 1 3</span><br><span class="line">(integer) 3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看插入是否符合预期</span></span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;2&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">3) &quot;3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成一个新的 list 插入 1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 在元素 1 的前面插入 2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> linsert k1 before <span class="token number">1</span> <span class="token number">2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token comment"># 在元素 2 的后面插入 3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> linsert k1 after <span class="token number">1</span> <span class="token number">3</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token comment"># 查看插入是否符合预期</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="lrem">lrem</span></h3><p>该指令用于删除前指定个数的元素</p>
 <p>时间复杂度：O(N)</p>
 <p>返回值：被成功删除的元素个数</p>
 <p>指令格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LREM key count element</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LREM key count element<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; rpush k1 1 2 3 4 4 4 5 6 7 4 4 4</span><br><span class="line">(integer) 12</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试删除4个2，但因为只有一个故返回1</span></span><br><span class="line">127.0.0.1:6379&gt; lrem k1 4 2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line"> 1) &quot;1&quot;</span><br><span class="line"> 2) &quot;3&quot;</span><br><span class="line"> 3) &quot;4&quot;</span><br><span class="line"> 4) &quot;4&quot;</span><br><span class="line"> 5) &quot;4&quot;</span><br><span class="line"> 6) &quot;5&quot;</span><br><span class="line"> 7) &quot;6&quot;</span><br><span class="line"> 8) &quot;7&quot;</span><br><span class="line"> 9) &quot;4&quot;</span><br><span class="line">10) &quot;4&quot;</span><br><span class="line">11) &quot;4&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试删除2个4，成功将前面两个4给删除了</span></span><br><span class="line">127.0.0.1:6379&gt; lrem k1 2 4</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; lrange k1 0 -1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;3&quot;</span><br><span class="line">3) &quot;4&quot;</span><br><span class="line">4) &quot;5&quot;</span><br><span class="line">5) &quot;6&quot;</span><br><span class="line">6) &quot;7&quot;</span><br><span class="line">7) &quot;4&quot;</span><br><span class="line">8) &quot;4&quot;</span><br><span class="line">9) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> rpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">4</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span> <span class="token number">7</span> <span class="token number">4</span> <span class="token number">4</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">12</span>
+<span class="token comment"># 尝试删除4个2，但因为只有一个故返回1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrem k1 <span class="token number">4</span> <span class="token number">2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+ <span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+ <span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+ <span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+ <span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+ <span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+ <span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+ <span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+ <span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"7"</span>
+ <span class="token number">9</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">10</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">11</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token comment"># 尝试删除2个4，成功将前面两个4给删除了</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrem k1 <span class="token number">2</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lrange k1 <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"7"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">9</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="llen">llen</span></h3><p>该指令用于获取 list 的长度</p>
 <p>语法如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LLEN key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">LLEN key<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(1)</p>
 <p>返回值：list 的⻓度</p>
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建一个长度为 4 的 list</span></span><br><span class="line">127.0.0.1:6379&gt; lpush k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看长度</span></span><br><span class="line">127.0.0.1:6379&gt; llen k1</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看不存在的 list 的长度</span></span><br><span class="line">127.0.0.1:6379&gt; llen k2</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建一个 非 list 的 k2</span></span><br><span class="line">127.0.0.1:6379&gt; hset k2 f1 v1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">因类型不匹配报错</span></span><br><span class="line">127.0.0.1:6379&gt; llen k2</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个长度为 4 的 list</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 查看长度</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> llen k1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 查看不存在的 list 的长度</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> llen k2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token comment"># 创建一个 非 list 的 k2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k2 f1 v1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 因类型不匹配报错</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> llen k2
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> WRONGTYPE Operation against a key holding the wrong kind of value<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="阻塞版本指令">阻塞版本指令</span></h2><h3><span id="redis-阻塞列表操作blpop-和-brpop">Redis 阻塞列表操作：BLPOP 和 BRPOP</span></h3><p><code>BLPOP</code> 和 <code>BRPOP</code> 是 <code>LPOP</code> 和 <code>RPOP</code> 的阻塞版本，它们的基本功能与非阻塞版本类似，但有以下关键区别：</p>
 <h4><span id="主要特性">主要特性</span></h4><ol>
@@ -660,14 +828,28 @@ Redis 阻塞列,"/>
 <p>下面只正对指令 blpop 进行讨论， brpop 同理</p>
 <h3><span id="blpop-指令讲解">blpop 指令讲解</span></h3><p>blpop 指令可以同时阻塞等待多个 list，当某个 list 中有元素则会取出该 list 中的元素并停止阻塞</p>
 <p>语法格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BLPOP key [key ...] timeout</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">BLPOP key <span class="token punctuation">[</span>key <span class="token punctuation">..</span>.<span class="token punctuation">]</span> <span class="token function">timeout</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>使用示例：</p>
 <p>场景1：等待一个 list</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端 1 阻塞等待一个 list 最多 100s</span></span><br><span class="line">127.0.0.1:6379&gt; blpop k1 100</span><br><span class="line">1) &quot;k1&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">(9.94s)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端 2 给 k1 头插元素 1</span></span><br><span class="line">127.0.0.1:6379&gt; lpush k1 1</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 客户端 1 阻塞等待一个 list 最多 100s</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> blpop k1 <span class="token number">100</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"k1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token punctuation">(</span><span class="token number">9</span>.94s<span class="token punctuation">)</span>
+<span class="token comment"># 客户端 2 给 k1 头插元素 1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k1 <span class="token number">1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>场景2：等待多个 list</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端 1 阻塞等待多个 list 最多 100s</span></span><br><span class="line">127.0.0.1:6379&gt; blpop k1 k2 k3 k4 100</span><br><span class="line">1) &quot;k3&quot;</span><br><span class="line">2) &quot;100&quot;</span><br><span class="line">(5.52s)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">客户端 2 给 k3 头插元素 1</span>  </span><br><span class="line">127.0.0.1:6379&gt; lpush k3 100</span><br><span class="line">(integer) 1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 客户端 1 阻塞等待多个 list 最多 100s</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> blpop k1 k2 k3 k4 <span class="token number">100</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"k3"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"100"</span>
+<span class="token punctuation">(</span><span class="token number">5</span>.52s<span class="token punctuation">)</span>
+<span class="token comment"># 客户端 2 给 k3 头插元素 1  </span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> lpush k3 <span class="token number">100</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="list-相关指令汇总表">list 相关指令汇总表</span></h2><table>
 <thead>
@@ -757,13 +939,24 @@ Redis 阻塞列,"/>
 </ul>
 </li>
 </ul>
-<h4><span id="配置参数">配置参数</span></h4><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># redis.conf 配置示例</span></span><br><span class="line">list-max-ziplist-entries 512  <span class="comment"># 最大元素个数阈值</span></span><br><span class="line">list-max-ziplist-value 64     <span class="comment"># 单个元素最大字节阈值</span></span><br></pre></td></tr></table></figure>
+<h4><span id="配置参数">配置参数</span></h4><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># redis.conf 配置示例</span>
+list-max-ziplist-entries 512  # 最大元素个数阈值
+list-max-ziplist-value 64     # 单个元素最大字节阈值<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="示例演示">示例演示</span></h4><h5><span id="1-使用-ziplist-编码满足两个条件">1. 使用 ziplist 编码（满足两个条件）</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; RPUSH listkey e1 e2 e3</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; OBJECT ENCODING listkey</span><br><span class="line">&quot;ziplist&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="示例演示">示例演示</span></h4><h5><span id="1-使用-ziplist-编码满足两个条件">1. 使用 ziplist 编码（满足两个条件）</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> RPUSH listkey e1 e2 e3
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> OBJECT ENCODING listkey
+<span class="token string">"ziplist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h5><span id="2-元素数量超限转为-linkedlist">2. 元素数量超限转为 linkedlist</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; RPUSH listkey e1 e2 ... e512 e513  # 插入513个元素</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; OBJECT ENCODING listkey</span><br><span class="line">&quot;linkedlist&quot;</span><br></pre></td></tr></table></figure>
+<h5><span id="2-元素数量超限转为-linkedlist">2. 元素数量超限转为 linkedlist</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> RPUSH listkey e1 e2 <span class="token punctuation">..</span>. e512 e513  <span class="token comment"># 插入513个元素</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> OBJECT ENCODING listkey
+<span class="token string">"linkedlist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h5><span id="3-元素大小超限转为-linkedlist">3. 元素大小超限转为 linkedlist</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; RPUSH listkey &quot;超过64字节的长字符串XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; OBJECT ENCODING listkey</span><br><span class="line">&quot;linkedlist&quot;</span><br></pre></td></tr></table></figure>
+<h5><span id="3-元素大小超限转为-linkedlist">3. 元素大小超限转为 linkedlist</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> RPUSH listkey <span class="token string">"超过64字节的长字符串XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> OBJECT ENCODING listkey
+<span class="token string">"linkedlist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="性能建议">性能建议</span></h4><ol>
 <li>需要大量小元素存储时 → 保持默认 ziplist 配置</li>
@@ -779,7 +972,11 @@ Redis 阻塞列,"/>
     class1 -->|"元素"| stu2["stu_002"]
     class1 -->|"..."| stun["stu_999"]</pre>
 
-<h4><span id="核心操作命令">核心操作命令</span></h4><h5><span id="1-初始化班级学生列表">1. 初始化班级学生列表</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加学生到班级1（尾部插入）</span></span><br><span class="line">RPUSH class:1:students stu_001 stu_002 stu_003</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加学生到班级2（头部插入）</span></span><br><span class="line">LPUSH class:2:students stu_101 stu_102</span><br></pre></td></tr></table></figure>
+<h4><span id="核心操作命令">核心操作命令</span></h4><h5><span id="1-初始化班级学生列表">1. 初始化班级学生列表</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加学生到班级1（尾部插入）</span>
+RPUSH class:1:students stu_001 stu_002 stu_003
+
+<span class="token comment"># 添加学生到班级2（头部插入）</span>
+LPUSH class:2:students stu_101 stu_102<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="2-查询学生列表">2. 查询学生列表</span></h5><pre class="mermaid">sequenceDiagram
     participant Client
@@ -787,7 +984,11 @@ Redis 阻塞列,"/>
     Client->>Redis: LRANGE class:1:students 0 -1
     Redis-->>Client: ["stu_001", "stu_002", "stu_003"]</pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取班级1全部学生（0表示起始索引，-1表示末尾）</span></span><br><span class="line">LRANGE class:1:students 0 -1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取前5名学生</span></span><br><span class="line">LRANGE class:1:students 0 4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取班级1全部学生（0表示起始索引，-1表示末尾）</span>
+LRANGE class:1:students <span class="token number">0</span> <span class="token parameter variable">-1</span>
+
+<span class="token comment"># 获取前5名学生</span>
+LRANGE class:1:students <span class="token number">0</span> <span class="token number">4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="3-学生变动操作">3. 学生变动操作</span></h5><pre class="mermaid">gantt
     title 学生名单变更流程
@@ -796,7 +997,14 @@ Redis 阻塞列,"/>
     新生入学      :2023-09-01, 1d
     学生转出      :2023-09-05, 1d</pre>
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">学生转入（尾部添加）</span></span><br><span class="line">RPUSH class:1:students stu_004</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">学生转出（头部移除）</span></span><br><span class="line">LPOP class:1:students</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除指定学生</span></span><br><span class="line">LREM class:1:students 1 stu_002</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 学生转入（尾部添加）</span>
+RPUSH class:1:students stu_004
+
+<span class="token comment"># 学生转出（头部移除）</span>
+LPOP class:1:students
+
+<span class="token comment"># 删除指定学生</span>
+LREM class:1:students <span class="token number">1</span> stu_002<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="性能优化建议">性能优化建议</span></h4><table>
 <thead>
@@ -847,7 +1055,7 @@ Redis 阻塞列,"/>
 <li>重要数据建议持久化：<code>BGSAVE</code></li>
 <li>可配合 Hash 存储学生详细信息：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HMSET student:stu_001 name &quot;Alice&quot; age 12 gender F</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HMSET student:stu_001 name <span class="token string">"Alice"</span> age <span class="token number">12</span> gender F<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h3><span id="消息队列">消息队列</span></h3><h4><span id="1-基础阻塞消息队列模型">1. 基础阻塞消息队列模型</span></h4><pre class="mermaid">sequenceDiagram
     participant Producer
@@ -897,7 +1105,13 @@ Redis 阻塞列,"/>
     queue3 --> ConsumerD</pre>
 
 <p><strong>频道订阅模式</strong>：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生产者发布消息到不同频道</span></span><br><span class="line">LPUSH channel:news &quot;最新消息&quot;</span><br><span class="line">LPUSH channel:alert &quot;系统警报&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">消费者订阅不同组合：</span></span><br><span class="line">BRPOP channel:news 30      # 只订阅新闻频道</span><br><span class="line">BRPOP channel:news channel:alert 30  # 多频道监听</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生产者发布消息到不同频道</span>
+LPUSH channel:news <span class="token string">"最新消息"</span>
+LPUSH channel:alert <span class="token string">"系统警报"</span>
+
+<span class="token comment"># 消费者订阅不同组合：</span>
+BRPOP channel:news <span class="token number">30</span>      <span class="token comment"># 只订阅新闻频道</span>
+BRPOP channel:news channel:alert <span class="token number">30</span>  <span class="token comment"># 多频道监听</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="两种模型对比">两种模型对比</span></h4><table>
 <thead>
@@ -942,7 +1156,14 @@ Redis 阻塞列,"/>
     mblog3 -->|HASH| content3["title: yy\ntimestamp: 1476536197\ncontent: yyyyy"]
     mblog9 -->|HASH| content9["title: zz\ntimestamp: 1476536198\ncontent: zzzzz"]</pre>
 
-<h4><span id="核心操作实现">核心操作实现</span></h4><h5><span id="1-微博存储hash结构">1. 微博存储（Hash结构）</span></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 存储单篇微博</span><br><span class="line">HMSET mblog:1 title &quot;Redis实战&quot; timestamp 1476536196 content &quot;使用List实现Timeline...&quot;</span><br><span class="line"></span><br><span class="line"># 批量存储示例</span><br><span class="line">MULTI</span><br><span class="line">HMSET mblog:2 title &quot;Redis优化&quot; timestamp 1476536197 content &quot;Pipeline使用技巧&quot;</span><br><span class="line">HMSET mblog:3 title &quot;Mermaid教程&quot; timestamp 1476536198 content &quot;图表绘制指南&quot;</span><br><span class="line">EXEC</span><br></pre></td></tr></table></figure>
+<h4><span id="核心操作实现">核心操作实现</span></h4><h5><span id="1-微博存储hash结构">1. 微博存储（Hash结构）</span></h5><pre class="line-numbers language-redis" data-language="redis"><code class="language-redis"># 存储单篇微博
+HMSET mblog:1 title &quot;Redis实战&quot; timestamp 1476536196 content &quot;使用List实现Timeline...&quot;
+
+# 批量存储示例
+MULTI
+HMSET mblog:2 title &quot;Redis优化&quot; timestamp 1476536197 content &quot;Pipeline使用技巧&quot;
+HMSET mblog:3 title &quot;Mermaid教程&quot; timestamp 1476536198 content &quot;图表绘制指南&quot;
+EXEC<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="2-timeline更新list操作">2. Timeline更新（List操作）</span></h5><pre class="mermaid">sequenceDiagram
     participant 客户端
@@ -952,7 +1173,16 @@ Redis 阻塞列,"/>
     客户端->>Redis: LPUSH user:1:mblogs mblog:9
     Redis-->>客户端: (integer) 3</pre>
 
-<h5><span id="3-分页查询方案">3. 分页查询方案</span></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># 获取第一页（10条）</span><br><span class="line">LRANGE user:1:mblogs 0 9</span><br><span class="line">--&gt; [&quot;mblog:9&quot;, &quot;mblog:3&quot;, &quot;mblog:1&quot;, ...]</span><br><span class="line"></span><br><span class="line"># 配合Pipeline获取详情</span><br><span class="line">MULTI</span><br><span class="line">HGETALL mblog:9</span><br><span class="line">HGETALL mblog:3</span><br><span class="line">HGETALL mblog:1</span><br><span class="line">EXEC</span><br></pre></td></tr></table></figure>
+<h5><span id="3-分页查询方案">3. 分页查询方案</span></h5><pre class="line-numbers language-redis" data-language="redis"><code class="language-redis"># 获取第一页（10条）
+LRANGE user:1:mblogs 0 9
+--&gt; [&quot;mblog:9&quot;, &quot;mblog:3&quot;, &quot;mblog:1&quot;, ...]
+
+# 配合Pipeline获取详情
+MULTI
+HGETALL mblog:9
+HGETALL mblog:3
+HGETALL mblog:1
+EXEC<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="性能优化方案">性能优化方案</span></h4><h5><span id="问题11n-查询问题">问题1：1+N 查询问题</span></h5><table>
 <thead>
@@ -1015,17 +1245,26 @@ Redis 阻塞列,"/>
 <h4><span id="生产环境注意事项">生产环境注意事项</span></h4><ol>
 <li><strong>内存控制</strong>：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">限制单个用户Timeline长度</span></span><br><span class="line">LTRIM user:1:mblogs 0 999</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 限制单个用户Timeline长度</span>
+LTRIM user:1:mblogs <span class="token number">0</span> <span class="token number">999</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>性能监控</strong>：</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --latency -h 127.0.0.1</span><br><span class="line">INFO memory</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">redis-cli <span class="token parameter variable">--latency</span> <span class="token parameter variable">-h</span> <span class="token number">127.0</span>.0.1
+INFO memory<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>异常处理</strong>：</li>
 </ol>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_timeline_page</span>(<span class="params">uid, page, size=<span class="number">10</span></span>):</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        start = (page-<span class="number">1</span>)*size</span><br><span class="line">        keys = redis.lrange(<span class="string">f&quot;user:<span class="subst">&#123;uid&#125;</span>:mblogs&quot;</span>, start, start+size-<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">return</span> redis.pipeline().hgetall(*keys).execute()</span><br><span class="line">    <span class="keyword">except</span> RedisError <span class="keyword">as</span> e:</span><br><span class="line">        log_error(<span class="string">f&quot;Timeline query failed: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">return</span> []</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-python" data-language="python"><code class="language-python"><span class="token keyword">def</span> <span class="token function">get_timeline_page</span><span class="token punctuation">(</span>uid<span class="token punctuation">,</span> page<span class="token punctuation">,</span> size<span class="token operator">=</span><span class="token number">10</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
+    <span class="token keyword">try</span><span class="token punctuation">:</span>
+        start <span class="token operator">=</span> <span class="token punctuation">(</span>page<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token operator">*</span>size
+        keys <span class="token operator">=</span> redis<span class="token punctuation">.</span>lrange<span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"user:</span><span class="token interpolation"><span class="token punctuation">&#123;</span>uid<span class="token punctuation">&#125;</span></span><span class="token string">:mblogs"</span></span><span class="token punctuation">,</span> start<span class="token punctuation">,</span> start<span class="token operator">+</span>size<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> redis<span class="token punctuation">.</span>pipeline<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>hgetall<span class="token punctuation">(</span><span class="token operator">*</span>keys<span class="token punctuation">)</span><span class="token punctuation">.</span>execute<span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">except</span> RedisError <span class="token keyword">as</span> e<span class="token punctuation">:</span>
+        log_error<span class="token punctuation">(</span><span class="token string-interpolation"><span class="token string">f"Timeline query failed: </span><span class="token interpolation"><span class="token punctuation">&#123;</span>e<span class="token punctuation">&#125;</span></span><span class="token string">"</span></span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

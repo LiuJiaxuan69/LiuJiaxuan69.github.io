@@ -92,6 +92,8 @@ FIFO的读写操,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -255,7 +257,7 @@ FIFO的读写操,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -264,7 +266,7 @@ FIFO的读写操,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li></ul>
+            <ul><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -322,26 +324,28 @@ FIFO的读写操,"/>
 <!-- tocstop -->
 
 <h2><span id="mkfifo-命令">mkfifo 命令</span></h2><p><code>mkfifo</code> 是 Linux&#x2F;Unix 系统中用于创建命名管道（named pipe，也称为 FIFO）的命令。命名管道是一种特殊的文件类型，允许不相关的进程通过文件系统进行通信。</p>
-<h3><span id="基本语法">基本语法</span></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkfifo</span> [选项] 管道名</span><br></pre></td></tr></table></figure>
+<h3><span id="基本语法">基本语法</span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkfifo</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> 管道名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h3><span id="主要选项">主要选项</span></h3><ul>
 <li><code>-m MODE</code> 或 <code>--mode=MODE</code>：设置管道的权限模式（类似 chmod）</li>
 <li><code>-Z</code>：设置 SELinux 安全上下文（在 SELinux 启用的系统上）</li>
 </ul>
-<h3><span id="使用示例">使用示例</span></h3><h4><span id="1-创建基本命名管道">1. 创建基本命名管道</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkfifo</span> mypipe</span><br></pre></td></tr></table></figure>
+<h3><span id="使用示例">使用示例</span></h3><h4><span id="1-创建基本命名管道">1. 创建基本命名管道</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkfifo</span> mypipe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>这会在当前目录创建一个名为 “mypipe” 的命名管道。</p>
-<h4><span id="2-创建带有特定权限的管道">2. 创建带有特定权限的管道</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkfifo</span> -m 644 mypipe</span><br></pre></td></tr></table></figure>
+<h4><span id="2-创建带有特定权限的管道">2. 创建带有特定权限的管道</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkfifo</span> <span class="token parameter variable">-m</span> <span class="token number">644</span> mypipe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>这会创建一个权限为 644（所有者可读写，其他人只读）的命名管道。</p>
 <h4><span id="3-使用命名管道进行进程通信">3. 使用命名管道进行进程通信</span></h4><p>在终端1中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt; mypipe</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">></span> mypipe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>在终端2中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &lt; mypipe</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">cat</span> <span class="token operator">&lt;</span> mypipe<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>此时在终端1中输入的内容会出现在终端2中。</p>
-<h4><span id="4-结合其他命令使用">4. 结合其他命令使用</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkfifo</span> mypipe</span><br><span class="line">tar -czf mypipe directory/ &amp;</span><br><span class="line">tar -xzf mypipe -C destination/</span><br></pre></td></tr></table></figure>
+<h4><span id="4-结合其他命令使用">4. 结合其他命令使用</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkfifo</span> mypipe
+<span class="token function">tar</span> <span class="token parameter variable">-czf</span> mypipe directory/ <span class="token operator">&amp;</span>
+<span class="token function">tar</span> <span class="token parameter variable">-xzf</span> mypipe <span class="token parameter variable">-C</span> destination/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>这通过命名管道将一个目录压缩并直接解压到另一个位置，而不生成中间文件。</p>
 <h3><span id="工作原理">工作原理</span></h3><p>命名管道与匿名管道（<code>|</code>）类似，但有几点关键区别：</p>
@@ -363,7 +367,10 @@ FIFO的读写操,"/>
 <li>命名管道可以多次打开，允许多个读写者</li>
 </ol>
 <h2><span id="mkfifo-函数">mkfifo 函数</span></h2><p><code>mkfifo</code>是C语言中用于创建命名管道(FIFO)的系统函数，它是在POSIX标准中定义的，可以在<code>&lt;sys/stat.h&gt;</code>头文件中找到。</p>
-<h3><span id="函数原型">函数原型</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">mkfifo</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">mode_t</span> mode)</span>;</span><br></pre></td></tr></table></figure>
+<h3><span id="函数原型">函数原型</span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/stat.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">mkfifo</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>pathname<span class="token punctuation">,</span> <span class="token class-name">mode_t</span> mode<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="参数说明">参数说明</span></h3><ol>
 <li><strong>pathname</strong>：要创建的FIFO文件的路径名</li>
@@ -382,12 +389,41 @@ FIFO的读写操,"/>
 <li><code>ENOTDIR</code>：路径中的某个部分不是目录</li>
 <li><code>EROFS</code>：指定的文件位于只读文件系统上</li>
 </ul>
-<h3><span id="基本用法示例">基本用法示例</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *fifo_path = <span class="string">&quot;/tmp/my_fifo&quot;</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建命名管道，权限设置为可读可写</span></span><br><span class="line">    <span class="keyword">if</span> (mkfifo(fifo_path, <span class="number">0666</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;mkfifo&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;FIFO created at %s\n&quot;</span>, fifo_path);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 这里可以添加对FIFO的读写操作...</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 使用完后删除FIFO</span></span><br><span class="line">    unlink(fifo_path);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="基本用法示例">基本用法示例</span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/stat.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;fcntl.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdlib.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>fifo_path <span class="token operator">=</span> <span class="token string">"/tmp/my_fifo"</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">// 创建命名管道，权限设置为可读可写</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">mkfifo</span><span class="token punctuation">(</span>fifo_path<span class="token punctuation">,</span> <span class="token number">0666</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">perror</span><span class="token punctuation">(</span><span class="token string">"mkfifo"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">exit</span><span class="token punctuation">(</span>EXIT_FAILURE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"FIFO created at %s\n"</span><span class="token punctuation">,</span> fifo_path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">// 这里可以添加对FIFO的读写操作...</span>
+    
+    <span class="token comment">// 使用完后删除FIFO</span>
+    <span class="token function">unlink</span><span class="token punctuation">(</span>fifo_path<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="fifo的读写操作">FIFO的读写操作</span></h3><p>创建FIFO后，可以使用标准文件I&#x2F;O函数进行读写：</p>
-<h4><span id="写入示例">写入示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> fd = open(fifo_path, O_WRONLY);</span><br><span class="line">write(fd, <span class="string">&quot;Hello, FIFO!&quot;</span>, <span class="number">12</span>);</span><br><span class="line">close(fd);</span><br></pre></td></tr></table></figure>
+<h4><span id="写入示例">写入示例</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> fd <span class="token operator">=</span> <span class="token function">open</span><span class="token punctuation">(</span>fifo_path<span class="token punctuation">,</span> O_WRONLY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">write</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> <span class="token string">"Hello, FIFO!"</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">close</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="读取示例">读取示例</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> fd = open(fifo_path, O_RDONLY);</span><br><span class="line"><span class="type">char</span> buf[<span class="number">256</span>];</span><br><span class="line">read(fd, buf, <span class="keyword">sizeof</span>(buf));</span><br><span class="line">close(fd);</span><br></pre></td></tr></table></figure>
+<h4><span id="读取示例">读取示例</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> fd <span class="token operator">=</span> <span class="token function">open</span><span class="token punctuation">(</span>fifo_path<span class="token punctuation">,</span> O_RDONLY<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">char</span> buf<span class="token punctuation">[</span><span class="token number">256</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token function">read</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> buf<span class="token punctuation">,</span> <span class="token keyword">sizeof</span><span class="token punctuation">(</span>buf<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">close</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="重要特性">重要特性</span></h3><ol>
 <li><p><strong>阻塞行为</strong>：</p>
@@ -402,7 +438,7 @@ FIFO的读写操,"/>
 </ul>
 </li>
 </ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> fd = open(fifo_path, O_RDONLY | O_NONBLOCK);</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> fd <span class="token operator">=</span> <span class="token function">open</span><span class="token punctuation">(</span>fifo_path<span class="token punctuation">,</span> O_RDONLY <span class="token operator">|</span> O_NONBLOCK<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>数据传递</strong>：<ul>
@@ -419,16 +455,129 @@ FIFO的读写操,"/>
 <li>使用完毕后应该删除FIFO文件</li>
 </ol>
 <h3><span id="应用示例">应用示例</span></h3><p>下面通过 mkfifo 函数创建一个命名管道用来实现两个无亲属关系的进程之间的通信</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// common.hpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _COMMON_HPP_</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _COMMON_HPP_ 1</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> *file_name = <span class="string">&quot;myfifo&quot;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> mode = <span class="number">0664</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> MAX_SIZE = <span class="number">1024</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">global_error</span>&#123;</span><br><span class="line">    mkfifo_error = <span class="number">1</span>,</span><br><span class="line">    unlink_error,</span><br><span class="line">    write_error,</span><br><span class="line">    read_error,</span><br><span class="line">    open_error,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 该函数用于初始化命名管道以及 RAII 清理命名管道</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">InitPipe</span>&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">InitPipe</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">mkfifo</span>(file_name, mode) == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;InitPipe(): mkfifo error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_error::mkfifo_error);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ~<span class="built_in">InitPipe</span>()</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">unlink</span>(file_name) == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;~InitPipe(): unlink error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_error::unlink_error);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; common.hpp
+#ifndef _COMMON_HPP_
+#define _COMMON_HPP_ 1
+
+#include &lt;iostream&gt;
+#include &lt;sys&#x2F;types.h&gt;
+#include &lt;sys&#x2F;stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;cstring&gt;
+
+const char *file_name &#x3D; &quot;myfifo&quot;;
+const int mode &#x3D; 0664;
+const int MAX_SIZE &#x3D; 1024;
+
+enum global_error&#123;
+    mkfifo_error &#x3D; 1,
+    unlink_error,
+    write_error,
+    read_error,
+    open_error,
+&#125;;
+
+&#x2F;&#x2F; 该函数用于初始化命名管道以及 RAII 清理命名管道
+class InitPipe&#123;
+public:
+    InitPipe()
+    &#123;
+        if(mkfifo(file_name, mode) &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;InitPipe(): mkfifo error&quot;);
+            exit(global_error::mkfifo_error);
+        &#125;
+    &#125;
+    ~InitPipe()
+    &#123;
+        if(unlink(file_name) &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;~InitPipe(): unlink error&quot;);
+            exit(global_error::unlink_error);
+        &#125;
+    &#125;
+&#125;;
+
+#endif<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>服务端代码</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server.cc</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;common.hpp&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    InitPipe init;</span><br><span class="line">    <span class="type">int</span> fd = <span class="built_in">open</span>(file_name, O_RDONLY);</span><br><span class="line">    <span class="keyword">if</span>(fd == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;server.o: open error&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(global_error::open_error);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">char</span> inbuffer[MAX_SIZE];</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">read</span>(fd, inbuffer, MAX_SIZE - <span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;server.o: read error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_error::read_error);</span><br><span class="line">        &#125;</span><br><span class="line">        inbuffer[n] = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">strcmp</span>(inbuffer, <span class="string">&quot;quit&quot;</span>) == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;server get information: &quot;</span> &lt;&lt; inbuffer &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; server.cc
+#include &quot;common.hpp&quot;
+using namespace std;
+
+int main()
+&#123;
+    InitPipe init;
+    int fd &#x3D; open(file_name, O_RDONLY);
+    if(fd &#x3D;&#x3D; -1)
+    &#123;
+        perror(&quot;server.o: open error&quot;);
+        exit(global_error::open_error);
+    &#125;
+    char inbuffer[MAX_SIZE];
+    while(true)
+    &#123;
+        int n &#x3D; read(fd, inbuffer, MAX_SIZE - 1);
+        if(n &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;server.o: read error&quot;);
+            exit(global_error::read_error);
+        &#125;
+        inbuffer[n] &#x3D; 0;
+        if(strcmp(inbuffer, &quot;quit&quot;) &#x3D;&#x3D; 0)
+        &#123;
+            break;
+        &#125;
+        cout &lt;&lt; &quot;server get information: &quot; &lt;&lt; inbuffer &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>客户端代码</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;common.hpp&quot;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> fd = <span class="built_in">open</span>(file_name, O_WRONLY);</span><br><span class="line">    string outbuffer;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Please Enter: &quot;</span>;</span><br><span class="line">        cin &gt;&gt; outbuffer;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">write</span>(fd, outbuffer.<span class="built_in">c_str</span>(), outbuffer.<span class="built_in">size</span>());</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;client.o: write error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_error::write_error);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(outbuffer == <span class="string">&quot;quit&quot;</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;bye&quot;</span> &lt;&lt; endl;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &quot;common.hpp&quot;
+using namespace std;
+
+
+int main()
+&#123;
+    int fd &#x3D; open(file_name, O_WRONLY);
+    string outbuffer;
+    while(true)
+    &#123;
+        cout &lt;&lt; &quot;Please Enter: &quot;;
+        cin &gt;&gt; outbuffer;
+        int n &#x3D; write(fd, outbuffer.c_str(), outbuffer.size());
+        if(n &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;client.o: write error&quot;);
+            exit(global_error::write_error);
+        &#125;
+        if(outbuffer &#x3D;&#x3D; &quot;quit&quot;)
+        &#123;
+            cout &lt;&lt; &quot;bye&quot; &lt;&lt; endl;
+            return 0;
+        &#125;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以观察到，数据被正常接受处理：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">client</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/fifo</span><br><span class="line">╰─➤  ./client.o</span><br><span class="line">Please Enter: 123</span><br><span class="line">Please Enter: 321</span><br><span class="line">Please Enter: 135</span><br><span class="line">Please Enter: quit</span><br><span class="line">bye</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">server</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/fifo  </span><br><span class="line">╰─➤  ./server.o</span><br><span class="line">server get information: 123</span><br><span class="line">server get information: 321</span><br><span class="line">server get information: 135</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># client</span>
+╭─ljx@VM-16-15-debian ~/linux_review/fifo
+╰─➤  ./client.o
+Please Enter: <span class="token number">123</span>
+Please Enter: <span class="token number">321</span>
+Please Enter: <span class="token number">135</span>
+Please Enter: quit
+bye
+
+<span class="token comment">#server</span>
+╭─ljx@VM-16-15-debian ~/linux_review/fifo  
+╰─➤  ./server.o
+server get information: <span class="token number">123</span>
+server get information: <span class="token number">321</span>
+server get information: <span class="token number">135</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

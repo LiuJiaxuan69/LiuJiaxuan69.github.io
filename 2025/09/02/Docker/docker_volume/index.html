@@ -77,6 +77,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -240,7 +242,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -249,7 +251,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li></ul>
+            <ul><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -455,7 +457,7 @@
 <hr>
 <h2><span id="创建和管理存储卷">创建和管理存储卷</span></h2><p>Docker 提供了一套命令来专门管理卷（Volume）。这些命令可以帮助我们创建、查看、删除以及清理卷。下面我们详细看一下。</p>
 <hr>
-<h3><span id="方式一通过-volume-命令操作">方式一：通过 Volume 命令操作</span></h3><h4><span id="1-创建卷docker-volume-create">1. 创建卷：<code>docker volume create</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create my_volume</span><br></pre></td></tr></table></figure>
+<h3><span id="方式一通过-volume-命令操作">方式一：通过 Volume 命令操作</span></h3><h4><span id="1-创建卷docker-volume-create">1. 创建卷：<code>docker volume create</code></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume create my_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>功能</strong>：创建一个新的存储卷。</p>
@@ -469,11 +471,15 @@
 <li><p><strong>示例</strong>：</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个默认卷</span></span><br><span class="line">docker volume create my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个带标签的卷</span></span><br><span class="line">docker volume create --label project=blog_data blog_volume</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个默认卷</span>
+<span class="token function">docker</span> volume create my_volume  
+
+<span class="token comment"># 创建一个带标签的卷</span>
+<span class="token function">docker</span> volume create <span class="token parameter variable">--label</span> <span class="token assign-left variable">project</span><span class="token operator">=</span>blog_data blog_volume<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>创建完成后，可以在宿主机 <code>/var/lib/docker/volumes/</code> 目录下找到对应的卷。</p>
 <hr>
-<h4><span id="2-查看卷信息docker-volume-inspect">2. 查看卷信息：<code>docker volume inspect</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect my_volume</span><br></pre></td></tr></table></figure>
+<h4><span id="2-查看卷信息docker-volume-inspect">2. 查看卷信息：<code>docker volume inspect</code></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume inspect my_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>功能</strong>：查看卷的详细信息，例如挂载点、驱动、标签等。</p>
@@ -486,11 +492,15 @@
 <li><p><strong>示例</strong>：</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看卷的详细信息</span></span><br><span class="line">docker volume inspect my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 只输出卷的挂载路径</span></span><br><span class="line">docker volume inspect -f <span class="string">&#x27;&#123;&#123; .Mountpoint &#125;&#125;&#x27;</span> my_volume</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看卷的详细信息</span>
+<span class="token function">docker</span> volume inspect my_volume  
+
+<span class="token comment"># 只输出卷的挂载路径</span>
+<span class="token function">docker</span> volume inspect <span class="token parameter variable">-f</span> <span class="token string">'&#123;&#123; .Mountpoint &#125;&#125;'</span> my_volume<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>输出结果通常会包含卷的具体路径（Mountpoint），我们可以确认卷和宿主机之间的真实绑定位置。</p>
 <hr>
-<h4><span id="3-列出卷docker-volume-ls">3. 列出卷：<code>docker volume ls</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+<h4><span id="3-列出卷docker-volume-ls">3. 列出卷：<code>docker volume ls</code></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume <span class="token function">ls</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>功能</strong>：显示当前所有的卷。</p>
@@ -505,10 +515,17 @@
 <li><p><strong>示例</strong>：</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出所有卷</span></span><br><span class="line">docker volume <span class="built_in">ls</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示卷的名称</span></span><br><span class="line">docker volume <span class="built_in">ls</span> -q  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 过滤出使用 local 驱动的卷</span></span><br><span class="line">docker volume <span class="built_in">ls</span> -f driver=<span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 列出所有卷</span>
+<span class="token function">docker</span> volume <span class="token function">ls</span>  
+
+<span class="token comment"># 只显示卷的名称</span>
+<span class="token function">docker</span> volume <span class="token function">ls</span> <span class="token parameter variable">-q</span>  
+
+<span class="token comment"># 过滤出使用 local 驱动的卷</span>
+<span class="token function">docker</span> volume <span class="token function">ls</span> <span class="token parameter variable">-f</span> <span class="token assign-left variable">driver</span><span class="token operator">=</span>local<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
-<h4><span id="4-删除卷docker-volume-rm">4. 删除卷：<code>docker volume rm</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">rm</span> my_volume</span><br></pre></td></tr></table></figure>
+<h4><span id="4-删除卷docker-volume-rm">4. 删除卷：<code>docker volume rm</code></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume <span class="token function">rm</span> my_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>功能</strong>：删除指定卷（前提是该卷没有被任何容器使用）。</p>
@@ -521,11 +538,15 @@
 <li><p><strong>示例</strong>：</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除一个卷</span></span><br><span class="line">docker volume <span class="built_in">rm</span> my_volume  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 强制删除卷</span></span><br><span class="line">docker volume <span class="built_in">rm</span> -f blog_volume</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除一个卷</span>
+<span class="token function">docker</span> volume <span class="token function">rm</span> my_volume  
+
+<span class="token comment"># 强制删除卷</span>
+<span class="token function">docker</span> volume <span class="token function">rm</span> <span class="token parameter variable">-f</span> blog_volume<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>⚠️ 注意：如果卷被容器使用，直接删除会失败。除非使用 <code>-f</code> 强制删除，但这可能导致容器数据丢失。</p>
 <hr>
-<h4><span id="5-清理未使用的卷docker-volume-prune">5. 清理未使用的卷：<code>docker volume prune</code></span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume prune</span><br></pre></td></tr></table></figure>
+<h4><span id="5-清理未使用的卷docker-volume-prune">5. 清理未使用的卷：<code>docker volume prune</code></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume prune<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>功能</strong>：清理掉所有未被容器使用的卷。</p>
@@ -539,7 +560,14 @@
 <li><p><strong>示例</strong>：</p>
 </li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 删除所有未使用的卷（执行前会有确认提示）</span></span><br><span class="line">docker volume prune  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 强制删除所有未使用的卷</span></span><br><span class="line">docker volume prune -f  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除创建时间早于 24 小时的卷</span></span><br><span class="line">docker volume prune --filter <span class="string">&quot;until=24h&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除所有未使用的卷（执行前会有确认提示）</span>
+<span class="token function">docker</span> volume prune  
+
+<span class="token comment"># 强制删除所有未使用的卷</span>
+<span class="token function">docker</span> volume prune <span class="token parameter variable">-f</span>  
+
+<span class="token comment"># 删除创建时间早于 24 小时的卷</span>
+<span class="token function">docker</span> volume prune <span class="token parameter variable">--filter</span> <span class="token string">"until=24h"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这个命令在日常开发中非常有用，尤其是反复测试创建容器后会产生很多孤立卷，通过 <code>prune</code> 可以一键清理，避免宿主机磁盘空间被占满。</p>
 <hr>
@@ -557,7 +585,7 @@
 <hr>
 <h4><span id="1-使用-v-参数">1. 使用 <code>-v</code> 参数</span></h4><p><code>-v</code> 是 Docker 早期提供的挂载方式，语法相对简洁。</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v [卷名或宿主机路径]:[容器内路径][:选项] ...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-v</span> <span class="token punctuation">[</span>卷名或宿主机路径<span class="token punctuation">]</span>:<span class="token punctuation">[</span>容器内路径<span class="token punctuation">]</span><span class="token punctuation">[</span>:选项<span class="token punctuation">]</span> <span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>参数说明</strong>：</p>
@@ -569,24 +597,44 @@
 </li>
 </ul>
 <p><strong>示例 1：挂载命名卷</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest \</span><br><span class="line">  -v myvol2:/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> myvol2:/app <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这条命令会自动创建一个名为 <code>myvol2</code> 的卷，并挂载到容器的 <code>/app</code> 目录。</p>
 <p>通过 <code>docker inspect devtest</code> 可以看到挂载详情：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myvol2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/myvol2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Mounts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"Type"</span><span class="token operator">:</span> <span class="token string">"volume"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"myvol2"</span><span class="token punctuation">,</span>
+    <span class="token property">"Source"</span><span class="token operator">:</span> <span class="token string">"/var/lib/docker/volumes/myvol2/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Destination"</span><span class="token operator">:</span> <span class="token string">"/app"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mode"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+    <span class="token property">"RW"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"Propagation"</span><span class="token operator">:</span> <span class="token string">""</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>示例 2：挂载宿主机目录</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest2 \</span><br><span class="line">  -v /home/user/logs:/var/log/nginx \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest2 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> /home/user/logs:/var/log/nginx <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这里将宿主机的 <code>/home/user/logs</code> 目录映射到容器的 <code>/var/log/nginx</code>，日志会直接写入宿主机目录。</p>
 <p><strong>示例 3：只读挂载</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest3 \</span><br><span class="line">  -v myvol3:/data:ro \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest3 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> myvol3:/data:ro <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这里的卷挂载到容器内 <code>/data</code>，但容器只能读取，无法写入。</p>
 <hr>
 <h4><span id="2-使用-mount-参数">2. 使用 <code>--mount</code> 参数</span></h4><p><code>--mount</code> 是 Docker 较新的推荐方式，语法比 <code>-v</code> 更加<strong>明确和可读</strong>。</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount <span class="built_in">type</span>=&lt;类型&gt;,<span class="built_in">source</span>=&lt;卷名或宿主机路径&gt;,target=&lt;容器内路径&gt;[,选项]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span><span class="token operator">&lt;</span>类型<span class="token operator">></span>,source<span class="token operator">=</span><span class="token operator">&lt;</span>卷名或宿主机路径<span class="token operator">></span>,target<span class="token operator">=</span><span class="token operator">&lt;</span>容器内路径<span class="token operator">></span><span class="token punctuation">[</span>,选项<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>关键参数</strong>：</p>
@@ -599,17 +647,37 @@
 </li>
 </ul>
 <p><strong>示例 1：挂载命名卷</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest \</span><br><span class="line">  --mount <span class="built_in">type</span>=volume,<span class="built_in">source</span>=myvol2,target=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>volume,source<span class="token operator">=</span>myvol2,target<span class="token operator">=</span>/app <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>输出 <code>docker inspect devtest</code> 的结果与 <code>-v</code> 类似：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;myvol2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/myvol2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Mounts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"Type"</span><span class="token operator">:</span> <span class="token string">"volume"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"myvol2"</span><span class="token punctuation">,</span>
+    <span class="token property">"Source"</span><span class="token operator">:</span> <span class="token string">"/var/lib/docker/volumes/myvol2/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Destination"</span><span class="token operator">:</span> <span class="token string">"/app"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mode"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+    <span class="token property">"RW"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"Propagation"</span><span class="token operator">:</span> <span class="token string">""</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>示例 2：挂载宿主机目录（bind mount）</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest2 \</span><br><span class="line">  --mount <span class="built_in">type</span>=<span class="built_in">bind</span>,<span class="built_in">source</span>=/home/user/logs,target=/var/log/nginx \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest2 <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>bind,source<span class="token operator">=</span>/home/user/logs,target<span class="token operator">=</span>/var/log/nginx <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这和 <code>-v /home/user/logs:/var/log/nginx</code> 等价，但语法更清晰。</p>
 <p><strong>示例 3：只读挂载</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name devtest3 \</span><br><span class="line">  --mount <span class="built_in">type</span>=volume,<span class="built_in">source</span>=myvol3,target=/data,<span class="built_in">readonly</span> \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest3 <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>volume,source<span class="token operator">=</span>myvol3,target<span class="token operator">=</span>/data,readonly <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>容器内 <code>/data</code> 目录为只读。</p>
 <hr>
@@ -650,54 +718,86 @@
 <hr>
 <h3><span id="方式三dockerfile-匿名卷">方式三：Dockerfile 匿名卷</span></h3><p>通过 Dockerfile 的 VOLUME 可以创建 docker 管理卷，我将在后面的 Dockerfile 章节中详细介绍</p>
 <hr>
-<h2><span id="三种存储卷操作实例">三种存储卷操作实例</span></h2><h3><span id="docker-命令创建管理卷">Docker 命令创建管理卷</span></h3><h4><span id="1-创建存储卷">1. 创建存储卷</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume create test_volume</span><br></pre></td></tr></table></figure>
+<h2><span id="三种存储卷操作实例">三种存储卷操作实例</span></h2><h3><span id="docker-命令创建管理卷">Docker 命令创建管理卷</span></h3><h4><span id="1-创建存储卷">1. 创建存储卷</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume create test_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test_volume</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">test_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="2-使用卷运行容器">2. 使用卷运行容器</span></h4><p>将刚才创建的卷挂载到 Nginx 容器中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx1 -d -p 5566:80 \</span><br><span class="line">  -v test_volume:/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">--name</span> nginx1 <span class="token parameter variable">-d</span> <span class="token parameter variable">-p</span> <span class="token number">5566</span>:80 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> test_volume:/usr/share/nginx/html <span class="token punctuation">\</span>
+  nginx:1.22.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>同样，我们也可以运行另一个容器，挂载到同一个卷：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx2 -d -p 5577:80 \</span><br><span class="line">  -v test_volume:/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">--name</span> nginx2 <span class="token parameter variable">-d</span> <span class="token parameter variable">-p</span> <span class="token number">5577</span>:80 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> test_volume:/usr/share/nginx/html <span class="token punctuation">\</span>
+  nginx:1.22.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>这样两个容器共享同一个卷，数据会同步。</p>
 <hr>
-<h4><span id="3-查看存储卷列表">3. 查看存储卷列表</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume <span class="built_in">ls</span></span><br></pre></td></tr></table></figure>
+<h4><span id="3-查看存储卷列表">3. 查看存储卷列表</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume <span class="token function">ls</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">DRIVER    VOLUME NAME</span><br><span class="line"><span class="built_in">local</span>     test_volume</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">DRIVER    VOLUME NAME
+<span class="token builtin class-name">local</span>     test_volume<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
-<h4><span id="4-查看卷的详细信息">4. 查看卷的详细信息</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect test_volume</span><br></pre></td></tr></table></figure>
+<h4><span id="4-查看卷的详细信息">4. 查看卷的详细信息</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume inspect test_volume<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果（部分）：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-02T12:23:12+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Options&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"CreatedAt"</span><span class="token operator">:</span> <span class="token string">"2025-09-02T12:23:12+08:00"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mountpoint"</span><span class="token operator">:</span> <span class="token string">"/data/var/lib/docker/volumes/test_volume/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"test_volume"</span><span class="token punctuation">,</span>
+    <span class="token property">"Options"</span><span class="token operator">:</span> <span class="token null keyword">null</span><span class="token punctuation">,</span>
+    <span class="token property">"Scope"</span><span class="token operator">:</span> <span class="token string">"local"</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到 <code>Mountpoint</code> 对应宿主机上的真实目录。</p>
 <hr>
 <h4><span id="5-查看宿主机目录">5. 查看宿主机目录</span></h4><p>进入卷对应的目录，可以看到 Nginx 默认的网页文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /data/var/lib/docker/volumes/test_volume/_data</span><br><span class="line"><span class="built_in">ls</span> -l</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /data/var/lib/docker/volumes/test_volume/_data
+<span class="token function">ls</span> <span class="token parameter variable">-l</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">total 16</span><br><span class="line">drwxr-xr-x 2 root root 4096 Mar 16 12:32 ./</span><br><span class="line">drwx-----x 3 root root 4096 Mar 16 12:16 ../</span><br><span class="line">-rw-r--r-- 1 root root  497 Oct 19 16:02 50x.html</span><br><span class="line">-rw-r--r-- 1 root root  615 Oct 19 16:02 index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">total <span class="token number">16</span>
+drwxr-xr-x <span class="token number">2</span> root root <span class="token number">4096</span> Mar <span class="token number">16</span> <span class="token number">12</span>:32 ./
+drwx-----x <span class="token number">3</span> root root <span class="token number">4096</span> Mar <span class="token number">16</span> <span class="token number">12</span>:16 <span class="token punctuation">..</span>/
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">497</span> Oct <span class="token number">19</span> <span class="token number">16</span>:02 50x.html
+-rw-r--r-- <span class="token number">1</span> root root  <span class="token number">615</span> Oct <span class="token number">19</span> <span class="token number">16</span>:02 index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
-<h4><span id="6-查看容器挂载信息">6. 查看容器挂载信息</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect nginx1</span><br></pre></td></tr></table></figure>
+<h4><span id="6-查看容器挂载信息">6. 查看容器挂载信息</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> inspect nginx1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果（部分）：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/usr/share/nginx/html&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;z&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Propagation&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Mounts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"Type"</span><span class="token operator">:</span> <span class="token string">"volume"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"test_volume"</span><span class="token punctuation">,</span>
+    <span class="token property">"Source"</span><span class="token operator">:</span> <span class="token string">"/data/var/lib/docker/volumes/test_volume/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Destination"</span><span class="token operator">:</span> <span class="token string">"/usr/share/nginx/html"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mode"</span><span class="token operator">:</span> <span class="token string">"z"</span><span class="token punctuation">,</span>
+    <span class="token property">"RW"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"Propagation"</span><span class="token operator">:</span> <span class="token string">""</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>说明 <code>test_volume</code> 已经挂载到容器的 <code>/usr/share/nginx/html</code> 目录中。</p>
 <hr>
 <h4><span id="7-修改宿主机文件并同步到容器">7. 修改宿主机文件并同步到容器</span></h4><p>修改宿主机上的 <code>index.html</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /data/var/lib/docker/volumes/test_volume/_data</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello Volume&quot;</span> &gt; index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /data/var/lib/docker/volumes/test_volume/_data
+<span class="token builtin class-name">echo</span> <span class="token string">"Hello Volume"</span> <span class="token operator">></span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>然后通过浏览器访问 <code>http://宿主机IP:5566</code>，即可看到更新后的内容，证明宿主机和容器数据同步：</p>
 <p><img src="/img/Docker/volume/volume_url.png" alt="volume_url"></p>
 <hr>
-<h4><span id="8-停止并删除容器">8. 停止并删除容器</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx1</span><br><span class="line">docker <span class="built_in">rm</span> nginx1</span><br></pre></td></tr></table></figure>
+<h4><span id="8-停止并删除容器">8. 停止并删除容器</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop nginx1
+<span class="token function">docker</span> <span class="token function">rm</span> nginx1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>卷不会随着容器的删除而消失，数据依然存在。</p>
 <hr>
@@ -709,37 +809,52 @@
 <h3><span id="docker-v-创建管理卷">Docker -v 创建管理卷</span></h3><p>下面演示如何使用 <code>-v</code> 参数创建和挂载存储卷，并验证 <strong>只读模式 (ro)</strong> 的效果。</p>
 <hr>
 <h4><span id="1-使用-v-创建卷并启动容器">1. 使用 -v 创建卷并启动容器</span></h4><p>通过 <code>-v</code> 指定一个新卷 <code>test_volume2</code>，挂载到 Nginx 容器的 <code>/usr/share/nginx/html</code> 目录，并设置为只读模式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx2 -d -p 5566:80 \</span><br><span class="line">  -v test_volume2:/usr/share/nginx/html:ro \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">--name</span> nginx2 <span class="token parameter variable">-d</span> <span class="token parameter variable">-p</span> <span class="token number">5566</span>:80 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> test_volume2:/usr/share/nginx/html:ro <span class="token punctuation">\</span>
+  nginx:1.22.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="2-查看卷信息">2. 查看卷信息</span></h4><p>使用 <code>docker inspect</code> 查看卷对应的宿主机目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect test_volume2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> inspect test_volume2<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果（部分）：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-02T12:23:35+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume2/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"CreatedAt"</span><span class="token operator">:</span> <span class="token string">"2025-09-02T12:23:35+08:00"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mountpoint"</span><span class="token operator">:</span> <span class="token string">"/data/var/lib/docker/volumes/test_volume2/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"test_volume2"</span><span class="token punctuation">,</span>
+    <span class="token property">"Scope"</span><span class="token operator">:</span> <span class="token string">"local"</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>进入宿主机目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /data/var/lib/docker/volumes/test_volume2/_data</span><br><span class="line">ls</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /data/var/lib/docker/volumes/test_volume2/_data
+<span class="token function">ls</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">50x.html  index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">50x.html  index.html<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="3-修改宿主机中的文件">3. 修改宿主机中的文件</span></h4><p>在宿主机上修改 <code>index.html</code> 内容：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;Hello Volume -v&quot; &gt; index.html</span><br><span class="line">cat index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"Hello Volume -v"</span> <span class="token operator">></span> index.html
+<span class="token function">cat</span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>通过浏览器访问 <code>http://宿主机IP:5566</code>，可以看到页面内容已更新：</p>
 <p><img src="/img/Docker/volume/volume_v.png" alt="volume_v"></p>
 <hr>
 <h4><span id="4-在容器中尝试修改文件">4. 在容器中尝试修改文件</span></h4><p>进入容器，尝试删除 <code>index.html</code>：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it nginx2 bash</span><br><span class="line">cd /usr/share/nginx/html/</span><br><span class="line">rm index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> nginx2 <span class="token function">bash</span>
+<span class="token builtin class-name">cd</span> /usr/share/nginx/html/
+<span class="token function">rm</span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">rm</span>: cannot remove <span class="string">&#x27;index.html&#x27;</span>: Read-only file system</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">rm: cannot remove <span class="token string">'index.html'</span><span class="token builtin class-name">:</span> Read-only <span class="token function">file</span> system<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>说明容器内的该目录是只读的，无法修改文件。</p>
 <hr>
-<h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx2</span><br><span class="line">docker rm nginx2</span><br></pre></td></tr></table></figure>
+<h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop nginx2
+<span class="token function">docker</span> <span class="token function">rm</span> nginx2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
 <ul>
@@ -750,35 +865,52 @@
 <h3><span id="docker-mount-创建管理卷">Docker –mount 创建管理卷</span></h3><p>下面演示如何使用 <code>--mount</code> 参数创建并挂载存储卷，验证宿主机和容器的数据同步效果。</p>
 <hr>
 <h4><span id="1-使用-mount-创建卷并启动容器">1. 使用 –mount 创建卷并启动容器</span></h4><p>通过 <code>--mount</code> 指定一个新卷 <code>test_volume3</code>，并挂载到 Nginx 容器的 <code>/usr/share/nginx/html</code> 目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container run --name nginx3 -d -p 5566:80 \</span><br><span class="line">  --mount type=volume,source=test_volume3,target=/usr/share/nginx/html \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container run <span class="token parameter variable">--name</span> nginx3 <span class="token parameter variable">-d</span> <span class="token parameter variable">-p</span> <span class="token number">5566</span>:80 <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>volume,source<span class="token operator">=</span>test_volume3,target<span class="token operator">=</span>/usr/share/nginx/html <span class="token punctuation">\</span>
+  nginx:1.22.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="2-查看卷是否创建成功">2. 查看卷是否创建成功</span></h4><p>使用 <code>docker volume ls</code> 查看已创建的卷：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume ls</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume <span class="token function">ls</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>示例输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">DRIVER    VOLUME NAME</span><br><span class="line"><span class="built_in">local</span>     test_volume3</span><br><span class="line"><span class="built_in">local</span>     myvoltest1</span><br><span class="line"><span class="built_in">local</span>     myvoltest2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">DRIVER    VOLUME NAME
+<span class="token builtin class-name">local</span>     test_volume3
+<span class="token builtin class-name">local</span>     myvoltest1
+<span class="token builtin class-name">local</span>     myvoltest2
+<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到 <code>test_volume3</code> 已经在卷列表中。</p>
 <hr>
 <h4><span id="3-查看卷的挂载点">3. 查看卷的挂载点</span></h4><p>使用 <code>docker volume inspect</code> 查看卷对应的宿主机目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker volume inspect test_volume3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> volume inspect test_volume3<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出结果（部分）：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;CreatedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2025-09-03T00:05:13+08:00&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Driver&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Mountpoint&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/data/var/lib/docker/volumes/test_volume3/_data&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;test_volume3&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;Scope&quot;</span><span class="punctuation">:</span> <span class="string">&quot;local&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"CreatedAt"</span><span class="token operator">:</span> <span class="token string">"2025-09-03T00:05:13+08:00"</span><span class="token punctuation">,</span>
+    <span class="token property">"Driver"</span><span class="token operator">:</span> <span class="token string">"local"</span><span class="token punctuation">,</span>
+    <span class="token property">"Mountpoint"</span><span class="token operator">:</span> <span class="token string">"/data/var/lib/docker/volumes/test_volume3/_data"</span><span class="token punctuation">,</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"test_volume3"</span><span class="token punctuation">,</span>
+    <span class="token property">"Scope"</span><span class="token operator">:</span> <span class="token string">"local"</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="4-修改宿主机中的文件内容">4. 修改宿主机中的文件内容</span></h4><p>进入卷目录并修改 <code>index.html</code> 文件：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /data/var/lib/docker/volumes/test_volume3/_data</span><br><span class="line">echo &quot;Hello Volume - mount&quot; &gt; index.html</span><br><span class="line">cat index.html</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">cd</span> /data/var/lib/docker/volumes/test_volume3/_data
+<span class="token builtin class-name">echo</span> <span class="token string">"Hello Volume - mount"</span> <span class="token operator">></span> index.html
+<span class="token function">cat</span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>输出结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hello Volume - mount</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Hello Volume - <span class="token function">mount</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>此时浏览器访问 <code>http://宿主机IP:5566</code>，即可看到页面内容已更新：</p>
 <p><img src="/img/Docker/volume/volume_mount.png" alt="volume_mount"></p>
 <hr>
 <h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><p>实验完成后，可以停止并删除容器：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop nginx3</span><br><span class="line">docker rm nginx3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop nginx3
+<span class="token function">docker</span> <span class="token function">rm</span> nginx3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
 <ul>
@@ -790,7 +922,7 @@
 <hr>
 <h4><span id="1-使用-v-创建绑定卷">1. 使用 -v 创建绑定卷</span></h4><p><strong>功能：</strong> 将宿主机目录映射到容器目录，实现数据共享。</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -v &lt;宿主机目录&gt;:&lt;容器目录&gt;[:options] ...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-v</span> <span class="token operator">&lt;</span>宿主机目录<span class="token operator">></span>:<span class="token operator">&lt;</span>容器目录<span class="token operator">></span><span class="token punctuation">[</span>:options<span class="token punctuation">]</span> <span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>参数说明</strong>：</p>
@@ -802,13 +934,16 @@
 </li>
 </ul>
 <p><strong>示例：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name devtest \</span><br><span class="line">  -v &quot;$(pwd)&quot;/target:/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">-it</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest <span class="token punctuation">\</span>
+  <span class="token parameter variable">-v</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token builtin class-name">pwd</span><span class="token variable">)</span></span>"</span>/target:/app <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>说明：宿主机当前目录下的 <code>target</code> 会挂载到容器的 <code>/app</code>，容器可以直接访问宿主机的文件。</p>
 <hr>
 <h4><span id="2-使用-mount-创建绑定卷">2. 使用 –mount 创建绑定卷</span></h4><p><strong>功能：</strong> 与 <code>-v</code> 类似，但语法更清晰，推荐在生产环境使用。</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount type=bind,source=&lt;宿主机目录&gt;,target=&lt;容器目录&gt;[,readonly]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>bind,source<span class="token operator">=</span><span class="token operator">&lt;</span>宿主机目录<span class="token operator">></span>,target<span class="token operator">=</span><span class="token operator">&lt;</span>容器目录<span class="token operator">></span><span class="token punctuation">[</span>,readonly<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>关键参数：</strong></p>
@@ -821,7 +956,10 @@
 </li>
 </ul>
 <p><strong>示例：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name devtest \</span><br><span class="line">  --mount type=bind,source=&quot;$(pwd)&quot;/target,target=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">-it</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> devtest <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>bind,source<span class="token operator">=</span><span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token builtin class-name">pwd</span><span class="token variable">)</span></span>"</span>/target,target<span class="token operator">=</span>/app <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>说明：效果与 <code>-v</code> 类似，但参数更直观，适合团队协作和复杂挂载场景。</p>
 <hr>
@@ -843,16 +981,19 @@
 <hr>
 <h4><span id="1-使用-tmpfs-创建临时卷">1. 使用 <code>--tmpfs</code> 创建临时卷</span></h4><p><strong>功能：</strong> 将容器目录映射到内存中，实现高速临时存储</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--tmpfs &lt;容器目录&gt;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--tmpfs</span> <span class="token operator">&lt;</span>容器目录<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>示例：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name tmptest \</span><br><span class="line">  --tmpfs /app \</span><br><span class="line">  nginx:1.22.1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">-it</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> tmptest <span class="token punctuation">\</span>
+  <span class="token parameter variable">--tmpfs</span> /app <span class="token punctuation">\</span>
+  nginx:1.22.1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>说明：容器内的 <code>/app</code> 目录完全位于内存中，容器停止后数据会消失。</p>
 <hr>
 <h4><span id="2-使用-mount-创建临时卷">2. 使用 <code>--mount</code> 创建临时卷</span></h4><p><strong>功能：</strong> 与 <code>--tmpfs</code> 类似，但语法更灵活，可指定更多参数</p>
 <p><strong>语法：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--mount type=tmpfs,destination=&lt;容器目录&gt;[,tmpfs-size=&lt;大小&gt;,tmpfs-mode=&lt;权限&gt;]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>tmpfs,destination<span class="token operator">=</span><span class="token operator">&lt;</span>容器目录<span class="token operator">></span><span class="token punctuation">[</span>,tmpfs-size<span class="token operator">=</span><span class="token operator">&lt;</span>大小<span class="token operator">></span>,tmpfs-mode<span class="token operator">=</span><span class="token operator">&lt;</span>权限<span class="token operator">></span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><p><strong>关键参数</strong>：</p>
@@ -865,7 +1006,10 @@
 </li>
 </ul>
 <p><strong>示例：</strong></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -it \</span><br><span class="line">  --name tmptest \</span><br><span class="line">  --mount type=tmpfs,destination=/app \</span><br><span class="line">  nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">-it</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> tmptest <span class="token punctuation">\</span>
+  <span class="token parameter variable">--mount</span> <span class="token assign-left variable">type</span><span class="token operator">=</span>tmpfs,destination<span class="token operator">=</span>/app <span class="token punctuation">\</span>
+  nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>说明：<code>/app</code> 目录位于内存中，高速且临时，容器停止后数据会丢失。</p>
 <hr>
@@ -955,31 +1099,42 @@
 <h2><span id="mysql灾难恢复实验">MySQL灾难恢复实验</span></h2><p>本实验旨在验证使用Docker部署MySQL时，如何通过挂载宿主机目录实现数据的持久化存储，以及在容器异常删除后如何依旧能够完成数据恢复。</p>
 <h3><span id="实验步骤">实验步骤</span></h3><ol>
 <li><p><strong>初始化前准备</strong><br>在宿主机上创建一个空目录作为MySQL数据挂载点：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /mydata/datadir</span><br><span class="line">ll /mydata/datadir</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /mydata/datadir
+ll /mydata/datadir<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>此时目录下无任何文件。</p>
 </li>
 <li><p><strong>运行MySQL容器并挂载目录</strong><br>使用<code>-v</code>参数将宿主机目录挂载到容器的<code>/var/lib/mysql</code>路径：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql3 -v /mydata/datadir:/var/lib/mysql \</span><br><span class="line">  -e MYSQL_ROOT_PASSWORD=ljx@docker -d mysql:8.0.41</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--name</span> mysql3 <span class="token parameter variable">-v</span> /mydata/datadir:/var/lib/mysql <span class="token punctuation">\</span>
+  <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span>ljx@docker <span class="token parameter variable">-d</span> mysql:8.0.41<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>启动后，可以看到<code>/mydata/datadir</code>目录中立即生成了MySQL系统数据库文件和相关配置。</p>
 </li>
 <li><p><strong>向数据库中插入数据</strong><br>进入容器并操作数据库：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -it mysql3 bash</span><br><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> mysql3 <span class="token function">bash</span>
+mysql <span class="token parameter variable">-u</span> root <span class="token parameter variable">-p</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>创建数据库和表，并插入一条数据：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> database test;</span><br><span class="line">use test;</span><br><span class="line"><span class="keyword">create table</span> t1(name <span class="type">varchar</span>(<span class="number">50</span>), age <span class="type">int</span>);</span><br><span class="line"><span class="keyword">insert into</span> t1 <span class="keyword">values</span>(<span class="string">&#x27;ljx&#x27;</span>, <span class="number">19</span>);</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">create</span> <span class="token keyword">database</span> test<span class="token punctuation">;</span>
+<span class="token keyword">use</span> test<span class="token punctuation">;</span>
+<span class="token keyword">create</span> <span class="token keyword">table</span> t1<span class="token punctuation">(</span>name <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">,</span> age <span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">insert</span> <span class="token keyword">into</span> t1 <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token string">'ljx'</span><span class="token punctuation">,</span> <span class="token number">19</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t1<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>查询结果显示数据已成功写入。</p>
 </li>
 <li><p><strong>模拟容器被异常中断和删除</strong><br>模拟类似公司突然断电的情况，直接删除容器：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker stop mysql3</span><br><span class="line">docker <span class="built_in">rm</span> mysql3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop mysql3
+<span class="token function">docker</span> <span class="token function">rm</span> mysql3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>重新创建新容器并挂载同一目录</strong><br>重新运行MySQL容器，仍挂载之前的目录：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --name mysql4 -v /mydata/datadir:/var/lib/mysql \</span><br><span class="line">  -e MYSQL_ROOT_PASSWORD=ljx@docker -d mysql:8.0.41</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--name</span> mysql4 <span class="token parameter variable">-v</span> /mydata/datadir:/var/lib/mysql <span class="token punctuation">\</span>
+  <span class="token parameter variable">-e</span> <span class="token assign-left variable">MYSQL_ROOT_PASSWORD</span><span class="token operator">=</span>ljx@docker <span class="token parameter variable">-d</span> mysql:8.0.41<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>登录数据库后，发现数据依旧存在：</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">show</span> databases;</span><br><span class="line">use test;</span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> t1;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql"><span class="token keyword">show</span> <span class="token keyword">databases</span><span class="token punctuation">;</span>
+<span class="token keyword">use</span> test<span class="token punctuation">;</span>
+<span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> t1<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到之前插入的数据<code>(&#39;ljx&#39;, 19)</code>仍然保留。</p>
 </li>

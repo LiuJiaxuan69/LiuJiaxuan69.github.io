@@ -89,6 +89,8 @@ sunion、sunion,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -252,7 +254,7 @@ sunion、sunion,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -261,7 +263,7 @@ sunion、sunion,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li></ul>
+            <ul><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -326,76 +328,156 @@ sunion、sunion,"/>
 <h2><span id="类型简介">类型简介</span></h2><p>集合类型也是保存多个字符串类型的元素的，但和列表类型不同的是，集合中 1）元素之间是⽆序的 2）元素不允许重复，<br>⼀个集合中最多可以存储 $2^{32}$ - 1 个元素。Redis 除了⽀持集合内的增删查改操作，同时还⽀持多个集合取交集、并集、差集，合理<br>地使⽤好集合类型，能在实际开发中解决很多问题</p>
 <p>相关指令如下：</p>
 <h2><span id="相关指令">相关指令</span></h2><h3><span id="sadd">sadd</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SADD key member [member ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SADD key member <span class="token punctuation">[</span>member <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>将一个或多个元素添加到 set 中，重复定义的元素是无法添加到 set 中的</p>
 <p>时间复杂度：O(1)</p>
 <p>返回值：本次添加成功的个数</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">预期添加 5 个元素</span></span><br><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 3 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">元素3被重复添加，只能添加一个</span></span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; smembers k1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 预期添加 5 个元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token comment"># 元素3被重复添加，只能添加一个</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k1
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="smembers">smembers</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SMEMBERS key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SMEMBERS key<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>获取—个 set 中的所有元素，<strong>元素间的顺序是无序的</strong></p>
 <p>时间复杂度：O(N)</p>
 <p>返回值：所有元素的列表</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; smembers k1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k1
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="sismember">sismember</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SISMEMBER key member</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SISMEMBER key member<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>判断一个元素是否在 set 中</p>
 <p>时间复杂度：O(1)</p>
 <p>返回值：1表示存在，0表示不存在</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询元素 2 存在</span></span><br><span class="line">127.0.0.1:6379&gt; sismember k1 2</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询元素 5 不存在</span></span><br><span class="line">127.0.0.1:6379&gt; sismember k1 5</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 查询元素 2 存在</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sismember k1 <span class="token number">2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 查询元素 5 不存在</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sismember k1 <span class="token number">5</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="scard">scard</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SCARD key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SCARD key<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>获取一个 set 的基数，即 set 中的元素个数</p>
 <p>时间复杂度：O(1)</p>
 <p>返回值：set 中元素的个数</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; scard k1</span><br><span class="line">(integer) 4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> scard k1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="spop">spop</span></h3><p>从set 中删除并返回—个或者多个元素。注意，由于 set 内的元素是无序的，所以取出哪个元素实际是<br>未定义行为，即可以看作随机的</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SPOP key [count]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SPOP key <span class="token punctuation">[</span>count<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N) n表示count</p>
 <p>返回值：取出的元素</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4 5 6</span><br><span class="line">(integer) 6</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">默认删除一个随机元素</span></span><br><span class="line">127.0.0.1:6379&gt; spop k1</span><br><span class="line">&quot;5&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除两个随机元素</span></span><br><span class="line">127.0.0.1:6379&gt; spop k1 2</span><br><span class="line">1) &quot;4&quot;</span><br><span class="line">2) &quot;6&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">剩余元素</span></span><br><span class="line">127.0.0.1:6379&gt; smembers k1</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">6</span>
+<span class="token comment"># 默认删除一个随机元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> spop k1
+<span class="token string">"5"</span>
+<span class="token comment"># 删除两个随机元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> spop k1 <span class="token number">2</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"6"</span>
+<span class="token comment"># 剩余元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k1
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="smove">smove</span></h3><p>将一个元素从源 set 取出并放到目的 set 中</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SMOVE source destination member</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SMOVE <span class="token builtin class-name">source</span> destination member<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(1)</p>
 <p>返回值：1表示移动成功，0表示移动失败</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">依次将 k1 中的所有元素移动到 k2 中</span></span><br><span class="line">127.0.0.1:6379&gt; smove k1 k2 3</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smove k1 k2 4</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smove k1 k2 2</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smove k1 k2 1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">k1 中的元素都被移动到 k2 中</span></span><br><span class="line">127.0.0.1:6379&gt; smembers k1</span><br><span class="line">(empty array)</span><br><span class="line">127.0.0.1:6379&gt; smembers k2</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br><span class="line">127.0.0.1:6379&gt; sadd k1 1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; smove k1 k2 1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移动相同的元素到 k2 中虽然移动成功，但因为 k2 中已经有该元素了，故 k2 无变化</span></span><br><span class="line">127.0.0.1:6379&gt; smembers k2</span><br><span class="line">1) &quot;1&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;3&quot;</span><br><span class="line">4) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token comment"># 依次将 k1 中的所有元素移动到 k2 中</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smove k1 k2 <span class="token number">3</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smove k1 k2 <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smove k1 k2 <span class="token number">2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smove k1 k2 <span class="token number">1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># k1 中的元素都被移动到 k2 中</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k1
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k2
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smove k1 k2 <span class="token number">1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 移动相同的元素到 k2 中虽然移动成功，但因为 k2 中已经有该元素了，故 k2 无变化</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k2
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="srem">srem</span></h3><p>该指令用于将指定元素从 set 中删除</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SREM key member [member ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SREM key member <span class="token punctuation">[</span>member <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N)，N 表示要删除的元素个数</p>
 <p>返回值：本次操作被删除的元素个数</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4 5</span><br><span class="line">(integer) 5</span><br><span class="line">127.0.0.1:6379&gt; srem k1 1 2 3</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; srem k1 4 4 4</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; srem k1 6 7</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">5</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> srem k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> srem k1 <span class="token number">4</span> <span class="token number">4</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> srem k1 <span class="token number">6</span> <span class="token number">7</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="集合间操作">集合间操作</span></h2><h3><span id="sinter">sinter</span></h3><p>该指令用于获取给定 set 的交集中的元素</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SINTER key [key ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SINTER key <span class="token punctuation">[</span>key <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N * M), N 是最小的集合元素个数. M 是集合个数.</p>
 <p>返回值：交集的元素</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sadd k2 2 3 4 5</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sadd k3 3 4 5 6</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sinter k1 k2 k3</span><br><span class="line">1) &quot;3&quot;</span><br><span class="line">2) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k2 <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k3 <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sinter k1 k2 k3
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>下面是针对该时间复杂度的讨论：</p>
 <div class="spoiler collapsed">
@@ -432,12 +514,22 @@ sunion、sunion,"/>
 
 <h3><span id="sinterstore">sinterstore</span></h3><p>该指令用于获取给定 set 的交集中的元素并保存到目标 set 中</p>
 <p>指令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SINTERSTORE destination key [key ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">SINTERSTORE destination key <span class="token punctuation">[</span>key <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(N * M), N 是最小的集合元素个数. M 是集合个数.</p>
 <p>返回值：交集的元素个数</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd k1 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sadd k2 2 3 4 5</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sadd k3 3 4 5 6</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; sinterstore k4 k1 k2 k3</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; smembers k4</span><br><span class="line">1) &quot;3&quot;</span><br><span class="line">2) &quot;4&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k1 <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k2 <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd k3 <span class="token number">3</span> <span class="token number">4</span> <span class="token number">5</span> <span class="token number">6</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sinterstore k4 k1 k2 k3
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> smembers k4
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"4"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="sunion-sunionstore-sdiff-sdiffstore">sunion、sunionstore、sdiff、sdiffstore</span></h3><p>这四个命令和上面的 sinter 和 sinterstore 指令类似，union 用于求并集，diff 用于求差集，故不再赘述</p>
 <h2><span id="set-相关指令汇总表">set 相关指令汇总表</span></h2><table>
@@ -496,17 +588,26 @@ sunion、sunion,"/>
 <h4><span id="示例">示例</span></h4><ol>
 <li><strong>当元素个数较少并且都为整数时，内部编码为 <code>intset</code>：</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd setkey 1 2 3 4</span><br><span class="line">(integer) 4</span><br><span class="line">127.0.0.1:6379&gt; object encoding setkey</span><br><span class="line">&quot;intset&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd setkey <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding setkey
+<span class="token string">"intset"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>当元素个数超过 512 个，内部编码为 <code>hashtable</code>：</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd setkey 1 2 3 4 ... 513</span><br><span class="line">(integer) 513</span><br><span class="line">127.0.0.1:6379&gt; object encoding setkey</span><br><span class="line">&quot;hashtable&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd setkey <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span> <span class="token number">4</span> <span class="token punctuation">..</span>. <span class="token number">513</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">513</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding setkey
+<span class="token string">"hashtable"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>当存在元素不是整数时，内部编码为 <code>hashtable</code>：</strong></li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; sadd setkey a</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; object encoding setkey</span><br><span class="line">&quot;hashtable&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> sadd setkey a
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding setkey
+<span class="token string">"hashtable"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="应用场景">应用场景</span></h2><h3><span id="集合类型在标签系统中的应用">集合类型在标签系统中的应用</span></h3><p>集合类型在标签(tag)系统中有着典型的使用场景，例如：</p>
 <ul>
@@ -514,15 +615,22 @@ sunion、sunion,"/>
 <li>基于标签的用户分析（共同兴趣、个性化推荐）</li>
 <li>电子商务的个性化产品推荐</li>
 </ul>
-<h4><span id="实现标签功能的redis命令演示">实现标签功能的Redis命令演示</span></h4><h5><span id="1-给用户添加标签">1. 给用户添加标签</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sadd user:1:tags tag1 tag2 tag5</span><br><span class="line">sadd user:2:tags tag2 tag3 tag5</span><br><span class="line">...</span><br><span class="line">sadd user:k:tags tag1 tag2 tag4</span><br></pre></td></tr></table></figure>
+<h4><span id="实现标签功能的redis命令演示">实现标签功能的Redis命令演示</span></h4><h5><span id="1-给用户添加标签">1. 给用户添加标签</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">sadd user:1:tags tag1 tag2 tag5
+sadd user:2:tags tag2 tag3 tag5
+<span class="token punctuation">..</span>.
+sadd user:k:tags tag1 tag2 tag4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h5><span id="2-给标签添加用户">2. 给标签添加用户</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sadd tag1:users user:1 user:3</span><br><span class="line">sadd tag2:users user:1 user:2 user:3</span><br><span class="line">...</span><br><span class="line">sadd tagk:users user:1 user:4 user:9 user:28</span><br></pre></td></tr></table></figure>
+<h5><span id="2-给标签添加用户">2. 给标签添加用户</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">sadd tag1:users user:1 user:3
+sadd tag2:users user:1 user:2 user:3
+<span class="token punctuation">..</span>.
+sadd tagk:users user:1 user:4 user:9 user:28<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h5><span id="3-删除用户下的标签">3. 删除用户下的标签</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">srem user:1:tags tag1 tag5</span><br></pre></td></tr></table></figure>
+<h5><span id="3-删除用户下的标签">3. 删除用户下的标签</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">srem user:1:tags tag1 tag5<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h5><span id="4-删除标签下的用户">4. 删除标签下的用户</span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">srem tag1:users user:1</span><br><span class="line">srem tag5:users user:1</span><br></pre></td></tr></table></figure>
+<h5><span id="4-删除标签下的用户">4. 删除标签下的用户</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">srem tag1:users user:1
+srem tag5:users user:1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-<h5><span id="5-计算用户的共同兴趣标签">5. 计算用户的共同兴趣标签</span></h5><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sinter user:1:tags user:2:tags</span><br></pre></td></tr></table></figure>
+<h5><span id="5-计算用户的共同兴趣标签">5. 计算用户的共同兴趣标签</span></h5><pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">sinter user:1:tags user:2:tags<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="应用价值">应用价值</span></h4><p>这种实现方式可以：</p>
 <ol>

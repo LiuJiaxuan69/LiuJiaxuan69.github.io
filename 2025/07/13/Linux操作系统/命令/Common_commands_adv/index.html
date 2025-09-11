@@ -71,6 +71,8 @@ Linux 重定向详解（结合 echo 和 cat 实践）
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -234,7 +236,7 @@ Linux 重定向详解（结合 echo 和 cat 实践）
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -315,14 +317,24 @@ Linux 重定向详解（结合 echo 和 cat 实践）
 <p>接下来要讲解的命令都和上一节的 cat 命令息息相关</p>
 <h2><span id="echo">echo</span></h2><p>该命令主要用于在终端输出文本或变量的值</p>
 <p>下面是 echo 的基础用法示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo &quot;hello world&quot;</span><br><span class="line">hello world</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo $HOME</span><br><span class="line">/home/ljx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token string">"hello world"</span>
+hello world
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token environment constant">$HOME</span>
+/home/ljx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>下面是 echo 命令常用的两个选项：</p>
 <h3><span id="-n">-n</span></h3><p>加上该选项后，echo 命令输出信息时会不换行输出</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo -n &quot;hello&quot;; echo &quot; World&quot;</span><br><span class="line">hello World</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token parameter variable">-n</span> <span class="token string">"hello"</span><span class="token punctuation">;</span> <span class="token builtin class-name">echo</span> <span class="token string">" World"</span>
+hello World<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="-e">-e</span></h3><p>加上改选项后，echo 命令会检测转义字符</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo -e &quot;hello\nworld&quot;</span><br><span class="line">hello</span><br><span class="line">world</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token parameter variable">-e</span> <span class="token string">"hello<span class="token entity" title="\n">\n</span>world"</span>
+hello
+world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这些是 echo 命令的基础用法，包括上一节讲到的 cat 命令都是一些基础用法，下面我要讲到的一个很重要的知识点是重定向，目前并不需要了解太深，<br>只需要学会将重定向和这两个指令结合着使用就可以了</p>
 <h2><span id="linux-重定向详解结合-echo-和-cat-实践"><strong>Linux 重定向详解（结合 echo 和 cat 实践）</strong></span></h2><p>重点！重点！重点！重要的事情说三遍，下面我们将讨论和重定向相关的知识点</p>
@@ -337,15 +349,45 @@ Linux 重定向详解（结合 echo 和 cat 实践）
 <p>这样一来，我们就可以理解到 cat 命令 和 echo 命令的基本底层逻辑了，cat 命令默认是读取后面输入的文件名所对应的信息的，而 echo 默认是将用户<br>输入的信息显示到显示屏上去的（准确说是输出到标准输出文件 stdout 中去的）（当然，你可以试试输入 cat 命令直接回车，然后你可以尝试输入一段信息并回车，他就会显示什么信息到显示屏，这是因为在你没有指定 cat 的输入流的<br>时候他会默认从标准输入中读取数据）</p>
 <p>因此，下面这些操作本质上就是让 cat 命令和 echo 命令将输入流和输出流控制到别的地方去</p>
 <h3><span id="二-输出重定向gt-和-gtgt">二、输出重定向（&gt; 和 &gt;&gt;）</span></h3><h4><span id="1-覆盖写入gt">1. 覆盖写入（&gt;）</span></h4><p>使用该符号重定向写入的数据会覆盖掉文件中的原始数据</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;第一行内容&quot; &gt; test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat test.txt</span><br><span class="line">第一行内容</span><br><span class="line"></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;新内容&quot; &gt; test.txt  # 覆盖原内容</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat test.txt</span><br><span class="line">新内容</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"第一行内容"</span> <span class="token operator">></span> test.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> test.txt
+第一行内容
 
-<h4><span id="2-追加写入gtgt">2. 追加写入（&gt;&gt;）</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;第一行&quot; &gt;&gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;第二行&quot; &gt;&gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat log.txt</span><br><span class="line">第一行</span><br><span class="line">第二行</span><br></pre></td></tr></table></figure>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"新内容"</span> <span class="token operator">></span> test.txt  <span class="token comment"># 覆盖原内容</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> test.txt
+新内容<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h3><span id="三-输入重定向lt-和-ltlt">三、输入重定向（&lt; 和 &lt;&lt;）</span></h3><h4><span id="1-文件作为输入lt">1. 文件作为输入（&lt;）</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat &lt; log.txt  # 效果等同于 cat log.txt（效果虽然相同，但是他们的底层实现逻辑有本质区别，这个涉及到了文件描述符，因此暂时不深究）</span><br><span class="line">第一行</span><br><span class="line">第二行</span><br></pre></td></tr></table></figure>
+<h4><span id="2-追加写入gtgt">2. 追加写入（&gt;&gt;）</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"第一行"</span> <span class="token operator">>></span> log.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"第二行"</span> <span class="token operator">>></span> log.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> log.txt
+第一行
+第二行<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="2-here-documentltlt">2. Here Document（&lt;&lt;）</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat &lt;&lt; EOF</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">这是即时输入的内容</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">直到遇到EOF结束标记</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">EOF</span></span><br><span class="line">这是即时输入的内容</span><br><span class="line">直到遇到EOF结束标记</span><br></pre></td></tr></table></figure>
+<h3><span id="三-输入重定向lt-和-ltlt">三、输入重定向（&lt; 和 &lt;&lt;）</span></h3><h4><span id="1-文件作为输入lt">1. 文件作为输入（&lt;）</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> <span class="token operator">&lt;</span> log.txt  <span class="token comment"># 效果等同于 cat log.txt（效果虽然相同，但是他们的底层实现逻辑有本质区别，这个涉及到了文件描述符，因此暂时不深究）</span>
+第一行
+第二行<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h3><span id="四-错误重定向2gt-和-2gtgt">四、错误重定向（2&gt; 和 2&gt;&gt;）</span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat not_exist.txt 2&gt; error.log</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat error.log</span><br><span class="line">cat: not_exist.txt: No such file or directory</span><br></pre></td></tr></table></figure>
+<h4><span id="2-here-documentltlt">2. Here Document（&lt;&lt;）</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> <span class="token operator">&lt;&lt;</span> EOF
+<span class="token operator">></span> 这是即时输入的内容
+<span class="token operator">></span> 直到遇到EOF结束标记
+<span class="token operator">></span> EOF
+这是即时输入的内容
+直到遇到EOF结束标记<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3><span id="四-错误重定向2gt-和-2gtgt">四、错误重定向（2&gt; 和 2&gt;&gt;）</span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> not_exist.txt <span class="token operator"><span class="token file-descriptor important">2</span>></span> error.log
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> error.log
+cat: not_exist.txt: No such <span class="token function">file</span> or directory<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>错误重定向用于将输出的错误信息重定向到指定文件中，当使用 2&gt; 作为错误输出重定向时和直接使用 &gt; 重定向没有本质区别，<br>但若想追加错误信息重定向就一定得使用 2&gt;&gt; 而不是 &gt;&gt;，当然相信你会有疑问， &gt;&gt; 符号不也是输出追加重定向吗，为什么他就不能<br>将错误信息追加到文件里面呢</p>
 <p>这就涉及到了一个历史遗留的问题了：</p>
@@ -405,15 +447,33 @@ Linux 重定向详解（结合 echo 和 cat 实践）
     </div>
 </div>
 
-<h3><span id="五-综合实践案例">五、综合实践案例</span></h3><h4><span id="案例1创建配置文件">案例1：创建配置文件</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;SERVER_IP=192.168.1.1&quot; &gt; config.env</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;PORT=8080&quot; &gt;&gt; config.env</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat config.env</span><br><span class="line">SERVER_IP=192.168.1.1</span><br><span class="line">PORT=8080</span><br></pre></td></tr></table></figure>
+<h3><span id="五-综合实践案例">五、综合实践案例</span></h3><h4><span id="案例1创建配置文件">案例1：创建配置文件</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"SERVER_IP=192.168.1.1"</span> <span class="token operator">></span> config.env
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"PORT=8080"</span> <span class="token operator">>></span> config.env
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> config.env
+<span class="token assign-left variable">SERVER_IP</span><span class="token operator">=</span><span class="token number">192.168</span>.1.1
+<span class="token assign-left variable">PORT</span><span class="token operator">=</span><span class="token number">8080</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="案例2日志收集">案例2：日志收集</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;$(date): 系统启动&quot; &gt;&gt; system.log</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat system.log</span><br><span class="line">Wed Jun 15 10:00:00 CST 2023: 系统启动</span><br></pre></td></tr></table></figure>
+<h4><span id="案例2日志收集">案例2：日志收集</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">date</span><span class="token variable">)</span></span>: 系统启动"</span> <span class="token operator">>></span> system.log
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> system.log
+Wed Jun <span class="token number">15</span> <span class="token number">10</span>:00:00 CST <span class="token number">2023</span>: 系统启动<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="案例3错误处理">案例3：错误处理</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat maybe_exist.txt &gt; output.log 2&gt; error.log</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ echo &quot;命令退出状态: $?&quot; &gt;&gt; error.log</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤ cat error.log</span><br><span class="line">cat: maybe_exist.txt: No such file or directory</span><br><span class="line">命令退出状态: 1</span><br></pre></td></tr></table></figure>
+<h4><span id="案例3错误处理">案例3：错误处理</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> maybe_exist.txt <span class="token operator">></span> output.log <span class="token operator"><span class="token file-descriptor important">2</span>></span> error.log
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token builtin class-name">echo</span> <span class="token string">"命令退出状态: <span class="token variable">$?</span>"</span> <span class="token operator">>></span> error.log
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤ <span class="token function">cat</span> error.log
+cat: maybe_exist.txt: No such <span class="token function">file</span> or directory
+命令退出状态: <span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="more">more</span></h2><p><code>more</code> 是 Linux&#x2F;Unix 系统中一个经典的分页查看工具，用于逐屏查看长文本文件内容。它是早期分页工具，后来被功能更强大的 <code>less</code> 命令部分取代，但在许多场景中仍然实用。</p>
 <hr>
-<h3><span id="一-基本用法"><strong>一、基本用法</strong></span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">more [选项] 文件名</span><br></pre></td></tr></table></figure>
+<h3><span id="一-基本用法"><strong>一、基本用法</strong></span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">more</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> 文件名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h3><span id="二-核心功能特点"><strong>二、核心功能特点</strong></span></h3><ol>
@@ -509,13 +569,13 @@ Linux 重定向详解（结合 echo 和 cat 实践）
 </tr>
 </tbody></table>
 <hr>
-<h3><span id="五-实用技巧示例"><strong>五、实用技巧示例</strong></span></h3><h4><span id="1-从特定行开始查看">1. 从特定行开始查看</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">more +100 /var/log/nginx/access.log  # 从第100行开始显示</span><br></pre></td></tr></table></figure>
+<h3><span id="五-实用技巧示例"><strong>五、实用技巧示例</strong></span></h3><h4><span id="1-从特定行开始查看">1. 从特定行开始查看</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">more</span> +100 /var/log/nginx/access.log  <span class="token comment"># 从第100行开始显示</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="2-配合管道使用">2. 配合管道使用</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep &quot;ERROR&quot; system.log | more      # 过滤错误日志后分页查看</span><br></pre></td></tr></table></figure>
+<h4><span id="2-配合管道使用">2. 配合管道使用</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">grep</span> <span class="token string">"ERROR"</span> system.log <span class="token operator">|</span> <span class="token function">more</span>      <span class="token comment"># 过滤错误日志后分页查看</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="3-查看多个文件">3. 查看多个文件</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">more file1.txt file2.txt           # 按 `:n` 切换到下一个文件</span><br></pre></td></tr></table></figure>
+<h4><span id="3-查看多个文件">3. 查看多个文件</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">more</span> file1.txt file2.txt           <span class="token comment"># 按 `:n` 切换到下一个文件</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="4-快速跳转较新版本支持">4. 快速跳转（较新版本支持）</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">more +/error system.log           # 搜索&quot;error&quot;并跳转到第一个匹配处</span><br></pre></td></tr></table></figure>
+<h4><span id="4-快速跳转较新版本支持">4. 快速跳转（较新版本支持）</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">more</span> +/error system.log           <span class="token comment"># 搜索"error"并跳转到第一个匹配处</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>下面要重点介绍的是 less 命令：</p>
 <h2><span id="linux-less-命令讲解">Linux <code>less</code> 命令讲解</span></h2><p><code>less</code> 是 Linux&#x2F;Unix 系统中功能最强大的分页查看工具，相比 <code>more</code> 具有更丰富的功能和更高的效率，是系统管理员和开发者的必备工具。</p>
@@ -528,7 +588,7 @@ Linux 重定向详解（结合 echo 和 cat 实践）
 <li><strong>自定义界面</strong>：可调整显示方式和快捷键</li>
 </ol>
 <hr>
-<h3><span id="二-基本用法"><strong>二、基本用法</strong></span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less [选项] 文件名</span><br></pre></td></tr></table></figure>
+<h3><span id="二-基本用法"><strong>二、基本用法</strong></span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">less</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> 文件名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="常用启动选项">常用启动选项：</span></h4><table>
 <thead>
@@ -648,42 +708,104 @@ Linux 重定向详解（结合 echo 和 cat 实践）
 <td>只显示匹配行</td>
 </tr>
 </tbody></table>
-<h4><span id="2-正则搜索">2. 正则搜索：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/[0-9]&#123;3&#125;-[0-9]&#123;4&#125;  # 搜索电话号码模式</span><br></pre></td></tr></table></figure>
+<h4><span id="2-正则搜索">2. 正则搜索：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">/<span class="token punctuation">[</span><span class="token number">0</span>-9<span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token number">3</span><span class="token punctuation">&#125;</span>-<span class="token punctuation">[</span><span class="token number">0</span>-9<span class="token punctuation">]</span><span class="token punctuation">&#123;</span><span class="token number">4</span><span class="token punctuation">&#125;</span>  <span class="token comment"># 搜索电话号码模式</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="3-搜索高亮">3. 搜索高亮：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less -p &quot;error&quot; log.txt  # 启动时直接搜索并高亮&quot;error&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="3-搜索高亮">3. 搜索高亮：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">less</span> <span class="token parameter variable">-p</span> <span class="token string">"error"</span> log.txt  <span class="token comment"># 启动时直接搜索并高亮"error"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h3><span id="五-实用功能技巧"><strong>五、实用功能技巧</strong></span></h3><p>下面这些并不需要你记住，包括上面的一些用法，在需要的时候学会查询文档就可以了，常用的选项其实就那么几个</p>
-<h4><span id="1-多文件操作">1. 多文件操作：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less file1.txt file2.txt</span><br></pre></td></tr></table></figure>
+<h4><span id="1-多文件操作">1. 多文件操作：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">less</span> file1.txt file2.txt<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <ul>
 <li><code>:n</code> 下一个文件</li>
 <li><code>:p</code> 上一个文件</li>
 <li><code>:e</code> 打开新文件</li>
 </ul>
-<h4><span id="2-实时监控替代-tail-f">2. 实时监控（替代 <code>tail -f</code>）：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less +F /var/log/syslog</span><br></pre></td></tr></table></figure>
+<h4><span id="2-实时监控替代-tail-f">2. 实时监控（替代 <code>tail -f</code>）：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">less</span> +F /var/log/syslog<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 <ul>
 <li><code>Ctrl+C</code> 退出跟踪模式</li>
 <li><code>F</code> 重新进入跟踪模式</li>
 </ul>
-<h4><span id="3-编辑当前文件">3. 编辑当前文件：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">v  # 用默认编辑器打开当前文件</span><br></pre></td></tr></table></figure>
+<h4><span id="3-编辑当前文件">3. 编辑当前文件：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">v</span>  <span class="token comment"># 用默认编辑器打开当前文件</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="4-标记位置">4. 标记位置：</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ma  # 标记当前位置为a</span><br><span class="line">&#x27;a  # 跳转到标记a</span><br></pre></td></tr></table></figure>
+<h4><span id="4-标记位置">4. 标记位置：</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ma  <span class="token comment"># 标记当前位置为a</span>
+'a  <span class="token comment"># 跳转到标记a</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h2><span id="head-以及-tail-指令">head 以及 tail 指令</span></h2><p>这两个指令一个是用来指定看文件的前多少行，另一个则用来查看问价你的最后多少行，我直接给你们一个示例你们自然就懂了：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  head -10 test.txt                                                                                              1 ↵</span><br><span class="line">hello linux 1</span><br><span class="line">hello linux 2</span><br><span class="line">hello linux 3</span><br><span class="line">hello linux 4</span><br><span class="line">hello linux 5</span><br><span class="line">hello linux 6</span><br><span class="line">hello linux 7</span><br><span class="line">hello linux 8</span><br><span class="line">hello linux 9</span><br><span class="line">hello linux 10</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  tail -10 test.txt</span><br><span class="line">hello linux 9991</span><br><span class="line">hello linux 9992</span><br><span class="line">hello linux 9993</span><br><span class="line">hello linux 9994</span><br><span class="line">hello linux 9995</span><br><span class="line">hello linux 9996</span><br><span class="line">hello linux 9997</span><br><span class="line">hello linux 9998</span><br><span class="line">hello linux 9999</span><br><span class="line">hello linux 10000</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">head</span> <span class="token parameter variable">-10</span> test.txt                                                                                              <span class="token number">1</span> ↵
+hello linux <span class="token number">1</span>
+hello linux <span class="token number">2</span>
+hello linux <span class="token number">3</span>
+hello linux <span class="token number">4</span>
+hello linux <span class="token number">5</span>
+hello linux <span class="token number">6</span>
+hello linux <span class="token number">7</span>
+hello linux <span class="token number">8</span>
+hello linux <span class="token number">9</span>
+hello linux <span class="token number">10</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">tail</span> <span class="token parameter variable">-10</span> test.txt
+hello linux <span class="token number">9991</span>
+hello linux <span class="token number">9992</span>
+hello linux <span class="token number">9993</span>
+hello linux <span class="token number">9994</span>
+hello linux <span class="token number">9995</span>
+hello linux <span class="token number">9996</span>
+hello linux <span class="token number">9997</span>
+hello linux <span class="token number">9998</span>
+hello linux <span class="token number">9999</span>
+hello linux <span class="token number">10000</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>会用了吧，接下来咱进阶一下，假如说我想要读取某个文件从第1300行开始的10行数据怎么办？</p>
 <p>你肯定会和我一样立刻产生一个想法，那我先通过 head 读取前1310行数据，再读取这1310行数据的最后10行不就可以了吗？</p>
 <p>没错，为了达成这个目的，我们就要讲到一个叫做管道的东西了：</p>
 <p>这里我们不需要理解太深刻，先把这个例子的实现搬出来：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  head -1310 test.txt | tail -10</span><br><span class="line">hello linux 1301</span><br><span class="line">hello linux 1302</span><br><span class="line">hello linux 1303</span><br><span class="line">hello linux 1304</span><br><span class="line">hello linux 1305</span><br><span class="line">hello linux 1306</span><br><span class="line">hello linux 1307</span><br><span class="line">hello linux 1308</span><br><span class="line">hello linux 1309</span><br><span class="line">hello linux 1310</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">head</span> <span class="token parameter variable">-1310</span> test.txt <span class="token operator">|</span> <span class="token function">tail</span> <span class="token parameter variable">-10</span>
+hello linux <span class="token number">1301</span>
+hello linux <span class="token number">1302</span>
+hello linux <span class="token number">1303</span>
+hello linux <span class="token number">1304</span>
+hello linux <span class="token number">1305</span>
+hello linux <span class="token number">1306</span>
+hello linux <span class="token number">1307</span>
+hello linux <span class="token number">1308</span>
+hello linux <span class="token number">1309</span>
+hello linux <span class="token number">1310</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，我们先读取文件的钱1310行，然后有一个 | 符号，这个符号就是管道，它的作用是，将管道左边的输出流（文件的前1310行数据）作为右边数据访问的输入流，这样<br>tail 所操作的数据就是文件的钱1310行了。</p>
 <h2><span id="find">find</span></h2><p>改命令用于查找文件名所在目录，这个命令的选项很多，但我们常用的就一个 -name 选项</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从 /home/ljx 中查找所有叫 test.txt 文件的所在路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  find /home/ljx -name test.txt                                                                                130 ↵</span><br><span class="line">/home/ljx/linux_review/lesson1/dir1/test.txt</span><br><span class="line">/home/ljx/linux_review/lesson1/test.txt</span><br><span class="line">/home/ljx/linux_lesson/lesson11/test.txt</span><br><span class="line">/home/ljx/cpp_code/Logging-System/build/Draft/logfile/test.txt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 从 /home/ljx 中查找所有叫 test.txt 文件的所在路径</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">find</span> /home/ljx <span class="token parameter variable">-name</span> test.txt                                                                                <span class="token number">130</span> ↵
+/home/ljx/linux_review/lesson1/dir1/test.txt
+/home/ljx/linux_review/lesson1/test.txt
+/home/ljx/linux_lesson/lesson11/test.txt
+/home/ljx/cpp_code/Logging-System/build/Draft/logfile/test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="grep">grep</span></h2><p>这个命令是用来查询文件中包含指定内容的数据，示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询 test.txt 中包含 999 的 行</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  grep 999 test.txt                                                                                              2 ↵</span><br><span class="line">hello linux 999</span><br><span class="line">hello linux 1999</span><br><span class="line">hello linux 2999</span><br><span class="line">hello linux 3999</span><br><span class="line">hello linux 4999</span><br><span class="line">hello linux 5999</span><br><span class="line">hello linux 6999</span><br><span class="line">hello linux 7999</span><br><span class="line">hello linux 8999</span><br><span class="line">hello linux 9990</span><br><span class="line">hello linux 9991</span><br><span class="line">hello linux 9992</span><br><span class="line">hello linux 9993</span><br><span class="line">hello linux 9994</span><br><span class="line">hello linux 9995</span><br><span class="line">hello linux 9996</span><br><span class="line">hello linux 9997</span><br><span class="line">hello linux 9998</span><br><span class="line">hello linux 9999</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询 test.txt 中包含 999 的 行</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">grep</span> <span class="token number">999</span> test.txt                                                                                              <span class="token number">2</span> ↵
+hello linux <span class="token number">999</span>
+hello linux <span class="token number">1999</span>
+hello linux <span class="token number">2999</span>
+hello linux <span class="token number">3999</span>
+hello linux <span class="token number">4999</span>
+hello linux <span class="token number">5999</span>
+hello linux <span class="token number">6999</span>
+hello linux <span class="token number">7999</span>
+hello linux <span class="token number">8999</span>
+hello linux <span class="token number">9990</span>
+hello linux <span class="token number">9991</span>
+hello linux <span class="token number">9992</span>
+hello linux <span class="token number">9993</span>
+hello linux <span class="token number">9994</span>
+hello linux <span class="token number">9995</span>
+hello linux <span class="token number">9996</span>
+hello linux <span class="token number">9997</span>
+hello linux <span class="token number">9998</span>
+hello linux <span class="token number">9999</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>grep 命令还有很多作用，这里先只介绍这一种，具体的后面用到时会详细介绍</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

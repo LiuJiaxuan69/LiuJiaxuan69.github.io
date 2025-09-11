@@ -25,7 +25,7 @@
 
 
 首先来看一段代码：
-123456789101112131415161,"> 
+#include &amp;lt;iostream&amp;gt,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -51,7 +51,7 @@
 
 
 首先来看一段代码：
-123456789101112131415161,"/>
+#include &amp;lt;iostream&amp;gt,"/>
     
     
     
@@ -74,7 +74,7 @@
 
 
 首先来看一段代码：
-123456789101112131415161,"/>
+#include &amp;lt;iostream&amp;gt,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -83,6 +83,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -246,7 +248,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -255,7 +257,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li></ul>
+            <ul><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -300,13 +302,50 @@
 <!-- tocstop -->
 
 <p>首先来看一段代码：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str1 = <span class="string">&quot;fwrite: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str2 = <span class="string">&quot;write: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="comment">// C/C++提供的文件接口</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(stdout, <span class="string">&quot;fprintf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fwrite</span>(str1, <span class="built_in">strlen</span>(str1), <span class="number">1</span>, stdout);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;cout: hello, linux!\n&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Linux 系统接口</span></span><br><span class="line">    <span class="built_in">write</span>(<span class="number">1</span>, str2, <span class="built_in">strlen</span>(str2));</span><br><span class="line">    fork();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;unistd.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    const char *str1 &#x3D; &quot;fwrite: hello, linux!\n&quot;;
+    const char *str2 &#x3D; &quot;write: hello, linux!\n&quot;;
+    &#x2F;&#x2F; C&#x2F;C++提供的文件接口
+    printf(&quot;printf: hello, linux!\n&quot;);
+    fprintf(stdout, &quot;fprintf: hello, linux!\n&quot;);
+    fwrite(str1, strlen(str1), 1, stdout);
+    cout &lt;&lt; &quot;cout: hello, linux!\n&quot;;
+
+    &#x2F;&#x2F; Linux 系统接口
+    write(1, str2, strlen(str2));
+    fork();
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>当我们直接输出的时候结果是这样的：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">write: hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span>
+write: hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>但当我们将输出重定向到文件中去是这样的：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat log.txt</span><br><span class="line">write: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o <span class="token operator">></span> log.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> log.txt
+write: hello, linux<span class="token operator">!</span>
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span>
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们会发现，有些数据不仅输出了两遍，而且 write 函数明明是后面才打印的，现在却变成了最先开始被打印出来</p>
 <p>如果你不是很清楚原因的话，这篇文章将会对你有帮助</p>
@@ -342,16 +381,44 @@
 </ol>
 <p>除此之外，当缓冲区满了，或执行 flush 语句，或进程结束的时候，C语言都会将缓冲区的内容利用 write 接口写入内存</p>
 <p>因此，如果我们不加换行符将数据输出到标准输出，而我们在进程退出前将标准输出文件关闭，就会导致数据无法被打印到显示屏上：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!&quot;</span>);</span><br><span class="line">    <span class="built_in">close</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;unistd.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    printf(&quot;printf: hello, linux!&quot;);
+    close(1);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>而如果我们让数据打印时换行，但是将标准输出重定向到普通磁盘文件，就会发现结果无法被打印到文件当中，因为当我们选择输出到文件的时候，缓冲区刷新策略就是全缓冲区策略，<br>这意味着只有在缓冲区被写满或进程结束的时候数据才会被写入，而我们在保证数据足够短的条件下让重定向被关闭，就会发现数据无法被打印到文件当中</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 仅仅多了个换行</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">close</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;unistd.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 仅仅多了个换行
+    printf(&quot;printf: hello, linux!\n&quot;);
+    close(1);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>直接打印会因为行刷新策略使得数据被打印到显示屏上：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o
+printf: hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>将输出重定向到普通文件后，因为刷新策略为全缓冲，导致文件里没有被写入任何数据：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o <span class="token operator">></span> test.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="再看开头代码">再看开头代码</span></h2><p>开头的代码为什么会出现这种现象呢？</p>
 <p>情景再现：</p>
@@ -360,13 +427,50 @@
         
     </div>
     <div class="spoiler-content">
-        <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str1 = <span class="string">&quot;fwrite: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *str2 = <span class="string">&quot;write: hello, linux!\n&quot;</span>;</span><br><span class="line">    <span class="comment">// C/C++提供的文件接口</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;printf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fprintf</span>(stdout, <span class="string">&quot;fprintf: hello, linux!\n&quot;</span>);</span><br><span class="line">    <span class="built_in">fwrite</span>(str1, <span class="built_in">strlen</span>(str1), <span class="number">1</span>, stdout);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;cout: hello, linux!\n&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Linux 系统接口</span></span><br><span class="line">    <span class="built_in">write</span>(<span class="number">1</span>, str2, <span class="built_in">strlen</span>(str2));</span><br><span class="line">    fork();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        <pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+#include &lt;unistd.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    const char *str1 &#x3D; &quot;fwrite: hello, linux!\n&quot;;
+    const char *str2 &#x3D; &quot;write: hello, linux!\n&quot;;
+    &#x2F;&#x2F; C&#x2F;C++提供的文件接口
+    printf(&quot;printf: hello, linux!\n&quot;);
+    fprintf(stdout, &quot;fprintf: hello, linux!\n&quot;);
+    fwrite(str1, strlen(str1), 1, stdout);
+    cout &lt;&lt; &quot;cout: hello, linux!\n&quot;;
+
+    &#x2F;&#x2F; Linux 系统接口
+    write(1, str2, strlen(str2));
+    fork();
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>当我们直接输出的时候结果是这样的：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">write: hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span>
+write: hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>但当我们将输出重定向到文件中去是这样的：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_buf.o &gt; log.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat log.txt</span><br><span class="line">write: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br><span class="line">printf: hello, linux!</span><br><span class="line">fprintf: hello, linux!</span><br><span class="line">fwrite: hello, linux!</span><br><span class="line">cout: hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_buf.o <span class="token operator">></span> log.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> log.txt
+write: hello, linux<span class="token operator">!</span>
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span>
+printf: hello, linux<span class="token operator">!</span>
+fprintf: hello, linux<span class="token operator">!</span>
+fwrite: hello, linux<span class="token operator">!</span>
+cout: hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 </div>

@@ -26,7 +26,7 @@ dup2
 
 
 先来看一段代码：
-123456789101,"> 
+#include &amp;lt,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -53,7 +53,7 @@ dup2
 
 
 先来看一段代码：
-123456789101,"/>
+#include &amp;lt,"/>
     
     
     
@@ -77,7 +77,7 @@ dup2
 
 
 先来看一段代码：
-123456789101,"/>
+#include &amp;lt,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -86,6 +86,8 @@ dup2
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -249,7 +251,7 @@ dup2
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -258,7 +260,7 @@ dup2
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li></ul>
+            <ul><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -304,14 +306,31 @@ dup2
 <!-- tocstop -->
 
 <p>先来看一段代码：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">close</span>(<span class="number">1</span>);</span><br><span class="line">    <span class="type">int</span> fd = <span class="built_in">open</span>(<span class="string">&quot;test.txt&quot;</span>, O_WRONLY | O_CREAT, <span class="number">0666</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;hello, linux!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">close</span>(fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+
+using namespace std;
+
+int main()
+&#123;
+    close(1);
+    int fd &#x3D; open(&quot;test.txt&quot;, O_WRONLY | O_CREAT, 0666);
+    cout &lt;&lt; &quot;hello, linux!&quot; &lt;&lt; endl;
+    close(fd);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这段代码将“标准输出文件”关闭了，我们再通过 cout 打印数据的时候，会发现数据被打印到了 test.txt 文件当中：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">hello, linux!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>这是因为标准输出文件被关闭后，文件描述符 1 变成空闲的，那么 test.txt 文件就会使用 1 号文件描述符，最终就导致 cout 函数打印的数据被 test.txt 文件接收到，而<br>这正是文件重定向的原理</p>
 <p>我们通过这种方式确实实现了重定向，但若每次通过这种方式来进行文件的重定向，未免太过麻烦，而且可读性极差，此时，我们就可以用到系统提供的一个重定向接口：</p>
-<h2><span id="dup2">dup2</span></h2><h3><span id="1-dup2-函数原型">1. <code>dup2</code> 函数原型</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dup2</span><span class="params">(<span class="type">int</span> oldfd, <span class="type">int</span> newfd)</span>;</span><br></pre></td></tr></table></figure>
+<h2><span id="dup2">dup2</span></h2><h3><span id="1-dup2-函数原型">1. <code>dup2</code> 函数原型</span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">dup2</span><span class="token punctuation">(</span><span class="token keyword">int</span> oldfd<span class="token punctuation">,</span> <span class="token keyword">int</span> newfd<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="参数说明">参数说明</span></h4><table>
 <thead>
@@ -354,7 +373,27 @@ dup2
 <li><strong><code>oldfd</code> 无效</strong>：返回 <code>-1</code>（<code>errno = EBADF</code>）。</li>
 </ul>
 <hr>
-<h3><span id="4-典型应用场景">4. 典型应用场景</span></h3><h4><span id="1-重定向标准输出到文件">(1) 重定向标准输出到文件</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;output.txt&quot;</span>, O_WRONLY | O_CREAT | O_TRUNC, <span class="number">0644</span>);</span><br><span class="line">    <span class="keyword">if</span> (fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将标准输出（fd=1）重定向到文件</span></span><br><span class="line">    <span class="keyword">if</span> (dup2(fd, STDOUT_FILENO) == <span class="number">-1</span>) &#123;  <span class="comment">// STDOUT_FILENO = 1</span></span><br><span class="line">        perror(<span class="string">&quot;dup2 failed&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    close(fd);  <span class="comment">// 关闭原始 fd（因为 1 已经指向文件）</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;This will be written to output.txt\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="4-典型应用场景">4. 典型应用场景</span></h3><h4><span id="1-重定向标准输出到文件">(1) 重定向标准输出到文件</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;fcntl.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> fd <span class="token operator">=</span> <span class="token function">open</span><span class="token punctuation">(</span><span class="token string">"output.txt"</span><span class="token punctuation">,</span> O_WRONLY <span class="token operator">|</span> O_CREAT <span class="token operator">|</span> O_TRUNC<span class="token punctuation">,</span> <span class="token number">0644</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>fd <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token function">perror</span><span class="token punctuation">(</span><span class="token string">"open failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 将标准输出（fd=1）重定向到文件</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">dup2</span><span class="token punctuation">(</span>fd<span class="token punctuation">,</span> STDOUT_FILENO<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// STDOUT_FILENO = 1</span>
+        <span class="token function">perror</span><span class="token punctuation">(</span><span class="token string">"dup2 failed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token function">close</span><span class="token punctuation">(</span>fd<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 关闭原始 fd（因为 1 已经指向文件）</span>
+
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"This will be written to output.txt\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>运行后</strong>：<code>printf</code> 的内容会写入 <code>output.txt</code>，而非屏幕。</p>
 <hr>
@@ -364,7 +403,25 @@ dup2
         
     </div>
     <div class="spoiler-content">
-        <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line">    pipe(pipefd);  <span class="comment">// 创建管道</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (fork() == <span class="number">0</span>) &#123;  <span class="comment">// 子进程</span></span><br><span class="line">        close(pipefd[<span class="number">0</span>]);  <span class="comment">// 关闭读端</span></span><br><span class="line">        dup2(pipefd[<span class="number">1</span>], STDOUT_FILENO);  <span class="comment">// 将标准输出重定向到管道写端</span></span><br><span class="line">        close(pipefd[<span class="number">1</span>]);</span><br><span class="line">        execlp(<span class="string">&quot;ls&quot;</span>, <span class="string">&quot;ls&quot;</span>, <span class="string">&quot;-l&quot;</span>, <span class="literal">NULL</span>);  <span class="comment">// 执行 ls -l</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;  <span class="comment">// 父进程</span></span><br><span class="line">        close(pipefd[<span class="number">1</span>]);  <span class="comment">// 关闭写端</span></span><br><span class="line">        dup2(pipefd[<span class="number">0</span>], STDIN_FILENO);   <span class="comment">// 将标准输入重定向到管道读端</span></span><br><span class="line">        close(pipefd[<span class="number">0</span>]);</span><br><span class="line">        execlp(<span class="string">&quot;grep&quot;</span>, <span class="string">&quot;grep&quot;</span>, <span class="string">&quot;test&quot;</span>, <span class="literal">NULL</span>);  <span class="comment">// 执行 grep test</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+        <pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> pipefd<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token function">pipe</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 创建管道</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">fork</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 子进程</span>
+        <span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 关闭读端</span>
+        <span class="token function">dup2</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> STDOUT_FILENO<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 将标准输出重定向到管道写端</span>
+        <span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">execlp</span><span class="token punctuation">(</span><span class="token string">"ls"</span><span class="token punctuation">,</span> <span class="token string">"ls"</span><span class="token punctuation">,</span> <span class="token string">"-l"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 执行 ls -l</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 父进程</span>
+        <span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 关闭写端</span>
+        <span class="token function">dup2</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> STDIN_FILENO<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// 将标准输入重定向到管道读端</span>
+        <span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">execlp</span><span class="token punctuation">(</span><span class="token string">"grep"</span><span class="token punctuation">,</span> <span class="token string">"grep"</span><span class="token punctuation">,</span> <span class="token string">"test"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 执行 grep test</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>功能：将 <code>ls -l</code> 的输出通过管道传递给 <code>grep test</code>。</p>
 
@@ -375,32 +432,130 @@ dup2
 <p><img src="/img/Linux/file_dup/dup2.png" alt="dup2"></p>
 <p>该函数会将旧文件描述符内部存储的 file 指针覆盖拷贝到新文件描述符处，因此，一般我们在重定向后会把旧的文件描述符给关闭</p>
 <p>下面是一个综合使用实例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> fd = <span class="built_in">open</span>(<span class="string">&quot;test.txt&quot;</span>, O_WRONLY | O_CREAT | O_APPEND, <span class="number">0666</span>);</span><br><span class="line">    <span class="built_in">dup2</span>(fd, <span class="number">1</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;hello, linux!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cerr &lt;&lt; <span class="string">&quot;error information!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">close</span>(fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+
+using namespace std;
+
+int main()
+&#123;
+    int fd &#x3D; open(&quot;test.txt&quot;, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    dup2(fd, 1);
+    cout &lt;&lt; &quot;hello, linux!&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;error information!&quot; &lt;&lt; endl;
+    close(fd);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这是一个将标准输出重定向的例子，而标准错误我们并没有重定向，因此我们会看到标准错误打印的信息出现在显示屏上：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./file_dump.o</span><br><span class="line">error information!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./file_dump.o
+error information<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// test.txt</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">&#x2F;&#x2F; test.txt
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们将标准错误也重定向：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> fd = <span class="built_in">open</span>(<span class="string">&quot;test.txt&quot;</span>, O_WRONLY | O_CREAT | O_APPEND, <span class="number">0666</span>);</span><br><span class="line">    <span class="built_in">dup2</span>(fd, <span class="number">1</span>);</span><br><span class="line">    <span class="built_in">dup2</span>(fd, <span class="number">2</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;hello, linux!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    cerr &lt;&lt; <span class="string">&quot;error information!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">close</span>(fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;unistd.h&gt;
+
+using namespace std;
+
+int main()
+&#123;
+    int fd &#x3D; open(&quot;test.txt&quot;, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    dup2(fd, 1);
+    dup2(fd, 2);
+    cout &lt;&lt; &quot;hello, linux!&quot; &lt;&lt; endl;
+    cerr &lt;&lt; &quot;error information!&quot; &lt;&lt; endl;
+    close(fd);
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>然后我们会发现标准错误也被重定向到文件中去了：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">hello, linux!</span><br><span class="line">error information!</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+hello, linux!
+error information!
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="再看shell重定向符号使用">再看shell重定向符号使用</span></h2><p>shell 中的 “&gt;” 和“&gt;&gt;”符号可以进行输出重定向，本质上其实就是使用系统底层的 dup2 函数来实现的，当我们使用 2&gt; 时，会将标准错误重定向到指定文件当中去</p>
 <p>我们写一个示例测试一下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">5</span>;</span><br><span class="line">    <span class="keyword">while</span>(cnt--)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;This is a current information!&quot;</span> &lt;&lt; endl;</span><br><span class="line">        cerr &lt;&lt; <span class="string">&quot;This is a error information!&quot;</span> &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+&#123;
+    int cnt &#x3D; 5;
+    while(cnt--)
+    &#123;
+        cout &lt;&lt; &quot;This is a current information!&quot; &lt;&lt; endl;
+        cerr &lt;&lt; &quot;This is a error information!&quot; &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>只重定向标准输出：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./test.o 1&gt; test.txt</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./test.o <span class="token operator"><span class="token file-descriptor important">1</span>></span> test.txt
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们会发现标准错误被打印到屏幕上，而标准输出被重定向到了 test.txt 当中</p>
 <p>只重定向标准错误：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./test.o 2&gt; test.txt</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a current information!</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./test.o <span class="token operator"><span class="token file-descriptor important">2</span>></span> test.txt
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>那我如果想要让标准输出和标准错误都重定向到 test.txt 中该怎么办，有些小天才可能就要动他的小脑筋了（没错正是本人），这样不就行了吗：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./test.o 1&gt; test.txt 2&gt; test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a error information!</span><br><span class="line">ormation!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./test.o <span class="token operator"><span class="token file-descriptor important">1</span>></span> test.txt <span class="token operator"><span class="token file-descriptor important">2</span>></span> test.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+ormation<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>你看这结果对劲吗？</p>
 <p>当我们运行命令 <code>./test.o 1&gt; test.txt 2&gt; test.txt</code> 时，<strong>标准输出（stdout）和标准错误（stderr）都会被重定向到同一个文件 <code>test.txt</code></strong>，但这里存在一个潜在问题：<strong>竞争条件</strong>。</p>
@@ -428,10 +583,23 @@ dup2
 </ol>
 <hr>
 <p>如果我们想将 <strong>stdout 和 stderr 合并写入同一个文件</strong>，应该使用以下方式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./test.o &gt; test.txt 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">./test.o <span class="token operator">></span> test.txt <span class="token operator"><span class="token file-descriptor important">2</span>></span><span class="token file-descriptor important">&amp;1</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>这样会把标准错误重定向搭配标准输出，从而避免了乱流问题：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  ./test.o 1&gt; test.txt 2&gt;&amp;1</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson4</span><br><span class="line">╰─➤  cat test.txt</span><br><span class="line">This is a current information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a error information!</span><br><span class="line">This is a current information!</span><br><span class="line">This is a error information!</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  ./test.o <span class="token operator"><span class="token file-descriptor important">1</span>></span> test.txt <span class="token operator"><span class="token file-descriptor important">2</span>></span><span class="token file-descriptor important">&amp;1</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson4
+╰─➤  <span class="token function">cat</span> test.txt
+This is a current information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span>
+This is a current information<span class="token operator">!</span>
+This is a error information<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

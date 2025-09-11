@@ -80,6 +80,8 @@ cgroup
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -243,7 +245,7 @@ cgroup
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -252,7 +254,7 @@ cgroup
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li></ul>
+            <ul><li><a href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -310,7 +312,7 @@ cgroup
 <p>它的核心功能是<strong>按块</strong>从输入文件（<code>if</code>）读取数据，进行可能的转换，然后写入输出文件（<code>of</code>）。由于其底层操作的特性和灵活性，它成为了系统管理员、开发者和高级用户进行各种低级磁盘操作的瑞士军刀。</p>
 <hr>
 <h4><span id="命令语法">命令语法</span></h4><p>基本语法非常简单：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=&lt;输入文件&gt; of=&lt;输出文件&gt; [选项]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span><span class="token operator">&lt;</span>输入文件<span class="token operator">></span> <span class="token assign-left variable">of</span><span class="token operator">=</span><span class="token operator">&lt;</span>输出文件<span class="token operator">></span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>if=</code>： input file，输入文件。默认为标准输入（stdin）。</li>
@@ -365,7 +367,8 @@ cgroup
     <div class="spoiler-content">
         <p><code>status=progress</code> 的作用就像一个<strong>实时仪表盘</strong>，它的核心价值是<strong>提供反馈</strong>。</p>
 <p>当你运行一个需要很长时间的 <code>dd</code> 命令时（比如复制整个硬盘），终端会<strong>看起来完全卡住</strong>，没有任何输出，只有一个闪烁的光标。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda of=/dev/sdb bs=4M</span><br><span class="line"><span class="comment"># 按下回车后... 一片寂静，可能持续几十分钟甚至几个小时</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdb <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M
+<span class="token comment"># 按下回车后... 一片寂静，可能持续几十分钟甚至几个小时</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>用户的感受：</strong></p>
 <ul>
@@ -376,21 +379,21 @@ cgroup
 </ul>
 <p>这种不确定性非常令人焦虑，尤其是在处理重要数据时。</p>
 <p>加上这个选项后，<code>dd</code> 会定期（通常是每秒）向标准错误输出（stderr）打印一行进度信息。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda of=/dev/sdb bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdb <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出示例：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">987425382 bytes (987 MB, 942 MiB) copied, 15 s, 65.8 MB/s</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">987425382</span> bytes <span class="token punctuation">(</span><span class="token number">987</span> MB, <span class="token number">942</span> MiB<span class="token punctuation">)</span> copied, <span class="token number">15</span> s, <span class="token number">65.8</span> MB/s<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>或者更现代的格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">467854336 bytes (468 MB, 446 MiB, 112384 sectors) copied, 9.12321 s, 51.3 MB/s</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">467854336</span> bytes <span class="token punctuation">(</span><span class="token number">468</span> MB, <span class="token number">446</span> MiB, <span class="token number">112384</span> sectors<span class="token punctuation">)</span> copied, <span class="token number">9.12321</span> s, <span class="token number">51.3</span> MB/s<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>再或者（使用 <code>oflag=direct</code> 等时）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2838312960 bytes (2.8 GB, 2.6 GiB) copied, 12.4323 s, 228 MB/s</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">2838312960</span> bytes <span class="token punctuation">(</span><span class="token number">2.8</span> GB, <span class="token number">2.6</span> GiB<span class="token punctuation">)</span> copied, <span class="token number">12.4323</span> s, <span class="token number">228</span> MB/s<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">467854336 bytes (468 MB, 446 MiB, 112384 sectors) copied, 9.12321 s, 51.3 MB/s</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">467854336</span> bytes <span class="token punctuation">(</span><span class="token number">468</span> MB, <span class="token number">446</span> MiB, <span class="token number">112384</span> sectors<span class="token punctuation">)</span> copied, <span class="token number">9.12321</span> s, <span class="token number">51.3</span> MB/s<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>再或者（使用 <code>oflag=direct</code> 等时）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2838312960 bytes (2.8 GB, 2.6 GiB) copied, 12.4323 s, 228 MB/s</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">2838312960</span> bytes <span class="token punctuation">(</span><span class="token number">2.8</span> GB, <span class="token number">2.6</span> GiB<span class="token punctuation">)</span> copied, <span class="token number">12.4323</span> s, <span class="token number">228</span> MB/s<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>这行信息包含了极其有用的情报：</strong></p>
 <ul>
@@ -405,7 +408,7 @@ cgroup
 </div>
 
 <h4><span id="经典实用示例">经典实用示例</span></h4><h5><span id="1-制作启动盘最经典的用途">1. 制作启动盘（最经典的用途）</span></h5><p>将 ISO 镜像文件写入 U 盘 (<code>/dev/sdb</code>)。<strong>警告：操作前务必确认目标设备，否则可能导致数据丢失！</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=ubuntu-22.04.iso of=/dev/sdb bs=4M status=progress oflag=<span class="built_in">sync</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>ubuntu-22.04.iso <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdb <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress <span class="token assign-left variable">oflag</span><span class="token operator">=</span>sync<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>if=ubuntu-22.04.iso</code>: 输入是 ISO 镜像文件。</li>
@@ -415,16 +418,20 @@ cgroup
 <li><code>oflag=sync</code>: 确保每次写入都同步到物理介质，保证数据完整性。</li>
 </ul>
 <h5><span id="2-磁盘x2f分区备份与还原">2. 磁盘&#x2F;分区备份与还原</span></h5><p><strong>备份整个磁盘（例如 <code>/dev/sda</code>）到一个镜像文件：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda of=/path/to/backup.img bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>/path/to/backup.img <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>从镜像文件还原到磁盘：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/path/to/backup.img of=/dev/sda bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/path/to/backup.img <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>注意：</strong> 对于包含大量空块的磁盘（如虚拟机磁盘），使用 <code>gzip</code> 压缩会更高效：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份并压缩</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda bs=4M | gzip &gt; /path/to/backup.img.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 解压并还原</span></span><br><span class="line">gzip -dc /path/to/backup.img.gz | <span class="built_in">sudo</span> <span class="built_in">dd</span> of=/dev/sda bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 备份并压缩</span>
+<span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token operator">|</span> <span class="token function">gzip</span> <span class="token operator">></span> /path/to/backup.img.gz
+
+<span class="token comment"># 解压并还原</span>
+<span class="token function">gzip</span> <span class="token parameter variable">-dc</span> /path/to/backup.img.gz <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="3-测试磁盘读写速度">3. 测试磁盘读写速度</span></h5><p><strong>测试写入速度：</strong><br>创建一个 1GB 的文件，测试写入性能。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=./testfile bs=1G count=1 oflag=direct</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>./testfile <span class="token assign-left variable">bs</span><span class="token operator">=</span>1G <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">oflag</span><span class="token operator">=</span>direct<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>if=/dev/zero</code>: 提供无限的空字符（0x00）。</li>
@@ -433,33 +440,37 @@ cgroup
 <li><code>oflag=direct</code>: 使用直接 I&#x2F;O，绕过系统缓存，得到更真实的磁盘速度。</li>
 </ul>
 <p><strong>测试读取速度：</strong><br>读取刚才创建的文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=./testfile of=/dev/null bs=1G count=1 iflag=direct</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>./testfile <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/null <span class="token assign-left variable">bs</span><span class="token operator">=</span>1G <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span> <span class="token assign-left variable">iflag</span><span class="token operator">=</span>direct<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>of=/dev/null</code>: 相当于一个数据黑洞，丢弃所有写入的数据。</li>
 <li><code>iflag=direct</code>: 使用直接 I&#x2F;O 读取。</li>
 </ul>
 <h5><span id="4-安全擦除磁盘数据">4. 安全擦除磁盘数据</span></h5><p>用随机数据覆盖整个磁盘，使其难以恢复。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/urandom of=/dev/sdX bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/urandom <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdX <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>if=/dev/urandom</code>: 提供高质量的随机数据。</li>
 <li><code>of=/dev/sdX</code>: 目标设备。</li>
 </ul>
 <p>（对于快速擦除，用零覆盖一次通常就足够了）：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=/dev/sdX bs=4M status=progress</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sdX <span class="token assign-left variable">bs</span><span class="token operator">=</span>4M <span class="token assign-left variable">status</span><span class="token operator">=</span>progress<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h5><span id="5-转换文件内容">5. 转换文件内容</span></h5><p><strong>将文件转换为大写：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=input.txt of=output.txt conv=ucase</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>input.txt <span class="token assign-left variable">of</span><span class="token operator">=</span>output.txt <span class="token assign-left variable">conv</span><span class="token operator">=</span>ucase<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>将 EBCDIC 编码的文件转换为 ASCII：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=ebcdic_file.txt of=ascii_file.txt conv=ascii</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>ebcdic_file.txt <span class="token assign-left variable">of</span><span class="token operator">=</span>ascii_file.txt <span class="token assign-left variable">conv</span><span class="token operator">=</span>ascii<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h5><span id="6-仅复制磁盘的-mbr主引导记录">6. 仅复制磁盘的 MBR（主引导记录）</span></h5><p>MBR 通常位于磁盘的第一个扇区（512 字节）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 备份 MBR</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=/dev/sda of=mbr_backup.bak bs=512 count=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 还原 MBR</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">dd</span> <span class="keyword">if</span>=mbr_backup.bak of=/dev/sda bs=512 count=1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 备份 MBR</span>
+<span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">of</span><span class="token operator">=</span>mbr_backup.bak <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">512</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span>
+
+<span class="token comment"># 还原 MBR</span>
+<span class="token function">sudo</span> <span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>mbr_backup.bak <span class="token assign-left variable">of</span><span class="token operator">=</span>/dev/sda <span class="token assign-left variable">bs</span><span class="token operator">=</span><span class="token number">512</span> <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="7-创建特定大小的空文件">7. 创建特定大小的空文件</span></h5><p>快速创建一个充满零的 100MB 文件，用于测试或占位。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=test.file bs=1M count=100</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>test.file <span class="token assign-left variable">bs</span><span class="token operator">=</span>1M <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">100</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <hr>
 <h4><span id="注意事项和警告">注意事项和警告</span></h4><ol>
@@ -473,7 +484,7 @@ cgroup
 <hr>
 <h4><span id="命令格式与工作原理">命令格式与工作原理</span></h4><p><code>mkfs</code> 其实是一个<strong>前端工具</strong>，它本身并不直接完成所有工作，而是会去调用相应的特定文件系统创建工具。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkfs [选项] [-t 文件系统类型] [设备名] [块数]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkfs</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> <span class="token punctuation">[</span>-t 文件系统类型<span class="token punctuation">]</span> <span class="token punctuation">[</span>设备名<span class="token punctuation">]</span> <span class="token punctuation">[</span>块数<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>-t 文件系统类型</code>： 指定要创建的文件系统，如 <code>ext4</code>, <code>xfs</code>, <code>vfat</code> 等。</li>
@@ -481,7 +492,7 @@ cgroup
 <li><code>块数</code>： 很少手动指定，通常使用整个设备。</li>
 </ul>
 <p><strong>例如，当你执行：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> mkfs -t ext4 /dev/sdb1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">mkfs</span> <span class="token parameter variable">-t</span> ext4 /dev/sdb1<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><code>mkfs</code> 会实际上调用更专门的程序 <code>mkfs.ext4</code> 来完成工作。这就是为什么你也会经常看到直接调用 <code>mkfs.&lt;类型&gt;</code> 的命令格式。</p>
 <hr>
@@ -575,23 +586,53 @@ cgroup
 </ol>
 <hr>
 <h4><span id="实用示例">实用示例</span></h4><h5><span id="示例-1将-u-盘格式化为-fat32最大兼容性">示例 1：将 U 盘格式化为 FAT32（最大兼容性）</span></h5><p>假设 U 盘被识别为 <code>/dev/sdb1</code>（<strong>请务必确认！</strong>）</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先卸载</span></span><br><span class="line"><span class="built_in">sudo</span> umount /dev/sdb1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再格式化为 FAT32，并设置卷标为“MYUSB”</span></span><br><span class="line"><span class="built_in">sudo</span> mkfs -t vfat -n MYUSB /dev/sdb1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者直接使用 mkfs.vfat</span></span><br><span class="line"><span class="built_in">sudo</span> mkfs.vfat -n MYUSB /dev/sdb1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先卸载</span>
+<span class="token function">sudo</span> <span class="token function">umount</span> /dev/sdb1
+
+<span class="token comment"># 再格式化为 FAT32，并设置卷标为“MYUSB”</span>
+<span class="token function">sudo</span> <span class="token function">mkfs</span> <span class="token parameter variable">-t</span> vfat <span class="token parameter variable">-n</span> MYUSB /dev/sdb1
+
+<span class="token comment"># 或者直接使用 mkfs.vfat</span>
+<span class="token function">sudo</span> mkfs.vfat <span class="token parameter variable">-n</span> MYUSB /dev/sdb1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-2将分区格式化为-linux-常用的-ext4">示例 2：将分区格式化为 Linux 常用的 ext4</span></h5><p>假设要格式化的分区是 <code>/dev/sdc1</code>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount /dev/sdc1</span><br><span class="line"><span class="built_in">sudo</span> mkfs -t ext4 -L BackupDrive /dev/sdc1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 更常见的直接用法</span></span><br><span class="line"><span class="built_in">sudo</span> mkfs.ext4 -L BackupDrive /dev/sdc1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">umount</span> /dev/sdc1
+<span class="token function">sudo</span> <span class="token function">mkfs</span> <span class="token parameter variable">-t</span> ext4 <span class="token parameter variable">-L</span> BackupDrive /dev/sdc1
+
+<span class="token comment"># 更常见的直接用法</span>
+<span class="token function">sudo</span> mkfs.ext4 <span class="token parameter variable">-L</span> BackupDrive /dev/sdc1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-3创建-xfs-文件系统">示例 3：创建 XFS 文件系统</span></h5><p>XFS 是很多企业级应用的首选。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> umount /dev/sdd1</span><br><span class="line"><span class="built_in">sudo</span> mkfs.xfs -f -L Database /dev/sdd1</span><br><span class="line"><span class="comment"># `-f` 强制创建，如果设备上已有文件系统则需要此选项</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> <span class="token function">umount</span> /dev/sdd1
+<span class="token function">sudo</span> mkfs.xfs <span class="token parameter variable">-f</span> <span class="token parameter variable">-L</span> Database /dev/sdd1
+<span class="token comment"># `-f` 强制创建，如果设备上已有文件系统则需要此选项</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-4检查坏块后再格式化">示例 4：检查坏块后再格式化</span></h5><p>这是一个好习惯，尤其对于新旧不明的硬盘。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> mkfs.ext4 -c /dev/sde1</span><br><span class="line"><span class="comment"># 这个过程会很久，因为它会先扫描整个设备的坏道</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> mkfs.ext4 <span class="token parameter variable">-c</span> /dev/sde1
+<span class="token comment"># 这个过程会很久，因为它会先扫描整个设备的坏道</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-5格式化一个镜像文件">示例 5：格式化一个镜像文件</span></h5><p>你不仅可以格式化设备，也可以格式化一个文件（通常需要先关联到 loop 设备）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个 1G 的空文件</span></span><br><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=my-disk.img bs=1M count=1000</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将这个文件格式化为 ext4</span></span><br><span class="line">mkfs.ext4 my-disk.img</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载这个镜像文件来使用它</span></span><br><span class="line"><span class="built_in">sudo</span> mount -o loop my-disk.img /mnt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个 1G 的空文件</span>
+<span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>my-disk.img <span class="token assign-left variable">bs</span><span class="token operator">=</span>1M <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">1000</span>
+
+<span class="token comment"># 将这个文件格式化为 ext4</span>
+mkfs.ext4 my-disk.img
+
+<span class="token comment"># 挂载这个镜像文件来使用它</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-o</span> loop my-disk.img /mnt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="mkfs-执行成功后你会看到什么"><code>mkfs</code> 执行成功后你会看到什么？</span></h4><p>运行 <code>sudo mkfs.ext4 /dev/sdb1</code> 后，你会看到类似如下输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mke2fs 1.46.5 (30-Dec-2021)</span><br><span class="line">Creating filesystem with 2621440 4k blocks and 655360 inodes</span><br><span class="line">Filesystem UUID: 6e5cff33-5f3d-4a86-b965-85c821a9e6b7</span><br><span class="line">Superblock backups stored on blocks:</span><br><span class="line">        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632</span><br><span class="line"></span><br><span class="line">Allocating group tables: <span class="keyword">done</span></span><br><span class="line">Writing inode tables: <span class="keyword">done</span></span><br><span class="line">Creating journal (16384 blocks): <span class="keyword">done</span></span><br><span class="line">Writing superblocks and filesystem accounting information: <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mke2fs</span> <span class="token number">1.46</span>.5 <span class="token punctuation">(</span><span class="token number">30</span>-Dec-2021<span class="token punctuation">)</span>
+Creating filesystem with <span class="token number">2621440</span> 4k blocks and <span class="token number">655360</span> inodes
+Filesystem UUID: 6e5cff33-5f3d-4a86-b965-85c821a9e6b7
+Superblock backups stored on blocks:
+        <span class="token number">32768</span>, <span class="token number">98304</span>, <span class="token number">163840</span>, <span class="token number">229376</span>, <span class="token number">294912</span>, <span class="token number">819200</span>, <span class="token number">884736</span>, <span class="token number">1605632</span>
+
+Allocating group tables: <span class="token keyword">done</span>
+Writing inode tables: <span class="token keyword">done</span>
+Creating journal <span class="token punctuation">(</span><span class="token number">16384</span> blocks<span class="token punctuation">)</span>: <span class="token keyword">done</span>
+Writing superblocks and filesystem accounting information: <span class="token keyword">done</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这些信息告诉你文件系统的基本参数：块数、inode 数、UUID、超级块备份位置等。</p>
 <hr>
@@ -612,7 +653,7 @@ cgroup
 </ol>
 <p>它是监控磁盘空间、防止磁盘被写满导致系统问题的首选工具。</p>
 <hr>
-<h4><span id="命令语法">命令语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> [选项] [文件或目录]</span><br></pre></td></tr></table></figure>
+<h4><span id="命令语法">命令语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> <span class="token punctuation">[</span>文件或目录<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li>如果不加任何参数，<code>df</code> 会显示所有<strong>已挂载</strong>的文件系统的使用情况。</li>
@@ -653,7 +694,14 @@ cgroup
 </tbody></table>
 <hr>
 <h4><span id="输出列解读">输出列解读</span></h4><p>当你运行 <code>df -h</code>，你会看到类似这样的输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">文件系统        容量  已用  可用 已用% 挂载点</span><br><span class="line">udev            3.9G     0  3.9G    0% /dev</span><br><span class="line">tmpfs           787M  2.1M  785M    1% /run</span><br><span class="line">/dev/nvme0n1p2  234G   65G  157G   30% /</span><br><span class="line">tmpfs           3.9G   87M  3.8G    3% /dev/shm</span><br><span class="line">tmpfs           5.0M  4.0K  5.0M    1% /run/lock</span><br><span class="line">/dev/nvme0n1p1  511M  6.1M  505M    2% /boot/efi</span><br><span class="line">tmpfs           787M   88K  787M    1% /run/user/1000</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">文件系统        容量  已用  可用 已用% 挂载点
+udev            <span class="token number">3</span>.9G     <span class="token number">0</span>  <span class="token number">3</span>.9G    <span class="token number">0</span>% /dev
+tmpfs           787M  <span class="token number">2</span>.1M  785M    <span class="token number">1</span>% /run
+/dev/nvme0n1p2  234G   65G  157G   <span class="token number">30</span>% /
+tmpfs           <span class="token number">3</span>.9G   87M  <span class="token number">3</span>.8G    <span class="token number">3</span>% /dev/shm
+tmpfs           <span class="token number">5</span>.0M  <span class="token number">4</span>.0K  <span class="token number">5</span>.0M    <span class="token number">1</span>% /run/lock
+/dev/nvme0n1p1  511M  <span class="token number">6</span>.1M  505M    <span class="token number">2</span>% /boot/efi
+tmpfs           787M   88K  787M    <span class="token number">1</span>% /run/user/1000<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>各列的含义如下：</p>
 <ul>
@@ -666,33 +714,37 @@ cgroup
 </ul>
 <hr>
 <h4><span id="实用示例">实用示例</span></h4><h5><span id="示例-1最基本用法人类可读格式">示例 1：最基本用法（人类可读格式）</span></h5><p>这是<strong>最常用</strong>的命令，没有之一。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -h</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-h</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出易于阅读，快速查看所有磁盘的使用情况。</p>
 <h5><span id="示例-2查看特定目录所在分区的空间">示例 2：查看特定目录所在分区的空间</span></h5><p>比如你想知道 <code>/home</code> 目录还有多少空间。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -h /home</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-h</span> /home<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">文件系统        容量  已用  可用 已用% 挂载点</span><br><span class="line">/dev/sda1       200G   50G  150G   25% /home</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">文件系统        容量  已用  可用 已用% 挂载点
+/dev/sda1       200G   50G  150G   <span class="token number">25</span>% /home<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-3显示文件系统类型">示例 3：显示文件系统类型</span></h5><p>想知道各个分区都是什么格式（ext4? NTFS?）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -hT</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-hT</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">文件系统       类型      容量  已用  可用 已用% 挂载点</span><br><span class="line">/dev/sda1      ext4      234G   65G  157G   30% /</span><br><span class="line">/dev/sdb1      vfat      30G    5G   25G    17% /media/myusb</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">文件系统       类型      容量  已用  可用 已用% 挂载点
+/dev/sda1      ext4      234G   65G  157G   <span class="token number">30</span>% /
+/dev/sdb1      vfat      30G    5G   25G    <span class="token number">17</span>% /media/myusb<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-4检查-inode-使用情况">示例 4：检查 inode 使用情况</span></h5><p>有时候磁盘空间明明还有剩余，但系统却报错“No space left on device”。这通常是 <strong>inode 用尽</strong>了（创建了太多小文件）。这个命令可以诊断这个问题。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -i</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-i</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">文件系统       Inode 已用(I) 可用(I) 已用%(I) 挂载点</span><br><span class="line">/dev/sda1      5.8M    1.1M    4.7M      19% /</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">文件系统       Inode 已用<span class="token punctuation">(</span>I<span class="token punctuation">)</span> 可用<span class="token punctuation">(</span>I<span class="token punctuation">)</span> 已用%<span class="token punctuation">(</span>I<span class="token punctuation">)</span> 挂载点
+/dev/sda1      <span class="token number">5</span>.8M    <span class="token number">1</span>.1M    <span class="token number">4</span>.7M      <span class="token number">19</span>% /<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>如果 <strong>可用(I)</strong> 接近 0 或 <strong>已用%(I)</strong> 是 100%，说明 inode 耗尽，需要清理文件。</p>
 <h5><span id="示例-5排除特定类型的文件系统">示例 5：排除特定类型的文件系统</span></h5><p>例如，不想看那些临时的 <code>tmpfs</code> 文件系统，只关心真实的硬盘。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -h -x tmpfs</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-h</span> <span class="token parameter variable">-x</span> tmpfs<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h5><span id="示例-6查看所有文件系统包括伪文件系统">示例 6：查看所有文件系统（包括伪文件系统）</span></h5><p>显示包括 <code>/proc</code>, <code>/sys</code> 在内的所有信息。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">df</span> -a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">df</span> <span class="token parameter variable">-a</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>（这个输出通常会很长，包含很多内核虚拟的文件系统。）</p>
 <hr>
@@ -713,23 +765,42 @@ cgroup
 <p>反之，<strong><code>umount</code></strong> 命令则用于将其<strong>分离</strong>，断开访问通道。</p>
 <p><strong>核心思想</strong>：它是在物理存储设备和用户可见的目录路径之间<strong>搭建一座桥梁</strong>。</p>
 <hr>
-<h4><span id="命令语法">命令语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mount [-选项] [-o 挂载选项] &lt;设备名&gt; &lt;挂载点&gt;</span><br><span class="line">umount &lt;挂载点或设备名&gt;</span><br></pre></td></tr></table></figure>
+<h4><span id="命令语法">命令语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span> <span class="token punctuation">[</span>-选项<span class="token punctuation">]</span> <span class="token punctuation">[</span>-o 挂载选项<span class="token punctuation">]</span> <span class="token operator">&lt;</span>设备名<span class="token operator">></span> <span class="token operator">&lt;</span>挂载点<span class="token operator">></span>
+<span class="token function">umount</span> <span class="token operator">&lt;</span>挂载点或设备名<span class="token operator">></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="基本用法示例">基本用法示例</span></h4><h5><span id="1-查看所有已挂载的文件系统">1. 查看所有已挂载的文件系统</span></h5><p>不加任何参数直接运行 <code>mount</code>，会显示系统中所有已挂载的文件系统列表，信息非常详细。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mount</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出会包括设备、挂载点、文件系统类型、挂载选项等，类似于 <code>df -h</code> 但更详细。</p>
 <h5><span id="2-挂载一个-u-盘手动挂载">2. 挂载一个 U 盘（手动挂载）</span></h5><p>假设系统将 U 盘识别为 <code>/dev/sdb1</code>，我们要将它挂载到 <code>/mnt/usb</code>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第一步：创建挂载点目录 (如果不存在)</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /mnt/usb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二步：执行挂载</span></span><br><span class="line"><span class="built_in">sudo</span> mount /dev/sdb1 /mnt/usb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步：访问U盘内容</span></span><br><span class="line"><span class="built_in">ls</span> /mnt/usb</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 第一步：创建挂载点目录 (如果不存在)</span>
+<span class="token function">sudo</span> <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /mnt/usb
+
+<span class="token comment"># 第二步：执行挂载</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> /dev/sdb1 /mnt/usb
+
+<span class="token comment"># 第三步：访问U盘内容</span>
+<span class="token function">ls</span> /mnt/usb<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="3-卸载设备">3. 卸载设备</span></h5><p>操作完成后，必须卸载才能安全移除设备。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过挂载点卸载</span></span><br><span class="line"><span class="built_in">sudo</span> umount /mnt/usb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者通过设备名卸载</span></span><br><span class="line"><span class="built_in">sudo</span> umount /dev/sdb1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 通过挂载点卸载</span>
+<span class="token function">sudo</span> <span class="token function">umount</span> /mnt/usb
+
+<span class="token comment"># 或者通过设备名卸载</span>
+<span class="token function">sudo</span> <span class="token function">umount</span> /dev/sdb1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>重要提示</strong>：<code>umount</code> 而不是 <code>unmount</code>。</p>
 <hr>
 <h4><span id="常用选项和高级用法">常用选项和高级用法</span></h4><h5><span id="-t指定文件系统类型"><code>-t</code>：指定文件系统类型</span></h5><p>如果系统无法自动识别设备类型，或者你想明确指定，可以使用 <code>-t</code> 选项。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 明确指定文件系统类型为 vfat (FAT32)</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t vfat /dev/sdb1 /mnt/usb</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载光盘，类型通常是 iso9660</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t iso9660 /dev/sr0 /mnt/cdrom</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载 exFAT 格式的U盘 (可能需要先安装 exfat-fuse)</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t exfat /dev/sdc1 /mnt/usb</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 明确指定文件系统类型为 vfat (FAT32)</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-t</span> vfat /dev/sdb1 /mnt/usb
+
+<span class="token comment"># 挂载光盘，类型通常是 iso9660</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-t</span> iso9660 /dev/sr0 /mnt/cdrom
+
+<span class="token comment"># 挂载 exFAT 格式的U盘 (可能需要先安装 exfat-fuse)</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-t</span> exfat /dev/sdc1 /mnt/usb<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="-o指定挂载选项非常强大"><code>-o</code>：指定挂载选项（非常强大）</span></h5><p>这是 <code>mount</code> 命令最灵活的部分，允许你精细控制挂载行为。多个选项用逗号分隔。</p>
 <p><strong>常用挂载选项：</strong></p>
@@ -788,7 +859,17 @@ cgroup
 </tr>
 </tbody></table>
 <p><strong>示例：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以只读方式挂载光盘</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t iso9660 -o ro /dev/sr0 /mnt/cdrom</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载ISO镜像文件</span></span><br><span class="line"><span class="built_in">sudo</span> mount -o loop ubuntu-22.04.iso /mnt/iso</span><br><span class="line"></span><br><span class="line"><span class="comment"># 挂载NTFS分区并赋予当前用户读写权限 (需安装ntfs-3g)</span></span><br><span class="line"><span class="built_in">sudo</span> mount -t ntfs-3g -o uid=1000,gid=1000 /dev/sdd1 /mnt/ntfs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重新挂载根目录为读写模式 (在救援模式中常用)</span></span><br><span class="line"><span class="built_in">sudo</span> mount -o remount,rw /</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 以只读方式挂载光盘</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-t</span> iso9660 <span class="token parameter variable">-o</span> ro /dev/sr0 /mnt/cdrom
+
+<span class="token comment"># 挂载ISO镜像文件</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-o</span> loop ubuntu-22.04.iso /mnt/iso
+
+<span class="token comment"># 挂载NTFS分区并赋予当前用户读写权限 (需安装ntfs-3g)</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-t</span> ntfs-3g <span class="token parameter variable">-o</span> <span class="token assign-left variable">uid</span><span class="token operator">=</span><span class="token number">1000</span>,gid<span class="token operator">=</span><span class="token number">1000</span> /dev/sdd1 /mnt/ntfs
+
+<span class="token comment"># 重新挂载根目录为读写模式 (在救援模式中常用)</span>
+<span class="token function">sudo</span> <span class="token function">mount</span> <span class="token parameter variable">-o</span> remount,rw /<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="注意事项">注意事项</span></h4><ol>
@@ -840,7 +921,7 @@ cgroup
 </ul>
 <p><code>unshare</code> 命令就是这个系统调用的命令行包装。</p>
 <hr>
-<h4><span id="命令语法">命令语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unshare [选项] [&lt;程序&gt; [&lt;参数&gt;...]]</span><br></pre></td></tr></table></figure>
+<h4><span id="命令语法">命令语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">unshare <span class="token punctuation">[</span>选项<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>程序<span class="token operator">></span> <span class="token punctuation">[</span><span class="token operator">&lt;</span>参数<span class="token operator">></span><span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><strong>选项</strong>： 指定要脱离哪种类型的 Namespace。</li>
@@ -923,27 +1004,46 @@ cgroup
 </tbody></table>
 <hr>
 <h4><span id="实用示例">实用示例</span></h4><h5><span id="示例-1创建一个新的-network-namespace">示例 1：创建一个新的 Network Namespace</span></h5><p>创建一个拥有独立网络环境的 shell。在这个 shell 里，你看不到宿主机的网络接口（除了 loopback）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> unshare --net /bin/bash</span><br><span class="line"><span class="comment"># 进入新的bash后，查看网络，只有lo接口</span></span><br><span class="line">ip a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> unshare <span class="token parameter variable">--net</span> /bin/bash
+<span class="token comment"># 进入新的bash后，查看网络，只有lo接口</span>
+<span class="token function">ip</span> a<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-2创建一个新的-pid-和-mount-namespace最像迷你容器">示例 2：创建一个新的 PID 和 Mount Namespace（最像迷你容器）</span></h5><p>这是最经典的用法，创建一个进程隔离的环境。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> unshare --pid --fork --mount-proc /bin/bash</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> unshare <span class="token parameter variable">--pid</span> <span class="token parameter variable">--fork</span> --mount-proc /bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>--pid</code>： 创建新的 PID Namespace。</li>
 <li><code>--fork</code>： 让 <code>unshare</code> 先 fork，再执行 <code>/bin/bash</code>，这样 bash 的 PID 就是 1。</li>
 <li><code>--mount-proc</code>： 重新挂载 <code>/proc</code>，使得 <code>ps aux</code> 等命令只显示这个新 Namespace 内的进程（实际上只有几个）。<br>现在，你运行 <code>ps aux</code>，会发现看不到宿主机上的其他进程，仿佛进入了一个崭新的系统。</li>
 </ul>
-<h5><span id="示例-3在新的-namespace-中改变主机名uts">示例 3：在新的 Namespace 中改变主机名（UTS）</span></h5><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先查看当前主机名</span></span><br><span class="line">hostname</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建新的 UTS Namespace 并运行 bash</span></span><br><span class="line"><span class="built_in">sudo</span> unshare --uts /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在新环境中修改主机名</span></span><br><span class="line">hostname my-new-container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再次查看，主机名已变</span></span><br><span class="line">hostname</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打开另一个终端，查看原主机名，发现并未改变。证明隔离成功。</span></span><br><span class="line"><span class="built_in">exit</span> <span class="comment"># 退出后，主机名恢复</span></span><br></pre></td></tr></table></figure>
+<h5><span id="示例-3在新的-namespace-中改变主机名uts">示例 3：在新的 Namespace 中改变主机名（UTS）</span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 先查看当前主机名</span>
+<span class="token function">hostname</span>
+
+<span class="token comment"># 创建新的 UTS Namespace 并运行 bash</span>
+<span class="token function">sudo</span> unshare <span class="token parameter variable">--uts</span> /bin/bash
+
+<span class="token comment"># 在新环境中修改主机名</span>
+<span class="token function">hostname</span> my-new-container
+
+<span class="token comment"># 再次查看，主机名已变</span>
+<span class="token function">hostname</span>
+
+<span class="token comment"># 打开另一个终端，查看原主机名，发现并未改变。证明隔离成功。</span>
+<span class="token builtin class-name">exit</span> <span class="token comment"># 退出后，主机名恢复</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="示例-4普通用户创建伪-root环境user-namespace">示例 4：普通用户创建“伪 root”环境（User Namespace）</span></h5><p>这是非常强大的一点：<strong>普通用户可以不需 root 权限就创建新的 User Namespace</strong>，并在其中拥有 root 权限。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不需要 sudo！</span></span><br><span class="line">unshare --user --map-root-user --pid --fork --mount-proc /bin/bash</span><br><span class="line"><span class="built_in">whoami</span> <span class="comment"># 输出：root</span></span><br><span class="line"><span class="built_in">id</span> <span class="comment"># 输出：uid=0(root) gid=0(root) groups=0(root)</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 不需要 sudo！</span>
+unshare <span class="token parameter variable">--user</span> --map-root-user <span class="token parameter variable">--pid</span> <span class="token parameter variable">--fork</span> --mount-proc /bin/bash
+<span class="token function">whoami</span> <span class="token comment"># 输出：root</span>
+<span class="token function">id</span> <span class="token comment"># 输出：uid=0(root) gid=0(root) groups=0(root)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><code>--user</code> 和 <code>--map-root-user</code>： 让你在内部成为 root。</li>
 <li>注意：这个内部的 root 权限<strong>仅限于这个新的 Namespace 之内</strong>，例如你可以挂载文件系统、设置能力（capabilities），但对宿主机的影响非常有限，安全性很高。</li>
 </ul>
 <h5><span id="示例-5直接运行一个程序">示例 5：直接运行一个程序</span></h5><p>不启动交互式 shell，而是直接在新 Namespace 中运行一个一次性命令。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> unshare --net --pid --fork --mount-proc <span class="built_in">sleep</span> 300</span><br><span class="line"><span class="comment"># 这个 `sleep` 进程在一个隔离的 PID 和 Network Namespace 中运行300秒</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> unshare <span class="token parameter variable">--net</span> <span class="token parameter variable">--pid</span> <span class="token parameter variable">--fork</span> --mount-proc <span class="token function">sleep</span> <span class="token number">300</span>
+<span class="token comment"># 这个 `sleep` 进程在一个隔离的 PID 和 Network Namespace 中运行300秒</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
 <p><code>unshare</code> 是 <strong>Docker&#x2F;容器技术的底层基础之一</strong>。</p>
@@ -958,13 +1058,15 @@ cgroup
 <h4><span id="实践演示私有挂载实验">实践演示：私有挂载实验</span></h4><p>通过一个简单的命令，我们可以清晰地观察到 Mount Namespace 的隔离效果：</p>
 <ol>
 <li><p><strong>创建隔离环境</strong>：首先，我们使用 <code>unshare</code> 命令创建一个新的 Mount Namespace（<code>--mount</code>）并启动一个 shell。<code>--mount-proc</code> 选项不仅会挂载一个新的 <code>/proc</code>，其内部也会调用 <code>unshare(CLONE_NEWNS)</code> 来创建新的 Mount Namespace。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> unshare --mount --fork --mount-proc /bin/bash</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">sudo</span> unshare <span class="token parameter variable">--mount</span> <span class="token parameter variable">--fork</span> --mount-proc /bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>准备存储介质</strong>：在新创建的隔离 shell 中，我们创建一个空的镜像文件并将其格式化为 ext4 文件系统，模拟一块虚拟磁盘。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">dd</span> <span class="keyword">if</span>=/dev/zero of=./my-disk.img bs=1M count=100</span><br><span class="line">mkfs.ext4 ./my-disk.img</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">dd</span> <span class="token assign-left variable">if</span><span class="token operator">=</span>/dev/zero <span class="token assign-left variable">of</span><span class="token operator">=</span>./my-disk.img <span class="token assign-left variable">bs</span><span class="token operator">=</span>1M <span class="token assign-left variable">count</span><span class="token operator">=</span><span class="token number">100</span>
+mkfs.ext4 ./my-disk.img<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>执行挂载操作</strong>：将格式化好的镜像文件挂载到一个目标目录（如 <code>./mnt</code>）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> ./mnt</span><br><span class="line">mount ./my-disk.img ./mnt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">mkdir</span> ./mnt
+<span class="token function">mount</span> ./my-disk.img ./mnt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>此时，在隔离环境内使用 <code>df -h</code> 或 <code>mount</code> 命令，可以清晰地看到该挂载点。</p>
 </li>
@@ -995,7 +1097,9 @@ A1 -.->|继承父组限制并可叠加| LA1[进程列表 A1]</pre>
 
 <p>cgroup v2 通过一个统一的层级结构（通常挂载在 <code>/sys/fs/cgroup/</code>）来管理所有资源控制器（cpu、memory、io 等）。每个子目录都是一个控制组，可以为其配置资源限制，并将进程纳入其中进行管理。</p>
 <h3><span id="管理基础挂载与目录操作">管理基础：挂载与目录操作</span></h3><p>cgroup v2 的管理接口通过虚拟文件系统（通常为 <code>cgroup2fs</code>）暴露。首先需要挂载，但现代系统通常已自动完成：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查 cgroup2 挂载点</span></span><br><span class="line">mount | grep cgroup2</span><br><span class="line"><span class="comment"># 输出示例：cgroup2 on /sys/fs/cgroup type cgroup2 (rw,nosuid,nodev,noexec,relatime)</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 检查 cgroup2 挂载点</span>
+<span class="token function">mount</span> <span class="token operator">|</span> <span class="token function">grep</span> cgroup2
+<span class="token comment"># 输出示例：cgroup2 on /sys/fs/cgroup type cgroup2 (rw,nosuid,nodev,noexec,relatime)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>管理 cgroup 的本质就是操作 <code>/sys/fs/cgroup/</code> 下的目录和文件：</p>
 <ul>
@@ -1006,7 +1110,10 @@ A1 -.->|继承父组限制并可叠加| LA1[进程列表 A1]</pre>
 </ul>
 <h3><span id="实战使用-cgroup-v2-限制-cpu-使用率">实战：使用 cgroup v2 限制 CPU 使用率</span></h3><p>本示例将演示如何创建一个 cgroup，并将其内所有进程的 CPU 使用率限制为 <strong>单个核心的 20%</strong>。</p>
 <h4><span id="第-1-步创建控制组">第 1 步：创建控制组</span></h4><p>我们创建一个名为 <code>cpu_demo</code> 的控制组。创建目录即创建了 cgroup。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换到 cgroup 根目录</span></span><br><span class="line"><span class="built_in">cd</span> /sys/fs/cgroup/</span><br><span class="line"><span class="comment"># 创建新的控制组</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> cpu_demo</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 切换到 cgroup 根目录</span>
+<span class="token builtin class-name">cd</span> /sys/fs/cgroup/
+<span class="token comment"># 创建新的控制组</span>
+<span class="token function">sudo</span> <span class="token function">mkdir</span> cpu_demo<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>创建后，系统会自动在该目录下生成所有控制文件（<code>cpu.max</code>, <code>cgroup.procs</code> 等）。</p>
 <h4><span id="第-2-步配置-cpu-限制">第 2 步：配置 CPU 限制</span></h4><p>cgroup v2 通过 <code>cpu.max</code> 文件来设置 CPU 配额，其格式为：<code>$MAX $PERIOD</code>。</p>
@@ -1015,25 +1122,38 @@ A1 -.->|继承父组限制并可叠加| LA1[进程列表 A1]</pre>
 <li><strong><code>$MAX</code></strong>： 在上述一个周期内，该 cgroup 中所有进程<strong>最多能使用的 CPU 时间</strong>（微秒）。计算公式为：<code>MAX = PERIOD * desired_cpu_percentage</code>。</li>
 </ul>
 <p>我们的目标是 20%，所以计算：<code>100000 * 0.2 = 20000</code>。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置 CPU 配额：100ms 周期内最多使用 20ms 的 CPU 时间</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;20000 100000&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /sys/fs/cgroup/cpu_demo/cpu.max</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 设置 CPU 配额：100ms 周期内最多使用 20ms 的 CPU 时间</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"20000 100000"</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /sys/fs/cgroup/cpu_demo/cpu.max<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>这表示该 cgroup 中的进程在任何 100ms 的时间窗口内，最多只能运行 20ms，即 20% 的 CPU 时间。</p>
 <h4><span id="第-3-步验证限制效果">第 3 步：验证限制效果</span></h4><p>为了验证限制，我们需要一个能消耗大量 CPU 的程序。这里使用 <code>stress</code> 工具。</p>
 <ol>
 <li><p><strong>将当前 Shell 加入控制组</strong>：<br> 当前 Shell 中启动的进程会自动继承其 cgroup。我们将当前 Shell 加入 <code>cpu_demo</code>。</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将当前 shell 的 PID 写入 cgroup.procs</span></span><br><span class="line"><span class="built_in">echo</span> $$ | <span class="built_in">sudo</span> <span class="built_in">tee</span> /sys/fs/cgroup/cpu_demo/cgroup.procs</span><br></pre></td></tr></table></figure>
+ <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将当前 shell 的 PID 写入 cgroup.procs</span>
+<span class="token builtin class-name">echo</span> <span class="token variable">$$</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /sys/fs/cgroup/cpu_demo/cgroup.procs<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>启动压力测试</strong>：<br> 在新终端中，使用 <code>pidstat</code> 监控 CPU。在原终端中启动 <code>stress</code>，它会尝试占满一个核心。</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个消耗 CPU 的 worker</span></span><br><span class="line">stress -c 1 &amp;</span><br></pre></td></tr></table></figure>
+ <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动一个消耗 CPU 的 worker</span>
+stress <span class="token parameter variable">-c</span> <span class="token number">1</span> <span class="token operator">&amp;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>监控 CPU 使用率</strong>：<br> 在另一个终端，使用 <code>pidstat</code> 监控 <code>stress</code> 进程。</p>
- <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pidstat -p $(pgrep -o stress) -u 1</span><br><span class="line"><span class="comment"># 输出示例：</span></span><br><span class="line"><span class="comment"># 06:14:48 PM   UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command</span></span><br><span class="line"><span class="comment"># 06:14:49 PM     0      1234    20.0      0.0      0.0     80.0     20.0     1  stress</span></span><br></pre></td></tr></table></figure>
+ <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">pidstat <span class="token parameter variable">-p</span> <span class="token variable"><span class="token variable">$(</span>pgrep <span class="token parameter variable">-o</span> stress<span class="token variable">)</span></span> <span class="token parameter variable">-u</span> <span class="token number">1</span>
+<span class="token comment"># 输出示例：</span>
+<span class="token comment"># 06:14:48 PM   UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command</span>
+<span class="token comment"># 06:14:49 PM     0      1234    20.0      0.0      0.0     80.0     20.0     1  stress</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p> <strong>结果分析</strong>：可以看到，<code>%CPU</code> 列被稳定地限制在了 <strong>~20%</strong>。同时，<code>%wait</code> 值很高，表明进程大部分时间在等待 CPU 时间片，这正是 cgroup 通过内核调度器进行“节流”限制的直观表现。</p>
 </li>
 </ol>
 <h4><span id="第-4-步清理">第 4 步：清理</span></h4><p>实验完成后，务必进行清理：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 终止测试进程</span></span><br><span class="line">pkill stress</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 将当前 shell 移回根 cgroup</span></span><br><span class="line"><span class="built_in">echo</span> $$ | <span class="built_in">sudo</span> <span class="built_in">tee</span> /sys/fs/cgroup/cgroup.procs</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 删除创建的 cgroup (必须确保组内无进程)</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">rmdir</span> /sys/fs/cgroup/cpu_demo</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 1. 终止测试进程</span>
+<span class="token function">pkill</span> stress
+
+<span class="token comment"># 2. 将当前 shell 移回根 cgroup</span>
+<span class="token builtin class-name">echo</span> <span class="token variable">$$</span> <span class="token operator">|</span> <span class="token function">sudo</span> <span class="token function">tee</span> /sys/fs/cgroup/cgroup.procs
+
+<span class="token comment"># 3. 删除创建的 cgroup (必须确保组内无进程)</span>
+<span class="token function">sudo</span> <span class="token function">rmdir</span> /sys/fs/cgroup/cpu_demo<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="核心特性与优势">核心特性与优势</span></h3><p>通过上述演示，我们可以看到 cgroup v2 的一些核心优势：</p>
 <ul>

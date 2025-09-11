@@ -107,6 +107,8 @@ Linux 作为一个深受广大社,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -270,7 +272,7 @@ Linux 作为一个深受广大社,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -279,7 +281,7 @@ Linux 作为一个深受广大社,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/">Linux 命令行参数和环境变量</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li></ul>
+            <ul><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/">Linux 命令行参数和环境变量</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -340,60 +342,156 @@ Linux 作为一个深受广大社,"/>
 <p>1、-a</p>
 <p>该选项用于列出目录下的所有文件，包括以.开头的隐含文件</p>
 <p>比如说，当我们在什么信息都没有的目录下用 ls 指令查看当前目录下的文件信息，会发现没有任何相应，但若我们加上-a选项，会看到：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -a</span><br><span class="line">.  ..</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-a</span>
+<span class="token builtin class-name">.</span>  <span class="token punctuation">..</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>你会看到，一个新的目录下面隐含了两个文件，一个叫’.’,另一个叫’..’，这两个文件分别表示当前目录以及上级目录，我会在cd指令中重点讲解这两个<br>文件，你现在只需要知道这两个文件是隐含文件，只有通过-a选项才可以查看到</p>
 <p>当然，隐含文件还有很多类型，比如说.config配置文件，还有许多环境变量的文件，这些文件一般都是通过隐含文件的形式来存放的</p>
 <p>2、-l</p>
 <p>该选项用于显示文件的详细信息，下面我会创建两个文件以及一个文本文件，创建好后通过 ls 指令查看效果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls</span><br><span class="line">dir1  dir2  test.txt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span>
+dir1  dir2  test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，只显示了文件名，但我们若想要看到每个文件的具体信息，就可以通过-l选项查看：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -l （等价于 ll 命令，ll 是对 ls -l 指令的缩写）</span><br><span class="line">total 8</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 21:58 dir1</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 21:58 dir2</span><br><span class="line">-rw-r--r-- 1 ljx ljx    0 Jul 12 21:59 test.txt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-l</span> （等价于 ll 命令，ll 是对 <span class="token function">ls</span> <span class="token parameter variable">-l</span> 指令的缩写）
+total <span class="token number">8</span>
+drwxr-xr-x <span class="token number">2</span> ljx ljx <span class="token number">4096</span> Jul <span class="token number">12</span> <span class="token number">21</span>:58 dir1
+drwxr-xr-x <span class="token number">2</span> ljx ljx <span class="token number">4096</span> Jul <span class="token number">12</span> <span class="token number">21</span>:58 dir2
+-rw-r--r-- <span class="token number">1</span> ljx ljx    <span class="token number">0</span> Jul <span class="token number">12</span> <span class="token number">21</span>:59 test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>其中 dir1 和 dir2 是目录文件，而 test.txt 是普通文件（文本文件）</p>
 <p>我们可以观察到两个目录文件最前面有一个d标志，这个表示该文件是一个目录文件（directory），但 test.txt 文件前面显示<br>的是一个-，表示该文件是普通文件，除了 d 和 - 其实还有别的标志，目前我们只需要知道这两个就够了</p>
 <p>3、-d</p>
 <p>该指令可以让目录按照文件的方式显示，ls 后面若跟的是一个目录文件，则会显示该目录下的文件信息，但有时候我们只是想看看这个目录文件<br>的详细信息，因此我们需要通过-d选项让目录按照文件的方式显示，与此同时再配合-l指令就可以显示该目录文件的详细信息了</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接使用会显示dir1目录下面的文件信息</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls dir1</span><br><span class="line">test_dir1.txt</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用-d选项就可以看到 dir1的信息</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -d dir1</span><br><span class="line">dir1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过追加-l选项就可以看到 dir1 的详细信息了（-d -l 在显示 dir1 的信息(-d)的同时显示它的详细信息(-l)）</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -d -l dir1</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 22:08 dir1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以将-d -l 选项综合写成 -dl，效果相同</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -dl dir1</span><br><span class="line">drwxr-xr-x 2 ljx ljx 4096 Jul 12 22:08 dir1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接使用会显示dir1目录下面的文件信息</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> dir1
+test_dir1.txt
+<span class="token comment"># 使用-d选项就可以看到 dir1的信息</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-d</span> dir1
+dir1
+<span class="token comment"># 通过追加-l选项就可以看到 dir1 的详细信息了（-d -l 在显示 dir1 的信息(-d)的同时显示它的详细信息(-l)）</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-d</span> <span class="token parameter variable">-l</span> dir1
+drwxr-xr-x <span class="token number">2</span> ljx ljx <span class="token number">4096</span> Jul <span class="token number">12</span> <span class="token number">22</span>:08 dir1
+<span class="token comment"># 可以将-d -l 选项综合写成 -dl，效果相同</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-dl</span> dir1
+drwxr-xr-x <span class="token number">2</span> ljx ljx <span class="token number">4096</span> Jul <span class="token number">12</span> <span class="token number">22</span>:08 dir1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>4、-F</p>
 <p>该指令会在每个文件名后附上一个字符以说明该文件的类型，“<em>”表示可执行的普通文件；“&#x2F;”表示目录；“@”表<br>示符号链接；“|”表示FIFOs；“&#x3D;”表示套接字(sockets)。这里只需要知道“</em>”表示可执行的普通文件；“&#x2F;”表示目录,<br>其他的后面会讲到</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls -F</span><br><span class="line">dir1/  dir2/  hello.cc  hello.o*  test.txt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> <span class="token parameter variable">-F</span>
+dir1/  dir2/  hello.cc  hello.o*  test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>其中 dir1 和 dir2 是目录文件，因此他们的后面会显示&#x2F;,而 hello.o 是可执行程序，因此后面会显示*</p>
 <p>hello.o 文件是通过 g++ 编译出来的可执行程序，hello.cc的信息如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  cout &lt;&lt; <span class="string">&quot;hello world&quot;</span> &lt;&lt; endl;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+&#123;
+  cout &lt;&lt; &quot;hello world&quot; &lt;&lt; endl;
+  return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>通过 g++ 编译后得到 hello.o 可执行程序，运行可得到输出：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  g++ -o hello.o hello.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ./hello.o</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  g++ <span class="token parameter variable">-o</span> hello.o hello.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  ./hello.o
+hello world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这里我们会发现运行 hello.o 文件需要在文件名前面加上”.&#x2F;“，上面我们讲到”.”是一个目录，表示的是当前目录，因此这里<br>我们可以发现这两个隐藏文件的作用：指定执行的文件的路径。若我们直接输入hello.o，那么系统是不知道这个可执行程序在哪里的，<br>但我们在该文件前面加上”.&#x2F;“，系统就知道了需要执行的是当前目录下的 hello.o ，所以我们当然可以进入到当前目录的下一级目录，然后<br>使用..&#x2F;hello.o 去执行这个程序：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> dir1 表示跳转到当前目录下的 dir1 目录</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cd dir1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">此时该可执行程序位于上一级目录，通过../标识路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ../hello.o</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># cd dir1 表示跳转到当前目录下的 dir1 目录</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token builtin class-name">cd</span> dir1
+<span class="token comment"># 此时该可执行程序位于上一级目录，通过../标识路径</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token punctuation">..</span>/hello.o
+hello world<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="pwd-指令">pwd 指令</span></h2><p>该指令很简单，用于显示用户当前所在的绝对路径：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx/linux_review/lesson1/dir1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx/linux_review/lesson1/dir1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="cd-指令">cd 指令</span></h2><p>该指令用于路径跳转</p>
 <p>Linux系统中，磁盘上的文件和目录被组成一棵目录树，每个节点都是目录或文件:</p>
 <p><img src="/img/Linux/common_commands/linux_dir_tree.png" alt="tree"></p>
 <p>其中最上面的是根目录，根目录是指向自己的，因此通过 cd 命令跳转到根目录的上层仍然是根目录，下面是 cd 命令的使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">显示当前所在路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx/linux_review/lesson1/dir1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过 .. 跳转到上一层目录</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  cd ..</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检测是否跳转到了上一层（相对跳转）</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx/linux_review/lesson1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接跳转到根目录（绝对跳转）</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cd /</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检测是否跳转到了根目录</span></span><br><span class="line">╭─ljx@VM-16-15-debian /</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 显示当前所在路径</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx/linux_review/lesson1/dir1
+<span class="token comment"># 通过 .. 跳转到上一层目录</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">cd</span> <span class="token punctuation">..</span>
+<span class="token comment"># 检测是否跳转到了上一层（相对跳转）</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx/linux_review/lesson1
+<span class="token comment"># 直接跳转到根目录（绝对跳转）</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token builtin class-name">cd</span> /
+<span class="token comment"># 检测是否跳转到了根目录</span>
+╭─ljx@VM-16-15-debian /
+╰─➤  <span class="token builtin class-name">pwd</span>
+/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="cd-">cd -</span></h3><p>该指令用于跳转到上一次所在的目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">显示当前所在路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx/linux_review</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">跳转到根目录</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review</span><br><span class="line">╰─➤  cd /</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再通过 <span class="built_in">cd</span> - 命令跳转到上一次所在路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian /</span><br><span class="line">╰─➤  cd -</span><br><span class="line">~/linux_review</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看是否回到了上一次所在路径</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx/linux_review</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 显示当前所在路径</span>
+╭─ljx@VM-16-15-debian ~/linux_review
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx/linux_review
+<span class="token comment"># 跳转到根目录</span>
+╭─ljx@VM-16-15-debian ~/linux_review
+╰─➤  <span class="token builtin class-name">cd</span> /
+<span class="token comment"># 再通过 cd - 命令跳转到上一次所在路径</span>
+╭─ljx@VM-16-15-debian /
+╰─➤  <span class="token builtin class-name">cd</span> -
+~/linux_review
+<span class="token comment"># 查看是否回到了上一次所在路径</span>
+╭─ljx@VM-16-15-debian ~/linux_review
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx/linux_review<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="cd-~">cd ~</span></h3><p>该指令用于跳转到自己所对应的家目录：</p>
 <p>在 Linux 中，root 用户（超级管理员）的家目录在 &#x2F;root 下，而其他普通用户的家目录在 &#x2F;home&#x2F;xxx 下面，因此<br>我们通过 cd ~ 指令就可以直接跳转到我们当前用户身份所对应的家目录下面了</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review</span><br><span class="line">╰─➤  cd ~</span><br><span class="line">╭─ljx@VM-16-15-debian ~</span><br><span class="line">╰─➤  pwd</span><br><span class="line">/home/ljx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review
+╰─➤  <span class="token builtin class-name">cd</span> ~
+╭─ljx@VM-16-15-debian ~
+╰─➤  <span class="token builtin class-name">pwd</span>
+/home/ljx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="touch">touch</span></h2><p>该指令用于创建文件（非目录），比如说我想在当前目录下面穿件一个 test.txt 文本文件:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir2</span><br><span class="line">╰─➤  touch test.cc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可以看到文件创建成功了</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir2</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 ljx ljx 0 Jul 12 22:58 test.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir2
+╰─➤  <span class="token function">touch</span> test.cc
+<span class="token comment"># 可以看到文件创建成功了</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir2
+╰─➤  ll
+total <span class="token number">0</span>
+-rw-r--r-- <span class="token number">1</span> ljx ljx <span class="token number">0</span> Jul <span class="token number">12</span> <span class="token number">22</span>:58 test.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="mkdir">mkdir</span></h2><p>该指令专门用于创建目录，通过上面可知，touch 命令是无法创建目录的，而我们需要通过这个命令创建目录文件：</p>
 <p>普通的文件目录创建就不过多赘述了，下面我们讲一下 -p 选项，该选项可以用于递归创建目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">同时创建 dir3 以及在下面递归创建 dir3_1 以及 dir3_1 下面递归创建 dir3_2</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  mkdir -p dir3/dir3_1/dir3_2  </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">tree 指令用于将目录按照树状图的形式显示出来                                                                                  1 ↵</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  tree dir3</span><br><span class="line">dir3</span><br><span class="line">└── dir3_1</span><br><span class="line">    └── dir3_2</span><br><span class="line"></span><br><span class="line">3 directories, 0 files</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 同时创建 dir3 以及在下面递归创建 dir3_1 以及 dir3_1 下面递归创建 dir3_2</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> dir3/dir3_1/dir3_2  
+<span class="token comment"># tree 指令用于将目录按照树状图的形式显示出来                                                                                  1 ↵</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  tree dir3
+dir3
+└── dir3_1
+    └── dir3_2
+
+<span class="token number">3</span> directories, <span class="token number">0</span> files<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="rmdir-及-rm-指令">rmdir 及 rm 指令</span></h2><h3><span id="rmdir">rmdir</span></h3><p>该指令只能用来删除目录文件，而 rm 指令包含了 rmdir 的所有功能，因此日后使用指令一般都用不到rmdir，下面详细介绍 rm 指令：</p>
 <h3><span id="rm">rm</span></h3><p>rm命令可以同时删除文件或目录<br><strong>语法</strong>：rm [-f-i-r-v][dirName&#x2F;dir]<br><strong>适用对象</strong>：所有使用者<br><strong>功能</strong>：删除文件或目录<br><strong>常用选项</strong>：</p>
@@ -403,14 +501,19 @@ Linux 作为一个深受广大社,"/>
 <li>-r 删除目录及其下所有文件</li>
 </ul>
 <p>下面介绍一下 -r 选项以及 -f 选项：</p>
-<h4><span id="-r">-r</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  rm dir1                                                                                                        1 ↵</span><br><span class="line">rm: cannot remove &#x27;dir1&#x27;: Is a directory                                                                                                1 ↵</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  rm -r dir1</span><br></pre></td></tr></table></figure>
+<h4><span id="-r">-r</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">rm</span> dir1                                                                                                        <span class="token number">1</span> ↵
+rm: cannot remove <span class="token string">'dir1'</span><span class="token builtin class-name">:</span> Is a directory                                                                                                <span class="token number">1</span> ↵
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">rm</span> <span class="token parameter variable">-r</span> dir1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>有些目录文件下面并不是空的，因此需要通过 -r 指令递归删除目录以及目录下的所有文件</p>
 <h4><span id="-f">-f</span></h4><p>在某些时候删除文件时会询问你是否确认删除该文件，加上这个选项后就可以跳过确认直接无脑删除了</p>
 <p>这样一来就形成了一套递归删除文件夹的命令格式：</p>
 <p>rm -rf [dir_name]</p>
 <p>示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  rm -rf dir3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">rm</span> <span class="token parameter variable">-rf</span> dir3<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h2><span id="cp">cp</span></h2><p><strong>语法</strong>：cp [选项] 源文件或目录 目标文件或目录<br><strong>功能</strong>: 复制文件或目录<br><strong>说明</strong>: cp指令用于复制文件或目录，如同时指定两个以上的文件或目录，且最后的目的地是一个已经存在的目录，<br>则它会把前面指定的所有文件或目录复制到此目录中。若同时指定多个文件或目录，而最后的目的地并非一个已存<br>在的目录，则会出现错误信息<br><strong>常用选项</strong>：</p>
 <ul>
@@ -421,10 +524,27 @@ Linux 作为一个深受广大社,"/>
 </ul>
 <p>同样的选项中 -r 和 -f 最常用，而这两个选项的用法和 rm 中的 -r 和 -f 相同，下面是使用示例：</p>
 <p>复制单个文件到指定目录：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  tree dir</span><br><span class="line">dir</span><br><span class="line"></span><br><span class="line">0 directories, 0 files</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cp hello.o dir</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  tree dir</span><br><span class="line">dir</span><br><span class="line">└── hello.o</span><br><span class="line"></span><br><span class="line">1 directory, 1 file</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  tree <span class="token function">dir</span>
+<span class="token function">dir</span>
+
+<span class="token number">0</span> directories, <span class="token number">0</span> files
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">cp</span> hello.o <span class="token function">dir</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  tree <span class="token function">dir</span>
+<span class="token function">dir</span>
+└── hello.o
+
+<span class="token number">1</span> directory, <span class="token number">1</span> <span class="token function">file</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>复制目录文件到指定目录（加上 -r 选项）：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不加上 -r 选项无法 <span class="built_in">cp</span></span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cp dir tmp</span><br><span class="line">cp: -r not specified; omitting directory &#x27;dir&#x27;</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  cp -r dir tmp     </span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 不加上 -r 选项无法 cp</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">cp</span> <span class="token function">dir</span> tmp
+cp: <span class="token parameter variable">-r</span> not specified<span class="token punctuation">;</span> omitting directory <span class="token string">'dir'</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">cp</span> <span class="token parameter variable">-r</span> <span class="token function">dir</span> tmp     <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="mv">mv</span></h2><p>mv命令是move的缩写，可以用来移动文件或者将文件改名（move (rename) files），是Linux系统下常用的命<br>令，经常用来备份文件或者目录。<br><strong>语法</strong>: mv [选项] 源文件或目录 目标文件或目录<br><strong>功能</strong>: </p>
 <ol>
@@ -437,13 +557,35 @@ Linux 作为一个深受广大社,"/>
 <li>-i ：若目标文件 (destination) 已经存在时，就会询问是否覆盖</li>
 </ul>
 <p>示例一：移动文件到指定目录下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  mv hello.o dir1</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls dir1</span><br><span class="line">hello.o</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">mv</span> hello.o dir1
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> dir1
+hello.o<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>示例二：改变文件名</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  mv hello.cc world.cc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hello.cc 被改名为 world.cc</span></span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls</span><br><span class="line">dir  dir1  test.txt  world.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">mv</span> hello.cc world.cc
+<span class="token comment"># hello.cc 被改名为 world.cc</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span>
+<span class="token function">dir</span>  dir1  test.txt  world.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>示例三：移动文件的同时改变文件名</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls</span><br><span class="line">dir  dir1  test.txt  world.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls dir1</span><br><span class="line">test.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  mv world.cc dir1/test.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls</span><br><span class="line">dir  dir1  test.txt</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1</span><br><span class="line">╰─➤  ls dir1</span><br><span class="line">test.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span>
+<span class="token function">dir</span>  dir1  test.txt  world.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> dir1
+test.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">mv</span> world.cc dir1/test.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span>
+<span class="token function">dir</span>  dir1  test.txt
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1
+╰─➤  <span class="token function">ls</span> dir1
+test.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这是你肯定会有疑问，既然 mv 指令既可以用于移动文件，又可以用于修改文件名，那么它在不同的场合到底发挥着什么功能呢？</p>
 <p>其实很简单，首先我们把 mv 的功能理解为移动文件的同时修改文件名，那么我们会发现，若目标是目录文件，就无法修改文件名，就只能将文件移动过去，<br>但目的若是非目录文件，那么就意味着我们会将该文件移动过去的同时将该文件的文件名也修改了，可以理解为覆盖cp，再抽象一点，你可以理解为 windows 中<br>将某个文件剪切下来，然后选择另一个文件通过 ctrl + v 覆盖另一个文件为之前剪切的文件</p>
@@ -454,7 +596,36 @@ Linux 作为一个深受广大社,"/>
 <li>-s 不输出多行空行</li>
 </ul>
 <p>示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  cat -n test.cc</span><br><span class="line">     1  #include &lt;iostream&gt;</span><br><span class="line">     2  using namespace std;</span><br><span class="line">     3</span><br><span class="line">     4  int main()</span><br><span class="line">     5  &#123;</span><br><span class="line">     6    cout &lt;&lt; &quot;hello world&quot; &lt;&lt; endl;</span><br><span class="line">     7    return 0;</span><br><span class="line">     8  &#125;</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  cat -ns test.cc</span><br><span class="line">     1  #include &lt;iostream&gt;</span><br><span class="line">     2  using namespace std;</span><br><span class="line">     3</span><br><span class="line">     4  int main()</span><br><span class="line">     5  &#123;</span><br><span class="line">     6    cout &lt;&lt; &quot;hello world&quot; &lt;&lt; endl;</span><br><span class="line">     7    return 0;</span><br><span class="line">     8  &#125;</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  cat -nb test.cc</span><br><span class="line">     1  #include &lt;iostream&gt;</span><br><span class="line">     2  using namespace std;</span><br><span class="line"></span><br><span class="line">     3  int main()</span><br><span class="line">     4  &#123;</span><br><span class="line">     5    cout &lt;&lt; &quot;hello world&quot; &lt;&lt; endl;</span><br><span class="line">     6    return 0;</span><br><span class="line">     7  &#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">cat</span> <span class="token parameter variable">-n</span> test.cc
+     <span class="token number">1</span>  <span class="token comment">#include &lt;iostream></span>
+     <span class="token number">2</span>  using namespace std<span class="token punctuation">;</span>
+     <span class="token number">3</span>
+     <span class="token number">4</span>  int main<span class="token punctuation">(</span><span class="token punctuation">)</span>
+     <span class="token number">5</span>  <span class="token punctuation">&#123;</span>
+     <span class="token number">6</span>    cout <span class="token operator">&lt;&lt;</span> <span class="token string">"hello world"</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+     <span class="token number">7</span>    <span class="token builtin class-name">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+     <span class="token number">8</span>  <span class="token punctuation">&#125;</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">cat</span> <span class="token parameter variable">-ns</span> test.cc
+     <span class="token number">1</span>  <span class="token comment">#include &lt;iostream></span>
+     <span class="token number">2</span>  using namespace std<span class="token punctuation">;</span>
+     <span class="token number">3</span>
+     <span class="token number">4</span>  int main<span class="token punctuation">(</span><span class="token punctuation">)</span>
+     <span class="token number">5</span>  <span class="token punctuation">&#123;</span>
+     <span class="token number">6</span>    cout <span class="token operator">&lt;&lt;</span> <span class="token string">"hello world"</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+     <span class="token number">7</span>    <span class="token builtin class-name">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+     <span class="token number">8</span>  <span class="token punctuation">&#125;</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">cat</span> <span class="token parameter variable">-nb</span> test.cc
+     <span class="token number">1</span>  <span class="token comment">#include &lt;iostream></span>
+     <span class="token number">2</span>  using namespace std<span class="token punctuation">;</span>
+
+     <span class="token number">3</span>  int main<span class="token punctuation">(</span><span class="token punctuation">)</span>
+     <span class="token number">4</span>  <span class="token punctuation">&#123;</span>
+     <span class="token number">5</span>    cout <span class="token operator">&lt;&lt;</span> <span class="token string">"hello world"</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+     <span class="token number">6</span>    <span class="token builtin class-name">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+     <span class="token number">7</span>  <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

@@ -77,6 +77,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -240,7 +242,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -249,7 +251,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li></ul>
+            <ul><li><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -297,11 +299,17 @@
 </li>
 <li><a href="#hash-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB%E8%A1%A8">hash 相关指令汇总表</a></li>
 <li><a href="#%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81">内部编码</a></li>
+</ul>
+<ul>
+<li><a href="#small-number-of-entries-and-the-biggest-entry-does-not-exceed-a-given">small number of entries, and the biggest entry does not exceed a given</a></li>
+<li><a href="#threshold-these-thresholds-can-be-configured-using-the-following-directives">threshold. These thresholds can be configured using the following directives.</a><ul>
 <li><a href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E7%BC%93%E5%AD%98">使用场景：缓存</a></li>
 <li><a href="#%E4%B8%8D%E5%90%8C%E7%BC%93%E5%AD%98%E6%96%B9%E5%BC%8F%E4%B9%8B%E9%97%B4%E7%9A%84%E6%AF%94%E8%BE%83">不同缓存方式之间的比较</a><ul>
 <li><a href="#%E5%8E%9F%E7%94%9F%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E6%AF%8F%E4%B8%AA%E5%B1%9E%E6%80%A7%E4%B8%80%E4%B8%AA%E9%94%AE">原生字符串类型⸺使⽤字符串类型，每个属性⼀个键</a></li>
 <li><a href="#%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E4%BE%8B%E5%A6%82-json-%E6%A0%BC%E5%BC%8F">序列化字符串类型，例如 JSON 格式</a></li>
 <li><a href="#%E5%93%88%E5%B8%8C%E7%B1%BB%E5%9E%8B">哈希类型</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -323,38 +331,69 @@
 
 <h2><span id="相关指令">相关指令</span></h2><p>不同于以往的 set 和 get，Hash 会采用专门的指令来设置 Hash 或获取 Hash 中特定 field 所对应的 value</p>
 <h3><span id="1-hset-指令">1、hset 指令</span></h3><p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HSET key field value [field value ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HSET key field value <span class="token punctuation">[</span>field value <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>和 String 类型一样，利用该命令可同时生成多组键值对（field-value），其中返回值对应的是成功添加的字段的个数</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成含有一个键值对的 <span class="built_in">hash</span> 数据</span></span><br><span class="line">127.0.0.1:6379&gt; hset k1 f1 v1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成含有多个键值对的 <span class="built_in">hash</span> 数据</span></span><br><span class="line">127.0.0.1:6379&gt; hset k2 f1 v1 f2 v2 f3 v3</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成含有一个键值对的 hash 数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k1 f1 v1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 生成含有多个键值对的 hash 数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k2 f1 v1 f2 v2 f3 v3
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="2-hget-指令">2、hget 指令</span></h3><p>该指令用于获取 hash 中指定字段的值</p>
 <p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HGET key field</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HGET key field<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回值：若字段存在则返回字段所对应的值，否则返回 nil</p>
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询 k1 中 f1 所对应的值</span></span><br><span class="line">127.0.0.1:6379&gt; hget k1 f1</span><br><span class="line">&quot;v1&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询不存在的值（返回nil）</span></span><br><span class="line">127.0.0.1:6379&gt; hget k1 f2</span><br><span class="line">(nil)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询 k2 中 f3 所对应的值</span></span><br><span class="line">127.0.0.1:6379&gt; hget k2 f3</span><br><span class="line">&quot;v3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询 k1 中 f1 所对应的值</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hget k1 f1
+<span class="token string">"v1"</span>
+<span class="token comment"># 查询不存在的值（返回nil）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hget k1 f2
+<span class="token punctuation">(</span>nil<span class="token punctuation">)</span>
+<span class="token comment"># 查询 k2 中 f3 所对应的值</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hget k2 f3
+<span class="token string">"v3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="3-hexists">3、hexists</span></h3><p>该指令用于判断 hash 中某个字段是否存在</p>
 <p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HEXISTS key field</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HEXISTS key field<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回值：1 表示存在，0 表示不存在</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hexists k1 f1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hexists k1 f2</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hexists k1 f1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hexists k1 f2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="4-hdel">4、hdel</span></h3><p>该指令用于删除 hash 中某个字段</p>
 <p>返回值：本次操作删除的字段个数</p>
 <p>语法格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HDEL key field [field ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HDEL key field <span class="token punctuation">[</span>field <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>若一个 hash 值中的所有字段都被删除了，那么其 hash 也会被删除</p>
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除一个字段</span></span><br><span class="line">127.0.0.1:6379&gt; hdel k2 f2</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除两个字段，因为 f2 字段刚刚已经被删掉了</span></span><br><span class="line">127.0.0.1:6379&gt; hdel k2 f1 f2 f3</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">k2 已经被删除</span></span><br><span class="line">127.0.0.1:6379&gt; exists k2</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 删除一个字段</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hdel k2 f2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 删除两个字段，因为 f2 字段刚刚已经被删掉了</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hdel k2 f1 f2 f3
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token comment"># k2 已经被删除</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> exists k2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>注意：不要混淆 exists 和 hexists 以及 del 和 hdel，前者是用来操作 key 值的，而后者是用来操作 key 中指定字段的</strong><br>示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">之前的 k2 已经被删除，直接生成一个字符串类型 k2</span></span><br><span class="line">127.0.0.1:6379&gt; set k2 v2</span><br><span class="line">OK</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">exists 和 del 不管用户给的是什么数据类型，直接操控和访问的是 key</span></span><br><span class="line">127.0.0.1:6379&gt; exists k1 k2</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; del k1 k2</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 之前的 k2 已经被删除，直接生成一个字符串类型 k2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> <span class="token builtin class-name">set</span> k2 v2
+OK
+<span class="token comment"># exists 和 del 不管用户给的是什么数据类型，直接操控和访问的是 key</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> exists k1 k2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> del k1 k2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="5-hkeys-hvals-hgetall">5、hkeys、hvals、hgetall</span></h3><ul>
 <li>hkeys 用于查询指定的 hash 中的所有字段</li>
@@ -362,39 +401,94 @@
 <li>hgetall 综合了 hkeys 和 hvals 两者，返回指定的 hash 中的所有字段及字段所对应的值</li>
 </ul>
 <p>格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hkeys</span></span><br><span class="line">HKEYS key</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hvals</span></span><br><span class="line">HVALS key</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hgetall</span></span><br><span class="line">HGETALL key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># hkeys</span>
+HKEYS key
+<span class="token comment"># hvals</span>
+HVALS key
+<span class="token comment"># hgetall</span>
+HGETALL key<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset key f1 v1 f2 v2 f3 v3</span><br><span class="line">(integer) 3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hkeys</span></span><br><span class="line">127.0.0.1:6379&gt; hkeys key</span><br><span class="line">1) &quot;f1&quot;</span><br><span class="line">2) &quot;f2&quot;</span><br><span class="line">3) &quot;f3&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hvals</span></span><br><span class="line">127.0.0.1:6379&gt; hvals key</span><br><span class="line">1) &quot;v1&quot;</span><br><span class="line">2) &quot;v2&quot;</span><br><span class="line">3) &quot;v3&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hgetall</span></span><br><span class="line">127.0.0.1:6379&gt; hgetall key</span><br><span class="line">1) &quot;f1&quot;</span><br><span class="line">2) &quot;v1&quot;</span><br><span class="line">3) &quot;f2&quot;</span><br><span class="line">4) &quot;v2&quot;</span><br><span class="line">5) &quot;f3&quot;</span><br><span class="line">6) &quot;v3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset key f1 v1 f2 v2 f3 v3
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token comment"># hkeys</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hkeys key
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"f1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"f2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"f3"</span>
+<span class="token comment"># hvals</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hvals key
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"v1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"v2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"v3"</span>
+<span class="token comment"># hgetall</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hgetall key
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"f1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"v1"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"f2"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"v2"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"f3"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"v3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="6-hmget">6、hmget</span></h3><p>相较于 hget，该指令可以一次获取多个值</p>
 <p>格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HMGET key field [field ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HMGET key field <span class="token punctuation">[</span>field <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>用法和 hget 类似，下面是使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">书接上回</span></span><br><span class="line">127.0.0.1:6379&gt; hmget key f1 f2 f3</span><br><span class="line">1) &quot;v1&quot;</span><br><span class="line">2) &quot;v2&quot;</span><br><span class="line">3) &quot;v3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 书接上回</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hmget key f1 f2 f3
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"v1"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"v2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"v3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="7-hlen">7、hlen</span></h3><p>顾名思义，这个命令是用来获取 hash 中字段个数的，格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HLEN key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HLEN key<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">书接上回</span></span><br><span class="line">127.0.0.1:6379&gt; hlen key</span><br><span class="line">(integer) 3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 书接上回</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hlen key
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="8-hsetnx">8、hsetnx</span></h3><p>该命令用于在字段不存在的情况下，设置 hash 中的字段和值,格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HSETNX key field value</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">HSETNX key field value<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回值：1 表示成功，0 表示失败</p>
 <p>用法如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">成功</span></span><br><span class="line">127.0.0.1:6379&gt; hsetnx k1 f1 v1</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">成功</span></span><br><span class="line">127.0.0.1:6379&gt; hsetnx k1 f2 v2</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">失败</span></span><br><span class="line">127.0.0.1:6379&gt; hsetnx k1 f2 v2</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 成功</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hsetnx k1 f1 v1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 成功</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hsetnx k1 f2 v2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># 失败</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hsetnx k1 f2 v2
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="9-hincrby-hincrbyfloat">9、hincrby、hincrbyfloat</span></h3><p>hincrby 用于整数进行加减运算，而 hincrbyfloat 用于浮点数运算</p>
 <p>返回值：计算之后的结果</p>
 <p>格式如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hincrby</span></span><br><span class="line">HINCRBY key field increment</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hincrbyfloat</span></span><br><span class="line">HINCRBYFLOAT key field increment</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># hincrby</span>
+HINCRBY key field increment
+<span class="token comment"># hincrbyfloat</span>
+HINCRBYFLOAT key field increment<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>需要注意的是，hincrby 操作时 value 必须是 int 类型，但若通过 hincrbyfloat 对 int 类型进行操作后，<br>即便操作的是整数的加减，也会导致 value 变成非 int 类型</p>
 <p>使用示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset k1 f1 5</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; hincrby k1 f1 6</span><br><span class="line">(integer) 11</span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat k1 f1 6</span><br><span class="line">&quot;17&quot;</span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat k1 f1 6.5</span><br><span class="line">&quot;23.5&quot;</span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat k1 f1 3.3</span><br><span class="line">&quot;26.8&quot;</span><br><span class="line">127.0.0.1:6379&gt; hincrbyfloat k1 f1 -4.4</span><br><span class="line">&quot;22.4&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">value 已不再是 int 类型，无法使用 hincrby 进行操作</span></span><br><span class="line">127.0.0.1:6379&gt; hincrby k1 f1 -6</span><br><span class="line">(error) ERR hash value is not an integer</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k1 f1 <span class="token number">5</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrby k1 f1 <span class="token number">6</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">11</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrbyfloat k1 f1 <span class="token number">6</span>
+<span class="token string">"17"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrbyfloat k1 f1 <span class="token number">6.5</span>
+<span class="token string">"23.5"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrbyfloat k1 f1 <span class="token number">3.3</span>
+<span class="token string">"26.8"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrbyfloat k1 f1 <span class="token parameter variable">-4.4</span>
+<span class="token string">"22.4"</span>
+<span class="token comment"># value 已不再是 int 类型，无法使用 hincrby 进行操作</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hincrby k1 f1 <span class="token parameter variable">-6</span>
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> ERR <span class="token builtin class-name">hash</span> value is not an integer<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="hash-相关指令汇总表">hash 相关指令汇总表</span></h2><table>
 <thead>
@@ -483,10 +577,22 @@
 </li>
 </ul>
 <p>若哈希中字段数量过多或者 value 过长都会使得存储方式变为 hashtable，而具体数值是可以在 conf 文件中被配置的：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Hashes are encoded using a memory efficient data structure when they have a</span><br><span class="line"># small number of entries, and the biggest entry does not exceed a given</span><br><span class="line"># threshold. These thresholds can be configured using the following directives.</span><br><span class="line">hash-max-listpack-entries 512</span><br><span class="line">hash-max-listpack-value 64</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-conf" data-language="conf"><code class="language-conf"># Hashes are encoded using a memory efficient data structure when they have a
+# small number of entries, and the biggest entry does not exceed a given
+# threshold. These thresholds can be configured using the following directives.
+hash-max-listpack-entries 512
+hash-max-listpack-value 64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>下面是不同长度的 value 存储方式的区别：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; hset k1 f1 v1</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; OBJECT ENCODING k1</span><br><span class="line">&quot;listpack&quot;</span><br><span class="line">127.0.0.1:6379&gt; hset k1 f2 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv22222222222222222222222222222222222222222222222222222222</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">value 太长，类型变为 hashtable</span></span><br><span class="line">127.0.0.1:6379&gt; OBJECT ENCODING k1</span><br><span class="line">&quot;hashtable&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k1 f1 v1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> OBJECT ENCODING k1
+<span class="token string">"listpack"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k1 f2 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv22222222222222222222222222222222222222222222222222222222
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token comment"># value 太长，类型变为 hashtable</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> OBJECT ENCODING k1
+<span class="token string">"hashtable"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="使用场景缓存">使用场景：缓存</span></h2><p>在关系型数据库当中，数据的存储是必须争对每一列属性都有对应的值的，而通过哈希表的方式存储，可以按需插入数据，且看起来更加直观，并且<br>更新起数据更加灵活。</p>
 <p>二者各有各的好处，若使用关系型数据库进行数据的存储，虽然会消耗更多的空间，但相对于着可以进行更多复杂的操作，若使用哈希进行数据的操作，<br>操作可行性更低（能做的操作更加有限），当然，好处就是哈希所消耗的空间更少。因此，具体使用哪种方式得根据具体实际去讨论。当然，这两者并<br>不冲突，因为哈希是用作缓存的，而关系型数据库是直接用于存储的，很多时候是两者相结合着一起使用，对于复杂的表操作固然选择使用关系型数据库<br>进行操作，而对于一些简单数据操作，则选择直接对缓存进行操作，因此，我们对这两者的比较并不是为了分出胜负来，因为我们正是因为它们各有优劣<br>才选择将两者结合起来使用的，不要忘了我们的初衷，Redis 更多是为了帮助忙不过来的关系型数据库服务的。</p>
@@ -564,17 +670,59 @@
 </tr>
 </tbody></table>
 <h2><span id="不同缓存方式之间的比较">不同缓存方式之间的比较</span></h2><p>下面我们需要讨论三种不同的缓存方式：</p>
-<h3><span id="原生字符串类型使用字符串类型每个属性一个键">原生字符串类型⸺使⽤字符串类型，每个属性⼀个键</span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">set user:1:name James</span><br><span class="line">set user:1:age 23</span><br><span class="line">set user:1:city Beijing</span><br></pre></td></tr></table></figure>
+<h3><span id="原生字符串类型使用字符串类型每个属性一个键">原生字符串类型⸺使⽤字符串类型，每个属性⼀个键</span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">set</span> user:1:name James
+<span class="token builtin class-name">set</span> user:1:age <span class="token number">23</span>
+<span class="token builtin class-name">set</span> user:1:city Beijing<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>优点：实现简单，针对个别属性变更也很灵活。<br>缺点：占⽤过多的键，内存占⽤量较⼤，同时⽤⼾信息在 Redis 中⽐较分散，缺少内聚性，所以这种<br>⽅案基本没有实⽤性。</p>
-<h3><span id="序列化字符串类型例如-json-格式">序列化字符串类型，例如 JSON 格式</span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set user:1 经过序列化后的⽤⼾对象字符串</span><br></pre></td></tr></table></figure>
+<h3><span id="序列化字符串类型例如-json-格式">序列化字符串类型，例如 JSON 格式</span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">set</span> user:1 经过序列化后的⽤⼾对象字符串<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>优点：针对总是以整体作为操作的信息⽐较合适，编程也简单。同时，如果序列化⽅案选择合适，内<br>存的使⽤效率很⾼。<br>缺点：本⾝序列化和反序列需要⼀定开销，同时如果总是操作个别属性则⾮常不灵活。</p>
-<h3><span id="哈希类型">哈希类型</span></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hmset user:1 name James age 23 city Beijin</span><br></pre></td></tr></table></figure>
+<h3><span id="哈希类型">哈希类型</span></h3><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">hmset user:1 name James age <span class="token number">23</span> city Beijin<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>优点：简单、直观、灵活。尤其是针对信息的局部变更或者获取操作。<br>缺点：需要控制哈希在 ziplist 和 hashtable 两种内部编码的转换，可能会造成内存的较⼤消耗。</p>
 <p>相⽐于使⽤ JSON 格式的字符串缓存⽤⼾信息，哈希类型变得更加直观，并且在更新操作上变得更灵活。可以将每个⽤⼾的 id 定义<br>为键后缀，多对 field-value 对应⽤⼾的各个属性，类似如下伪代码</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 根据用户ID获取用户信息（缓存优先）</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> uid 用户ID</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 用户信息对象，未找到时返回null</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">UserInfo <span class="title function_">getUserInfo</span><span class="params">(<span class="type">long</span> uid)</span> &#123;</span><br><span class="line">    <span class="comment">// 1. 构建Redis键</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">key</span> <span class="operator">=</span> <span class="string">&quot;user:&quot;</span> + uid;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 尝试从Redis获取缓存数据</span></span><br><span class="line">    Map&lt;String, String&gt; userInfoMap = Redis执行命令：hgetall key;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 缓存命中处理</span></span><br><span class="line">    <span class="keyword">if</span> (userInfoMap != <span class="literal">null</span> &amp;&amp; !userInfoMap.isEmpty()) &#123;</span><br><span class="line">        <span class="comment">// 将Redis哈希数据转换为UserInfo对象</span></span><br><span class="line">        <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> 利用映射关系构建对象(userInfoMap);</span><br><span class="line">        <span class="keyword">return</span> userInfo;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 缓存未命中，查询数据库</span></span><br><span class="line">    <span class="type">UserInfo</span> <span class="variable">userInfo</span> <span class="operator">=</span> MySQL执行SQL：select * from user_info <span class="type">where</span> <span class="variable">uid</span> <span class="operator">=</span> &lt;uid&gt;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5. 处理未找到用户的情况</span></span><br><span class="line">    <span class="keyword">if</span> (userInfo == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 记录日志或响应404</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 6. 写入Redis缓存</span></span><br><span class="line">    Redis执行命令：hmset key </span><br><span class="line">        name userInfo.name </span><br><span class="line">        age userInfo.age </span><br><span class="line">        city userInfo.city;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 7. 设置缓存过期时间（1小时）</span></span><br><span class="line">    Redis执行命令：expire key <span class="number">3600</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 8. 返回用户信息</span></span><br><span class="line">    <span class="keyword">return</span> userInfo;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-java" data-language="java"><code class="language-java"><span class="token comment">/**
+ * 根据用户ID获取用户信息（缓存优先）
+ * @param uid 用户ID
+ * @return 用户信息对象，未找到时返回null
+ */</span>
+<span class="token class-name">UserInfo</span> <span class="token function">getUserInfo</span><span class="token punctuation">(</span><span class="token keyword">long</span> uid<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 1. 构建Redis键</span>
+    <span class="token class-name">String</span> key <span class="token operator">=</span> <span class="token string">"user:"</span> <span class="token operator">+</span> uid<span class="token punctuation">;</span>
+
+    <span class="token comment">// 2. 尝试从Redis获取缓存数据</span>
+    <span class="token class-name">Map</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">,</span> <span class="token class-name">String</span><span class="token punctuation">></span></span> userInfoMap <span class="token operator">=</span> <span class="token class-name">Redis</span>执行命令：hgetall key<span class="token punctuation">;</span>
+
+    <span class="token comment">// 3. 缓存命中处理</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>userInfoMap <span class="token operator">!=</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">!</span>userInfoMap<span class="token punctuation">.</span><span class="token function">isEmpty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 将Redis哈希数据转换为UserInfo对象</span>
+        <span class="token class-name">UserInfo</span> userInfo <span class="token operator">=</span> 利用映射关系构建对象<span class="token punctuation">(</span>userInfoMap<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> userInfo<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 4. 缓存未命中，查询数据库</span>
+    <span class="token class-name">UserInfo</span> userInfo <span class="token operator">=</span> <span class="token class-name">MySQL</span>执行<span class="token constant">SQL</span>：select <span class="token operator">*</span> from user_info where uid <span class="token operator">=</span> <span class="token generics"><span class="token punctuation">&lt;</span>uid<span class="token punctuation">></span></span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 5. 处理未找到用户的情况</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>userInfo <span class="token operator">==</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 记录日志或响应404</span>
+        <span class="token keyword">return</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 6. 写入Redis缓存</span>
+    <span class="token class-name">Redis</span>执行命令：hmset key 
+        name userInfo<span class="token punctuation">.</span>name 
+        age userInfo<span class="token punctuation">.</span>age 
+        city userInfo<span class="token punctuation">.</span>city<span class="token punctuation">;</span>
+
+    <span class="token comment">// 7. 设置缓存过期时间（1小时）</span>
+    <span class="token class-name">Redis</span>执行命令：expire key <span class="token number">3600</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 8. 返回用户信息</span>
+    <span class="token keyword">return</span> userInfo<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

@@ -80,6 +80,8 @@ Z,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -243,7 +245,7 @@ Z,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -252,7 +254,7 @@ Z,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a></li><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li></ul>
+            <ul><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/2025/08/19/Redis/redis_rdb/">Redis 持久化</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -359,7 +361,7 @@ Z,"/>
 </tbody></table>
 <h2><span id="相关指令">相关指令</span></h2><h3><span id="zadd-指令深度解析"><strong>ZADD 指令深度解析</strong></span></h3><p>将一个或多个成员元素及其分数值加入到有序集（sorted set）中。如果成员已经存在于有序集合中，则会更新其分数值，并根据新的分数值重新排序。</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZADD key [NX|XX] [GT|LT] [CH] [INCR] score member [score member ...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZADD key <span class="token punctuation">[</span>NX<span class="token operator">|</span>XX<span class="token punctuation">]</span> <span class="token punctuation">[</span>GT<span class="token operator">|</span>LT<span class="token punctuation">]</span> <span class="token punctuation">[</span>CH<span class="token punctuation">]</span> <span class="token punctuation">[</span>INCR<span class="token punctuation">]</span> score member <span class="token punctuation">[</span>score member <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="选项说明">选项说明</span></h4><ul>
 <li><strong>NX</strong>：仅添加新元素，不更新已存在的元素</li>
@@ -383,32 +385,111 @@ Z,"/>
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li>基本用法：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加三个成员</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset 1 &quot;one&quot; 2 &quot;two&quot; 3 &quot;three&quot;</span><br><span class="line">(integer) 3</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看有序集</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">3) &quot;two&quot;</span><br><span class="line">4) &quot;2&quot;</span><br><span class="line">5) &quot;three&quot;</span><br><span class="line">6) &quot;3&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加三个成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset <span class="token number">1</span> <span class="token string">"one"</span> <span class="token number">2</span> <span class="token string">"two"</span> <span class="token number">3</span> <span class="token string">"three"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+
+<span class="token comment"># 查看有序集</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zrange myzset <span class="token number">0</span> <span class="token parameter variable">-1</span> withscores
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"one"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"two"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"three"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"3"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>使用NX选项（仅添加新元素）：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试更新已存在的元素<span class="string">&quot;one&quot;</span>（失败）</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset NX 4 &quot;one&quot; 5 &quot;four&quot;</span><br><span class="line">(integer) 1  # 只新增了&quot;four&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;one&quot;</span><br><span class="line">2) &quot;1&quot;</span><br><span class="line">3) &quot;two&quot;</span><br><span class="line">4) &quot;2&quot;</span><br><span class="line">5) &quot;three&quot;</span><br><span class="line">6) &quot;3&quot;</span><br><span class="line">7) &quot;four&quot;</span><br><span class="line">8) &quot;5&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 尝试更新已存在的元素"one"（失败）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset NX <span class="token number">4</span> <span class="token string">"one"</span> <span class="token number">5</span> <span class="token string">"four"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>  <span class="token comment"># 只新增了"four"</span>
+
+<span class="token comment"># 查看结果</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zrange myzset <span class="token number">0</span> <span class="token parameter variable">-1</span> withscores
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"one"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"1"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"two"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"three"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"four"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"5"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li>使用XX选项（仅更新已存在元素）：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试更新已存在的<span class="string">&quot;one&quot;</span>和新增<span class="string">&quot;five&quot;</span></span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset XX 10 &quot;one&quot; 5 &quot;five&quot;</span><br><span class="line">(integer) 1  # 只更新了&quot;one&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;one&quot;</span><br><span class="line">8) &quot;10&quot;  # &quot;one&quot;的分数被更新</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 尝试更新已存在的"one"和新增"five"</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset XX <span class="token number">10</span> <span class="token string">"one"</span> <span class="token number">5</span> <span class="token string">"five"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>  <span class="token comment"># 只更新了"one"</span>
+
+<span class="token comment"># 查看结果</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zrange myzset <span class="token number">0</span> <span class="token parameter variable">-1</span> withscores
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"two"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"three"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"four"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"one"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"10"</span>  <span class="token comment"># "one"的分数被更新</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="4">
 <li>使用CH选项（返回修改总数）：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新一个已存在元素，添加一个新元素</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset CH 15 &quot;one&quot; 20 &quot;five&quot;</span><br><span class="line">(integer) 2  # 一个更新，一个新增</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;one&quot;</span><br><span class="line">8) &quot;15&quot;</span><br><span class="line">9) &quot;five&quot;</span><br><span class="line">10) &quot;20&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 更新一个已存在元素，添加一个新元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset CH <span class="token number">15</span> <span class="token string">"one"</span> <span class="token number">20</span> <span class="token string">"five"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># 一个更新，一个新增</span>
+
+<span class="token comment"># 查看结果</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zrange myzset <span class="token number">0</span> <span class="token parameter variable">-1</span> withscores
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"two"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"three"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"four"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"one"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"15"</span>
+<span class="token number">9</span><span class="token punctuation">)</span> <span class="token string">"five"</span>
+<span class="token number">10</span><span class="token punctuation">)</span> <span class="token string">"20"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="5">
 <li>使用INCR选项（分数递增）：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将<span class="string">&quot;one&quot;</span>的分数增加5</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset INCR 5 &quot;one&quot;</span><br><span class="line">&quot;20&quot;  # 返回新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看结果</span></span><br><span class="line">127.0.0.1:6379&gt; zrange myzset 0 -1 withscores</span><br><span class="line">1) &quot;two&quot;</span><br><span class="line">2) &quot;2&quot;</span><br><span class="line">3) &quot;three&quot;</span><br><span class="line">4) &quot;3&quot;</span><br><span class="line">5) &quot;four&quot;</span><br><span class="line">6) &quot;5&quot;</span><br><span class="line">7) &quot;five&quot;</span><br><span class="line">8) &quot;20&quot;</span><br><span class="line">9) &quot;one&quot;</span><br><span class="line">10) &quot;20&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将"one"的分数增加5</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset INCR <span class="token number">5</span> <span class="token string">"one"</span>
+<span class="token string">"20"</span>  <span class="token comment"># 返回新分数</span>
+
+<span class="token comment"># 查看结果</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zrange myzset <span class="token number">0</span> <span class="token parameter variable">-1</span> withscores
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"two"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"2"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"three"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"3"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"four"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"5"</span>
+<span class="token number">7</span><span class="token punctuation">)</span> <span class="token string">"five"</span>
+<span class="token number">8</span><span class="token punctuation">)</span> <span class="token string">"20"</span>
+<span class="token number">9</span><span class="token punctuation">)</span> <span class="token string">"one"</span>
+<span class="token number">10</span><span class="token punctuation">)</span> <span class="token string">"20"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol>
 <li>使用GT&#x2F;LT选项：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">只有当新分数大于当前分数时才更新</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset GT 25 &quot;one&quot;  # 当前分数20 &lt; 25，会更新</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">尝试用更小的分数更新</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset GT 10 &quot;one&quot;  # 当前分数25 &gt; 10，不会更新</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用LT选项（只有当新分数小于当前分数时才更新）</span></span><br><span class="line">127.0.0.1:6379&gt; zadd myzset LT 8 &quot;two&quot;  # 当前分数2 &lt; 8，不会更新</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; zadd myzset LT 1 &quot;two&quot;  # 当前分数2 &gt; 1，会更新</span><br><span class="line">(integer) 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 只有当新分数大于当前分数时才更新</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset GT <span class="token number">25</span> <span class="token string">"one"</span>  <span class="token comment"># 当前分数20 &lt; 25，会更新</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+
+<span class="token comment"># 尝试用更小的分数更新</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset GT <span class="token number">10</span> <span class="token string">"one"</span>  <span class="token comment"># 当前分数25 > 10，不会更新</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+
+<span class="token comment"># 使用LT选项（只有当新分数小于当前分数时才更新）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset LT <span class="token number">8</span> <span class="token string">"two"</span>  <span class="token comment"># 当前分数2 &lt; 8，不会更新</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd myzset LT <span class="token number">1</span> <span class="token string">"two"</span>  <span class="token comment"># 当前分数2 > 1，会更新</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li>分数值是64位双精度浮点数，可以表示的范围为-(2^53)到+(2^53)</li>
@@ -419,15 +500,19 @@ Z,"/>
 </ol>
 <h3><span id="zcard">zcard</span></h3><p>该指令获取—个 zset 的基数（cardinality），即 zset 中的元素个数</p>
 <p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZCARD key</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZCARD key<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>时间复杂度：O(1)</p>
 <p>返回值：zset 内的元素个数</p>
 <p>使用示例：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd k1 10 a 20 b</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询 k1 中的元素个数</span></span><br><span class="line">127.0.0.1:6379&gt; zcard k1</span><br><span class="line">(integer) 2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd k1 <span class="token number">10</span> a <span class="token number">20</span> b
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token comment"># 查询 k1 中的元素个数</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zcard k1
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="zcount">zcount</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZCOUNT key min max</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZCOUNT key min max<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回有序集合中分数值在<code>min</code>和<code>max</code>之间的成员数量（默认包含边界值）</p>
 <p>时间复杂度：O(log(N))，其中N是有序集合的基数</p>
@@ -441,17 +526,39 @@ Z,"/>
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li>基本用法（闭区间）：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建有序集合</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot;</span><br><span class="line">(integer) 4</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计200-400分（包含边界）的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores 200 400</span><br><span class="line">(integer) 3  # 包含Bob(200), Charlie(300), David(400)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建有序集合</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span> <span class="token number">400</span> <span class="token string">"David"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">4</span>
+
+<span class="token comment"># 统计200-400分（包含边界）的成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token number">200</span> <span class="token number">400</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>  <span class="token comment"># 包含Bob(200), Charlie(300), David(400)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>开区间用法：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计大于200且小于400的成员（排除边界）</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 (400</span><br><span class="line">(integer) 1  # 仅Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅排除下限</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 400</span><br><span class="line">(integer) 2  # Charlie(300), David(400)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅排除上限</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores 200 (400</span><br><span class="line">(integer) 2  # Bob(200), Charlie(300)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 统计大于200且小于400的成员（排除边界）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token punctuation">(</span><span class="token number">200</span> <span class="token punctuation">(</span><span class="token number">400</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>  <span class="token comment"># 仅Charlie(300)</span>
+
+<span class="token comment"># 仅排除下限</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token punctuation">(</span><span class="token number">200</span> <span class="token number">400</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># Charlie(300), David(400)</span>
+
+<span class="token comment"># 仅排除上限</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token number">200</span> <span class="token punctuation">(</span><span class="token number">400</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># Bob(200), Charlie(300)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li>无限区间：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计所有小于300分的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores -inf 300</span><br><span class="line">(integer) 3  # Alice(100), Bob(200), Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">统计所有大于200分的成员（不包含200）</span></span><br><span class="line">127.0.0.1:6379&gt; ZCOUNT scores (200 +inf</span><br><span class="line">(integer) 2  # Charlie(300), David(400)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 统计所有小于300分的成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token parameter variable">-inf</span> <span class="token number">300</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>  <span class="token comment"># Alice(100), Bob(200), Charlie(300)</span>
+
+<span class="token comment"># 统计所有大于200分的成员（不包含200）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZCOUNT scores <span class="token punctuation">(</span><span class="token number">200</span> +inf
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># Charlie(300), David(400)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li>默认范围是闭区间（包含边界值）</li>
@@ -460,7 +567,7 @@ Z,"/>
 <li>分数值使用双精度浮点数存储</li>
 </ol>
 <h3><span id="zrange">zrange</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZRANGE key start stop [BYSCORE | BYLEX] [REV] [LIMIT offset count] [WITHSCORES]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZRANGE key start stop <span class="token punctuation">[</span>BYSCORE <span class="token operator">|</span> BYLEX<span class="token punctuation">]</span> <span class="token punctuation">[</span>REV<span class="token punctuation">]</span> <span class="token punctuation">[</span>LIMIT offset count<span class="token punctuation">]</span> <span class="token punctuation">[</span>WITHSCORES<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回有序集合中指定区间内的成员，支持按索引、分数或字典序查询</p>
 <h4><span id="核心功能">核心功能</span></h4><ol>
@@ -470,7 +577,11 @@ Z,"/>
 </ul>
 </li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取前3个元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 2</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取前3个元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token number">2</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>分数范围查询</strong>（BYSCORE）：<ul>
@@ -479,7 +590,10 @@ Z,"/>
 </ul>
 </li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取分数在(100,300]之间的元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores (100 300 BYSCORE</span><br><span class="line">1) &quot;Bob&quot;</span><br><span class="line">2) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取分数在(100,300]之间的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token punctuation">(</span><span class="token number">100</span> <span class="token number">300</span> BYSCORE
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li><strong>字典序查询</strong>（BYLEX）：<ul>
@@ -488,7 +602,14 @@ Z,"/>
 </ul>
 </li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD k1 1 a 1 b 1 c 1 d 1 e 1 f</span><br><span class="line">(integer) 6</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取字典序在[a,e)之间的元素</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE k1 [a (e BYLEX</span><br><span class="line">1) &quot;a&quot;</span><br><span class="line">2) &quot;b&quot;</span><br><span class="line">3) &quot;c&quot;</span><br><span class="line">4) &quot;d&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD k1 <span class="token number">1</span> a <span class="token number">1</span> b <span class="token number">1</span> c <span class="token number">1</span> d <span class="token number">1</span> e <span class="token number">1</span> f
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">6</span>
+<span class="token comment"># 获取字典序在[a,e)之间的元素</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE k1 <span class="token punctuation">[</span>a <span class="token punctuation">(</span>e BYLEX
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"a"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"b"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"c"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"d"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="关键选项">关键选项：</span></h4><ul>
 <li><code>REV</code>：反向排序（从高到低）</li>
@@ -501,17 +622,29 @@ Z,"/>
 <h4><span id="使用示例">使用示例：</span></h4><ol>
 <li>基本范围查询：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Charlie&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>带分数的反向查询：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 REV WITHSCORES</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br><span class="line">3) &quot;Bob&quot;</span><br><span class="line">4) &quot;200&quot;</span><br><span class="line">5) &quot;Alice&quot;</span><br><span class="line">6) &quot;100&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span> REV WITHSCORES
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"300"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"200"</span>
+<span class="token number">5</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span>
+<span class="token number">6</span><span class="token punctuation">)</span> <span class="token string">"100"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li>开区间查询：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZRANGE scores (100 (300 BYSCORE</span><br><span class="line">1) &quot;Bob&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token punctuation">(</span><span class="token number">100</span> <span class="token punctuation">(</span><span class="token number">300</span> BYSCORE
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li>Redis 6.2+版本开始替代了ZREVRANGE等命令</li>
@@ -519,7 +652,7 @@ Z,"/>
 <li>大范围查询可能影响性能（时间复杂度O(log(N)+M)）</li>
 </ol>
 <h3><span id="zrevrange">ZREVRANGE</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREVRANGE key start stop [WITHSCORES]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZREVRANGE key start stop <span class="token punctuation">[</span>WITHSCORES<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回有序集合中指定索引范围内的成员，按分数从高到低排序（与ZRANGE排序相反）</p>
 <h4><span id="核心特性">核心特性</span></h4><ol>
@@ -536,12 +669,21 @@ Z,"/>
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li>基本用法：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZREVRANGE scores 0 -1  # 获取全部元素（降序）</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;Bob&quot;</span><br><span class="line">3) &quot;Alice&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span>  <span class="token comment"># 获取全部元素（降序）</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>带分数返回：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZREVRANGE scores 0 1 WITHSCORES  # 获取前两名</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br><span class="line">3) &quot;Bob&quot;</span><br><span class="line">4) &quot;200&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANGE scores <span class="token number">0</span> <span class="token number">1</span> WITHSCORES  <span class="token comment"># 获取前两名</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"300"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"200"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li><strong>已弃用</strong>：Redis 6.2+建议改用<code>ZRANGE key start stop REV</code></li>
@@ -551,14 +693,14 @@ Z,"/>
 <h4><span id="典型应用场景">典型应用场景</span></h4><ol>
 <li>排行榜（显示前N名）</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZREVRANGE leaderboard 0 9 WITHSCORES</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANGE leaderboard <span class="token number">0</span> <span class="token number">9</span> WITHSCORES<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li>优先级队列（处理高优先级任务）</li>
 <li>时间线（最新内容优先）</li>
 </ol>
 <h3><span id="zpopmax">ZPOPMAX</span></h3><p>命令格式：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZPOPMAX key [count]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZPOPMAX key <span class="token punctuation">[</span>count<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>移除并返回有序集合中分数最高的成员（默认返回1个）</p>
 <h4><span id="核心特性">核心特性</span></h4><ol>
@@ -571,17 +713,33 @@ Z,"/>
 <h4><span id="使用示例">使用示例</span></h4><ol>
 <li>基本用法：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX scores  # 移除并返回最高分成员</span><br><span class="line">1) &quot;Charlie&quot;</span><br><span class="line">2) &quot;300&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX scores  <span class="token comment"># 移除并返回最高分成员</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Charlie"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"300"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>批量移除：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX scores 2  # 移除前两名</span><br><span class="line">1) &quot;Bob&quot;</span><br><span class="line">2) &quot;200&quot;</span><br><span class="line">3) &quot;Alice&quot;</span><br><span class="line">4) &quot;100&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX scores <span class="token number">2</span>  <span class="token comment"># 移除前两名</span>
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Bob"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"200"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"100"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="3">
 <li>异常情况：</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键不存在时</span></span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX not_exists</span><br><span class="line">(empty array)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型时</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZPOPMAX wrong_type</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 键不存在时</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX not_exists
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span>
+
+<span class="token comment"># 错误数据类型时</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SET wrong_type <span class="token string">"value"</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX wrong_type
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> WRONGTYPE Operation against a key holding the wrong kind of value<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li><strong>count限制</strong>：<ul>
@@ -595,12 +753,12 @@ Z,"/>
 <h4><span id="典型应用场景">典型应用场景</span></h4><ol>
 <li>任务队列（处理高优先级任务）</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX pending_tasks</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX pending_tasks<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="2">
 <li>实时排行榜（获取当日冠军）</li>
 </ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; ZPOPMAX daily_ranking WITHSCORES</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZPOPMAX daily_ranking WITHSCORES<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ol start="3">
 <li>流量控制（处理最高权重请求）</li>
@@ -610,7 +768,8 @@ Z,"/>
 <li><strong>ZRANK</strong>：返回成员在有序集合中的升序排名（分数从低到高），排名从0开始计算，最低分成员排名为0</li>
 <li><strong>ZREVRANK</strong>：返回成员在有序集合中的降序排名（分数从高到低），排名从0开始计算，最高分成员排名为0</li>
 </ul>
-<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZRANK key member [WITHSCORE]</span><br><span class="line">ZREVRANK key member [WITHSCORE]</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZRANK key member <span class="token punctuation">[</span>WITHSCORE<span class="token punctuation">]</span>
+ZREVRANK key member <span class="token punctuation">[</span>WITHSCORE<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="3-共同特性">3. 共同特性</span></h4><ul>
 <li>时间复杂度：O(log(N))</li>
@@ -645,7 +804,25 @@ Z,"/>
 <td>最大排名值</td>
 </tr>
 </tbody></table>
-<h4><span id="5-使用示例">5. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD leaderboard 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ZRANK示例（升序排名）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANK leaderboard &quot;Alice&quot;  # 最低分→排名0</span><br><span class="line">(integer) 0</span><br><span class="line">127.0.0.1:6379&gt; ZRANK leaderboard &quot;Charlie&quot;  # 最高分→排名2</span><br><span class="line">(integer) 2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ZREVRANK示例（降序排名）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Alice&quot;  # 最低分→排名2</span><br><span class="line">(integer) 2</span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Charlie&quot;  # 最高分→排名0</span><br><span class="line">(integer) 0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">WITHSCORE选项（Redis 7.2+）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREVRANK leaderboard &quot;Bob&quot; WITHSCORE</span><br><span class="line">1) (integer) 1</span><br><span class="line">2) &quot;200&quot;</span><br></pre></td></tr></table></figure>
+<h4><span id="5-使用示例">5. 使用示例</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD leaderboard <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+
+<span class="token comment"># ZRANK示例（升序排名）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANK leaderboard <span class="token string">"Alice"</span>  <span class="token comment"># 最低分→排名0</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANK leaderboard <span class="token string">"Charlie"</span>  <span class="token comment"># 最高分→排名2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+
+<span class="token comment"># ZREVRANK示例（降序排名）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANK leaderboard <span class="token string">"Alice"</span>  <span class="token comment"># 最低分→排名2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANK leaderboard <span class="token string">"Charlie"</span>  <span class="token comment"># 最高分→排名0</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">0</span>
+
+<span class="token comment"># WITHSCORE选项（Redis 7.2+）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREVRANK leaderboard <span class="token string">"Bob"</span> WITHSCORE
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"200"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="6-应用场景">6. 应用场景</span></h4><ul>
 <li><p><strong>ZRANK适用场景</strong>：</p>
@@ -667,7 +844,7 @@ Z,"/>
 <li>大集合中使用时要注意O(log(N))的时间复杂度</li>
 </ul>
 <h3><span id="zscore-指令详解">ZSCORE 指令详解</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><p>返回有序集合中指定成员的分数值。如果成员不存在或key不存在，返回nil</p>
-<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZSCORE key member</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZSCORE key member<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="3-核心特性">3. 核心特性</span></h4><ul>
 <li>时间复杂度：O(1)</li>
@@ -678,7 +855,22 @@ Z,"/>
 </ul>
 </li>
 </ul>
-<h4><span id="4-使用示例">4. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询成员分数</span></span><br><span class="line">127.0.0.1:6379&gt; ZSCORE scores &quot;Alice&quot;</span><br><span class="line">&quot;100&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不存在的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZSCORE scores &quot;David&quot;</span><br><span class="line">(nil)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZSCORE wrong_type &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+<h4><span id="4-使用示例">4. 使用示例</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+
+<span class="token comment"># 查询成员分数</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZSCORE scores <span class="token string">"Alice"</span>
+<span class="token string">"100"</span>
+
+<span class="token comment"># 不存在的成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZSCORE scores <span class="token string">"David"</span>
+<span class="token punctuation">(</span>nil<span class="token punctuation">)</span>
+
+<span class="token comment"># 错误数据类型</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SET wrong_type <span class="token string">"value"</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZSCORE wrong_type <span class="token string">"test"</span>
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> WRONGTYPE Operation against a key holding the wrong kind of value<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="5-应用场景">5. 应用场景</span></h4><ul>
 <li>排行榜系统（查看用户得分）</li>
@@ -687,14 +879,29 @@ Z,"/>
 </ul>
 <hr>
 <h3><span id="zrem-指令详解">ZREM 指令详解</span></h3><h4><span id="1-基本功能">1. 基本功能</span></h4><p>从有序集合中移除一个或多个成员，不存在的成员会被忽略</p>
-<h4><span id="2-命令格式">2. 命令格式</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREM key member [member ...]</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式">2. 命令格式</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZREM key member <span class="token punctuation">[</span>member <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="3-核心特性">3. 核心特性</span></h4><ul>
 <li>时间复杂度：O(M*log(N))，M为移除成员数，N为集合基数</li>
 <li>返回值：实际移除的成员数量（不包含不存在的成员）</li>
 <li>支持批量操作（Redis 2.4+）</li>
 </ul>
-<h4><span id="4-使用示例">4. 使用示例</span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除单个成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZREM scores &quot;Alice&quot;</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">批量移除</span></span><br><span class="line">127.0.0.1:6379&gt; ZREM scores &quot;Bob&quot; &quot;David&quot;  # David不存在</span><br><span class="line">(integer) 1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误数据类型</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZREM wrong_type &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+<h4><span id="4-使用示例">4. 使用示例</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span>
+
+<span class="token comment"># 移除单个成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREM scores <span class="token string">"Alice"</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+
+<span class="token comment"># 批量移除</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREM scores <span class="token string">"Bob"</span> <span class="token string">"David"</span>  <span class="token comment"># David不存在</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+
+<span class="token comment"># 错误数据类型</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SET wrong_type <span class="token string">"value"</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREM wrong_type <span class="token string">"test"</span>
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> WRONGTYPE Operation against a key holding the wrong kind of value<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="5-应用场景">5. 应用场景</span></h4><ul>
 <li>排行榜更新（移除过期用户）</li>
@@ -706,7 +913,7 @@ Z,"/>
 <li>大集合批量移除时建议使用管道(pipeline)提高效率</li>
 </ul>
 <h3><span id="zremrangebyrank">ZREMRANGEBYRANK</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>移除有序集合中指定<strong>排名范围</strong>内的所有成员，按<strong>升序排名</strong>（分数从低到高）计算范围。</p>
-<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREMRANGEBYRANK key start stop</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZREMRANGEBYRANK key start stop<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
 <li><strong>时间复杂度</strong>：<code>O(log(N) + M)</code>，其中 <code>N</code> 是集合大小，<code>M</code> 是被移除的成员数量。</li>
@@ -717,7 +924,27 @@ Z,"/>
 </li>
 <li><strong>返回值</strong>：被移除的成员数量（若 <code>key</code> 不存在或范围无效，返回 <code>0</code>）。</li>
 </ul>
-<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot; 500 &quot;Eve&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除排名 0-2（最低分的3个成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYRANK scores 0 2</span><br><span class="line">(integer) 3  # 移除了 Alice(100), Bob(200), Charlie(300)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查剩余成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 WITHSCORES</span><br><span class="line">1) &quot;David&quot;</span><br><span class="line">2) &quot;400&quot;</span><br><span class="line">3) &quot;Eve&quot;</span><br><span class="line">4) &quot;500&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用负数索引（移除倒数2个成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYRANK scores -2 -1</span><br><span class="line">(integer) 2  # 移除了 David(400), Eve(500)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查是否为空</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1</span><br><span class="line">(empty array)</span><br></pre></td></tr></table></figure>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span> <span class="token number">400</span> <span class="token string">"David"</span> <span class="token number">500</span> <span class="token string">"Eve"</span>
+
+<span class="token comment"># 移除排名 0-2（最低分的3个成员）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREMRANGEBYRANK scores <span class="token number">0</span> <span class="token number">2</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>  <span class="token comment"># 移除了 Alice(100), Bob(200), Charlie(300)</span>
+
+<span class="token comment"># 检查剩余成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span> WITHSCORES
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"David"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"400"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Eve"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"500"</span>
+
+<span class="token comment"># 使用负数索引（移除倒数2个成员）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREMRANGEBYRANK scores <span class="token parameter variable">-2</span> <span class="token parameter variable">-1</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># 移除了 David(400), Eve(500)</span>
+
+<span class="token comment"># 检查是否为空</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span>
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
 <li><strong>排行榜清理</strong>（定期移除排名最低的N个用户）</li>
@@ -737,11 +964,12 @@ Z,"/>
 </li>
 <li><strong>键不存在时</strong>：返回 <code>0</code>，不会报错。</li>
 </ul>
-<h4><span id="7-替代方案redis-62"><strong>7. 替代方案（Redis 6.2+）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 ZRANGE + ZREM 组合（适用于复杂条件删除）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 2 BYSCORE | xargs redis-cli ZREM scores</span><br></pre></td></tr></table></figure>
+<h4><span id="7-替代方案redis-62"><strong>7. 替代方案（Redis 6.2+）</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 ZRANGE + ZREM 组合（适用于复杂条件删除）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token number">2</span> BYSCORE <span class="token operator">|</span> <span class="token function">xargs</span> redis-cli ZREM scores<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>总结</strong>：<code>ZREMRANGEBYRANK</code> 适用于<strong>按排名批量删除</strong>，适合排行榜维护、数据清理等场景，使用时需注意排名方向和索引范围。</p>
 <h3><span id="zremrangebyscore">ZREMRANGEBYSCORE</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>移除有序集合中<strong>分数在指定范围内</strong>的所有成员（包含 <code>min</code> 和 <code>max</code> 边界值）。</p>
-<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZREMRANGEBYSCORE key min max</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZREMRANGEBYSCORE key min max<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
 <li><strong>时间复杂度</strong>：<code>O(log(N) + M)</code>，<code>N</code> 是集合大小，<code>M</code> 是被移除的成员数量。</li>
@@ -753,7 +981,27 @@ Z,"/>
 </li>
 <li><strong>返回值</strong>：被移除的成员数量（若 <code>key</code> 不存在或范围无效，返回 <code>0</code>）。</li>
 </ul>
-<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot; 300 &quot;Charlie&quot; 400 &quot;David&quot; 500 &quot;Eve&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除分数 200 ≤ score ≤ 400 的成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores 200 400</span><br><span class="line">(integer) 3  # 移除了 Bob(200), Charlie(300), David(400)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查剩余成员</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGE scores 0 -1 WITHSCORES</span><br><span class="line">1) &quot;Alice&quot;</span><br><span class="line">2) &quot;100&quot;</span><br><span class="line">3) &quot;Eve&quot;</span><br><span class="line">4) &quot;500&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用开区间（移除分数 &gt;100 且 ≤300 的成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores (100 300</span><br><span class="line">(integer) 1  # 仅移除了 Bob(200)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 -inf 和 +inf（移除所有成员）</span></span><br><span class="line">127.0.0.1:6379&gt; ZREMRANGEBYSCORE scores -inf +inf</span><br><span class="line">(integer) 2  # 移除了剩余 Alice(100), Eve(500)</span><br></pre></td></tr></table></figure>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span> <span class="token number">300</span> <span class="token string">"Charlie"</span> <span class="token number">400</span> <span class="token string">"David"</span> <span class="token number">500</span> <span class="token string">"Eve"</span>
+
+<span class="token comment"># 移除分数 200 ≤ score ≤ 400 的成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREMRANGEBYSCORE scores <span class="token number">200</span> <span class="token number">400</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>  <span class="token comment"># 移除了 Bob(200), Charlie(300), David(400)</span>
+
+<span class="token comment"># 检查剩余成员</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGE scores <span class="token number">0</span> <span class="token parameter variable">-1</span> WITHSCORES
+<span class="token number">1</span><span class="token punctuation">)</span> <span class="token string">"Alice"</span>
+<span class="token number">2</span><span class="token punctuation">)</span> <span class="token string">"100"</span>
+<span class="token number">3</span><span class="token punctuation">)</span> <span class="token string">"Eve"</span>
+<span class="token number">4</span><span class="token punctuation">)</span> <span class="token string">"500"</span>
+
+<span class="token comment"># 使用开区间（移除分数 >100 且 ≤300 的成员）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREMRANGEBYSCORE scores <span class="token punctuation">(</span><span class="token number">100</span> <span class="token number">300</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>  <span class="token comment"># 仅移除了 Bob(200)</span>
+
+<span class="token comment"># 使用 -inf 和 +inf（移除所有成员）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZREMRANGEBYSCORE scores <span class="token parameter variable">-inf</span> +inf
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">2</span>  <span class="token comment"># 移除了剩余 Alice(100), Eve(500)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
 <li><strong>数据清理</strong>（如删除过期低分数据）。</li>
@@ -769,11 +1017,12 @@ Z,"/>
 <li><strong>键不存在时</strong>：返回 <code>0</code>，无错误。</li>
 <li><strong>错误类型</strong>：若键存在但非有序集合，返回 <code>WRONGTYPE</code> 错误。</li>
 </ul>
-<h4><span id="7-替代方案复杂条件删除"><strong>7. 替代方案（复杂条件删除）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 ZRANGEBYSCORE + ZREM 组合（适用于非连续范围）</span></span><br><span class="line">127.0.0.1:6379&gt; ZRANGEBYSCORE scores 100 300 | xargs redis-cli ZREM scores</span><br></pre></td></tr></table></figure>
+<h4><span id="7-替代方案复杂条件删除"><strong>7. 替代方案（复杂条件删除）</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 ZRANGEBYSCORE + ZREM 组合（适用于非连续范围）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZRANGEBYSCORE scores <span class="token number">100</span> <span class="token number">300</span> <span class="token operator">|</span> <span class="token function">xargs</span> redis-cli ZREM scores<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>总结</strong>：<code>ZREMRANGEBYSCORE</code> 适用于<strong>按分数批量删除</strong>，支持灵活的范围设定，适合数据过滤和动态集合维护场景。</p>
 <h3><span id="zincrby-指令详解">ZINCRBY 指令详解</span></h3><h4><span id="1-基本功能"><strong>1. 基本功能</strong></span></h4><p>对有序集合中的指定成员进行<strong>分数增减操作</strong>。若成员不存在，则自动创建并设置初始分数为 <code>0.0</code> 后增减；若键不存在，则创建新有序集合并添加该成员。</p>
-<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ZINCRBY key increment member</span><br></pre></td></tr></table></figure>
+<h4><span id="2-命令格式"><strong>2. 命令格式</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZINCRBY key increment member<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="3-核心特性"><strong>3. 核心特性</strong></span></h4><ul>
 <li><strong>时间复杂度</strong>：<code>O(log(N))</code>，<code>N</code> 为有序集合的成员数量。</li>
@@ -789,7 +1038,26 @@ Z,"/>
 </ul>
 </li>
 </ul>
-<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">初始数据</span></span><br><span class="line">127.0.0.1:6379&gt; ZADD scores 100 &quot;Alice&quot; 200 &quot;Bob&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">增加 Alice 的分数 (+50)</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores 50 &quot;Alice&quot;</span><br><span class="line">&quot;150&quot;  # 新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">减少 Bob 的分数 (-30)</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores -30 &quot;Bob&quot;</span><br><span class="line">&quot;170&quot;  # 新分数</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">不存在的成员（自动创建，初始分数 0 + 10）</span></span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY scores 10 &quot;Charlie&quot;</span><br><span class="line">&quot;10&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">错误示例（键存在但非有序集合）</span></span><br><span class="line">127.0.0.1:6379&gt; SET wrong_type &quot;value&quot;</span><br><span class="line">OK</span><br><span class="line">127.0.0.1:6379&gt; ZINCRBY wrong_type 5 &quot;test&quot;</span><br><span class="line">(error) WRONGTYPE Operation against a key holding the wrong kind of value</span><br></pre></td></tr></table></figure>
+<h4><span id="4-使用示例"><strong>4. 使用示例</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 初始数据</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZADD scores <span class="token number">100</span> <span class="token string">"Alice"</span> <span class="token number">200</span> <span class="token string">"Bob"</span>
+
+<span class="token comment"># 增加 Alice 的分数 (+50)</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZINCRBY scores <span class="token number">50</span> <span class="token string">"Alice"</span>
+<span class="token string">"150"</span>  <span class="token comment"># 新分数</span>
+
+<span class="token comment"># 减少 Bob 的分数 (-30)</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZINCRBY scores <span class="token parameter variable">-30</span> <span class="token string">"Bob"</span>
+<span class="token string">"170"</span>  <span class="token comment"># 新分数</span>
+
+<span class="token comment"># 不存在的成员（自动创建，初始分数 0 + 10）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZINCRBY scores <span class="token number">10</span> <span class="token string">"Charlie"</span>
+<span class="token string">"10"</span>
+
+<span class="token comment"># 错误示例（键存在但非有序集合）</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> SET wrong_type <span class="token string">"value"</span>
+OK
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> ZINCRBY wrong_type <span class="token number">5</span> <span class="token string">"test"</span>
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> WRONGTYPE Operation against a key holding the wrong kind of value<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="5-应用场景"><strong>5. 应用场景</strong></span></h4><ul>
 <li><strong>实时排行榜更新</strong>（如游戏积分变动）。</li>
@@ -860,7 +1128,9 @@ Z,"/>
 
 <h2><span id="集合间操作指令">集合间操作指令</span></h2><h3><span id="zinterstore-指令深度解析"><strong>ZINTERSTORE 指令深度解析</strong></span></h3><h4><span id="1-核心功能"><strong>1. 核心功能</strong></span></h4><p>计算多个有序集合的交集，并将结果存储到指定的目标键中。仅保留同时存在于所有输入集合的成员，其分数通过可配置的聚合规则计算。</p>
 <hr>
-<h4><span id="2-完整命令格式"><strong>2. 完整命令格式</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZINTERSTORE destination numkeys key [key ...] </span><br><span class="line">    [WEIGHTS weight [weight ...]] </span><br><span class="line">    [AGGREGATE SUM|MIN|MAX]</span><br></pre></td></tr></table></figure>
+<h4><span id="2-完整命令格式"><strong>2. 完整命令格式</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">ZINTERSTORE destination numkeys key <span class="token punctuation">[</span>key <span class="token punctuation">..</span>.<span class="token punctuation">]</span> 
+    <span class="token punctuation">[</span>WEIGHTS weight <span class="token punctuation">[</span>weight <span class="token punctuation">..</span>.<span class="token punctuation">]</span><span class="token punctuation">]</span> 
+    <span class="token punctuation">[</span>AGGREGATE SUM<span class="token operator">|</span>MIN<span class="token operator">|</span>MAX<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="3-参数详解"><strong>3. 参数详解</strong></span></h4><h5><span id="31-必选参数"><strong>3.1 必选参数</strong></span></h5><ul>
@@ -877,7 +1147,8 @@ Z,"/>
 </li>
 <li><strong>示例</strong>：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集合1分数×10，集合2分数×0.5</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 WEIGHTS 10 0.5</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 集合1分数×10，集合2分数×0.5</span>
+ZINTERSTORE result <span class="token number">2</span> set1 set2 WEIGHTS <span class="token number">10</span> <span class="token number">0.5</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h6><span id="aggregate"><strong>AGGREGATE</strong></span></h6><ul>
 <li><strong>作用</strong>：控制交集成员的分数计算方式。</li>
@@ -889,7 +1160,8 @@ Z,"/>
 </li>
 <li><strong>示例</strong>：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">取分数的最小值</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 AGGREGATE MIN</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 取分数的最小值</span>
+ZINTERSTORE result <span class="token number">2</span> set1 set2 AGGREGATE MIN<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="4-执行逻辑"><strong>4. 执行逻辑</strong></span></h4><ol>
@@ -994,11 +1266,26 @@ Z,"/>
 </div>
 
 <hr>
-<h4><span id="6-使用示例"><strong>6. 使用示例</strong></span></h4><h5><span id="61-基础交集"><strong>6.1 基础交集</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建测试数据</span></span><br><span class="line">ZADD set1 1 &quot;A&quot; 2 &quot;B&quot;</span><br><span class="line">ZADD set2 2 &quot;B&quot; 3 &quot;C&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">计算交集（默认SUM聚合）</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;B&quot;</span>的分数=2(set1)+2(set2)=4</span></span><br></pre></td></tr></table></figure>
+<h4><span id="6-使用示例"><strong>6. 使用示例</strong></span></h4><h5><span id="61-基础交集"><strong>6.1 基础交集</strong></span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建测试数据</span>
+ZADD set1 <span class="token number">1</span> <span class="token string">"A"</span> <span class="token number">2</span> <span class="token string">"B"</span>
+ZADD set2 <span class="token number">2</span> <span class="token string">"B"</span> <span class="token number">3</span> <span class="token string">"C"</span>
 
-<h5><span id="62-加权与聚合"><strong>6.2 加权与聚合</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加权计算（set1分数×10，set2分数×0.1）</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 WEIGHTS 10 0.1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">&quot;B&quot;</span>的分数=2×10 + 2×0.1=20.2</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MIN聚合</span></span><br><span class="line">ZINTERSTORE result 2 set1 set2 AGGREGATE MIN</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="string">&quot;B&quot;</span>的分数=min(2, 2)=2</span></span><br></pre></td></tr></table></figure>
+<span class="token comment"># 计算交集（默认SUM聚合）</span>
+ZINTERSTORE result <span class="token number">2</span> set1 set2
+<span class="token comment"># 结果: "B"的分数=2(set1)+2(set2)=4</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h5><span id="63-错误处理"><strong>6.3 错误处理</strong></span></h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键类型错误（非有序集合）</span></span><br><span class="line">SET wrong_type &quot;value&quot;</span><br><span class="line">ZINTERSTORE result 1 wrong_type</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">返回: (error) WRONGTYPE</span></span><br></pre></td></tr></table></figure>
+<h5><span id="62-加权与聚合"><strong>6.2 加权与聚合</strong></span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 加权计算（set1分数×10，set2分数×0.1）</span>
+ZINTERSTORE result <span class="token number">2</span> set1 set2 WEIGHTS <span class="token number">10</span> <span class="token number">0.1</span>
+<span class="token comment"># "B"的分数=2×10 + 2×0.1=20.2</span>
+
+<span class="token comment"># MIN聚合</span>
+ZINTERSTORE result <span class="token number">2</span> set1 set2 AGGREGATE MIN
+<span class="token comment"># "B"的分数=min(2, 2)=2</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5><span id="63-错误处理"><strong>6.3 错误处理</strong></span></h5><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 键类型错误（非有序集合）</span>
+SET wrong_type <span class="token string">"value"</span>
+ZINTERSTORE result <span class="token number">1</span> wrong_type
+<span class="token comment"># 返回: (error) WRONGTYPE</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h4><span id="7-应用场景"><strong>7. 应用场景</strong></span></h4><ul>
@@ -1014,15 +1301,39 @@ Z,"/>
 <li><strong>性能影响</strong>：大集合交集的CPU和内存消耗较高，建议在低峰期执行。</li>
 </ol>
 <h3><span id="zunionstore">ZUNIONSTORE</span></h3><p>该指令用法和 ZINERSTORE 相同，故不再赘述，下面是使用示例：</p>
-<h4><span id="1-基础并集计算"><strong>1. 基础并集计算</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建两个有序集合</span></span><br><span class="line">ZADD set1 1 &quot;A&quot; 2 &quot;B&quot;</span><br><span class="line">ZADD set2 2 &quot;B&quot; 3 &quot;C&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">计算并集（默认SUM聚合）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(4=2+2), <span class="string">&quot;C&quot;</span>(3)</span></span><br></pre></td></tr></table></figure>
+<h4><span id="1-基础并集计算"><strong>1. 基础并集计算</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建两个有序集合</span>
+ZADD set1 <span class="token number">1</span> <span class="token string">"A"</span> <span class="token number">2</span> <span class="token string">"B"</span>
+ZADD set2 <span class="token number">2</span> <span class="token string">"B"</span> <span class="token number">3</span> <span class="token string">"C"</span>
 
-<h4><span id="2-使用权重weights"><strong>2. 使用权重（WEIGHTS）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集合1分数×10，集合2分数×0.5</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 WEIGHTS 10 0.5</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(10=1×10), <span class="string">&quot;B&quot;</span>(21=2×10 + 2×0.5), <span class="string">&quot;C&quot;</span>(1.5=3×0.5)</span></span><br></pre></td></tr></table></figure>
+<span class="token comment"># 计算并集（默认SUM聚合）</span>
+ZUNIONSTORE result <span class="token number">2</span> set1 set2
+<span class="token comment"># 结果: "A"(1), "B"(4=2+2), "C"(3)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="3-聚合规则aggregate"><strong>3. 聚合规则（AGGREGATE）</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MIN聚合（取最小分数）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 AGGREGATE MIN</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(2), <span class="string">&quot;C&quot;</span>(3)</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">MAX聚合（取最大分数）</span></span><br><span class="line">ZUNIONSTORE result 2 set1 set2 AGGREGATE MAX</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(2), <span class="string">&quot;C&quot;</span>(3)</span></span><br></pre></td></tr></table></figure>
+<h4><span id="2-使用权重weights"><strong>2. 使用权重（WEIGHTS）</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 集合1分数×10，集合2分数×0.5</span>
+ZUNIONSTORE result <span class="token number">2</span> set1 set2 WEIGHTS <span class="token number">10</span> <span class="token number">0.5</span>
+<span class="token comment"># 结果: "A"(10=1×10), "B"(21=2×10 + 2×0.5), "C"(1.5=3×0.5)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="4-多集合并集"><strong>4. 多集合并集</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">三个集合的并集</span></span><br><span class="line">ZADD set3 4 &quot;B&quot; 5 &quot;D&quot;</span><br><span class="line">ZUNIONSTORE result 3 set1 set2 set3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: <span class="string">&quot;A&quot;</span>(1), <span class="string">&quot;B&quot;</span>(8=2+2+4), <span class="string">&quot;C&quot;</span>(3), <span class="string">&quot;D&quot;</span>(5)</span></span><br></pre></td></tr></table></figure>
+<h4><span id="3-聚合规则aggregate"><strong>3. 聚合规则（AGGREGATE）</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># MIN聚合（取最小分数）</span>
+ZUNIONSTORE result <span class="token number">2</span> set1 set2 AGGREGATE MIN
+<span class="token comment"># 结果: "A"(1), "B"(2), "C"(3)</span>
 
-<h4><span id="5-异常处理"><strong>5. 异常处理</strong></span></h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键不存在时</span></span><br><span class="line">ZUNIONSTORE result 1 non_existing_key</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: (<span class="built_in">integer</span>) 0</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">键类型错误（非有序集合）</span></span><br><span class="line">SET wrong_type &quot;value&quot;</span><br><span class="line">ZUNIONSTORE result 1 wrong_type</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结果: (error) WRONGTYPE</span></span><br></pre></td></tr></table></figure>
+<span class="token comment"># MAX聚合（取最大分数）</span>
+ZUNIONSTORE result <span class="token number">2</span> set1 set2 AGGREGATE MAX
+<span class="token comment"># 结果: "A"(1), "B"(2), "C"(3)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4><span id="4-多集合并集"><strong>4. 多集合并集</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 三个集合的并集</span>
+ZADD set3 <span class="token number">4</span> <span class="token string">"B"</span> <span class="token number">5</span> <span class="token string">"D"</span>
+ZUNIONSTORE result <span class="token number">3</span> set1 set2 set3
+<span class="token comment"># 结果: "A"(1), "B"(8=2+2+4), "C"(3), "D"(5)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4><span id="5-异常处理"><strong>5. 异常处理</strong></span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 键不存在时</span>
+ZUNIONSTORE result <span class="token number">1</span> non_existing_key
+<span class="token comment"># 结果: (integer) 0</span>
+
+<span class="token comment"># 键类型错误（非有序集合）</span>
+SET wrong_type <span class="token string">"value"</span>
+ZUNIONSTORE result <span class="token number">1</span> wrong_type
+<span class="token comment"># 结果: (error) WRONGTYPE</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="zset-相关指令汇总表">Zset 相关指令汇总表</span></h2><table>
 <thead>
@@ -1159,19 +1470,28 @@ Z,"/>
 <li><strong>优势</strong>：有效减少内存使用</li>
 <li><strong>示例</strong>：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 e1 60 e2 30 e3</span><br><span class="line">(integer) 3</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;ziplist&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd zsetkey <span class="token number">50</span> e1 <span class="token number">60</span> e2 <span class="token number">30</span> e3
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">3</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding zsetkey
+<span class="token string">"ziplist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="2-skiplist跳表">2. skiplist（跳表）</span></h4><ul>
 <li><strong>使用条件</strong>：当不满足ziplist条件时自动切换</li>
 <li><strong>原因</strong>：元素过多或过大时，ziplist操作效率会下降</li>
 <li><strong>示例1（元素数量超过限制）</strong>：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 e1 60 e2 30 e3 ... e129</span><br><span class="line">(integer) 129</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;skiplist&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd zsetkey <span class="token number">50</span> e1 <span class="token number">60</span> e2 <span class="token number">30</span> e3 <span class="token punctuation">..</span>. e129
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">129</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding zsetkey
+<span class="token string">"skiplist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>示例2（元素大小超过限制）</strong>：</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; zadd zsetkey 50 &quot;超长字符串...(超过64字节)...&quot;</span><br><span class="line">(integer) 1</span><br><span class="line">127.0.0.1:6379&gt; object encoding zsetkey</span><br><span class="line">&quot;skiplist&quot;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> zadd zsetkey <span class="token number">50</span> <span class="token string">"超长字符串...(超过64字节)..."</span>
+<span class="token punctuation">(</span>integer<span class="token punctuation">)</span> <span class="token number">1</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> object encoding zsetkey
+<span class="token string">"skiplist"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="配置参数">配置参数</span></h4><table>
 <thead>
@@ -1197,55 +1517,71 @@ Z,"/>
 <li><code>ZREVRANGE</code> 获取前N名玩家</li>
 <li><code>ZINCRBY</code> 实时更新玩家分数</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD game_leaderboard 1500 &quot;player1&quot; 2000 &quot;player2&quot; 1800 &quot;player3&quot;</span><br><span class="line">ZREVRANGE game_leaderboard 0 9 WITHSCORES  # 获取TOP10</span><br><span class="line">ZINCRBY game_leaderboard 50 &quot;player1&quot;      # 玩家1增加50分</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD game_leaderboard 1500 &quot;player1&quot; 2000 &quot;player2&quot; 1800 &quot;player3&quot;
+ZREVRANGE game_leaderboard 0 9 WITHSCORES  # 获取TOP10
+ZINCRBY game_leaderboard 50 &quot;player1&quot;      # 玩家1增加50分<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="微博热搜榜">微博热搜榜</span></h4><ul>
 <li>使用 <code>ZINCRBY</code> 增加话题热度</li>
 <li><code>ZREVRANGE</code> 获取实时热搜</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZINCRBY weibo_trending 1000000 &quot;#世界杯决赛#&quot;</span><br><span class="line">ZINCRBY weibo_trending 500000 &quot;#元旦假期安排#&quot;</span><br><span class="line">ZREVRANGE weibo_trending 0 4 WITHSCORES  # 获取TOP5热搜</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZINCRBY weibo_trending 1000000 &quot;#世界杯决赛#&quot;
+ZINCRBY weibo_trending 500000 &quot;#元旦假期安排#&quot;
+ZREVRANGE weibo_trending 0 4 WITHSCORES  # 获取TOP5热搜<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="2-延迟队列系统">2. 延迟队列系统</span></h3><h4><span id="订单超时处理">订单超时处理</span></h4><ul>
 <li>使用分数存储执行时间戳</li>
 <li>定时任务获取到期订单</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD delay_queue 1672531200 &quot;order_123&quot;  # 2023-01-01 00:00:00执行</span><br><span class="line">ZRANGEBYSCORE delay_queue 0 1672531200  # 获取到期订单</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD delay_queue 1672531200 &quot;order_123&quot;  # 2023-01-01 00:00:00执行
+ZRANGEBYSCORE delay_queue 0 1672531200  # 获取到期订单<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h3><span id="3-滑动窗口限流">3. 滑动窗口限流</span></h3><h4><span id="api访问频率控制">API访问频率控制</span></h4><ul>
 <li>使用时间戳作为分数</li>
 <li>统计窗口内请求数</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ZADD api_limit 1672500000 &quot;req_1&quot;</span><br><span class="line">ZADD api_limit 1672500001 &quot;req_2&quot;</span><br><span class="line">ZREMRANGEBYSCORE api_limit 0 1672500000  # 清理1秒前的请求</span><br><span class="line">ZCARD api_limit                          # 获取当前秒内请求数</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD api_limit 1672500000 &quot;req_1&quot;
+ZADD api_limit 1672500001 &quot;req_2&quot;
+ZREMRANGEBYSCORE api_limit 0 1672500000  # 清理1秒前的请求
+ZCARD api_limit                          # 获取当前秒内请求数<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="4-带权重的投票系统">4. 带权重的投票系统</span></h3><h4><span id="热门内容评选">热门内容评选</span></h4><ul>
 <li>不同用户投票权重不同</li>
 <li>实时计算内容得分</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD content_votes 5 &quot;article_123&quot;  # 初始5票</span><br><span class="line">ZINCRBY content_votes 2 &quot;article_123&quot;  # VIP用户投票权重为2</span><br><span class="line">ZREVRANGE content_votes 0 9 WITHSCORES  # 获取TOP10内容</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD content_votes 5 &quot;article_123&quot;  # 初始5票
+ZINCRBY content_votes 2 &quot;article_123&quot;  # VIP用户投票权重为2
+ZREVRANGE content_votes 0 9 WITHSCORES  # 获取TOP10内容<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="5-时间线排序">5. 时间线排序</span></h3><h4><span id="朋友圈动态">朋友圈动态</span></h4><ul>
 <li>使用发布时间戳作为分数</li>
 <li>获取最新动态</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD friend_timeline 1672500000 &quot;post_123&quot;  # 发布动态</span><br><span class="line">ZREVRANGE friend_timeline 0 19  # 获取最新20条动态</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD friend_timeline 1672500000 &quot;post_123&quot;  # 发布动态
+ZREVRANGE friend_timeline 0 19  # 获取最新20条动态<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h3><span id="6-多维度排序">6. 多维度排序</span></h3><h4><span id="商品综合排序">商品综合排序</span></h4><ul>
 <li>使用加权分数计算综合评分</li>
 <li>销量、好评率、价格等多维度</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ZADD product_rank 85 &quot;product_123&quot;  # 初始综合分85</span><br><span class="line">ZINCRBY product_rank 5 &quot;product_123&quot;  # 销量增加提升排名</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD product_rank 85 &quot;product_123&quot;  # 初始综合分85
+ZINCRBY product_rank 5 &quot;product_123&quot;  # 销量增加提升排名<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h3><span id="7-实时竞赛系统">7. 实时竞赛系统</span></h3><h4><span id="在线编程比赛">在线编程比赛</span></h4><ul>
 <li>实时更新选手得分</li>
 <li>获取实时排名</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD coding_contest 3 &quot;user_123&quot;  # 3道题正确</span><br><span class="line">ZINCRBY coding_contest 1 &quot;user_123&quot;  # 又解决1题</span><br><span class="line">ZREVRANK coding_contest &quot;user_123&quot;  # 获取用户排名</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD coding_contest 3 &quot;user_123&quot;  # 3道题正确
+ZINCRBY coding_contest 1 &quot;user_123&quot;  # 又解决1题
+ZREVRANK coding_contest &quot;user_123&quot;  # 获取用户排名<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="8-热点数据缓存">8. 热点数据缓存</span></h3><h4><span id="新闻点击排行">新闻点击排行</span></h4><ul>
 <li>记录点击事件</li>
 <li>实时统计热点</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ZADD news_clicks 1500 &quot;news_123&quot;  # 初始点击量</span><br><span class="line">ZINCRBY news_clicks 1 &quot;news_123&quot;  # 用户点击+1</span><br><span class="line">ZREVRANGE news_clicks 0 9  # 获取TOP10热点新闻</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-redis" data-language="redis"><code class="language-redis">ZADD news_clicks 1500 &quot;news_123&quot;  # 初始点击量
+ZINCRBY news_clicks 1 &quot;news_123&quot;  # 用户点击+1
+ZREVRANGE news_clicks 0 9  # 获取TOP10热点新闻<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>ZSet的这些特性使其成为处理需要实时排序和加权计算场景的理想选择，性能优异且实现简洁。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

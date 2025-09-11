@@ -80,6 +80,8 @@ execle 和 execve
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -243,7 +245,7 @@ execle 和 execve
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -252,7 +254,7 @@ execle 和 execve
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li></ul>
+            <ul><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -306,7 +308,12 @@ execle 和 execve
 <li>子进程获得父进程文件描述符表的副本</li>
 <li>父子进程执行相同的程序，通过返回值区分：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="comment">// 子进程代码</span></span><br><span class="line">&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 父进程代码</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token class-name">pid_t</span> pid <span class="token operator">=</span> <span class="token function">fork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>pid <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 子进程代码</span>
+<span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 父进程代码</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li><strong>exec 函数族</strong></li>
@@ -315,7 +322,8 @@ execle 和 execve
 <li>包含多个变体：execl, execv, execle, execve 等</li>
 <li>核心功能是替换当前进程的地址空间：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *argv[] = &#123;<span class="string">&quot;ls&quot;</span>, <span class="string">&quot;-l&quot;</span>, <span class="literal">NULL</span>&#125;;</span><br><span class="line">execvp(<span class="string">&quot;ls&quot;</span>, argv);</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">char</span> <span class="token operator">*</span>argv<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token string">"ls"</span><span class="token punctuation">,</span> <span class="token string">"-l"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token function">execvp</span><span class="token punctuation">(</span><span class="token string">"ls"</span><span class="token punctuation">,</span> argv<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ul>
 <li>特点：<ul>
@@ -332,7 +340,8 @@ execle 和 execve
 <li>exec 调用默认继承原环境变量</li>
 <li>使用 execle&#x2F;execve 可以指定新环境：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">char</span> *envp[] = &#123;<span class="string">&quot;PATH=/usr/bin&quot;</span>, <span class="literal">NULL</span>&#125;;</span><br><span class="line">execle(<span class="string">&quot;/bin/ls&quot;</span>, <span class="string">&quot;ls&quot;</span>, <span class="literal">NULL</span>, envp);</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">char</span> <span class="token operator">*</span>envp<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token string">"PATH=/usr/bin"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token function">execle</span><span class="token punctuation">(</span><span class="token string">"/bin/ls"</span><span class="token punctuation">,</span> <span class="token string">"ls"</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> envp<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ol start="4">
 <li><strong>程序计数器(PC)处理</strong></li>
@@ -344,12 +353,19 @@ execle 和 execve
 <p>下面这个图示完美的展示了程序替换所作出的改动：</p>
 <p><img src="/img/Linux/process_rep/rep.png" alt="replace"></p>
 <h2><span id="替换函数">替换函数</span></h2><p>有六种以 exec 开头的函数，统称为 exec 函数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execl</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">const</span> <span class="type">char</span> *arg, ...)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">execlp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *file, <span class="type">const</span> <span class="type">char</span> *arg, ...)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">execle</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">const</span> <span class="type">char</span> *arg, ...,<span class="type">char</span> *<span class="type">const</span> envp[])</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">execv</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">char</span> *<span class="type">const</span> argv[])</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">execvp</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *file, <span class="type">char</span> *<span class="type">const</span> argv[])</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">execve</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">char</span> *<span class="type">const</span> argv[], <span class="type">char</span> *<span class="type">const</span> envp[])</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token keyword">int</span> <span class="token function">execl</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>path<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>arg<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">execlp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>file<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>arg<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">execle</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>path<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>arg<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">,</span><span class="token keyword">char</span> <span class="token operator">*</span><span class="token keyword">const</span> envp<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">execv</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>path<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token keyword">const</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">execvp</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>file<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token keyword">const</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">int</span> <span class="token function">execve</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>path<span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token keyword">const</span> argv<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token keyword">char</span> <span class="token operator">*</span><span class="token keyword">const</span> envp<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="execl-函数">execl 函数</span></h3><p>首先，我们先来了解一下 execl 函数的用法：</p>
 <p><code>execl()</code> 是 <code>exec</code> 函数族中的一个成员，用于 <strong>替换当前进程的镜像</strong>（加载并执行新程序）。它的特点是 <strong>参数以可变参数列表（<code>...</code>）的形式传递</strong>，适合参数数量已知且固定的场景。</p>
 <hr>
-<h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">execl</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *path, <span class="type">const</span> <span class="type">char</span> *arg, ... <span class="comment">/* (char *) NULL */</span>)</span>;</span><br></pre></td></tr></table></figure>
+<h4><span id="函数原型">函数原型</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token keyword">int</span> <span class="token function">execl</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>path<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">char</span> <span class="token operator">*</span>arg<span class="token punctuation">,</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token comment">/* (char *) NULL */</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="参数说明">参数说明</span></h4><ol>
 <li><p><strong><code>path</code></strong>  </p>
@@ -375,45 +391,279 @@ execle 和 execve
 <li><strong>成功</strong>：不返回（原程序已被替换，后续代码不会执行）。</li>
 <li><strong>失败</strong>：返回 <code>-1</code>，并设置 <code>errno</code>（例如文件不存在、权限不足等）。</li>
 </ul>
-<h4><span id="使用示例">使用示例</span></h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令</span></span><br><span class="line">        <span class="built_in">execl</span>(<span class="string">&quot;/usr/bin/ls&quot;</span>, <span class="string">&quot;ls&quot;</span>, <span class="string">&quot;-l&quot;</span>, <span class="string">&quot;-s&quot;</span>, <span class="literal">nullptr</span>);</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, <span class="literal">nullptr</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;父进程已回收子进程 &quot;</span> &lt;&lt; id &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4><span id="使用示例">使用示例</span></h4><pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令
+        execl(&quot;&#x2F;usr&#x2F;bin&#x2F;ls&quot;, &quot;ls&quot;, &quot;-l&quot;, &quot;-s&quot;, nullptr);
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int ret &#x3D; waitpid(-1, nullptr, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    cout &lt;&lt; &quot;父进程已回收子进程 &quot; &lt;&lt; id &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>执行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_rep.o</span><br><span class="line">子进程pid：2880883</span><br><span class="line">total 64</span><br><span class="line"> 4 -rw-r--r-- 1 ljx ljx   594 Jul 17 13:40 pro_rep.cc</span><br><span class="line">20 -rwxr-xr-x 1 ljx ljx 16880 Jul 17 13:40 pro_rep.o</span><br><span class="line"> 4 -rw-r--r-- 1 ljx ljx  2009 Jul 16 23:14 pro_wait.cc</span><br><span class="line">36 -rwxr-xr-x 1 ljx ljx 33808 Jul 16 23:14 pro_wait.o</span><br><span class="line">父进程已回收子进程 2880883</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_rep.o
+子进程pid：2880883
+total <span class="token number">64</span>
+ <span class="token number">4</span> -rw-r--r-- <span class="token number">1</span> ljx ljx   <span class="token number">594</span> Jul <span class="token number">17</span> <span class="token number">13</span>:40 pro_rep.cc
+<span class="token number">20</span> -rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">16880</span> Jul <span class="token number">17</span> <span class="token number">13</span>:40 pro_rep.o
+ <span class="token number">4</span> -rw-r--r-- <span class="token number">1</span> ljx ljx  <span class="token number">2009</span> Jul <span class="token number">16</span> <span class="token number">23</span>:14 pro_wait.cc
+<span class="token number">36</span> -rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">33808</span> Jul <span class="token number">16</span> <span class="token number">23</span>:14 pro_wait.o
+父进程已回收子进程 <span class="token number">2880883</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>同样，我们可以利用这个函数执行自己的可执行程序：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pro_rep.cc</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令</span></span><br><span class="line">        <span class="built_in">execl</span>(<span class="string">&quot;./test.o&quot;</span>, <span class="string">&quot;test.o&quot;</span>, <span class="string">&quot;aaa&quot;</span>, <span class="string">&quot;bbb&quot;</span>, <span class="literal">nullptr</span>);</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, <span class="literal">nullptr</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;父进程已回收子进程 &quot;</span> &lt;&lt; id &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// test.cc</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; argv[i]; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; i &lt;&lt; <span class="string">&quot;:&quot;</span> &lt;&lt; argv[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; pro_rep.cc
+#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令
+        execl(&quot;.&#x2F;test.o&quot;, &quot;test.o&quot;, &quot;aaa&quot;, &quot;bbb&quot;, nullptr);
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int ret &#x3D; waitpid(-1, nullptr, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    cout &lt;&lt; &quot;父进程已回收子进程 &quot; &lt;&lt; id &lt;&lt; endl;
+    return 0;
+&#125;
+&#x2F;&#x2F; test.cc
+#include &lt;iostream&gt;
+using namespace std;
+
+int main(int argc, char *argv[])
+&#123;
+    for(int i &#x3D; 1; argv[i]; ++i)
+    &#123;
+        cout &lt;&lt; i &lt;&lt; &quot;:&quot; &lt;&lt; argv[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们可以发现，替换的进程会将 execl 传递的命令行参数接受，我们可以将其打印出来</p>
 <h3><span id="execv-函数">execv 函数</span></h3><p>该函数和 execl 函数唯一的区别就在于该函数不是通过可变参数模板传递命令行参数的，而是通过数组的方式传递参数：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令（通过数组传递参数）</span></span><br><span class="line">        vector&lt;<span class="type">char</span>*&gt; argv = &#123;<span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;test.o&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;aaa&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;bbb&quot;</span>), <span class="literal">nullptr</span>&#125;;</span><br><span class="line">        <span class="built_in">execv</span>(<span class="string">&quot;./test.o&quot;</span>, argv.<span class="built_in">data</span>());</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> status;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">WIFEXITED</span>(status))&#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;运行完毕，状态码：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;异常退出，信号：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(<span class="built_in">WTERMSIG</span>(status)) &lt;&lt; <span class="string">&quot;)&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;vector&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令（通过数组传递参数）
+        vector&lt;char*&gt; argv &#x3D; &#123;const_cast&lt;char*&gt;(&quot;test.o&quot;), const_cast&lt;char*&gt;(&quot;aaa&quot;), const_cast&lt;char*&gt;(&quot;bbb&quot;), nullptr&#125;;
+        execv(&quot;.&#x2F;test.o&quot;, argv.data());
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int status;
+    int ret &#x3D; waitpid(-1, &amp;status, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    if(WIFEXITED(status))&#123;
+        cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;运行完毕，状态码：&quot; &lt;&lt; WEXITSTATUS(status) &lt;&lt; endl;
+    &#125;
+    else cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;异常退出，信号：&quot; &lt;&lt; WTERMSIG(status) &lt;&lt; &quot;(&quot; &lt;&lt; strsignal(WTERMSIG(status)) &lt;&lt; &quot;)&quot; &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>执行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_rep.o</span><br><span class="line">子进程pid：2891886</span><br><span class="line">1:aaa</span><br><span class="line">2:bbb</span><br><span class="line">子进程 2891886运行完毕，状态码：0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_rep.o
+子进程pid：2891886
+<span class="token number">1</span>:aaa
+<span class="token number">2</span>:bbb
+子进程 <span class="token number">2891886</span>运行完毕，状态码：0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，我们通过父进程获取了子进程的退出状态，这里我们让子进程触发除零错误，此时即便子进程被进程程序替换了，父进程依然可以知晓子进程的状态，<br>因为子进程的程序替换并没有替换进程 pid，因此父进程依然和子进程保持着父子关系：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改替换程序，故意引发除零错误</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span> / <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>; argv[i]; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; i &lt;&lt; <span class="string">&quot;:&quot;</span> &lt;&lt; argv[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">&#x2F;&#x2F; 修改替换程序，故意引发除零错误
+#include &lt;iostream&gt;
+using namespace std;
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_rep.o</span><br><span class="line">子进程pid：2893724</span><br><span class="line">子进程 2893724异常退出，信号：8(Floating point exception)</span><br></pre></td></tr></table></figure>
+int main(int argc, char *argv[])
+&#123;
+    int a &#x3D; 10 &#x2F; 0;
+    for(int i &#x3D; 1; argv[i]; ++i)
+    &#123;
+        cout &lt;&lt; i &lt;&lt; &quot;:&quot; &lt;&lt; argv[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_rep.o
+子进程pid：2893724
+子进程 <span class="token number">2893724</span>异常退出，信号：8<span class="token punctuation">(</span>Floating point exception<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，子进程的异常状况被父进程捕捉到了</p>
 <h3><span id="execlp-和-execvp">execlp 和 execvp</span></h3><p>execlp 和 execvp 命令在执行环境变量路径下的命令时不需要带路径，可以自动根据环境变量搜索命令：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令（通过数组传递参数）</span></span><br><span class="line">        <span class="comment">// vector&lt;char*&gt; argv = &#123;const_cast&lt;char*&gt;(&quot;test.o&quot;), const_cast&lt;char*&gt;(&quot;aaa&quot;), const_cast&lt;char*&gt;(&quot;bbb&quot;), nullptr&#125;;</span></span><br><span class="line">        <span class="built_in">execlp</span>(<span class="string">&quot;ls&quot;</span>, <span class="string">&quot;-a&quot;</span>, <span class="string">&quot;-l&quot;</span>, <span class="literal">nullptr</span>);</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> status;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">WIFEXITED</span>(status))&#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;运行完毕，状态码：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;异常退出，信号：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(<span class="built_in">WTERMSIG</span>(status)) &lt;&lt; <span class="string">&quot;)&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;vector&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令（通过数组传递参数）
+        &#x2F;&#x2F; vector&lt;char*&gt; argv &#x3D; &#123;const_cast&lt;char*&gt;(&quot;test.o&quot;), const_cast&lt;char*&gt;(&quot;aaa&quot;), const_cast&lt;char*&gt;(&quot;bbb&quot;), nullptr&#125;;
+        execlp(&quot;ls&quot;, &quot;-a&quot;, &quot;-l&quot;, nullptr);
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int status;
+    int ret &#x3D; waitpid(-1, &amp;status, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    if(WIFEXITED(status))&#123;
+        cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;运行完毕，状态码：&quot; &lt;&lt; WEXITSTATUS(status) &lt;&lt; endl;
+    &#125;
+    else cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;异常退出，信号：&quot; &lt;&lt; WTERMSIG(status) &lt;&lt; &quot;(&quot; &lt;&lt; strsignal(WTERMSIG(status)) &lt;&lt; &quot;)&quot; &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，即便不指定路径，依然可以获取到可执行程序：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_rep.o</span><br><span class="line">子进程pid：2895026</span><br><span class="line">total 88</span><br><span class="line">-rw-r--r-- 1 ljx ljx  1002 Jul 17 14:26 pro_rep.cc</span><br><span class="line">-rwxr-xr-x 1 ljx ljx 16936 Jul 17 14:26 pro_rep.o</span><br><span class="line">-rw-r--r-- 1 ljx ljx  2009 Jul 16 23:14 pro_wait.cc</span><br><span class="line">-rwxr-xr-x 1 ljx ljx 33808 Jul 16 23:14 pro_wait.o</span><br><span class="line">-rw-r--r-- 1 ljx ljx   202 Jul 17 14:23 test.cc</span><br><span class="line">-rwxr-xr-x 1 ljx ljx 16592 Jul 17 14:26 test.o</span><br><span class="line">子进程 2895026运行完毕，状态码：0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_rep.o
+子进程pid：2895026
+total <span class="token number">88</span>
+-rw-r--r-- <span class="token number">1</span> ljx ljx  <span class="token number">1002</span> Jul <span class="token number">17</span> <span class="token number">14</span>:26 pro_rep.cc
+-rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">16936</span> Jul <span class="token number">17</span> <span class="token number">14</span>:26 pro_rep.o
+-rw-r--r-- <span class="token number">1</span> ljx ljx  <span class="token number">2009</span> Jul <span class="token number">16</span> <span class="token number">23</span>:14 pro_wait.cc
+-rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">33808</span> Jul <span class="token number">16</span> <span class="token number">23</span>:14 pro_wait.o
+-rw-r--r-- <span class="token number">1</span> ljx ljx   <span class="token number">202</span> Jul <span class="token number">17</span> <span class="token number">14</span>:23 test.cc
+-rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">16592</span> Jul <span class="token number">17</span> <span class="token number">14</span>:26 test.o
+子进程 <span class="token number">2895026</span>运行完毕，状态码：0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>但是，若不是系统命令，自己的可执行程序的路径不在环境变量当中，当然就需要指定路径了，若不指定路径则会导致程序替换失败，下面用 execvp 举例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令（通过数组传递参数）</span></span><br><span class="line">        vector&lt;<span class="type">char</span>*&gt; argv = &#123;<span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;test.o&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;aaa&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;bbb&quot;</span>), <span class="literal">nullptr</span>&#125;;</span><br><span class="line">        <span class="built_in">execvp</span>(<span class="string">&quot;test.o&quot;</span>, argv.<span class="built_in">data</span>());</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> status;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">WIFEXITED</span>(status))&#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;运行完毕，状态码：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;异常退出，信号：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(<span class="built_in">WTERMSIG</span>(status)) &lt;&lt; <span class="string">&quot;)&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;vector&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令（通过数组传递参数）
+        vector&lt;char*&gt; argv &#x3D; &#123;const_cast&lt;char*&gt;(&quot;test.o&quot;), const_cast&lt;char*&gt;(&quot;aaa&quot;), const_cast&lt;char*&gt;(&quot;bbb&quot;), nullptr&#125;;
+        execvp(&quot;test.o&quot;, argv.data());
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int status;
+    int ret &#x3D; waitpid(-1, &amp;status, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    if(WIFEXITED(status))&#123;
+        cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;运行完毕，状态码：&quot; &lt;&lt; WEXITSTATUS(status) &lt;&lt; endl;
+    &#125;
+    else cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;异常退出，信号：&quot; &lt;&lt; WTERMSIG(status) &lt;&lt; &quot;(&quot; &lt;&lt; strsignal(WTERMSIG(status)) &lt;&lt; &quot;)&quot; &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>执行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_rep.o</span><br><span class="line">子进程pid：2895822</span><br><span class="line">子进程 2895822运行完毕，状态码：1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_rep.o
+子进程pid：2895822
+子进程 <span class="token number">2895822</span>运行完毕，状态码：1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="execle-和-execve">execle 和 execve</span></h3><p>这两个命令可以传递新的环境变量到替换的程序当中去，这里的传递是覆盖式传递，而不是追加环境变量，因此若想追加环境变量一定要在原始的环境变量参数上追加新的环境变量再传递参数：</p>
 <p>假若父进程只希望给子进程追加一个环境变量而父进程不需要追加，实现方式如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 先创建一个子进程</span></span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程pid：&quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="comment">// 让子进程执行 ls -a -l 命令（通过数组传递参数）</span></span><br><span class="line">        vector&lt;<span class="type">char</span>*&gt; argv = &#123;<span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;test.o&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;aaa&quot;</span>), <span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;bbb&quot;</span>), <span class="literal">nullptr</span>&#125;;</span><br><span class="line">        <span class="type">size_t</span> len = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span> (environ[len] != <span class="literal">nullptr</span>) len++;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 使用指针范围构造 vector</span></span><br><span class="line">        <span class="function">std::vector&lt;<span class="type">char</span>*&gt; <span class="title">new_env</span><span class="params">(environ, environ + len)</span></span>;</span><br><span class="line">        new_env.<span class="built_in">push_back</span>(<span class="built_in">const_cast</span>&lt;<span class="type">char</span>*&gt;(<span class="string">&quot;new_env_op=111&quot;</span>));</span><br><span class="line">        new_env.<span class="built_in">push_back</span>(<span class="literal">nullptr</span>);</span><br><span class="line">        <span class="built_in">execve</span>(<span class="string">&quot;./test.o&quot;</span>, argv.<span class="built_in">data</span>(), new_env.<span class="built_in">data</span>());</span><br><span class="line">        <span class="comment">// 若执行到了这里，说明程序替换失败</span></span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">int</span> status;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">WIFEXITED</span>(status))&#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;运行完毕，状态码：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot;异常退出，信号：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; <span class="string">&quot;(&quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(<span class="built_in">WTERMSIG</span>(status)) &lt;&lt; <span class="string">&quot;)&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;vector&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 先创建一个子进程
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        cout &lt;&lt; &quot;子进程pid：&quot; &lt;&lt; getpid() &lt;&lt; endl;
+        &#x2F;&#x2F; 让子进程执行 ls -a -l 命令（通过数组传递参数）
+        vector&lt;char*&gt; argv &#x3D; &#123;const_cast&lt;char*&gt;(&quot;test.o&quot;), const_cast&lt;char*&gt;(&quot;aaa&quot;), const_cast&lt;char*&gt;(&quot;bbb&quot;), nullptr&#125;;
+        size_t len &#x3D; 0;
+        while (environ[len] !&#x3D; nullptr) len++;
+
+        &#x2F;&#x2F; 使用指针范围构造 vector
+        std::vector&lt;char*&gt; new_env(environ, environ + len);
+        new_env.push_back(const_cast&lt;char*&gt;(&quot;new_env_op&#x3D;111&quot;));
+        new_env.push_back(nullptr);
+        execve(&quot;.&#x2F;test.o&quot;, argv.data(), new_env.data());
+        &#x2F;&#x2F; 若执行到了这里，说明程序替换失败
+        exit(1);
+    &#125;
+    int status;
+    int ret &#x3D; waitpid(-1, &amp;status, 0);
+    if(ret &lt; 0)&#123;
+        perror(&quot;waitpid&quot;);
+        exit(2);
+    &#125;
+    if(WIFEXITED(status))&#123;
+        cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;运行完毕，状态码：&quot; &lt;&lt; WEXITSTATUS(status) &lt;&lt; endl;
+    &#125;
+    else cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; id &lt;&lt; &quot;异常退出，信号：&quot; &lt;&lt; WTERMSIG(status) &lt;&lt; &quot;(&quot; &lt;&lt; strsignal(WTERMSIG(status)) &lt;&lt; &quot;)&quot; &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们让子进程的替换程序打印环境变量，可以看到子进程最终成功打印了新追加的环境变量：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">26:new_env_op=111</span><br><span class="line">子进程 2899087运行完毕，状态码：0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">26</span>:new_env_op<span class="token operator">=</span><span class="token number">111</span>
+子进程 <span class="token number">2899087</span>运行完毕，状态码：0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>下面是对这6个函数的总结：</p>
 <table>

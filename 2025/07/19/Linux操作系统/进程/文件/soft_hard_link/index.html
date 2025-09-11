@@ -77,6 +77,8 @@ Inode 的分配与管理
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -240,7 +242,7 @@ Inode 的分配与管理
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -249,7 +251,7 @@ Inode 的分配与管理
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li></ul>
+            <ul><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/">Linux 进程间通信--匿名管道</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -308,7 +310,13 @@ Inode 的分配与管理
 </ul>
 </li>
 </ol>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">文件类型（普通文件/目录/符号链接/设备文件等）</span><br><span class="line">权限（rwx）</span><br><span class="line">所有者（UID/GID）</span><br><span class="line">大小（字节数）</span><br><span class="line">时间戳（创建/修改/访问时间）</span><br><span class="line">链接计数（硬链接数）</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">文件类型（普通文件&#x2F;目录&#x2F;符号链接&#x2F;设备文件等）
+权限（rwx）
+所有者（UID&#x2F;GID）
+大小（字节数）
+时间戳（创建&#x2F;修改&#x2F;访问时间）
+链接计数（硬链接数）
+...<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ol start="2">
 <li>指向文件数据块<ul>
@@ -373,7 +381,10 @@ Inode 的分配与管理
 <li>目录本质是一个<strong>映射表</strong>，存储 <code>文件名 -&gt; inode 编号</code> 的对应关系。  </li>
 <li>例如目录 <code>/home</code> 的内容可能如下：</li>
 </ul>
- <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.    -&gt; inode 1234  (当前目录)</span><br><span class="line">..   -&gt; inode 2     (父目录)</span><br><span class="line">alice -&gt; inode 5678 (用户目录)</span><br><span class="line">bob   -&gt; inode 9012</span><br></pre></td></tr></table></figure>
+ <pre class="line-numbers language-none"><code class="language-none">.    -&gt; inode 1234  (当前目录)
+..   -&gt; inode 2     (父目录)
+alice -&gt; inode 5678 (用户目录)
+bob   -&gt; inode 9012<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p>文件访问流程<br>当访问 <code>/home/alice/file.txt</code> 时：</p>
 <ul>
@@ -394,7 +405,7 @@ Inode 的分配与管理
 <li><p>inode 表（inode Table）</p>
 <ul>
 <li>磁盘上的固定区域，存储所有 inode 结构的数组。  </li>
-<li>通过 inode 编号可直接计算其物理位置：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">inode 物理位置 = inode_table_start + (inode_number * inode_size)</span><br></pre></td></tr></table></figure></li>
+<li>通过 inode 编号可直接计算其物理位置：<pre class="line-numbers language-none"><code class="language-none">inode 物理位置 &#x3D; inode_table_start + (inode_number * inode_size)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 </li>
 <li><p>链接计数（<code>i_links_count</code>）</p>
@@ -422,10 +433,21 @@ Inode 的分配与管理
 </li>
 </ul>
 <p>示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ln test.cc test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 2 ljx ljx 0 Jul 19 12:34 test1.cc</span><br><span class="line">-rw-r--r-- 2 ljx ljx 0 Jul 19 12:34 test.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  <span class="token function">ln</span> test.cc test1.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  ll
+total <span class="token number">0</span>
+-rw-r--r-- <span class="token number">2</span> ljx ljx <span class="token number">0</span> Jul <span class="token number">19</span> <span class="token number">12</span>:34 test1.cc
+-rw-r--r-- <span class="token number">2</span> ljx ljx <span class="token number">0</span> Jul <span class="token number">19</span> <span class="token number">12</span>:34 test.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，硬链接会使得硬链接引用计数加一，而我们若删掉原来的硬链接原副本，会发现被硬链接的副本引用技术变为1，因此，一个文件真正被删除实际是引用计数从1变成0的时候：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  rm test.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 ljx ljx 0 Jul 19 12:28 test1.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  <span class="token function">rm</span> test.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  ll
+total <span class="token number">0</span>
+-rw-r--r-- <span class="token number">1</span> ljx ljx <span class="token number">0</span> Jul <span class="token number">19</span> <span class="token number">12</span>:28 test1.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="软链接符号链接的实现">软链接（符号链接）的实现</span></h2><ul>
 <li><strong>创建过程</strong>：创建软链接时，系统会：<ol>
@@ -447,10 +469,24 @@ Inode 的分配与管理
 </li>
 </ul>
 <p>示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ln -s test1.cc test2.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">-rw-r--r-- 1 ljx ljx 0 Jul 19 12:34 test1.cc</span><br><span class="line">lrwxrwxrwx 1 ljx ljx 8 Jul 19 12:35 test2.cc -&gt; test1.cc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  <span class="token function">ln</span> <span class="token parameter variable">-s</span> test1.cc test2.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  ll
+total <span class="token number">0</span>
+-rw-r--r-- <span class="token number">1</span> ljx ljx <span class="token number">0</span> Jul <span class="token number">19</span> <span class="token number">12</span>:34 test1.cc
+lrwxrwxrwx <span class="token number">1</span> ljx ljx <span class="token number">8</span> Jul <span class="token number">19</span> <span class="token number">12</span>:35 test2.cc -<span class="token operator">></span> test1.cc<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>此时我们若删除原副本，将会导致链接失效：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  rm test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  ll</span><br><span class="line">total 0</span><br><span class="line">lrwxrwxrwx 1 ljx ljx 8 Jul 19 12:35 test2.cc -&gt; test1.cc</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson5</span><br><span class="line">╰─➤  cat test2.cc</span><br><span class="line">cat: test2.cc: No such file or directory</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  <span class="token function">rm</span> test1.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  ll
+total <span class="token number">0</span>
+lrwxrwxrwx <span class="token number">1</span> ljx ljx <span class="token number">8</span> Jul <span class="token number">19</span> <span class="token number">12</span>:35 test2.cc -<span class="token operator">></span> test1.cc
+╭─ljx@VM-16-15-debian ~/linux_review/lesson5
+╰─➤  <span class="token function">cat</span> test2.cc
+cat: test2.cc: No such <span class="token function">file</span> or directory<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="关键区别的底层表现">关键区别的底层表现</span></h2><table>
 <thead>
@@ -506,7 +542,8 @@ Inode 的分配与管理
 <ul>
 <li>目录结构在文件系统中是一棵 <strong>有向无环图（DAG）</strong>，通过硬链接目录可能形成循环引用：</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 假设允许硬链接目录：</span><br><span class="line">ln /home/user/dir /home/user/dir/link_to_self</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none"># 假设允许硬链接目录：
+ln &#x2F;home&#x2F;user&#x2F;dir &#x2F;home&#x2F;user&#x2F;dir&#x2F;link_to_self<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>  此时：</p>
 <ul>
@@ -518,7 +555,7 @@ Inode 的分配与管理
 <li><p>每个目录的 inode 中都有一个 <code>..</code> 条目指向父目录。</p>
 </li>
 <li><p>如果允许硬链接目录，<code>..</code> 应该指向哪个父目录？</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/dir1/subdir (硬链接到 /dir2/subdir)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;dir1&#x2F;subdir (硬链接到 &#x2F;dir2&#x2F;subdir)<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>subdir</code> 的 <code>..</code> 应该是 <code>/dir1</code> 还是 <code>/dir2</code>？无法确定。</li>

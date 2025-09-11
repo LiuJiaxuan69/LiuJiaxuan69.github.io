@@ -83,6 +83,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -246,7 +248,7 @@
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -255,7 +257,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li></ul>
+            <ul><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/05/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/">串口通信</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -344,7 +346,9 @@
 <p>管道通信不仅仅只局限于父子进程，只要是有血缘关系的进程都可以进行管道通信，例如，父进程创建两个子进程，随后父进程将读写端都关闭了，这时两个兄弟进程的读写段都和父进程一样，故他们直接也可以构成管道通信，父进程创建的子进程，子进程再创建一个子进程，那么由于父进程和它的孙子进程共享同一个<code>file_struct</code>，故也可以构成管道通信。</p>
 <h2><span id="管道通信使用">管道通信使用</span></h2><p><code>pipe</code> 是 Linux&#x2F;Unix 系统中用于创建<strong>匿名管道（Anonymous Pipe）<strong>的系统调用，主要用于</strong>父子进程或兄弟进程之间的单向通信</strong>。它创建一个内核缓冲区，并返回两个文件描述符（<code>fd</code>），一个用于<strong>读</strong>，一个用于<strong>写</strong>。</p>
 <hr>
-<h3><span id="函数原型">函数原型</span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">pipe</span><span class="params">(<span class="type">int</span> pipefd[<span class="number">2</span>])</span>;</span><br></pre></td></tr></table></figure>
+<h3><span id="函数原型">函数原型</span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">pipe</span><span class="token punctuation">(</span><span class="token keyword">int</span> pipefd<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>参数</strong>：<ul>
@@ -361,7 +365,11 @@
 </li>
 </ul>
 <hr>
-<h3><span id="基本使用流程">基本使用流程</span></h3><h4><span id="1创建管道"><strong>（1）创建管道</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> pipefd[<span class="number">2</span>];</span><br><span class="line"><span class="keyword">if</span> (pipe(pipefd) == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;pipe&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="基本使用流程">基本使用流程</span></h3><h4><span id="1创建管道"><strong>（1）创建管道</strong></span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> pipefd<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">pipe</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">perror</span><span class="token punctuation">(</span><span class="token string">"pipe"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">exit</span><span class="token punctuation">(</span>EXIT_FAILURE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li>此时：<ul>
@@ -370,7 +378,11 @@
 </ul>
 </li>
 </ul>
-<h4><span id="2fork-创建子进程"><strong>（2）<code>fork()</code> 创建子进程</strong></span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> pid = fork();</span><br><span class="line"><span class="keyword">if</span> (pid == <span class="number">-1</span>) &#123;</span><br><span class="line">    perror(<span class="string">&quot;fork&quot;</span>);</span><br><span class="line">    <span class="built_in">exit</span>(EXIT_FAILURE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4><span id="2fork-创建子进程"><strong>（2）<code>fork()</code> 创建子进程</strong></span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token class-name">pid_t</span> pid <span class="token operator">=</span> <span class="token function">fork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>pid <span class="token operator">==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">perror</span><span class="token punctuation">(</span><span class="token string">"fork"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">exit</span><span class="token punctuation">(</span>EXIT_FAILURE<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>父进程和子进程都会继承 <code>pipefd</code></strong>，因此两者都可以读写管道。</li>
@@ -379,12 +391,12 @@
 <ul>
 <li><strong>父进程关闭写端，只读数据</strong>：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(pipefd[<span class="number">1</span>]);  <span class="comment">// 父进程关闭写端</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 父进程关闭写端</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><strong>子进程关闭读端，只写数据</strong>：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">close(pipefd[<span class="number">0</span>]);  <span class="comment">// 子进程关闭读端</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">close</span><span class="token punctuation">(</span>pipefd<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 子进程关闭读端</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>这样：</p>
 <ul>
@@ -421,10 +433,109 @@
 </tr>
 </tbody></table>
 <h3><span id="使用用例">使用用例</span></h3><p>下面是一个综合测试用例，我们让父进程持续读取子进程的数据，而子进程每隔一秒写入一段数据到管道中</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SIZE 1024</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">global_ret</span>&#123;</span><br><span class="line">    pipe_error = <span class="number">1</span>,</span><br><span class="line">    write_error,</span><br><span class="line">    read_error,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Write</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">5</span>;</span><br><span class="line">    <span class="type">char</span> inbuffer[SIZE];</span><br><span class="line">    <span class="keyword">while</span>(cnt--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> pid = <span class="built_in">getpid</span>();</span><br><span class="line">        <span class="comment">// 告知此处将 inbuffer 作为字符串缓冲区使用</span></span><br><span class="line">        inbuffer[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">        <span class="built_in">snprintf</span>(inbuffer, SIZE - <span class="number">1</span>, <span class="string">&quot;%s-%d: %s %d&quot;</span>, <span class="string">&quot;pid&quot;</span>, pid, <span class="string">&quot;hello, linux&quot;</span>, cnt);</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">write</span>(fd, inbuffer, <span class="built_in">strlen</span>(inbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;write error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::write_error);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">Read</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">char</span> outbuffer[SIZE];</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">read</span>(fd, outbuffer, <span class="built_in">sizeof</span>(outbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 读取到了文件末尾，不再读取</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;read error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::read_error);</span><br><span class="line">        &#125;</span><br><span class="line">        outbuffer[n] = <span class="number">0</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;parent process get message: &quot;</span> &lt;&lt; outbuffer &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">int</span> fd[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">if</span>(<span class="built_in">pipe</span>(fd) == <span class="number">-1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;pipe error&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> global_ret::pipe_error;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 子进程</span></span><br><span class="line">        <span class="comment">// 关闭读端口</span></span><br><span class="line">        <span class="built_in">close</span>(fd[<span class="number">0</span>]);</span><br><span class="line">        <span class="comment">// 执行写操作</span></span><br><span class="line">        <span class="built_in">Write</span>(fd[<span class="number">1</span>]);</span><br><span class="line">        <span class="comment">// 退出时关闭写端口（关闭所有端口）</span></span><br><span class="line">        <span class="built_in">close</span>(fd[<span class="number">1</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    <span class="comment">// 关闭写端口</span></span><br><span class="line">    <span class="built_in">close</span>(fd[<span class="number">1</span>]);</span><br><span class="line">    <span class="comment">// 执行读操作</span></span><br><span class="line">    <span class="built_in">Read</span>(fd[<span class="number">0</span>]);</span><br><span class="line">    <span class="comment">// 退出时关闭读端口（关闭所有端口）</span></span><br><span class="line">    <span class="built_in">close</span>(fd[<span class="number">0</span>]);</span><br><span class="line">    <span class="type">int</span> status = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(id, &amp;status, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// 正常退出</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">WIFEXITED</span>(status)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot; exited with code: &quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 异常退出</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; id &lt;&lt; <span class="string">&quot; killed by signal: &quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status) &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+
+#define SIZE 1024
+
+enum global_ret&#123;
+    pipe_error &#x3D; 1,
+    write_error,
+    read_error,
+&#125;;
+
+using namespace std;
+
+void Write(int fd)
+&#123;
+    int cnt &#x3D; 5;
+    char inbuffer[SIZE];
+    while(cnt--)
+    &#123;
+        int pid &#x3D; getpid();
+        &#x2F;&#x2F; 告知此处将 inbuffer 作为字符串缓冲区使用
+        inbuffer[0] &#x3D; 0;
+        snprintf(inbuffer, SIZE - 1, &quot;%s-%d: %s %d&quot;, &quot;pid&quot;, pid, &quot;hello, linux&quot;, cnt);
+        int n &#x3D; write(fd, inbuffer, strlen(inbuffer));
+        if(n &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;write error&quot;);
+            exit(global_ret::write_error);
+        &#125;
+        sleep(1);
+    &#125;
+    exit(0);
+&#125;
+
+void Read(int fd)
+&#123;
+    char outbuffer[SIZE];
+    while(true)
+    &#123;
+        int n &#x3D; read(fd, outbuffer, sizeof(outbuffer));
+        if(n &#x3D;&#x3D; 0)
+        &#123;
+            &#x2F;&#x2F; 读取到了文件末尾，不再读取
+            return;
+        &#125;else if(n &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;read error&quot;);
+            exit(global_ret::read_error);
+        &#125;
+        outbuffer[n] &#x3D; 0;
+        cout &lt;&lt; &quot;parent process get message: &quot; &lt;&lt; outbuffer &lt;&lt; endl;
+    &#125;
+&#125;
+
+int main()
+&#123;
+    int fd[2];
+    if(pipe(fd) &#x3D;&#x3D; -1)
+    &#123;
+        perror(&quot;pipe error&quot;);
+        return global_ret::pipe_error;
+    &#125;
+    pid_t id &#x3D; fork();
+    if(id &#x3D;&#x3D; 0)
+    &#123;
+        &#x2F;&#x2F; 子进程
+        &#x2F;&#x2F; 关闭读端口
+        close(fd[0]);
+        &#x2F;&#x2F; 执行写操作
+        Write(fd[1]);
+        &#x2F;&#x2F; 退出时关闭写端口（关闭所有端口）
+        close(fd[1]);
+    &#125;
+    &#x2F;&#x2F; 父进程
+    &#x2F;&#x2F; 关闭写端口
+    close(fd[1]);
+    &#x2F;&#x2F; 执行读操作
+    Read(fd[0]);
+    &#x2F;&#x2F; 退出时关闭读端口（关闭所有端口）
+    close(fd[0]);
+    int status &#x3D; 0;
+    int ret &#x3D; waitpid(id, &amp;status, 0);
+    &#x2F;&#x2F; 正常退出
+    if (WIFEXITED(status)) &#123;
+        cout &lt;&lt; &quot;Child process &quot; &lt;&lt; id &lt;&lt; &quot; exited with code: &quot; &lt;&lt; WEXITSTATUS(status) &lt;&lt; endl;
+    &#125; else &#123;
+        &#x2F;&#x2F; 异常退出
+        cout &lt;&lt; &quot;Child process &quot; &lt;&lt; id &lt;&lt; &quot; killed by signal: &quot; &lt;&lt; WTERMSIG(status) &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>运行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/pipe  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">parent process get message: pid-3873378: hello, linux 4</span><br><span class="line">parent process get message: pid-3873378: hello, linux 3</span><br><span class="line">parent process get message: pid-3873378: hello, linux 2</span><br><span class="line">parent process get message: pid-3873378: hello, linux 1</span><br><span class="line">parent process get message: pid-3873378: hello, linux 0</span><br><span class="line">Child process 3873378 exited with code: 0</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/pipe  
+╰─➤  ./main.o
+parent process get message: pid-3873378: hello, linux <span class="token number">4</span>
+parent process get message: pid-3873378: hello, linux <span class="token number">3</span>
+parent process get message: pid-3873378: hello, linux <span class="token number">2</span>
+parent process get message: pid-3873378: hello, linux <span class="token number">1</span>
+parent process get message: pid-3873378: hello, linux <span class="token number">0</span>
+Child process <span class="token number">3873378</span> exited with code: <span class="token number">0</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>父进程的“每隔一秒读取一次”是 <strong>管道阻塞特性</strong> 和 <strong>进程调度</strong> 的自然结果：</p>
 <p>(1) 管道的阻塞行为</p>
@@ -510,10 +621,33 @@
 </ol>
 <p>下面我们来验证一下父进程退出，子进程写入的现象：</p>
 <p>父进程读取2秒后就退出，而子进程会持续写入5秒</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Read</span><span class="params">(<span class="type">int</span> fd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">char</span> outbuffer[SIZE];</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">while</span>(cnt--)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> n = <span class="built_in">read</span>(fd, outbuffer, <span class="built_in">sizeof</span>(outbuffer));</span><br><span class="line">        <span class="keyword">if</span>(n == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 读取到了文件末尾，不再读取</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(n == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;read error&quot;</span>);</span><br><span class="line">            <span class="built_in">exit</span>(global_ret::read_error);</span><br><span class="line">        &#125;</span><br><span class="line">        outbuffer[n] = <span class="number">0</span>;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;parent process get message: &quot;</span> &lt;&lt; outbuffer &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">void Read(int fd)
+&#123;
+    char outbuffer[SIZE];
+    int cnt &#x3D; 2;
+    while(cnt--)
+    &#123;
+        int n &#x3D; read(fd, outbuffer, sizeof(outbuffer));
+        if(n &#x3D;&#x3D; 0)
+        &#123;
+            &#x2F;&#x2F; 读取到了文件末尾，不再读取
+            return;
+        &#125;else if(n &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;read error&quot;);
+            exit(global_ret::read_error);
+        &#125;
+        outbuffer[n] &#x3D; 0;
+        cout &lt;&lt; &quot;parent process get message: &quot; &lt;&lt; outbuffer &lt;&lt; endl;
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>运行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/pipe  </span><br><span class="line">╰─➤  ./main.o</span><br><span class="line">parent process get message: pid-3876701: hello, linux 4</span><br><span class="line">parent process get message: pid-3876701: hello, linux 3</span><br><span class="line">Child process 3876701 killed by signal: 13</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/pipe  
+╰─➤  ./main.o
+parent process get message: pid-3876701: hello, linux <span class="token number">4</span>
+parent process get message: pid-3876701: hello, linux <span class="token number">3</span>
+Child process <span class="token number">3876701</span> killed by signal: <span class="token number">13</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到子进程被 13 号信号杀掉了</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

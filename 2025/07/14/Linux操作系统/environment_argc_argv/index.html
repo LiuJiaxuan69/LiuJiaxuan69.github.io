@@ -74,6 +74,8 @@ getenv
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -237,7 +239,7 @@ getenv
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -246,7 +248,7 @@ getenv
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_basic/">Linux 最基础的命令</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li></ul>
+            <ul><li><a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_basic/">Linux 最基础的命令</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -309,35 +311,84 @@ getenv
 </li>
 </ul>
 <p>我们可以通过 echo 指令查看环境变量:</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo $NAME //NAME:你的环境变量名称</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">echo</span> <span class="token variable">$NAME</span> //NAME:你的环境变量名称<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>示例如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo $PATH</span><br><span class="line">/usr/local/bin:/usr/bin:/bin:/usr/games</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token environment constant">$PATH</span>
+/usr/local/bin:/usr/bin:/bin:/usr/games<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>系统的命令本质上也是可执行程序，而你自己编译出来的可执行程序执行是需要指定对应路径的，但系统的命令确不需要指定路径就可以调度，这是为什么呢？</p>
 <p>这正是环境变量起到了作用，当你输入一个命令的时候，系统是会去 PATH 环境变量对应的路径下面查找是否有对应可执行程序的，而你自己编译出来的可执行程序的路径并不在<br> PATH 环境变量中，因此若你不提供自己的可执行程序对应的路径，系统在 PATH 所包含的所有路径中查找后没有发现该可执行程序，就会报错</p>
 <p>这里我们可以举例验证一下，下面这个可执行程序默认情况下是需要指定路径才可以运行的：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./test.o                                                                                                     130 ↵</span><br><span class="line">I am parent process, my pid is 2027036</span><br><span class="line">I am child process, my pid is 2027037 my ppid is 2027036</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  test.o</span><br><span class="line">zsh: command not found: test.o</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  ./test.o                                                                                                     <span class="token number">130</span> ↵
+I am parent process, my pid is <span class="token number">2027036</span>
+I am child process, my pid is <span class="token number">2027037</span> my ppid is <span class="token number">2027036</span>
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  test.o
+zsh: <span class="token builtin class-name">command</span> not found: test.o<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>但我们可以用个 export 命令导入一个新的路径环境变量到 PATH 中去：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  export PATH=$PATH:/home/ljx/linux_review/lesson1/dir1</span><br><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  test.o</span><br><span class="line">I am parent process, my pid is 2027629</span><br><span class="line">I am child process, my pid is 2027630 my ppid is 2027629</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">export</span> <span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span><span class="token environment constant">$PATH</span>:/home/ljx/linux_review/lesson1/dir1
+╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  test.o
+I am parent process, my pid is <span class="token number">2027629</span>
+I am child process, my pid is <span class="token number">2027630</span> my ppid is <span class="token number">2027629</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>然后你就会惊奇的发现，不用指定路径也可以运行这条指令了，我们查看一下 PATH 变量，会发现多了一条<br>刚刚被我们导入的路径：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  echo $PATH</span><br><span class="line">/usr/local/bin:/usr/bin:/bin:/usr/games:/home/ljx/linux_review/lesson1/dir1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token builtin class-name">echo</span> <span class="token environment constant">$PATH</span>
+/usr/local/bin:/usr/bin:/bin:/usr/games:/home/ljx/linux_review/lesson1/dir1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>Linux 中如果想要查看到所有的变量，可以通过 env 命令查看：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  env</span><br><span class="line">USER=ljx</span><br><span class="line">LOGNAME=ljx</span><br><span class="line">HOME=/home/ljx</span><br><span class="line">PATH=/usr/local/bin:/usr/bin:/bin:/usr/games</span><br><span class="line">SHELL=/usr/bin/zsh</span><br><span class="line">...... #后面内容太多就省略了</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  <span class="token function">env</span>
+<span class="token assign-left variable"><span class="token environment constant">USER</span></span><span class="token operator">=</span>ljx
+<span class="token assign-left variable"><span class="token environment constant">LOGNAME</span></span><span class="token operator">=</span>ljx
+<span class="token assign-left variable"><span class="token environment constant">HOME</span></span><span class="token operator">=</span>/home/ljx
+<span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span>/usr/local/bin:/usr/bin:/bin:/usr/games
+<span class="token assign-left variable"><span class="token environment constant">SHELL</span></span><span class="token operator">=</span>/usr/bin/zsh
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span> <span class="token comment">#后面内容太多就省略了</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>除了这种方式获取环境变量，我们还可以通过代码获取环境变量，不过在此之前，我得先介绍一下 main 函数传参的前两个参数 argc 和 argv</p>
 <h2><span id="命令行参数">命令行参数</span></h2><p>这两个参数分别代表的是命令行参数的个数以及命令行参数</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; i &lt; argc; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; argv[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+
+int main(int argc, char *argv[])
+&#123;
+    for(int i &#x3D; 0; i &lt; argc; ++i)
+    &#123;
+        cout &lt;&lt; argv[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们运行这段代码：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./arg.o 111 222 333</span><br><span class="line">./arg.o</span><br><span class="line">111</span><br><span class="line">222</span><br><span class="line">333</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  ./arg.o <span class="token number">111</span> <span class="token number">222</span> <span class="token number">333</span>
+./arg.o
+<span class="token number">111</span>
+<span class="token number">222</span>
+<span class="token number">333</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>你会发现，argv 的第一个参数是进程名称，后面分别就对应的是输入的命令行参数</p>
 <p>命令行参数中存储的是一个个的 char* 指针，因此最后一个 argv 的下一个 char* 是空指针，因此可以改写成如下遍历形式：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; argv[i]; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; argv[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+
+int main(int argc, char *argv[])
+&#123;
+    for(int i &#x3D; 0; argv[i]; ++i)
+    &#123;
+        cout &lt;&lt; argv[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>当遍历到 argv[i] 为0的时候，就会退出循环，最终运行结果和上面相同</p>
 <h2><span id="环境变量参数">环境变量参数</span></h2><p>同样的，环境变量也可以通过这种方式获取，环境变量对应的是 main 函数的第三个参数 env（名字随便取的，你喜欢怎么叫都行）</p>
@@ -345,21 +396,61 @@ getenv
 <p>环境变量参数存储图：</p>
 <p><img src="/img/Linux/env_arg/environ.png" alt="env"></p>
 <p>我们通过判断是否遍历到空指针来遍历整个环境变量</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[], <span class="type">char</span> *env[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; env[i]; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; env[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+int main(int argc, char *argv[], char *env[])
+&#123;
+    for(int i &#x3D; 0; env[i]; ++i)
+    &#123;
+        cout &lt;&lt; env[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，打印出来的数据和通过 env 指令获取的一模一样：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./arg.o</span><br><span class="line">USER=ljx</span><br><span class="line">LOGNAME=ljx</span><br><span class="line">HOME=/home/ljx</span><br><span class="line">PATH=/usr/local/bin:/usr/bin:/bin:/usr/games</span><br><span class="line">SHELL=/usr/bin/zsh</span><br><span class="line">...... # 同理，省略了后面的数据</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  ./arg.o
+<span class="token assign-left variable"><span class="token environment constant">USER</span></span><span class="token operator">=</span>ljx
+<span class="token assign-left variable"><span class="token environment constant">LOGNAME</span></span><span class="token operator">=</span>ljx
+<span class="token assign-left variable"><span class="token environment constant">HOME</span></span><span class="token operator">=</span>/home/ljx
+<span class="token assign-left variable"><span class="token environment constant">PATH</span></span><span class="token operator">=</span>/usr/local/bin:/usr/bin:/bin:/usr/games
+<span class="token assign-left variable"><span class="token environment constant">SHELL</span></span><span class="token operator">=</span>/usr/bin/zsh
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span> <span class="token comment"># 同理，省略了后面的数据</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>除此之外，我们还可以利用第三方变量 environ 来获取环境变量：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">0</span>; environ[i]; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        cout &lt;&lt; environ[i] &lt;&lt; endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+using namespace std;
+
+int main()
+&#123;
+    extern char **environ;
+    for(int i &#x3D; 0; environ[i]; ++i)
+    &#123;
+        cout &lt;&lt; environ[i] &lt;&lt; endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>libc中定义的全局变量environ指向环境变量表,environ没有包含在任何头文件中,所以在使用时 要用<br>extern声明</p>
 <h2><span id="进程是如何获取环境变量的">进程是如何获取环境变量的？</span></h2><p>子进程的环境变量都是会从父进程继承过来的，而我们创建的所有进程，都是通过 bash 或 zsh 等命令行工具创建出来的，因此<br>在我们运行一个进程的时候，这个进程就自然将 bash 进程的环境变量继承过来了</p>
 <h2><span id="getenv">getenv</span></h2><p>该函数可以用于获取环境变量对应的参数：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">extern</span> <span class="type">char</span> **environ;</span><br><span class="line">    cout &lt;&lt; <span class="built_in">getenv</span>(<span class="string">&quot;PATH&quot;</span>) &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;stdlib.h&gt;
+using namespace std;
+
+
+int main()
+&#123;
+    extern char **environ;
+    cout &lt;&lt; getenv(&quot;PATH&quot;) &lt;&lt; endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>运行后即可直接查看到 PATH 环境变量存储的内容：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1</span><br><span class="line">╰─➤  ./arg.o</span><br><span class="line">/usr/local/bin:/usr/bin:/bin:/usr/games</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson1/dir1
+╰─➤  ./arg.o
+/usr/local/bin:/usr/bin:/bin:/usr/games<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

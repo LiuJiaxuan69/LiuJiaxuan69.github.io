@@ -77,6 +77,8 @@ struct sigaction 结构体
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -240,7 +242,7 @@ struct sigaction 结构体
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -249,7 +251,7 @@ struct sigaction 结构体
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li></ul>
+            <ul><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -380,7 +382,9 @@ struct sigaction 结构体
 <li>配置额外的信号处理选项（<code>sa_flags</code>）</li>
 </ul>
 <hr>
-<h3><span id="函数原型"><strong>函数原型</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">sigaction</span><span class="params">(<span class="type">int</span> signum, <span class="type">const</span> <span class="keyword">struct</span> sigaction *act, <span class="keyword">struct</span> sigaction *oldact)</span>;</span><br></pre></td></tr></table></figure>
+<h3><span id="函数原型"><strong>函数原型</strong></span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;signal.h></span></span>
+
+<span class="token keyword">int</span> <span class="token function">sigaction</span><span class="token punctuation">(</span><span class="token keyword">int</span> signum<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token keyword">struct</span> <span class="token class-name">sigaction</span> <span class="token operator">*</span>act<span class="token punctuation">,</span> <span class="token keyword">struct</span> <span class="token class-name">sigaction</span> <span class="token operator">*</span>oldact<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="参数说明"><strong>参数说明</strong></span></h3><table>
 <thead>
@@ -407,7 +411,13 @@ struct sigaction 结构体
 <li><strong>失败</strong>：返回 <code>-1</code>，并设置 <code>errno</code></li>
 </ul>
 <hr>
-<h3><span id="struct-sigaction-结构体"><strong><code>struct sigaction</code> 结构体</strong></span></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> &#123;</span></span><br><span class="line">    <span class="type">void</span> (*sa_handler)(<span class="type">int</span>);                  <span class="comment">// 普通信号处理函数</span></span><br><span class="line">    <span class="type">void</span> (*sa_sigaction)(<span class="type">int</span>, <span class="type">siginfo_t</span> *, <span class="type">void</span> *);  <span class="comment">// 实时信号处理函数</span></span><br><span class="line">    <span class="type">sigset_t</span> sa_mask;                         <span class="comment">// 额外阻塞的信号集</span></span><br><span class="line">    <span class="type">int</span> sa_flags;                             <span class="comment">// 控制信号行为的标志位</span></span><br><span class="line">    <span class="type">void</span> (*sa_restorer)(<span class="type">void</span>);                <span class="comment">// 已废弃，通常置 NULL</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3><span id="struct-sigaction-结构体"><strong><code>struct sigaction</code> 结构体</strong></span></h3><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">struct</span> <span class="token class-name">sigaction</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>sa_handler<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                  <span class="token comment">// 普通信号处理函数</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>sa_sigaction<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">,</span> <span class="token class-name">siginfo_t</span> <span class="token operator">*</span><span class="token punctuation">,</span> <span class="token keyword">void</span> <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 实时信号处理函数</span>
+    <span class="token class-name">sigset_t</span> sa_mask<span class="token punctuation">;</span>                         <span class="token comment">// 额外阻塞的信号集</span>
+    <span class="token keyword">int</span> sa_flags<span class="token punctuation">;</span>                             <span class="token comment">// 控制信号行为的标志位</span>
+    <span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>sa_restorer<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token comment">// 已废弃，通常置 NULL</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="关键字段说明"><strong>关键字段说明</strong></span></h3><ol>
 <li><p><strong><code>sa_handler</code></strong>  </p>
@@ -418,7 +428,11 @@ struct sigaction 结构体
 <li><strong>自定义函数</strong>（格式：<code>void handler(int signo)</code>）</li>
 </ul>
 </li>
-<li>例如：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handler</span><span class="params">(<span class="type">int</span> sig)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Received signal %d\n&quot;</span>, sig);</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> <span class="title">act</span>;</span></span><br><span class="line">act.sa_handler = handler;  <span class="comment">// 设置自定义处理函数</span></span><br></pre></td></tr></table></figure></li>
+<li>例如：<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">handler</span><span class="token punctuation">(</span><span class="token keyword">int</span> sig<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Received signal %d\n"</span><span class="token punctuation">,</span> sig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+<span class="token keyword">struct</span> <span class="token class-name">sigaction</span> act<span class="token punctuation">;</span>
+act<span class="token punctuation">.</span>sa_handler <span class="token operator">=</span> handler<span class="token punctuation">;</span>  <span class="token comment">// 设置自定义处理函数</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 </li>
 <li><p><strong><code>sa_sigaction</code></strong>  </p>
@@ -434,7 +448,8 @@ struct sigaction 结构体
 <li><p><strong>默认阻塞当前信号</strong>（无需手动添加）。</p>
 </li>
 <li><p>例如：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sigemptyset(&amp;act.sa_mask);  <span class="comment">// 清空信号集</span></span><br><span class="line">sigaddset(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 阻塞 SIGQUIT</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">sigemptyset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>act<span class="token punctuation">.</span>sa_mask<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 清空信号集</span>
+<span class="token function">sigaddset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>act<span class="token punctuation">.</span>sa_mask<span class="token punctuation">,</span> SIGQUIT<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 阻塞 SIGQUIT</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ul>
 </li>
 <li><p><strong><code>sa_flags</code></strong>  </p>
@@ -447,7 +462,7 @@ struct sigaction 结构体
 </ul>
 </li>
 <li><p>例如：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">act.sa_flags = SA_RESTART;  <span class="comment">// 系统调用被中断后自动恢复</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c">act<span class="token punctuation">.</span>sa_flags <span class="token operator">=</span> SA_RESTART<span class="token punctuation">;</span>  <span class="token comment">// 系统调用被中断后自动恢复</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 </li>
 </ol>
@@ -561,7 +576,99 @@ struct sigaction 结构体
 </li>
 </ol>
 <p>下面是验证示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印当前进程的未决信号集(pending signals)</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_pending_map</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">sigset_t</span> sigset;</span><br><span class="line">    <span class="built_in">sigpending</span>(&amp;sigset);  <span class="comment">// 获取当前未决信号集</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 从31到1遍历所有可能的信号</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">31</span>; i &gt;= <span class="number">1</span>; --i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span>(<span class="built_in">sigismember</span>(&amp;sigset, i)) </span><br><span class="line">            cout &lt;&lt; <span class="number">1</span> &lt;&lt; <span class="string">&quot; &quot;</span>;  <span class="comment">// 该信号处于未决状态</span></span><br><span class="line">        <span class="keyword">else</span> </span><br><span class="line">            cout &lt;&lt; <span class="number">0</span> &lt;&lt; <span class="string">&quot; &quot;</span>;   <span class="comment">// 该信号未产生</span></span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; endl &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 信号处理函数</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> sign)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 打印收到的信号信息</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;signal &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; <span class="string">&quot; begin&quot;</span> &lt;&lt; endl;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 无限循环打印信号状态</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">print_pending_map</span>();  <span class="comment">// 打印当前未决信号集</span></span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Processing signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);  <span class="comment">// 每秒打印一次</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 设置SIGINT的信号处理</span></span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">sigaction</span> act, oact;</span><br><span class="line">    <span class="built_in">sigemptyset</span>(&amp;act.sa_mask);  <span class="comment">// 初始化信号屏蔽字</span></span><br><span class="line">    <span class="built_in">sigemptyset</span>(&amp;oact.sa_mask);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 关键设置：在执行SIGINT处理函数时阻塞SIGQUIT</span></span><br><span class="line">    <span class="built_in">sigaddset</span>(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 将SIGQUIT加入阻塞集</span></span><br><span class="line">    </span><br><span class="line">    act.sa_handler = myhandler;  <span class="comment">// 设置信号处理函数</span></span><br><span class="line">    <span class="built_in">sigaction</span>(SIGINT, &amp;act, &amp;oact);  <span class="comment">// 注册SIGINT的处理方式</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 为SIGQUIT设置相同的处理函数(用于演示)</span></span><br><span class="line">    <span class="built_in">signal</span>(SIGQUIT, myhandler);  <span class="comment">// 注意：这里使用signal而不是sigaction</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建子进程</span></span><br><span class="line">    <span class="type">pid_t</span> ret = fork();</span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">0</span>)  <span class="comment">// 子进程代码</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 子进程无限循环打印自己的PID</span></span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">            cout &lt;&lt; <span class="string">&quot;Child process &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; running...&quot;</span> &lt;&lt; endl;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 父进程代码</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒让子进程启动</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 第一次向子进程发送SIGINT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGINT to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGINT);  <span class="comment">// 发送SIGINT信号</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 第二次向子进程发送SIGINT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGINT to child process again&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGINT);</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 向子进程发送SIGQUIT</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGQUIT to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGQUIT);  <span class="comment">// 发送SIGQUIT信号</span></span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);  <span class="comment">// 等待2秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 向子进程发送SIGKILL(无法被捕获或忽略)</span></span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Parent sending SIGKILL to child process&quot;</span> &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">kill</span>(ret, SIGKILL);  <span class="comment">// 发送SIGKILL信号强制终止子进程</span></span><br><span class="line">    </span><br><span class="line">    <span class="built_in">wait</span>(<span class="literal">nullptr</span>);  <span class="comment">// 等待子进程结束</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+
+using namespace std;
+
+&#x2F;&#x2F; 打印当前进程的未决信号集(pending signals)
+void print_pending_map()
+&#123;
+    sigset_t sigset;
+    sigpending(&amp;sigset);  &#x2F;&#x2F; 获取当前未决信号集
+    
+    &#x2F;&#x2F; 从31到1遍历所有可能的信号
+    for(int i &#x3D; 31; i &gt;&#x3D; 1; --i)
+    &#123;
+        if(sigismember(&amp;sigset, i)) 
+            cout &lt;&lt; 1 &lt;&lt; &quot; &quot;;  &#x2F;&#x2F; 该信号处于未决状态
+        else 
+            cout &lt;&lt; 0 &lt;&lt; &quot; &quot;;   &#x2F;&#x2F; 该信号未产生
+    &#125;
+    cout &lt;&lt; endl &lt;&lt; endl;
+&#125;
+
+&#x2F;&#x2F; 信号处理函数
+void myhandler(int sign)
+&#123;
+    &#x2F;&#x2F; 打印收到的信号信息
+    cout &lt;&lt; &quot;signal &quot; &lt;&lt; strsignal(sign) &lt;&lt; &quot; begin&quot; &lt;&lt; endl;
+    
+    &#x2F;&#x2F; 无限循环打印信号状态
+    while(true)
+    &#123;
+        print_pending_map();  &#x2F;&#x2F; 打印当前未决信号集
+        cout &lt;&lt; &quot;Processing signal: &quot; &lt;&lt; strsignal(sign) &lt;&lt; endl;
+        sleep(1);  &#x2F;&#x2F; 每秒打印一次
+    &#125;
+&#125;
+
+int main()
+&#123;
+    &#x2F;&#x2F; 设置SIGINT的信号处理
+    struct sigaction act, oact;
+    sigemptyset(&amp;act.sa_mask);  &#x2F;&#x2F; 初始化信号屏蔽字
+    sigemptyset(&amp;oact.sa_mask);
+    
+    &#x2F;&#x2F; 关键设置：在执行SIGINT处理函数时阻塞SIGQUIT
+    sigaddset(&amp;act.sa_mask, SIGQUIT);  &#x2F;&#x2F; 将SIGQUIT加入阻塞集
+    
+    act.sa_handler &#x3D; myhandler;  &#x2F;&#x2F; 设置信号处理函数
+    sigaction(SIGINT, &amp;act, &amp;oact);  &#x2F;&#x2F; 注册SIGINT的处理方式
+    
+    &#x2F;&#x2F; 为SIGQUIT设置相同的处理函数(用于演示)
+    signal(SIGQUIT, myhandler);  &#x2F;&#x2F; 注意：这里使用signal而不是sigaction
+
+    &#x2F;&#x2F; 创建子进程
+    pid_t ret &#x3D; fork();
+    if(ret &#x3D;&#x3D; 0)  &#x2F;&#x2F; 子进程代码
+    &#123;
+        &#x2F;&#x2F; 子进程无限循环打印自己的PID
+        while(true)
+        &#123;
+            sleep(1);
+            cout &lt;&lt; &quot;Child process &quot; &lt;&lt; getpid() &lt;&lt; &quot; running...&quot; &lt;&lt; endl;
+        &#125;
+    &#125;
+
+    &#x2F;&#x2F; 父进程代码
+    sleep(2);  &#x2F;&#x2F; 等待2秒让子进程启动
+    
+    &#x2F;&#x2F; 第一次向子进程发送SIGINT
+    cout &lt;&lt; &quot;Parent sending SIGINT to child process&quot; &lt;&lt; endl;
+    kill(ret, SIGINT);  &#x2F;&#x2F; 发送SIGINT信号
+    sleep(2);  &#x2F;&#x2F; 等待2秒
+    
+    &#x2F;&#x2F; 第二次向子进程发送SIGINT
+    cout &lt;&lt; &quot;Parent sending SIGINT to child process again&quot; &lt;&lt; endl;
+    kill(ret, SIGINT);
+    sleep(2);  &#x2F;&#x2F; 等待2秒
+    
+    &#x2F;&#x2F; 向子进程发送SIGQUIT
+    cout &lt;&lt; &quot;Parent sending SIGQUIT to child process&quot; &lt;&lt; endl;
+    kill(ret, SIGQUIT);  &#x2F;&#x2F; 发送SIGQUIT信号
+    sleep(2);  &#x2F;&#x2F; 等待2秒
+    
+    &#x2F;&#x2F; 向子进程发送SIGKILL(无法被捕获或忽略)
+    cout &lt;&lt; &quot;Parent sending SIGKILL to child process&quot; &lt;&lt; endl;
+    kill(ret, SIGKILL);  &#x2F;&#x2F; 发送SIGKILL信号强制终止子进程
+    
+    wait(nullptr);  &#x2F;&#x2F; 等待子进程结束
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h5><span id="代码设计目标">代码设计目标</span></h5><p>本实验通过父子进程模型，演示以下Linux信号处理核心机制：</p>
 <ul>
@@ -571,14 +678,36 @@ struct sigaction 结构体
 <li>不可阻塞信号（SIGKILL）的特殊性</li>
 </ul>
 <h5><span id="核心组件说明">核心组件说明</span></h5><p>信号监控函数</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">print_pending_map</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">sigset_t</span> sigset;</span><br><span class="line">    <span class="built_in">sigpending</span>(&amp;sigset);  <span class="comment">// 获取当前未决信号集</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">31</span>; i &gt;= <span class="number">1</span>; --i) &#123;</span><br><span class="line">        cout &lt;&lt; (<span class="built_in">sigismember</span>(&amp;sigset, i) ? <span class="number">1</span> : <span class="number">0</span>) &lt;&lt; <span class="string">&quot; &quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cout &lt;&lt; endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">print_pending_map</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    sigset_t sigset<span class="token punctuation">;</span>
+    <span class="token function">sigpending</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sigset<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 获取当前未决信号集</span>
+    
+    <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">31</span><span class="token punctuation">;</span> i <span class="token operator">>=</span> <span class="token number">1</span><span class="token punctuation">;</span> <span class="token operator">--</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        cout <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token function">sigismember</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>sigset<span class="token punctuation">,</span> i<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token number">1</span> <span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token string">" "</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    cout <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>功能</strong>：实时打印信号未决状态，每个bit代表对应信号是否处于未决状态。</p>
 <p>信号处理函数</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> sign)</span> </span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;Handler executing for: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(sign) &lt;&lt; endl;</span><br><span class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;  <span class="comment">// 用于保持处理状态便于观察</span></span><br><span class="line">        <span class="built_in">print_pending_map</span>();</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">myhandler</span><span class="token punctuation">(</span><span class="token keyword">int</span> sign<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Handler executing for: "</span> <span class="token operator">&lt;&lt;</span> <span class="token function">strsignal</span><span class="token punctuation">(</span>sign<span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+    <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 用于保持处理状态便于观察</span>
+        <span class="token function">print_pending_map</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>设计意图</strong>：通过无限循环模拟长时间信号处理，便于观察信号阻塞效果。</p>
-<h5><span id="关键配置">关键配置</span></h5><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 配置SIGINT处理</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">sigaction</span> act;</span><br><span class="line"><span class="built_in">sigemptyset</span>(&amp;act.sa_mask);</span><br><span class="line"><span class="built_in">sigaddset</span>(&amp;act.sa_mask, SIGQUIT);  <span class="comment">// 关键设置！</span></span><br><span class="line">act.sa_handler = myhandler;</span><br><span class="line"><span class="built_in">sigaction</span>(SIGINT, &amp;act, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 配置SIGQUIT处理（对比组）</span></span><br><span class="line"><span class="built_in">signal</span>(SIGQUIT, myhandler);</span><br></pre></td></tr></table></figure>
+<h5><span id="关键配置">关键配置</span></h5><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// 配置SIGINT处理</span>
+<span class="token keyword">struct</span> <span class="token class-name">sigaction</span> act<span class="token punctuation">;</span>
+<span class="token function">sigemptyset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>act<span class="token punctuation">.</span>sa_mask<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">sigaddset</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>act<span class="token punctuation">.</span>sa_mask<span class="token punctuation">,</span> SIGQUIT<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 关键设置！</span>
+act<span class="token punctuation">.</span>sa_handler <span class="token operator">=</span> myhandler<span class="token punctuation">;</span>
+<span class="token function">sigaction</span><span class="token punctuation">(</span>SIGINT<span class="token punctuation">,</span> <span class="token operator">&amp;</span>act<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 配置SIGQUIT处理（对比组）</span>
+<span class="token function">signal</span><span class="token punctuation">(</span>SIGQUIT<span class="token punctuation">,</span> myhandler<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>核心设置</strong>：当处理SIGINT时，自动阻塞SIGQUIT信号。</p>
 <h5><span id="实验流程">实验流程</span></h5><pre class="mermaid">sequenceDiagram
@@ -596,7 +725,32 @@ struct sigaction 结构体
     Parent->>Child: kill(SIGKILL)</pre>
 
 <p>结果输出如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign</span><br><span class="line">╰─➤  ./signal_cap.o</span><br><span class="line">Child process 703969 running...</span><br><span class="line">Parent sending SIGINT to child process</span><br><span class="line">signal Interrupt begin</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGINT to child process again</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGQUIT to child process</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 0</span><br><span class="line"></span><br><span class="line">Processing signal: Interrupt</span><br><span class="line">Parent sending SIGKILL to child process</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign
+╰─➤  ./signal_cap.o
+Child process <span class="token number">703969</span> running<span class="token punctuation">..</span>.
+Parent sending SIGINT to child process
+signal Interrupt begin
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+Parent sending SIGINT to child process again
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+Parent sending SIGQUIT to child process
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">1</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+<span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> <span class="token number">1</span> <span class="token number">0</span>
+
+Processing signal: Interrupt
+Parent sending SIGKILL to child process<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"

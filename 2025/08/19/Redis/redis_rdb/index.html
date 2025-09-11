@@ -89,6 +89,8 @@ R,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -252,7 +254,7 @@ R,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -261,7 +263,7 @@ R,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li></ul>
+            <ul><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -324,7 +326,9 @@ R,"/>
 <li><p><strong>工作原理</strong>：<br>Redis 周期性检查是否满足配置的条件，若满足则自动启动 <code>bgsave</code>（后台执行，非阻塞）。</p>
 </li>
 <li><p><strong>默认配置</strong>（Redis 默认的 <code>redis.conf</code> 片段）：  </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">save 900 1</span><br><span class="line">save 300 10</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">save 900 1
+save 300 10
+save 60 10000<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>含义：  </p>
 <ul>
@@ -427,7 +431,7 @@ R,"/>
 <li><p>Redis 启动时自动校验 RDB 文件完整性（魔数 + CRC 校验），损坏则报错：<br><code># Fatal error loading the DB: Invalid file format.</code></p>
 </li>
 <li><p><strong>修复工具</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-check-rdb dump.rdb</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">redis-check-rdb dump.rdb<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>该工具会报告损坏位置（如无效键值对、文件截断等），但<strong>无法直接修复</strong>。</p>
 </li>
@@ -455,7 +459,9 @@ R,"/>
 </ul>
 </li>
 <li><p>示例场景：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每6小时备份并上传到HDFS</span></span><br><span class="line">save 21600 1</span><br><span class="line">hadoop fs -put /var/lib/redis/dump.rdb /backup/redis/$(<span class="built_in">date</span> +%Y%m%d).rdb</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 每6小时备份并上传到HDFS</span>
+save <span class="token number">21600</span> <span class="token number">1</span>
+hadoop fs <span class="token parameter variable">-put</span> /var/lib/redis/dump.rdb /backup/redis/<span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> +%Y%m%d<span class="token variable">)</span></span>.rdb<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <h5><span id="2-极快的恢复速度">2. <strong>极快的恢复速度</strong></span></h5><ul>
 <li><p>相比 AOF 的日志重放方式，RDB 直接加载二进制数据：</p>
@@ -464,7 +470,7 @@ R,"/>
 </ul>
 </li>
 <li><p>重要指标：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-benchmark -n 1000000 --rdb /tmp/dump.rdb  <span class="comment"># 测试恢复速度</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">redis-benchmark <span class="token parameter variable">-n</span> <span class="token number">1000000</span> <span class="token parameter variable">--rdb</span> /tmp/dump.rdb  <span class="token comment"># 测试恢复速度</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <h4><span id="缺点">❌ 缺点</span></h4><h5><span id="1-非实时持久化">1. <strong>非实时持久化</strong></span></h5><ul>
 <li><p>致命短板：</p>
@@ -478,7 +484,8 @@ R,"/>
 </ul>
 </li>
 <li><p>典型问题：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监控fork耗时（超过100ms需告警）</span></span><br><span class="line">redis-cli info stats | grep latest_fork_usec</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 监控fork耗时（超过100ms需告警）</span>
+redis-cli info stats <span class="token operator">|</span> <span class="token function">grep</span> latest_fork_usec<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ul>
 <h5><span id="2-版本兼容性风险">2. <strong>版本兼容性风险</strong></span></h5><ul>
 <li>RDB 格式随 Redis 版本演进变化：<table>
@@ -637,7 +644,9 @@ R,"/>
 </ul>
 </li>
 </ul>
-<h4><span id="3-文件结构示例">3. 文件结构示例</span></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[RDB二进制数据]  ← 文件开头是RDB格式的快照</span><br><span class="line">*3\r\n$3\r\nSET\r\n$5\r\nkey1\r\n$7\r\nvalue1\r\n  ← 后面追加AOF格式命令</span><br><span class="line">*3\r\n$3\r\nSET\r\n$5\r\nkey2\r\n$7\r\nvalue2\r\n</span><br></pre></td></tr></table></figure>
+<h4><span id="3-文件结构示例">3. 文件结构示例</span></h4><pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">[RDB二进制数据]  ← 文件开头是RDB格式的快照
+*3\r\n$3\r\nSET\r\n$5\r\nkey1\r\n$7\r\nvalue1\r\n  ← 后面追加AOF格式命令
+*3\r\n$3\r\nSET\r\n$5\r\nkey2\r\n$7\r\nvalue2\r\n<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="4-数据恢复过程">4. 数据恢复过程</span></h4><ol>
 <li>Redis 重启时检测到 AOF 文件</li>
@@ -646,7 +655,11 @@ R,"/>
 <li>然后按顺序执行后面的 AOF 命令</li>
 <li>完成数据恢复</li>
 </ol>
-<h4><span id="5-配置参数">5. 配置参数</span></h4><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes                  <span class="comment"># 启用AOF</span></span><br><span class="line">aof-use-rdb-preamble yes        <span class="comment"># 启用混合持久化</span></span><br><span class="line">aof-rewrite-incremental-fsync yes <span class="comment"># 重写时增量fsync</span></span><br><span class="line">auto-aof-rewrite-percentage 100 <span class="comment"># 文件增长比例阈值</span></span><br><span class="line">auto-aof-rewrite-min-size 64mb  <span class="comment"># 最小重写大小</span></span><br></pre></td></tr></table></figure>
+<h4><span id="5-配置参数">5. 配置参数</span></h4><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">appendonly yes                  # 启用AOF
+aof-use-rdb-preamble yes        # 启用混合持久化
+aof-rewrite-incremental-fsync yes # 重写时增量fsync
+auto-aof-rewrite-percentage 100 # 文件增长比例阈值
+auto-aof-rewrite-min-size 64mb  # 最小重写大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="6-优缺点分析">6. 优缺点分析</span></h4><p><strong>优势：</strong></p>
 <ul>
@@ -663,13 +676,15 @@ R,"/>
 </ul>
 <h4><span id="7-生产环境建议">7. 生产环境建议</span></h4><ol>
 <li><p>对于关键业务，强烈建议开启：</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">appendonly yes</span><br><span class="line">aof-use-rdb-preamble yes</span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">appendonly yes
+aof-use-rdb-preamble yes
+appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p>监控重写过程：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli info persistence | grep aof_rewrite</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">redis-cli info persistence <span class="token operator">|</span> <span class="token function">grep</span> aof_rewrite<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p>定期检查 AOF 文件完整性：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-check-aof --fix appendonly.aof</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">redis-check-aof <span class="token parameter variable">--fix</span> appendonly.aof<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p>配合适当的备份策略（如每小时备份到远程存储）</p>
 </li>
@@ -716,7 +731,11 @@ R,"/>
 <li>类似于一个“目录”，告诉 Redis 应该按什么顺序加载数据文件。</li>
 </ul>
 <p><strong>文件内容示例</strong>：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;base&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;b&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="string">&quot;appendonly.aof.1.base.rdb&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;incr&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;i&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;seq&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span> <span class="attr">&quot;file&quot;</span><span class="punctuation">:</span> <span class="string">&quot;appendonly.aof.1.incr.aof&quot;</span><span class="punctuation">&#125;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token punctuation">&#123;</span>
+  <span class="token property">"seq"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token property">"base"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">&#123;</span><span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token property">"seq"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"file"</span><span class="token operator">:</span> <span class="token string">"appendonly.aof.1.base.rdb"</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"incr"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">&#123;</span><span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"i"</span><span class="token punctuation">,</span> <span class="token property">"seq"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"file"</span><span class="token operator">:</span> <span class="token string">"appendonly.aof.1.incr.aof"</span><span class="token punctuation">&#125;</span><span class="token punctuation">]</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>运作机制</strong>：</p>
 <ul>
@@ -741,7 +760,7 @@ R,"/>
 <li>类似于传统 AOF 的尾部，但现在是独立文件。</li>
 </ul>
 <p><strong>文件内容示例</strong>（RESP 协议）：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">*3\r\n$3\r\nSET\r\n$3\r\nkey\r\n$5\r\nvalue\r\n<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>运作机制</strong>：</p>
 <ul>
@@ -816,7 +835,8 @@ R,"/>
 <li>可通过 <code>redis-check-aof --fix</code> 修复损坏的 AOF 文件。</li>
 </ul>
 <p>如果需要回退到传统单文件模式，可设置：</p>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">aof-use-rdb-preamble yes</span><br><span class="line">aof-manifest-enabled no</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">aof-use-rdb-preamble yes
+aof-manifest-enabled no<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>但官方建议保持 MP-AOF，除非有特殊兼容性需求。</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

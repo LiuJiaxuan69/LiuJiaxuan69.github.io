@@ -80,6 +80,8 @@ dock,"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -243,7 +245,7 @@ dock,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -252,7 +254,7 @@ dock,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li></ul>
+            <ul><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -366,7 +368,7 @@ dock,"/>
 <h3><span id="容器暂停">容器暂停</span></h3><p>Docker”剥夺”了此容器的 CPU 资源。而其他资源，如 Memory 资源、Network 资源等还保留未动。如此一来，失去了 CPU 资源的进程，是不会被主机内核系统所调度的，所以此容器就处于”冰封”状态，底层实现上，实际上就是不给该容器的进程分配时间片。</p>
 <h2><span id="docker-container-常用命令">Docker Container 常用命令</span></h2><h3><span id="docker-create">docker create</span></h3><p><code>docker create</code> 命令用于<strong>创建一个新的容器</strong>，但<strong>并不会立即启动它</strong>。</p>
 <p>语法格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker create [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> create <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>你可以把它想象成买了一辆新车（从镜像创建容器），把它停在了车库裡，但还没有插入钥匙启动引擎。此时，车辆的所有配置（颜色、型号、内饰）都已就绪，只差最后一步——点火。</p>
 <h4><span id="docker-create-与-docker-run-的区别"><code>docker create</code> 与 <code>docker run</code> 的区别</span></h4><p>我们可以用一个简单的类比来区分：</p>
@@ -393,10 +395,18 @@ dock,"/>
 </ol>
 <h4><span id="常用参数和示例">常用参数和示例</span></h4><p><code>docker create</code> 的参数与 <code>docker run</code> 几乎完全一致，因为它需要为容器设定所有运行时的配置。</p>
 <p><strong>基本示例 1：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个名为 `my_web` 的 Nginx 容器，但不启动它</span></span><br><span class="line">docker create --name my_web nginx:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个名为 `my_web` 的 Nginx 容器，但不启动它</span>
+<span class="token function">docker</span> create <span class="token parameter variable">--name</span> my_web nginx:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>基本示例 2（包含常用参数）：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个复杂的容器</span></span><br><span class="line">docker create \</span><br><span class="line">  --name my_app \                  <span class="comment"># 为容器指定一个名称</span></span><br><span class="line">  -p 8080:80 \                     <span class="comment"># 将主机的 8080 端口映射到容器的 80 端口</span></span><br><span class="line">  -v /host/path:/container/path \  <span class="comment"># 挂载主机目录到容器中</span></span><br><span class="line">  -e ENV_VAR=<span class="string">&quot;my_value&quot;</span> \          <span class="comment"># 设置环境变量</span></span><br><span class="line">  --restart=unless-stopped \       <span class="comment"># 设置重启策略</span></span><br><span class="line">  nginx:latest                     <span class="comment"># 使用的镜像</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 创建一个复杂的容器</span>
+<span class="token function">docker</span> create <span class="token punctuation">\</span>
+  <span class="token parameter variable">--name</span> my_app <span class="token punctuation">\</span>                  <span class="token comment"># 为容器指定一个名称</span>
+  <span class="token parameter variable">-p</span> <span class="token number">8080</span>:80 <span class="token punctuation">\</span>                     <span class="token comment"># 将主机的 8080 端口映射到容器的 80 端口</span>
+  <span class="token parameter variable">-v</span> /host/path:/container/path <span class="token punctuation">\</span>  <span class="token comment"># 挂载主机目录到容器中</span>
+  <span class="token parameter variable">-e</span> <span class="token assign-left variable">ENV_VAR</span><span class="token operator">=</span><span class="token string">"my_value"</span> <span class="token punctuation">\</span>          <span class="token comment"># 设置环境变量</span>
+  <span class="token parameter variable">--restart</span><span class="token operator">=</span>unless-stopped <span class="token punctuation">\</span>       <span class="token comment"># 设置重启策略</span>
+  nginx:latest                     <span class="token comment"># 使用的镜像</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>执行上述命令后，你会得到一个容器 ID，表示容器已创建成功。可以使用 <code>docker ps -a</code> 查看所有容器（包括已停止的），你会发现 <code>my_app</code> 的状态是 <code>Created</code>。</p>
 <h4><span id="docker-create-的典型应用场景"><code>docker create</code> 的典型应用场景</span></h4><ol>
@@ -407,10 +417,11 @@ dock,"/>
 </ol>
 <h3><span id="docker-start">docker start</span></h3><p>创建容器后，通常会需要启动它：</p>
 <p>语法格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> start <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个已创建的容器</span></span><br><span class="line">docker start my_web</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动一个已创建的容器</span>
+<span class="token function">docker</span> start my_web<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>这条命令会将容器从 <code>Created</code> 状态转为 <code>Running</code> 状态，启动容器内的主进程（如 Nginx 服务）。</p>
 <h3><span id="docker-run">docker run</span></h3><p>如果说 Docker 镜像是一个静态的、可执行的软件包（包含代码、运行时、库、环境变量和配置文件），那么 <code>docker run</code> 就是让这个软件包<strong>活起来</strong>的魔法咒语。它是 Docker 中最核心、最常用的命令，是创建和启动容器的唯一入口。理解 <code>docker run</code>，就掌握了开启容器化之旅的钥匙。</p>
@@ -422,7 +433,7 @@ dock,"/>
 <li><strong>启动</strong>：执行镜像中定义的默认命令（如 <code>CMD</code> 或 <code>ENTRYPOINT</code>），让容器内的应用进程运行起来。</li>
 </ol>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run [OPTIONS] IMAGE [COMMAND] [ARG...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> IMAGE <span class="token punctuation">[</span>COMMAND<span class="token punctuation">]</span> <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>IMAGE</code>：用于创建容器的镜像名称（如 <code>nginx:latest</code>、<code>ubuntu:20.04</code>）。</li>
@@ -438,20 +449,21 @@ dock,"/>
 <p><strong>1. 容器运行模式与交互：</strong></p>
 <ul>
 <li><p><strong><code>-d</code>， <code>--detach</code></strong>：在<strong>后台</strong>运行容器（守护进程模式）。这是运行后台服务（如 Nginx、MySQL）的标准方式。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>-it</code></strong>：<strong>组合使用</strong>，用于启动一个<strong>交互式</strong>容器。<code>-i</code>（保持标准输入打开）和 <code>-t</code>（分配一个伪终端） together 让你可以像使用普通 Shell 一样与容器交互。这是运行临时工具容器（如 Ubuntu、Alpine）的标准方式。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it ubuntu /bin/bash</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-it</span> ubuntu /bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <p><strong>2. 名称与标识：</strong></p>
 <ul>
 <li><p><strong><code>--name</code></strong>：为容器指定一个自定义名称，而不是使用 Docker 随机生成的名字。这对于后续的管理操作（如 <code>docker stop</code>、<code>docker logs</code>）至关重要。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name my_web -d nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--name</span> my_web <span class="token parameter variable">-d</span> nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <p><strong>3. 网络配置：</strong></p>
 <ul>
 <li><p><strong><code>-p</code>， <code>--publish</code></strong>：<strong>映射端口</strong>，将容器的端口发布到宿主机的端口上。这是从外部访问容器内服务的基础。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器的80端口映射到宿主机的8080端口</span></span><br><span class="line">docker run -p 8080:80 nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将容器的80端口映射到宿主机的8080端口</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-p</span> <span class="token number">8080</span>:80 nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong><code>--network</code></strong>：指定容器的网络模式（如 <code>bridge</code>、<code>host</code>、<code>none</code> 或自定义网络），实现容器间的隔离或通信。</p>
 </li>
@@ -459,27 +471,39 @@ dock,"/>
 <p><strong>4. 存储与数据持久化：</strong></p>
 <ul>
 <li><p><strong><code>-v</code>， <code>--volume</code></strong>：<strong>挂载数据卷</strong>或<strong>绑定宿主机目录</strong>。这是实现数据持久化的核心方法，避免数据随着容器的删除而丢失。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 绑定挂载：将宿主机的 /host/data 挂载到容器的 /container/data</span></span><br><span class="line">docker run -v /host/data:/container/data nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用命名的数据卷</span></span><br><span class="line">docker run -v my_volume:/container/data nginx</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 绑定挂载：将宿主机的 /host/data 挂载到容器的 /container/data</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-v</span> /host/data:/container/data nginx
+
+<span class="token comment"># 使用命名的数据卷</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-v</span> my_volume:/container/data nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <p><strong>5. 环境变量配置：</strong></p>
 <ul>
 <li><p><strong><code>-e</code>， <code>--env</code></strong>：设置容器内的环境变量。常用于传递配置参数（如密码、运行模式）给容器内的应用。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -e MODE=production -e DB_HOST=db.example.com my_app</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-e</span> <span class="token assign-left variable">MODE</span><span class="token operator">=</span>production <span class="token parameter variable">-e</span> <span class="token assign-left variable">DB_HOST</span><span class="token operator">=</span>db.example.com my_app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <p><strong>6. 资源管理：</strong></p>
 <ul>
 <li><p><strong><code>--cpus</code></strong>：限制容器能使用的 CPU 核心数。</p>
 </li>
 <li><p><strong><code>-m</code>， <code>--memory</code></strong>：限制容器能使用的最大内存。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --cpus=<span class="string">&quot;1.5&quot;</span> -m <span class="string">&quot;512m&quot;</span> my_app</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--cpus</span><span class="token operator">=</span><span class="token string">"1.5"</span> <span class="token parameter variable">-m</span> <span class="token string">"512m"</span> my_app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <p><strong>7. 重启策略：</strong></p>
 <ul>
 <li><p><strong><code>--restart</code></strong>：配置容器的自动重启策略，如 <code>no</code>（不重启）、<code>on-failure</code>（失败时重启）、<code>always</code>（总是重启）。这是保证服务高可用的关键配置。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --restart unless-stopped my_app</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--restart</span> unless-stopped my_app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <h4><span id="实战示例组合使用选项">实战示例：组合使用选项</span></h4><p>一个典型的后台 Web 服务启动命令可能结合了上述所有选项：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \                  <span class="comment"># 后台运行</span></span><br><span class="line">  --name my-app \                <span class="comment"># 指定容器名</span></span><br><span class="line">  -p 80:80 \                     <span class="comment"># 端口映射</span></span><br><span class="line">  -v /app/config:/etc/config \   <span class="comment"># 挂载配置文件目录</span></span><br><span class="line">  -e DATABASE_URL=postgresql://... \ <span class="comment"># 设置环境变量</span></span><br><span class="line">  --cpus=2 \                     <span class="comment"># 资源限制</span></span><br><span class="line">  -m=1g \</span><br><span class="line">  --restart on-failure \         <span class="comment"># 重启策略</span></span><br><span class="line">  my-app-image:latest           <span class="comment"># 镜像名</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token punctuation">\</span>                  <span class="token comment"># 后台运行</span>
+  <span class="token parameter variable">--name</span> my-app <span class="token punctuation">\</span>                <span class="token comment"># 指定容器名</span>
+  <span class="token parameter variable">-p</span> <span class="token number">80</span>:80 <span class="token punctuation">\</span>                     <span class="token comment"># 端口映射</span>
+  <span class="token parameter variable">-v</span> /app/config:/etc/config <span class="token punctuation">\</span>   <span class="token comment"># 挂载配置文件目录</span>
+  <span class="token parameter variable">-e</span> <span class="token assign-left variable">DATABASE_URL</span><span class="token operator">=</span>postgresql://<span class="token punctuation">..</span>. <span class="token punctuation">\</span> <span class="token comment"># 设置环境变量</span>
+  <span class="token parameter variable">--cpus</span><span class="token operator">=</span><span class="token number">2</span> <span class="token punctuation">\</span>                     <span class="token comment"># 资源限制</span>
+  <span class="token parameter variable">-m</span><span class="token operator">=</span>1g <span class="token punctuation">\</span>
+  <span class="token parameter variable">--restart</span> on-failure <span class="token punctuation">\</span>         <span class="token comment"># 重启策略</span>
+  my-app-image:latest           <span class="token comment"># 镜像名</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
 <li><strong>总是使用 <code>--name</code></strong>：为容器命名是良好的习惯，这让管理变得更加简单和清晰。</li>
@@ -503,36 +527,39 @@ dock,"/>
     </div>
     <div class="spoiler-content">
         <h4><span id="功能">功能</span></h4><p>列出容器。这是 Docker 中最常用的监控和管理命令之一，用于查看当前容器运行状态。</p>
-<h4><span id="语法">语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps [OPTIONS]</span><br></pre></td></tr></table></figure>
+<h4><span id="语法">语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
-<h4><span id="别名">别名</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker container <span class="built_in">ls</span></span><br><span class="line">docker container list</span><br><span class="line">docker container ps</span><br></pre></td></tr></table></figure>
+<h4><span id="别名">别名</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container <span class="token function">ls</span>
+<span class="token function">docker</span> container list
+<span class="token function">docker</span> container <span class="token function">ps</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="关键参数详解">关键参数详解</span></h4><h5><span id="显示范围控制">显示范围控制</span></h5><ul>
 <li><p><strong><code>-a, --all</code></strong>：显示所有容器，包括停止的容器。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -a</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>-f, --filter</code></strong>：根据条件过滤显示结果。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=running&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"name=web"</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"status=running"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong><code>-n, --last</code></strong>：显示最近创建的 n 个容器（包括所有状态）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -n 3</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-n</span> <span class="token number">3</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <h5><span id="显示格式控制">显示格式控制</span></h5><ul>
 <li><p><strong><code>-q, --quiet</code></strong>：只显示容器 ID。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -q</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-q</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>--no-trunc</code></strong>：显示完整信息，不截断输出。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps --no-trunc</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> --no-trunc<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>--format</code></strong>：使用 Go 模板格式化输出。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.ID&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Names&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Status&#125;&#125;"</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>-s, --size</code></strong>：显示容器文件大小。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -s</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-s</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <h5><span id="时间显示">时间显示</span></h5><ul>
 <li><p><strong><code>-l, --latest</code></strong>：显示最近创建的容器（包括所有状态）。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps -l</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-l</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ul>
 <h4><span id="输出列说明">输出列说明</span></h4><p>执行 <code>docker ps</code> 后显示的表格包含以下重要列：</p>
 <table>
@@ -572,28 +599,87 @@ dock,"/>
 </tr>
 </tbody></table>
 <h4><span id="过滤器常用用法">过滤器常用用法</span></h4><p>过滤器是 <code>docker ps</code> 的强大功能，支持多种过滤条件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 按名称过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按状态过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=running&quot;</span>   <span class="comment"># 运行中的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=exited&quot;</span>    <span class="comment"># 已停止的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;status=created&quot;</span>   <span class="comment"># 已创建但未运行的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按镜像过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;ancestor=nginx&quot;</span>   <span class="comment"># 使用nginx镜像的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按退出代码过滤</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=0&quot;</span>      <span class="comment"># 正常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span>      <span class="comment"># 异常退出的容器</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按标签过滤</span></span><br><span class="line">docker ps -f <span class="string">&quot;label=environment=production&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 组合多个过滤器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=db&quot;</span> -f <span class="string">&quot;status=running&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 按名称过滤</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"name=web"</span>
+
+<span class="token comment"># 按状态过滤</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"status=running"</span>   <span class="token comment"># 运行中的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"status=exited"</span>    <span class="token comment"># 已停止的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"status=created"</span>   <span class="token comment"># 已创建但未运行的容器</span>
+
+<span class="token comment"># 按镜像过滤</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"ancestor=nginx"</span>   <span class="token comment"># 使用nginx镜像的容器</span>
+
+<span class="token comment"># 按退出代码过滤</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token string">"exited=0"</span>      <span class="token comment"># 正常退出的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token string">"exited=1"</span>      <span class="token comment"># 异常退出的容器</span>
+
+<span class="token comment"># 按标签过滤</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"label=environment=production"</span>
+
+<span class="token comment"># 组合多个过滤器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"name=db"</span> <span class="token parameter variable">-f</span> <span class="token string">"status=running"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="格式化输出示例">格式化输出示例</span></h4><p>使用 <code>--format</code> 参数可以自定义输出格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只显示ID和名称</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示ID、名称、状态和端口</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;\t&#123;&#123;.Ports&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以JSON格式输出</span></span><br><span class="line">docker ps --format <span class="string">&quot;&#123;&#123;json .&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义表格标题</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.ID&#125;&#125;\t&#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;&quot;</span> --format <span class="string">&quot;ID\tNAME\tSTATUS&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 只显示ID和名称</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.ID&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Names&#125;&#125;"</span>
 
-<h4><span id="使用示例">使用示例</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看所有运行中的容器</span></span><br><span class="line">docker ps</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有容器（包括已停止的）</span></span><br><span class="line">docker ps -a</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看最近创建的2个容器</span></span><br><span class="line">docker ps -n 2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只显示运行中容器的ID</span></span><br><span class="line">docker ps -q</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看名称包含&quot;web&quot;的容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=web&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看所有异常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 显示容器大小信息</span></span><br><span class="line">docker ps -s</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自定义格式输出</span></span><br><span class="line">docker ps --format <span class="string">&quot;table &#123;&#123;.Names&#125;&#125;\t&#123;&#123;.Status&#125;&#125;\t&#123;&#123;.Ports&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+<span class="token comment"># 显示ID、名称、状态和端口</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.ID&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Names&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Status&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Ports&#125;&#125;"</span>
+
+<span class="token comment"># 以JSON格式输出</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"&#123;&#123;json .&#125;&#125;"</span>
+
+<span class="token comment"># 自定义表格标题</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.ID&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Names&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Status&#125;&#125;"</span> <span class="token parameter variable">--format</span> <span class="token string">"ID<span class="token entity" title="\t">\t</span>NAME<span class="token entity" title="\t">\t</span>STATUS"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4><span id="使用示例">使用示例</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看所有运行中的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span>
+
+<span class="token comment"># 查看所有容器（包括已停止的）</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span>
+
+<span class="token comment"># 查看最近创建的2个容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-n</span> <span class="token number">2</span>
+
+<span class="token comment"># 只显示运行中容器的ID</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-q</span>
+
+<span class="token comment"># 查看名称包含"web"的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"name=web"</span>
+
+<span class="token comment"># 查看所有异常退出的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token string">"exited=1"</span>
+
+<span class="token comment"># 显示容器大小信息</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-s</span>
+
+<span class="token comment"># 自定义格式输出</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.Names&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Status&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.Ports&#125;&#125;"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="实际应用场景">实际应用场景</span></h4><ol>
 <li><p><strong>快速查看容器状态</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 日常监控</span></span><br><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 日常监控</span>
+<span class="token function">docker</span> <span class="token function">ps</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>查找特定容器</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查找MySQL容器</span></span><br><span class="line">docker ps -f <span class="string">&quot;name=mysql&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查找MySQL容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-f</span> <span class="token string">"name=mysql"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>批量操作容器</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 停止所有运行中的容器</span></span><br><span class="line">docker stop $(docker ps -q)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除所有已停止的容器</span></span><br><span class="line">docker <span class="built_in">rm</span> $(docker ps -a -q -f <span class="string">&quot;status=exited&quot;</span>)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 停止所有运行中的容器</span>
+<span class="token function">docker</span> stop <span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-q</span><span class="token variable">)</span></span>
+
+<span class="token comment"># 删除所有已停止的容器</span>
+<span class="token function">docker</span> <span class="token function">rm</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-q</span> <span class="token parameter variable">-f</span> <span class="token string">"status=exited"</span><span class="token variable">)</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>故障排查</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看异常退出的容器</span></span><br><span class="line">docker ps -a -f <span class="string">&quot;exited=1&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看异常退出的容器</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token parameter variable">-f</span> <span class="token string">"exited=1"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>资源监控</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器占用空间</span></span><br><span class="line">docker ps -s</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看容器占用空间</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-s</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ol>
 <h4><span id="注意事项">注意事项</span></h4><ol>
 <li>默认情况下 <code>docker ps</code> 只显示运行中的容器</li>
@@ -618,7 +704,7 @@ dock,"/>
 <p>这种机制的好处在于，<strong>即使容器已经停止（Exited）</strong>，只要日志文件没有被手动清理（例如通过 <code>docker rm</code> 删除容器），你依然可以查看其历史日志。</p>
 <h4><span id="基本语法和常用参数">基本语法和常用参数</span></h4><p><code>docker logs</code> 的功能非常强大，通过添加不同的参数，可以满足各种查看需求。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs [OPTIONS] CONTAINER</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> logs <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>其中 <code>CONTAINER</code> 可以是容器名称 (<code>--name</code> 指定的) 或容器 ID（通常取前几位即可）。</p>
 <p><strong>最常用的参数（Flags）：</strong></p>
@@ -664,18 +750,36 @@ dock,"/>
 <h4><span id="实战示例">实战示例</span></h4><p>假设我们有一个正在运行的名为 <code>my_web_app</code> 的容器。</p>
 <ol>
 <li><p><strong>查看最新日志：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看最后10条日志（默认）</span></span><br><span class="line">docker logs my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看最后100条日志</span></span><br><span class="line">docker logs --<span class="built_in">tail</span> 100 my_web_app</span><br><span class="line"><span class="comment"># 或</span></span><br><span class="line">docker logs -n 100 my_web_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看最后10条日志（默认）</span>
+<span class="token function">docker</span> logs my_web_app
+
+<span class="token comment"># 查看最后100条日志</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">--tail</span> <span class="token number">100</span> my_web_app
+<span class="token comment"># 或</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">-n</span> <span class="token number">100</span> my_web_app<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>实时跟踪日志（最常用）：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实时查看最新日志，常用于调试和监控</span></span><br><span class="line">docker logs -f my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 实时查看并带上时间戳</span></span><br><span class="line">docker logs -ft my_web_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 实时查看最新日志，常用于调试和监控</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">-f</span> my_web_app
+
+<span class="token comment"># 实时查看并带上时间戳</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">-ft</span> my_web_app<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><em>按下 <code>Ctrl+C</code> 可以退出跟踪模式。</em></p>
 </li>
 <li><p><strong>查看某个时间段内的日志：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看过去30分钟内的日志</span></span><br><span class="line">docker logs --since 30m my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看2024年1月1日之后的日志，并显示时间戳</span></span><br><span class="line">docker logs -t --since 2024-01-01 my_web_app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看今天早上8点到9点之间的日志</span></span><br><span class="line">docker logs --since 2024-08-31T08:00:00 --<span class="keyword">until</span> 2024-08-31T09:00:00 my_web_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看过去30分钟内的日志</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">--since</span> 30m my_web_app
+
+<span class="token comment"># 查看2024年1月1日之后的日志，并显示时间戳</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">-t</span> <span class="token parameter variable">--since</span> <span class="token number">2024</span>-01-01 my_web_app
+
+<span class="token comment"># 查看今天早上8点到9点之间的日志</span>
+<span class="token function">docker</span> logs <span class="token parameter variable">--since</span> <span class="token number">2024</span>-08-31T08:00:00 <span class="token parameter variable">--until</span> <span class="token number">2024</span>-08-31T09:00:00 my_web_app<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>查看已停止容器的日志：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 即使容器已停止，只要没被删除，日志依然可查</span></span><br><span class="line">docker logs my_stopped_container</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 即使容器已停止，只要没被删除，日志依然可查</span>
+<span class="token function">docker</span> logs my_stopped_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ol>
 <h4><span id="高级用法与最佳实践">高级用法与最佳实践</span></h4><ol>
 <li><p><strong>日志驱动（Logging Driver）</strong>：<br>Docker 支持多种日志驱动（如 <code>json-file</code>, <code>syslog</code>, <code>journald</code>, <code>fluentd</code>, <code>awslogs</code> 等）。<code>docker logs</code> 命令<strong>仅适用于 <code>json-file</code>、<code>journald</code> 和 <code>local</code> 等少数几种驱动</strong>。如果你将日志驱动设置为 <code>syslog</code> 或第三方工具（如 Fluentd），则 <code>docker logs</code> 将无法工作，你需要使用相应日志系统的工具（如 <code>journalctl</code>）来查看日志。</p>
@@ -688,7 +792,8 @@ dock,"/>
 </ul>
 </li>
 <li><p><strong>日志大小轮替（Log Rotation）</strong>：<br>使用默认的 <code>json-file</code> 驱动时，需要注意日志文件会不断增长。可以通过 <code>docker run</code> 时设置 <code>--log-opt</code> 参数来控制日志大小和轮替，防止撑爆磁盘。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker run --log-opt max-size=10m --log-opt max-file=3 my_image</span><br><span class="line"><span class="comment"># 含义：最多保存3个日志文件，每个文件最大10MB</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run --log-opt max-size<span class="token operator">=</span>10m --log-opt max-file<span class="token operator">=</span><span class="token number">3</span> my_image
+<span class="token comment"># 含义：最多保存3个日志文件，每个文件最大10MB</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ol>
 <h3><span id="docker-attach">docker attach</span></h3><p>在 Docker 的交互命令工具箱里，<code>docker attach</code> 是一个特殊的存在。如果说 <code>docker exec</code> 像是通过 SSH 远程登录到一台服务器，那么 <code>docker attach</code> 就更像是<strong>直接坐在那台服务器的显示器前，接管了它的键盘和屏幕</strong>。先说明一个个人的观点：<code>docker attach</code> 并不是一个常用命令，除非你非常清楚它的行为和风险，否则不建议随意使用。</p>
 <hr>
@@ -699,7 +804,7 @@ dock,"/>
 <li>让你能够<strong>看到</strong>主进程产生的输出，并<strong>向</strong>主进程发送输入。</li>
 </ul>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach [OPTIONS] CONTAINER</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> attach <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="docker-attach-的核心特性与工作机制"><code>docker attach</code> 的核心特性与工作机制</span></h4><p>要理解 <code>attach</code>，必须理解它的几个关键特性：</p>
 <ol>
@@ -710,7 +815,7 @@ dock,"/>
 </ul>
 </li>
 <li><p><strong>输入输出流的重定向</strong>：<br>假设你这样启动一个容器：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name my_container -it alpine /bin/sh</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">--name</span> my_container <span class="token parameter variable">-it</span> alpine /bin/sh<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>此时，<code>/bin/sh</code> 就是主进程。<code>docker attach my_container</code> 会直接将你的终端连接到这个 <code>/bin/sh</code> 进程的输入输出流。</p>
 </li>
@@ -724,22 +829,30 @@ dock,"/>
 </ol>
 <h4><span id="实战示例与场景">实战示例与场景</span></h4><p><strong>场景 1：查看交互式容器的输出</strong>：</p>
 <p>假设你有一个 Python 应用在容器中运行，它会每秒打印一次日志。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设容器已通过 `docker run -d --name my_app my_python_image` 运行</span></span><br><span class="line">docker attach my_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 假设容器已通过 `docker run -d --name my_app my_python_image` 运行</span>
+<span class="token function">docker</span> attach my_app<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Current <span class="keyword">time</span>: 19:25:01</span><br><span class="line">Current <span class="keyword">time</span>: 19:25:02</span><br><span class="line">Current <span class="keyword">time</span>: 19:25:03</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Current time: <span class="token number">19</span>:25:01
+Current time: <span class="token number">19</span>:25:02
+Current time: <span class="token number">19</span>:25:03
+<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>此时，你就像在 <code>tail -f</code> 日志一样。<strong>但要小心！</strong> 如果你不小心按了 <code>Ctrl+C</code>，Python 程序会被中断，容器也就停止了。</p>
 <p><strong>场景 2：与交互式程序通信</strong>：</p>
 <p>有些容器运行的是交互式程序，比如一个简单的 CLI 工具。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动一个容器，运行一个要求输入名字的程序</span></span><br><span class="line">docker run -it --name asker my_image</span><br><span class="line"></span><br><span class="line"><span class="comment"># （在另一个终端）附加到它</span></span><br><span class="line">docker attach asker</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动一个容器，运行一个要求输入名字的程序</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-it</span> <span class="token parameter variable">--name</span> asker my_image
+
+<span class="token comment"># （在另一个终端）附加到它</span>
+<span class="token function">docker</span> attach asker<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>你现在就可以直接向那个程序输入内容了。</p>
 <h4><span id="如何安全地退出-docker-attach">如何安全地退出 <code>docker attach</code>？</span></h4><p>由于直接退出会停止容器，Docker 提供了一个<strong>序列来脱离（detach）终端，而不停止容器</strong>：</p>
 <p><strong>按顺序按下：<code>Ctrl+P</code>, 然后 <code>Ctrl+Q</code></strong>，需要注意的是，通过这种方式脱离终端需要你再启动该容器的时候给该容器指定了 <code>-it</code> 参数。</p>
 <p>这个按键序列会<strong>将你的终端从容器主进程上分离出来，但让容器继续在后台运行</strong>。这是使用 <code>attach</code> 时必须掌握的“安全逃生”技巧。</p>
 <p>当然，<code>docker attach</code> 也提供了一种<strong>安全脱离</strong>的方式，避免意外停止容器：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach --sig-proxy=<span class="literal">false</span> my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> attach --sig-proxy<span class="token operator">=</span>false my_container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="docker-attach-与-docker-exec-的对比"><code>docker attach</code> 与 <code>docker exec</code> 的对比</span></h4><table>
 <thead>
@@ -799,7 +912,7 @@ dock,"/>
 <p><code>docker exec</code>（execute 的缩写）命令用于<strong>在正在运行的容器内部启动一个新的进程</strong>。</p>
 <p>它与容器启动时运行的主进程（PID 1）<strong>并行运行</strong>，互不干扰。这意味着你可以安全地在容器内执行任何命令，而无需担心影响主应用程序的正常运行。这就像是在一台正在提供服务的服务器上，新开了一个 SSH 会话进行操作，完全不会影响正在运行的网站或数据库服务。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> [OPTIONS] CONTAINER COMMAND [ARG...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER COMMAND <span class="token punctuation">[</span>ARG<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>: 目标容器的<strong>名称</strong>或 <strong>ID</strong>（通常取前几位即可）。</li>
@@ -860,23 +973,56 @@ dock,"/>
 </tbody></table>
 <h4><span id="实战示例从入门到精通">实战示例：从入门到精通</span></h4><p>假设我们有一个名为 <code>my_web</code> 的 Nginx 容器在运行。</p>
 <p><strong>1. 进入容器的交互式 Shell（最常用）</strong><br>这是 <code>docker exec</code> 最经典的用法，让你获得一个容器内的终端。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 bash（如果镜像基于 Ubuntu、CentOS 等）</span></span><br><span class="line">docker <span class="built_in">exec</span> -it my_web /bin/bash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用 sh（更通用，Alpine 等精简镜像也支持）</span></span><br><span class="line">docker <span class="built_in">exec</span> -it my_web /bin/sh</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 bash（如果镜像基于 Ubuntu、CentOS 等）</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> my_web /bin/bash
+
+<span class="token comment"># 使用 sh（更通用，Alpine 等精简镜像也支持）</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> my_web /bin/sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>成功执行后，命令行提示符会变化，表示你已“进入”容器：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@a1b2c3d4e5f6:/#</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@a1b2c3d4e5f6:/<span class="token comment">#</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>现在，你可以像操作普通 Linux 系统一样执行任何命令：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 探索文件系统</span></span><br><span class="line"><span class="built_in">ls</span> -la /etc/nginx/</span><br><span class="line"><span class="built_in">cat</span> /etc/nginx/nginx.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看进程</span></span><br><span class="line">ps aux</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装软件（但不推荐持久化这样做）</span></span><br><span class="line">apt update &amp;&amp; apt install -y vim net-tools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 检查网络</span></span><br><span class="line">netstat -tulpn</span><br><span class="line">curl localhost</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 探索文件系统</span>
+<span class="token function">ls</span> <span class="token parameter variable">-la</span> /etc/nginx/
+<span class="token function">cat</span> /etc/nginx/nginx.conf
+
+<span class="token comment"># 查看进程</span>
+<span class="token function">ps</span> aux
+
+<span class="token comment"># 安装软件（但不推荐持久化这样做）</span>
+<span class="token function">apt</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> <span class="token function">vim</span> net-tools
+
+<span class="token comment"># 检查网络</span>
+<span class="token function">netstat</span> <span class="token parameter variable">-tulpn</span>
+<span class="token function">curl</span> localhost<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>退出时，只需输入 <code>exit</code> 或按 <code>Ctrl+D</code>。容器会继续正常运行。</strong></p>
 <p><strong>2. 执行单条命令并获取结果</strong><br>你不需要总是启动一个完整的 Shell 会话，可以直接执行命令并返回结果。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器内的当前工作目录</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">pwd</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看环境变量</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">env</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看 Nginx 访问日志的最后10行</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web <span class="built_in">tail</span> -10 /var/log/nginx/access.log</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试配置文件语法是否正确（非常实用的调试命令）</span></span><br><span class="line">docker <span class="built_in">exec</span> my_web nginx -t</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看容器内的当前工作目录</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_web <span class="token builtin class-name">pwd</span>
+
+<span class="token comment"># 查看环境变量</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_web <span class="token function">env</span>
+
+<span class="token comment"># 查看 Nginx 访问日志的最后10行</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_web <span class="token function">tail</span> <span class="token parameter variable">-10</span> /var/log/nginx/access.log
+
+<span class="token comment"># 测试配置文件语法是否正确（非常实用的调试命令）</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_web nginx <span class="token parameter variable">-t</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>3. 以特定用户身份执行命令</strong><br>为了安全，最佳实践是不以 root 身份运行应用。<code>exec</code> 允许你指定用户。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设你的 Nginx 以 &#x27;www-data&#x27; 用户运行</span></span><br><span class="line"><span class="comment"># 以该用户身份查看它有权访问的文件</span></span><br><span class="line">docker <span class="built_in">exec</span> -it -u www-data my_web /bin/sh</span><br><span class="line"><span class="built_in">whoami</span> <span class="comment"># 会显示 &#x27;www-data&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 但如果需要调试，可以临时切换回 root</span></span><br><span class="line">docker <span class="built_in">exec</span> -it -u root my_web /bin/bash</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 假设你的 Nginx 以 'www-data' 用户运行</span>
+<span class="token comment"># 以该用户身份查看它有权访问的文件</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> <span class="token parameter variable">-u</span> www-data my_web /bin/sh
+<span class="token function">whoami</span> <span class="token comment"># 会显示 'www-data'</span>
+
+<span class="token comment"># 但如果需要调试，可以临时切换回 root</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> <span class="token parameter variable">-u</span> root my_web /bin/bash<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>4. 在特定目录下执行命令</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接列出容器内 /app 目录下的文件</span></span><br><span class="line">docker <span class="built_in">exec</span> -w /app my_web <span class="built_in">ls</span> -la</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接列出容器内 /app 目录下的文件</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-w</span> /app my_web <span class="token function">ls</span> <span class="token parameter variable">-la</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
 <li><p><strong>容器必须处于运行状态</strong>：<code>docker exec</code> 只能用于状态为 <code>Up</code> 的容器。如果容器已停止（<code>Exited</code>），你需要先使用 <code>docker start</code> 启动它。</p>
@@ -905,13 +1051,13 @@ dock,"/>
 <p>它的核心工作流程可以简单概括为：<br><strong><code>docker stop</code> + <code>docker start</code></strong></p>
 <p>也就是说，<code>restart</code> 并不是让容器内的进程原地“热重启”，而是先执行一个停止流程，然后再重新启动容器。这使得它的行为非常明确和可预测。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> restart <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>你可以同时重启多个容器，只需将它们的名称或 ID 用空格隔开。</p>
 <h4><span id="docker-restart-的工作流程与生命周期"><code>docker restart</code> 的工作流程与生命周期</span></h4><p>要深入理解 <code>restart</code>，我们需要跟踪一个容器在重启过程中的状态变化：</p>
 <ol>
 <li><p><strong>发起重启请求</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> restart my_container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>停止阶段（<code>docker stop</code>）</strong>：</p>
 <ul>
@@ -951,13 +1097,19 @@ dock,"/>
 </tr>
 </tbody></table>
 <h4><span id="实战示例与场景">实战示例与场景</span></h4><p><strong>1. 重启单个容器：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 重启名为 &#x27;nginx&#x27; 的容器</span></span><br><span class="line">docker restart nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启指定ID的容器（取前几位即可）</span></span><br><span class="line">docker restart a1b2c3d4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 重启名为 'nginx' 的容器</span>
+<span class="token function">docker</span> restart nginx
+
+<span class="token comment"># 重启指定ID的容器（取前几位即可）</span>
+<span class="token function">docker</span> restart a1b2c3d4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>2. 重启多个容器：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时重启整个应用栈的所有容器</span></span><br><span class="line">docker restart nginx web_app database cache</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 同时重启整个应用栈的所有容器</span>
+<span class="token function">docker</span> restart nginx web_app database cache<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>3. 延长优雅停止时间：</strong><br>对于数据库、有状态服务等需要较长时间进行收尾工作的应用，默认的 10 秒可能不够。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给予数据库容器60秒的时间来完成事务、刷新缓存和关闭连接</span></span><br><span class="line">docker restart -t 60 mysql_db</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 给予数据库容器60秒的时间来完成事务、刷新缓存和关闭连接</span>
+<span class="token function">docker</span> restart <span class="token parameter variable">-t</span> <span class="token number">60</span> mysql_db<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
 <li><p><strong>理解“无状态”与“有状态”</strong>：</p>
@@ -971,7 +1123,11 @@ dock,"/>
 <li><p><strong>与 <code>docker stop</code> + <code>docker start</code> 的区别</strong>：<br>从结果上看，<code>restart</code> 等价于先后执行 <code>stop</code> 和 <code>start</code>。但使用单一命令更简洁，并且在一些编排工具中更容易管理。<strong><code>restart</code> 的优势在于其原子性和便利性。</strong></p>
 </li>
 <li><p><strong>监控重启后的状态</strong>：<br>重启后，务必检查容器是否真正成功启动并健康运行。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看容器状态</span></span><br><span class="line">docker ps -a | grep my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看容器启动日志，排查任何启动错误</span></span><br><span class="line">docker logs my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查看容器状态</span>
+<span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-a</span> <span class="token operator">|</span> <span class="token function">grep</span> my_container
+
+<span class="token comment"># 查看容器启动日志，排查任何启动错误</span>
+<span class="token function">docker</span> logs my_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>不要滥用重启</strong>：<br>重启是解决“症状”的快速方法，但不应替代对“根因”的排查。如果某个容器需要频繁重启，你应该深入调查其背后的根本原因，如内存泄漏、配置错误或资源不足。</p>
 </li>
@@ -995,7 +1151,7 @@ dock,"/>
 <p><code>docker stop</code> 命令用于<strong>停止一个或多个正在运行的容器</strong>。</p>
 <p>其核心目标是在尽可能保证应用程序数据一致性的前提下，安全地终止容器。它通过向容器内进程发送特定的系统信号（Signal）来实现这一目标。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stop [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="docker-stop-的工作流程一个两阶段的优雅过程"><code>docker stop</code> 的工作流程：一个两阶段的优雅过程</span></h4><p><code>docker stop</code> 的执行并非一蹴而就，而是一个包含等待和协商的过程：</p>
 <ol>
@@ -1027,7 +1183,8 @@ dock,"/>
 <li><p><strong>使用场景</strong>：对于数据库、消息队列等需要较长时间进行收尾工作的<strong>有状态服务</strong>，默认的 10 秒可能远远不够。使用 <code>-t</code> 可以给予它们充足的时间完成优雅关闭。</p>
 </li>
 <li><p><strong>示例</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 给予容器30秒的时间进行优雅关闭，30秒后才会强制终止</span></span><br><span class="line">docker stop -t 30 mysql_container</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 给予容器30秒的时间进行优雅关闭，30秒后才会强制终止</span>
+<span class="token function">docker</span> stop <span class="token parameter variable">-t</span> <span class="token number">30</span> mysql_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre></li>
 </ul>
 <h4><span id="最佳实践与精要注意事项">最佳实践与精要注意事项</span></h4><ol>
 <li><p><strong>区分“有状态”与“无状态”服务</strong>：</p>
@@ -1055,7 +1212,7 @@ dock,"/>
 <p><code>docker kill</code> 命令用于<strong>向一个或多个容器的主进程发送一个特定的系统信号（Signal）</strong>，默认情况下，这个信号是 <strong>SIGKILL</strong>。</p>
 <p>它的核心特点是<strong>强制性和即时性</strong>。它绕过了 <code>docker stop</code> 的优雅终止流程，旨在以最快的方式让容器停止运行。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">kill</span> [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">kill</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="docker-kill-的核心机制信号的力量"><code>docker kill</code> 的核心机制：信号的力量</span></h4><p><code>docker kill</code> 的威力源于 Linux 的系统信号机制。与 <code>docker stop</code> 固定先 SIGTERM 再 SIGKILL 的流程不同，<code>docker kill</code> 允许你<strong>直接指定发送任何信号</strong>，赋予了操作者极大的灵活性和控制力。</p>
 <p><strong>最关键的选项：<code>-s</code> (–signal)</strong><br>这是 <code>docker kill</code> 的灵魂所在，它允许你指定要发送的信号。</p>
@@ -1107,7 +1264,8 @@ dock,"/>
 <li><p><strong>立即释放关键资源</strong>：当某个失控的容器正在疯狂消耗主机资源（如 CPU、内存、磁盘 I&#x2F;O），导致系统即将崩溃时，你没有时间等待 10 秒的优雅退出。必须使用 <code>docker kill</code> 立即“拔掉电源”，以保护主机和其他容器。</p>
 </li>
 <li><p><strong>与进程进行特定通信</strong>：通过 <code>-s</code> 选项，它可以成为一个高级管理工具。例如，通知 Nginx 重新加载配置而不重启进程：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 向nginx容器发送SIGHUP信号，使其重新加载配置文件</span></span><br><span class="line">docker <span class="built_in">kill</span> -s SIGHUP nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 向nginx容器发送SIGHUP信号，使其重新加载配置文件</span>
+<span class="token function">docker</span> <span class="token function">kill</span> <span class="token parameter variable">-s</span> SIGHUP nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>在这种情况下，它非但不会终止容器，反而是一种“管理”指令。</p>
 </li>
@@ -1125,7 +1283,9 @@ dock,"/>
 <li><p><strong>明确的升级流程</strong>：建立自己的操作流程：<code>docker stop -&gt; (等待) -&gt; 如果超时或无响应) -&gt; docker kill</code>。</p>
 </li>
 <li><p><strong>尝试“软”杀死</strong>：在发送最终的 <code>SIGKILL</code> 之前，可以尝试先手动发送 <code>SIGTERM</code>，给它最后一次机会：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">kill</span> -s SIGTERM my_stuck_container</span><br><span class="line"><span class="comment"># 等待几秒...</span></span><br><span class="line">docker <span class="built_in">kill</span> my_stuck_container <span class="comment"># 默认发送SIGKILL</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">kill</span> <span class="token parameter variable">-s</span> SIGTERM my_stuck_container
+<span class="token comment"># 等待几秒...</span>
+<span class="token function">docker</span> <span class="token function">kill</span> my_stuck_container <span class="token comment"># 默认发送SIGKILL</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>记录与复盘</strong>：每次使用 <code>docker kill</code> 后，都应记录原因并复盘。一个需要频繁被强制杀死的容器，其本身一定存在需要修复的缺陷（如内存泄漏、死锁 bug）。</p>
 </li>
@@ -1143,7 +1303,7 @@ dock,"/>
 <p><code>docker top</code> 命令用于<strong>显示一个运行中容器内部的进程信息</strong>。</p>
 <p>它的功能类似于在宿主机上执行 <code>ps</code>（process status）命令，但它的查看对象是容器内部的进程树。这个命令执行速度极快，因为它直接从 Docker 守护进程获取信息，而无需通过容器的 Shell 环境。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top CONTAINER [ps OPTIONS]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> CONTAINER <span class="token punctuation">[</span>ps OPTIONS<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>: 目标容器的名称或 ID。</li>
@@ -1157,10 +1317,13 @@ dock,"/>
 </ol>
 <h4><span id="实战示例从基础到高级">实战示例：从基础到高级</span></h4><p>假设我们有一个名为 <code>my_web</code> 的 Nginx 容器在运行。</p>
 <p><strong>1. 基础用法：查看容器内进程</strong><br>最基本的命令，显示容器内所有进程的基本信息，默认输出格式与 <code>ps</code> 相同。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> my_web<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">UID    PID    PPID   C   STIME   TTY   TIME        CMD</span><br><span class="line">root   12345  12316  0   10:00   ?     00:00:00   nginx: master process nginx -g daemon off;</span><br><span class="line">systemd+ 12367 12345  0   10:00   ?     00:00:00   nginx: worker process</span><br><span class="line">systemd+ 12368 12345  0   10:00   ?     00:00:00   nginx: worker process</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token environment constant">UID</span>    PID    <span class="token environment constant">PPID</span>   C   STIME   TTY   TIME        CMD
+root   <span class="token number">12345</span>  <span class="token number">12316</span>  <span class="token number">0</span>   <span class="token number">10</span>:00   ?     00:00:00   nginx: master process nginx <span class="token parameter variable">-g</span> daemon off<span class="token punctuation">;</span>
+systemd+ <span class="token number">12367</span> <span class="token number">12345</span>  <span class="token number">0</span>   <span class="token number">10</span>:00   ?     00:00:00   nginx: worker process
+systemd+ <span class="token number">12368</span> <span class="token number">12345</span>  <span class="token number">0</span>   <span class="token number">10</span>:00   ?     00:00:00   nginx: worker process<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>从输出可以清晰地看到：</p>
 <ul>
@@ -1170,21 +1333,26 @@ dock,"/>
 <p><strong>2. 高级用法：自定义输出格式</strong><br>通过传递标准的 <code>ps</code> 选项，可以获取更详细或更具体的信息。这是 <code>docker top</code> 最强大的地方。</p>
 <ul>
 <li><p><strong>显示完整的命令及其参数</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">docker top my_web -args</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> my_web <span class="token parameter variable">-e</span>
+<span class="token comment"># 或者</span>
+<span class="token function">docker</span> <span class="token function">top</span> my_web <span class="token parameter variable">-args</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>查看进程的 UID 和用户名</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e -o uid,user,pid,cmd</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> my_web <span class="token parameter variable">-e</span> <span class="token parameter variable">-o</span> uid,user,pid,cmd<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>以森林模式显示进程层级关系</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -e -o pid,ppid,user,cmd --forest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> my_web <span class="token parameter variable">-e</span> <span class="token parameter variable">-o</span> pid,ppid,user,cmd <span class="token parameter variable">--forest</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">PID    PPID   USER    COMMAND</span><br><span class="line">12345  12316  root    nginx: master process nginx -g daemon off;</span><br><span class="line">12367  12345  systemd+  \_ nginx: worker process</span><br><span class="line">12368  12345  systemd+  \_ nginx: worker process</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">PID    <span class="token environment constant">PPID</span>   <span class="token environment constant">USER</span>    COMMAND
+<span class="token number">12345</span>  <span class="token number">12316</span>  root    nginx: master process nginx <span class="token parameter variable">-g</span> daemon off<span class="token punctuation">;</span>
+<span class="token number">12367</span>  <span class="token number">12345</span>  systemd+  <span class="token punctuation">\</span>_ nginx: worker process
+<span class="token number">12368</span>  <span class="token number">12345</span>  systemd+  <span class="token punctuation">\</span>_ nginx: worker process<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这种方式可以非常直观地看到进程的父子关系。</p>
 </li>
 <li><p><strong>查看进程资源占用（CPU、内存）</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker top my_web -o pid,user,%cpu,%mem,cmd --<span class="built_in">sort</span> -%cpu</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">top</span> my_web <span class="token parameter variable">-o</span> pid,user,%cpu,%mem,cmd <span class="token parameter variable">--sort</span> -%cpu<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>此命令按 CPU 使用率降序排列，快速定位最耗资源的进程。</p>
 </li>
@@ -1214,7 +1382,7 @@ dock,"/>
 <p><code>docker stats</code> 命令用于<strong>实时显示一个或多个容器的资源使用情况统计信息</strong>。</p>
 <p>它会动态刷新一个表格，其中包含了每个容器在 CPU、内存、网络 I&#x2F;O 和磁盘 I&#x2F;O 等方面的关键性能指标。这些数据直接来源于 Linux 内核的控制组（cgroups），因此非常准确和高效。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats [OPTIONS] [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stats <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>如果不指定任何容器，默认会显示所有运行中（Up）容器的统计信息。</p>
 <h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
@@ -1224,7 +1392,10 @@ dock,"/>
 <li><strong>零成本、零侵入</strong>：该命令是 Docker CLI 自带的，无需在容器内安装任何代理或监控软件，对容器本身毫无影响。</li>
 </ol>
 <h4><span id="解读监控面板每一列的含义">解读监控面板：每一列的含义</span></h4><p>执行 <code>docker stats</code> 后，你会看到一个类似这样的动态更新的表格：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O        PIDS</span><br><span class="line">a1b2c3d4e5f6   redis     0.12%     45.21MiB / 1.5GiB     2.94%     1.45kB / 0B      0B / 0B          4</span><br><span class="line">f6e5d4c3b2a1   nginx     0.05%     12.5MiB /  unlimited    -        25.6kB / 120kB   0B / 0B          3</span><br><span class="line">c3b2a1f6e5d4   web-app   125.7%    512.4MiB / 512MiB     100.0%    450kB / 1.2MB    12.3MB / 0B      27</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O        PIDS
+a1b2c3d4e5f6   redis     <span class="token number">0.12</span>%     <span class="token number">45</span>.21MiB / <span class="token number">1</span>.5GiB     <span class="token number">2.94</span>%     <span class="token number">1</span>.45kB / 0B      0B / 0B          <span class="token number">4</span>
+f6e5d4c3b2a1   nginx     <span class="token number">0.05</span>%     <span class="token number">12</span>.5MiB /  unlimited    -        <span class="token number">25</span>.6kB / 120kB   0B / 0B          <span class="token number">3</span>
+c3b2a1f6e5d4   web-app   <span class="token number">125.7</span>%    <span class="token number">512</span>.4MiB / 512MiB     <span class="token number">100.0</span>%    450kB / <span class="token number">1</span>.2MB    <span class="token number">12</span>.3MB / 0B      <span class="token number">27</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>每一列都代表一个关键指标：</p>
 <ul>
@@ -1237,19 +1408,27 @@ dock,"/>
 <li><strong>PIDS</strong>: <strong>进程数量</strong>。显示容器内当前存在的进程和线程数。一个异常的激增可能预示着某些问题。</li>
 </ul>
 <h4><span id="实战示例从概览到聚焦">实战示例：从概览到聚焦</span></h4><p><strong>1. 监控所有容器（全局概览）</strong><br>最基本的命令，给你一个主机上所有运行容器的资源大盘。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stats<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>按 <code>Ctrl+C</code> 退出监控。</p>
 <p><strong>2. 监控特定容器（精准聚焦）</strong><br>如果你只关心某几个容器，可以在命令后指定它们的名称或 ID。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监控指定的容器</span></span><br><span class="line">docker stats nginx redis</span><br><span class="line"></span><br><span class="line"><span class="comment"># 使用容器ID（取前几位即可）</span></span><br><span class="line">docker stats a1b2c3 f6e5d4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 监控指定的容器</span>
+<span class="token function">docker</span> stats nginx redis
+
+<span class="token comment"># 使用容器ID（取前几位即可）</span>
+<span class="token function">docker</span> stats a1b2c3 f6e5d4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>3. 使用选项格式化输出</strong><br><code>docker stats</code> 提供了一些有用的选项来定制输出。</p>
 <ul>
 <li><p><strong><code>--no-stream</code></strong>：<strong>只输出一次当前状态，然后退出</strong>。适用于编写脚本或快速获取某个时间点的快照，而不是持续监控。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker stats --no-stream</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stats --no-stream<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong><code>--format</code></strong>：<strong>按照 Go 模板自定义输出格式</strong>。这是高级用法，可以让你只显示关心的列，或者用于自动化脚本。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只显示容器名、CPU百分比和内存使用量</span></span><br><span class="line">docker stats --format <span class="string">&quot;table &#123;&#123;.Name&#125;&#125;\t&#123;&#123;.CPUPerc&#125;&#125;\t&#123;&#123;.MemUsage&#125;&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以纯JSON格式输出一次（非常适合由其他程序解析）</span></span><br><span class="line">docker stats --no-stream --format <span class="string">&quot;&#123;&#123;json .&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 只显示容器名、CPU百分比和内存使用量</span>
+<span class="token function">docker</span> stats <span class="token parameter variable">--format</span> <span class="token string">"table &#123;&#123;.Name&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.CPUPerc&#125;&#125;<span class="token entity" title="\t">\t</span>&#123;&#123;.MemUsage&#125;&#125;"</span>
+
+<span class="token comment"># 以纯JSON格式输出一次（非常适合由其他程序解析）</span>
+<span class="token function">docker</span> stats --no-stream <span class="token parameter variable">--format</span> <span class="token string">"&#123;&#123;json .&#125;&#125;"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ul>
 <h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
 <li><p><strong>它只是一个实时工具</strong>：<code>docker stats</code> 显示的是<strong>实时数据流</strong>，而非历史数据。它不会保存任何历史记录。对于长期趋势分析、告警和数据持久化，你需要更专业的监控方案，如 <strong>Prometheus + Grafana</strong>（通常通过 <code>cAdvisor</code> 来收集 Docker 指标）。</p>
@@ -1275,10 +1454,10 @@ dock,"/>
 <p><code>docker container inspect</code> 命令用于<strong>获取 Docker 容器底层配置和运行时状态的详细信息（元数据）</strong>。</p>
 <p>它会返回一个庞大的 JSON 对象，这个对象包含了容器生命周期的几乎所有信息，从最初的创建配置（<code>docker create</code>&#x2F;<code>docker run</code> 时指定的所有参数）到当前的运行时状态（如 IP 地址、端口映射、进程 ID 等）。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container inspect <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>你也可以使用它的传统缩写形式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect CONTAINER</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> inspect CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>两者功能完全一致。</p>
 <h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
@@ -1290,42 +1469,101 @@ dock,"/>
 </ol>
 <h4><span id="解读体检报告json-输出中的关键信息">解读“体检报告”：JSON 输出中的关键信息</span></h4><p><code>docker container inspect</code> 的输出是一个深度嵌套的 JSON 对象，主要包含两大块：<strong>容器配置（Config）</strong> 和<strong>容器状态（State）</strong>。</p>
 <p>执行以下命令查看原始格式：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container inspect my_container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出内容非常丰富，以下是一些最常用和关键的字段：</p>
 <p><strong>1. 网络设置（NetworkSettings）：</strong></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;NetworkSettings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Networks&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;bridge&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// 网络模式，可能是 bridge, host, 或自定义网络名</span></span><br><span class="line">      <span class="attr">&quot;IPAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.17.0.2&quot;</span><span class="punctuation">,</span> <span class="comment">// **容器的IP地址**</span></span><br><span class="line">      <span class="attr">&quot;Gateway&quot;</span><span class="punctuation">:</span> <span class="string">&quot;172.17.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;MacAddress&quot;</span><span class="punctuation">:</span> <span class="string">&quot;02:42:ac:11:00:02&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Ports&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// **端口映射**</span></span><br><span class="line">    <span class="attr">&quot;80/tcp&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;HostIp&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.0.0.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;HostPort&quot;</span><span class="punctuation">:</span> <span class="string">&quot;8080&quot;</span> <span class="comment">// **宿主机的映射端口**</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">]</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"NetworkSettings"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+  <span class="token property">"Networks"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+    <span class="token property">"bridge"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span> <span class="token comment">// 网络模式，可能是 bridge, host, 或自定义网络名</span>
+      <span class="token property">"IPAddress"</span><span class="token operator">:</span> <span class="token string">"172.17.0.2"</span><span class="token punctuation">,</span> <span class="token comment">// **容器的IP地址**</span>
+      <span class="token property">"Gateway"</span><span class="token operator">:</span> <span class="token string">"172.17.0.1"</span><span class="token punctuation">,</span>
+      <span class="token property">"MacAddress"</span><span class="token operator">:</span> <span class="token string">"02:42:ac:11:00:02"</span>
+    <span class="token punctuation">&#125;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">,</span>
+  <span class="token property">"Ports"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span> <span class="token comment">// **端口映射**</span>
+    <span class="token property">"80/tcp"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+      <span class="token punctuation">&#123;</span>
+        <span class="token property">"HostIp"</span><span class="token operator">:</span> <span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span>
+        <span class="token property">"HostPort"</span><span class="token operator">:</span> <span class="token string">"8080"</span> <span class="token comment">// **宿主机的映射端口**</span>
+      <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">]</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>用途</strong>：查找容器 IP 以进行连接测试，确认端口映射是否正确。</li>
 </ul>
 <p><strong>2. 挂载信息（Mounts）：</strong></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Mounts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">  <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;Type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;volume&quot;</span><span class="punctuation">,</span> <span class="comment">// 类型可以是 volume（数据卷）, bind（绑定挂载）, tmpfs</span></span><br><span class="line">    <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;my_volume&quot;</span><span class="punctuation">,</span> <span class="comment">// 卷名</span></span><br><span class="line">    <span class="attr">&quot;Source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/var/lib/docker/volumes/my_volume/_data&quot;</span><span class="punctuation">,</span> <span class="comment">// **在宿主机上的源路径**</span></span><br><span class="line">    <span class="attr">&quot;Destination&quot;</span><span class="punctuation">:</span> <span class="string">&quot;/app/data&quot;</span><span class="punctuation">,</span> <span class="comment">// **在容器内的目标路径**</span></span><br><span class="line">    <span class="attr">&quot;Mode&quot;</span><span class="punctuation">:</span> <span class="string">&quot;z&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;RW&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span> <span class="comment">// 读写权限</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Mounts"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">&#123;</span>
+    <span class="token property">"Type"</span><span class="token operator">:</span> <span class="token string">"volume"</span><span class="token punctuation">,</span> <span class="token comment">// 类型可以是 volume（数据卷）, bind（绑定挂载）, tmpfs</span>
+    <span class="token property">"Name"</span><span class="token operator">:</span> <span class="token string">"my_volume"</span><span class="token punctuation">,</span> <span class="token comment">// 卷名</span>
+    <span class="token property">"Source"</span><span class="token operator">:</span> <span class="token string">"/var/lib/docker/volumes/my_volume/_data"</span><span class="token punctuation">,</span> <span class="token comment">// **在宿主机上的源路径**</span>
+    <span class="token property">"Destination"</span><span class="token operator">:</span> <span class="token string">"/app/data"</span><span class="token punctuation">,</span> <span class="token comment">// **在容器内的目标路径**</span>
+    <span class="token property">"Mode"</span><span class="token operator">:</span> <span class="token string">"z"</span><span class="token punctuation">,</span>
+    <span class="token property">"RW"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token comment">// 读写权限</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>用途</strong>：确认数据卷和绑定挂载是否正确配置，并找到数据在宿主机上的实际存储位置。</li>
 </ul>
 <p><strong>3. 配置信息（Config）：</strong></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;Config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Image&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nginx:latest&quot;</span><span class="punctuation">,</span> <span class="comment">// 使用的镜像</span></span><br><span class="line">  <span class="attr">&quot;Env&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span> <span class="comment">// **环境变量**</span></span><br><span class="line">    <span class="string">&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;NGINX_VERSION=1.25.3&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Cmd&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;nginx&quot;</span><span class="punctuation">,</span> <span class="string">&quot;-g&quot;</span><span class="punctuation">,</span> <span class="string">&quot;daemon off;&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="comment">// 启动命令</span></span><br><span class="line">  <span class="attr">&quot;Labels&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="comment">// 标签</span></span><br><span class="line">    <span class="attr">&quot;maintainer&quot;</span><span class="punctuation">:</span> <span class="string">&quot;NGINX Docker Maintainers&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"Config"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+  <span class="token property">"Image"</span><span class="token operator">:</span> <span class="token string">"nginx:latest"</span><span class="token punctuation">,</span> <span class="token comment">// 使用的镜像</span>
+  <span class="token property">"Env"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token comment">// **环境变量**</span>
+    <span class="token string">"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"</span><span class="token punctuation">,</span>
+    <span class="token string">"NGINX_VERSION=1.25.3"</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token property">"Cmd"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"nginx"</span><span class="token punctuation">,</span> <span class="token string">"-g"</span><span class="token punctuation">,</span> <span class="token string">"daemon off;"</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 启动命令</span>
+  <span class="token property">"Labels"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span> <span class="token comment">// 标签</span>
+    <span class="token property">"maintainer"</span><span class="token operator">:</span> <span class="token string">"NGINX Docker Maintainers"</span>
+  <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>用途</strong>：检查容器运行时的核心配置，如启动命令、环境变量等。</li>
 </ul>
 <p><strong>4. 状态信息（State）：</strong></p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;State&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;running&quot;</span><span class="punctuation">,</span> <span class="comment">// 状态：running, paused, exited, restarting</span></span><br><span class="line">  <span class="attr">&quot;Running&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Paused&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Restarting&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Pid&quot;</span><span class="punctuation">:</span> <span class="number">1234</span><span class="punctuation">,</span> <span class="comment">// **容器主进程在宿主机上的PID**</span></span><br><span class="line">  <span class="attr">&quot;StartedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2024-08-31T10:00:00.123456789Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;FinishedAt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0001-01-01T00:00:00Z&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-json" data-language="json"><code class="language-json"><span class="token property">"State"</span><span class="token operator">:</span> <span class="token punctuation">&#123;</span>
+  <span class="token property">"Status"</span><span class="token operator">:</span> <span class="token string">"running"</span><span class="token punctuation">,</span> <span class="token comment">// 状态：running, paused, exited, restarting</span>
+  <span class="token property">"Running"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"Paused"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"Restarting"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token property">"Pid"</span><span class="token operator">:</span> <span class="token number">1234</span><span class="token punctuation">,</span> <span class="token comment">// **容器主进程在宿主机上的PID**</span>
+  <span class="token property">"StartedAt"</span><span class="token operator">:</span> <span class="token string">"2024-08-31T10:00:00.123456789Z"</span><span class="token punctuation">,</span>
+  <span class="token property">"FinishedAt"</span><span class="token operator">:</span> <span class="token string">"0001-01-01T00:00:00Z"</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>用途</strong>：确认容器的精确状态和运行时长，获取 PID 用于高级调试。</li>
 </ul>
 <h4><span id="实战示例使用格式化和过滤">实战示例：使用格式化和过滤</span></h4><p>原始 JSON 输出信息量巨大，我们通常需要借助选项来提取特定信息。</p>
 <p><strong>1. 使用 <code>--format</code> 或 <code>-f</code> 提取特定字段（Go 模板）</strong><br>这是最强大的功能，可以精准获取你需要的值。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取容器的IP地址</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;range .NetworkSettings.Networks&#125;&#125;&#123;&#123;.IPAddress&#125;&#125;&#123;&#123;end&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取容器状态</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;.State.Status&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取容器使用的镜像</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;.Config.Image&#125;&#125;&#x27;</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取宿主机映射的端口（例如映射到容器80端口的主机端口）</span></span><br><span class="line">docker inspect --format=<span class="string">&#x27;&#123;&#123;(index (index .NetworkSettings.Ports &quot;80/tcp&quot;) 0).HostPort&#125;&#125;&#x27;</span> my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 获取容器的IP地址</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">--format</span><span class="token operator">=</span><span class="token string">'&#123;&#123;range .NetworkSettings.Networks&#125;&#125;&#123;&#123;.IPAddress&#125;&#125;&#123;&#123;end&#125;&#125;'</span> my_container
+
+<span class="token comment"># 获取容器状态</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">--format</span><span class="token operator">=</span><span class="token string">'&#123;&#123;.State.Status&#125;&#125;'</span> my_container
+
+<span class="token comment"># 获取容器使用的镜像</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">--format</span><span class="token operator">=</span><span class="token string">'&#123;&#123;.Config.Image&#125;&#125;'</span> my_container
+
+<span class="token comment"># 获取宿主机映射的端口（例如映射到容器80端口的主机端口）</span>
+<span class="token function">docker</span> inspect <span class="token parameter variable">--format</span><span class="token operator">=</span><span class="token string">'&#123;&#123;(index (index .NetworkSettings.Ports "80/tcp") 0).HostPort&#125;&#125;'</span> my_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>2. 使用 <code>jq</code> 工具解析输出（更灵活）</strong><br><code>jq</code> 是一个强大的命令行 JSON 处理器，与 <code>docker inspect</code> 是绝配。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先确保系统安装了 jq: apt-get install jq</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取所有挂载点的源和目标</span></span><br><span class="line">docker inspect my_container | jq <span class="string">&#x27;.[].Mounts[] | .Source, .Destination&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 以更漂亮的格式输出整个JSON，便于阅读</span></span><br><span class="line">docker inspect my_container | jq .</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先确保系统安装了 jq: apt-get install jq</span>
+
+<span class="token comment"># 获取所有挂载点的源和目标</span>
+<span class="token function">docker</span> inspect my_container <span class="token operator">|</span> jq <span class="token string">'.[].Mounts[] | .Source, .Destination'</span>
+
+<span class="token comment"># 以更漂亮的格式输出整个JSON，便于阅读</span>
+<span class="token function">docker</span> inspect my_container <span class="token operator">|</span> jq <span class="token builtin class-name">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>3. 一次检查多个容器</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker container inspect nginx redis</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> container inspect nginx redis<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="最佳实践与注意事项">最佳实践与注意事项</span></h4><ol>
 <li><strong>适用于所有状态的容器</strong>：与许多命令不同，<code>docker container inspect</code> 不仅可以用于运行中的容器，也可以用于已停止（<code>exited</code>）的容器。这对于排查为什么容器启动失败非常有用。</li>
@@ -1346,7 +1584,7 @@ dock,"/>
 <p><code>docker port</code> 命令用于<strong>快速列出容器端口到宿主机端口的映射关系</strong>。</p>
 <p>它直接查询 Docker 守护进程中记录的端口绑定信息，并以最清晰的方式呈现出来，让你无需从冗长的 <code>docker inspect</code> 输出中费力地寻找答案。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker port CONTAINER [PRIVATE_PORT[/PROTO]]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> port CONTAINER <span class="token punctuation">[</span>PRIVATE_PORT<span class="token punctuation">[</span>/PROTO<span class="token punctuation">]</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>: 目标容器的名称或 ID。</li>
@@ -1358,13 +1596,14 @@ dock,"/>
 <li><strong>避免记忆和猜测</strong>在复杂环境中，可能同时运行着多个容器，每个容器都有多个端口映射。此命令可以准确告诉你当前的映射状态，避免因记错端口而导致的连接失败。</li>
 </ol>
 <h4><span id="实战示例从查全部到精准查询">实战示例：从查全部到精准查询</span></h4><p>假设我们运行了一个 Nginx 容器，并将容器的 80 端口映射到了宿主机的 <strong>8080</strong> 端口，同时将容器的 443 端口映射到了宿主机的 <strong>8443</strong> 端口。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --name my_nginx -p 8080:80 -p 8443:443 nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> my_nginx <span class="token parameter variable">-p</span> <span class="token number">8080</span>:80 <span class="token parameter variable">-p</span> <span class="token number">8443</span>:443 nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>1. 查询容器的所有端口映射</strong><br>这是最常用的方式，列出该容器配置的所有端口映射规则。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker port my_nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> port my_nginx<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出示例：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">80/tcp -&gt; 0.0.0.0:8080</span><br><span class="line">443/tcp -&gt; 0.0.0.0:8443</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-none"><code class="language-none">80&#x2F;tcp -&gt; 0.0.0.0:8080
+443&#x2F;tcp -&gt; 0.0.0.0:8443<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>解读输出：</strong></p>
 <ul>
@@ -1373,10 +1612,13 @@ dock,"/>
 <li><code>0.0.0.0:8080</code>：宿主机上绑定的 IP 地址和端口。<code>0.0.0.0</code> 表示绑定在宿主机的所有网络接口上，可通过宿主机的任何一个 IP 地址加 <code>8080</code> 端口来访问。</li>
 </ul>
 <p><strong>2. 查询容器的特定端口映射</strong><br>如果你只关心某个特定端口（例如只想知道 80 端口映射到了哪里），可以使用可选参数进行过滤。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查询容器内部80端口的映射情况</span></span><br><span class="line">docker port my_nginx 80</span><br><span class="line"><span class="comment"># 或更精确地指定协议（虽然TCP是默认值）</span></span><br><span class="line">docker port my_nginx 80/tcp</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 查询容器内部80端口的映射情况</span>
+<span class="token function">docker</span> port my_nginx <span class="token number">80</span>
+<span class="token comment"># 或更精确地指定协议（虽然TCP是默认值）</span>
+<span class="token function">docker</span> port my_nginx <span class="token number">80</span>/tcp<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>输出示例：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0.0.0.0:8080</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">0.0</span>.0.0:8080<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>这次输出更加简洁，只返回了宿主机端的绑定信息。</p>
 <h4><span id="工作原理与局限性">工作原理与局限性</span></h4><p><strong>工作原理：</strong><br><code>docker port</code> 命令本质上是查询 Docker 守护进程维护的 iptables 规则或内部状态表，这些规则是在容器启动时通过 <code>-p</code> 或 <code>-P</code> 参数设置的。它返回的是<strong>配置的映射关系</strong>，而不是实时检测端口是否真正处于监听状态。</p>
@@ -1385,13 +1627,17 @@ dock,"/>
 <li><p><strong>仅显示显式映射的端口</strong>：它只显示通过 <code>-p</code> 或 <code>-P</code> 参数设置的端口映射。对于使用 <code>--network=host</code> 模式（主机网络模式）的容器，由于容器直接使用宿主机的网络命名空间，没有端口映射的概念，因此此命令不会返回任何信息。</p>
 </li>
 <li><p><strong>不检测端口状态</strong>：它只告诉你“根据配置，端口应该映射到哪里”，但并不会检查宿主机的 <code>8080</code> 端口是否真的处于监听状态。要验证端口是否可访问，还需要配合 <code>netstat</code>、<code>ss</code> 或 <code>telnet</code> 等命令。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 docker port 找到映射端口，再用 telnet 测试连通性</span></span><br><span class="line">docker port my_nginx 80</span><br><span class="line">telnet localhost 8080</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 使用 docker port 找到映射端口，再用 telnet 测试连通性</span>
+<span class="token function">docker</span> port my_nginx <span class="token number">80</span>
+telnet localhost <span class="token number">8080</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre></li>
 </ol>
 <h4><span id="最佳实践与应用场景">最佳实践与应用场景</span></h4><ol>
 <li><p><strong>快速诊断连接问题</strong>：当无法通过宿主机 IP 和端口访问容器服务时，第一步就应用 <code>docker port</code> 确认映射关系是否正确建立。</p>
 </li>
 <li><p><strong>自动化脚本</strong>：在 CI&#x2F;CD 流水线或运维脚本中，如果需要获取容器的映射端口以便进行健康检查或集成测试，<code>docker port</code> 的简洁输出非常适合被其他命令直接使用。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在脚本中获取映射端口并赋值给变量</span></span><br><span class="line">MAPPED_PORT=$(docker port my_nginx 80 | <span class="built_in">cut</span> -d: -f2)</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;The application is accessible on port <span class="variable">$MAPPED_PORT</span>.&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在脚本中获取映射端口并赋值给变量</span>
+<span class="token assign-left variable">MAPPED_PORT</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> port my_nginx <span class="token number">80</span> <span class="token operator">|</span> <span class="token function">cut</span> -d: <span class="token parameter variable">-f2</span><span class="token variable">)</span></span>
+<span class="token builtin class-name">echo</span> <span class="token string">"The application is accessible on port <span class="token variable">$MAPPED_PORT</span>."</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>与 <code>docker ps</code> 互补</strong>：<code>docker ps</code> 也会显示端口映射，但格式是浓缩的（如 <code>0.0.0.0:8080-&gt;80/tcp</code>）。当 <code>docker ps</code> 的输出因信息过多而不易阅读时，使用 <code>docker port</code> 查看特定容器的映射会更加清晰。</p>
 </li>
@@ -1409,7 +1655,8 @@ dock,"/>
 <p><code>docker cp</code> 命令用于<strong>在宿主机文件系统和一个运行的或已停止的容器文件系统之间复制文件或目录</strong>。</p>
 <p>它实现了容器内外环境的文件交换，支持双向操作，并且对容器内的进程毫无影响。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> [OPTIONS] CONTAINER:SRC_PATH DEST_PATH</span><br><span class="line">docker <span class="built_in">cp</span> [OPTIONS] SRC_PATH CONTAINER:DEST_PATH</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER:SRC_PATH DEST_PATH
+<span class="token function">docker</span> <span class="token function">cp</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> SRC_PATH CONTAINER:DEST_PATH<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>：目标容器的名称或 ID。</li>
@@ -1424,19 +1671,28 @@ dock,"/>
 <li><strong>备份与恢复</strong>：快速备份容器内用户生成的重要数据，或者将备份数据恢复到另一个容器中。</li>
 </ol>
 <h4><span id="实战示例从宿主机到容器以及反向操作">实战示例：从宿主机到容器，以及反向操作</span></h4><p><strong>1. 将文件从宿主机复制到容器内（Host -&gt; Container）</strong><br>这是最常见的操作，例如传入一个配置文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将宿主机当前目录下的 app.conf 文件复制到容器内 /etc/ 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> ./app.conf my_container:/etc/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将宿主机目录 /host/logs 整个复制到容器内的 /tmp 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> -a /host/logs my_container:/tmp/</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将宿主机当前目录下的 app.conf 文件复制到容器内 /etc/ 目录下</span>
+<span class="token function">docker</span> <span class="token function">cp</span> ./app.conf my_container:/etc/
+
+<span class="token comment"># 将宿主机目录 /host/logs 整个复制到容器内的 /tmp 目录下</span>
+<span class="token function">docker</span> <span class="token function">cp</span> <span class="token parameter variable">-a</span> /host/logs my_container:/tmp/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>注意</strong>：如果容器内的目标路径是一个目录，文件会被复制到该目录下。如果目标路径不存在，<code>docker cp</code> 会尝试创建它。</li>
 </ul>
 <p><strong>2. 将文件从容器内复制到宿主机（Container -&gt; Host）</strong><br>同样重要，常用于提取数据。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器内 /var/log/nginx/error.log 文件复制到宿主机当前目录</span></span><br><span class="line">docker <span class="built_in">cp</span> my_container:/var/log/nginx/error.log ./</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将容器内 /app/data 整个目录复制到宿主机的 /backup 目录下</span></span><br><span class="line">docker <span class="built_in">cp</span> -a my_container:/app/data /backup/</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将容器内 /var/log/nginx/error.log 文件复制到宿主机当前目录</span>
+<span class="token function">docker</span> <span class="token function">cp</span> my_container:/var/log/nginx/error.log ./
+
+<span class="token comment"># 将容器内 /app/data 整个目录复制到宿主机的 /backup 目录下</span>
+<span class="token function">docker</span> <span class="token function">cp</span> <span class="token parameter variable">-a</span> my_container:/app/data /backup/<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><strong>注意</strong>：从容器内复制时，源路径必须写全路径，并以 <code>容器名或ID:</code> 开头。</li>
 </ul>
 <p><strong>3. 复制已停止的容器中的文件</strong><br><code>docker cp</code> 的一个巨大优势是它不仅适用于运行中的容器，也适用于已停止（<code>exited</code>）的容器。只要容器没有被删除，你仍然可以访问其文件系统。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 一个已停止的容器，其ID为 stopped_container</span></span><br><span class="line">docker <span class="built_in">cp</span> stopped_container:/app/config.json ./recovered_config.json</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 一个已停止的容器，其ID为 stopped_container</span>
+<span class="token function">docker</span> <span class="token function">cp</span> stopped_container:/app/config.json ./recovered_config.json<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="核心选项options详解">核心选项（OPTIONS）详解</span></h4><ul>
 <li><p><strong><code>-a</code> (–archive)</strong>：<strong>归档模式</strong>。这是最常用的选项，它在复制时会保留文件的所有元信息，包括：</p>
@@ -1457,13 +1713,22 @@ dock,"/>
 <li><p><strong>对运行中应用的影响</strong>：向一个运行中的容器复制文件（尤其是覆盖正在被进程打开的文件）可能会导致不可预知的行为。对于配置文件，更安全的做法是复制进去后，再在容器内发送信号让应用重载配置（如 <code>nginx -s reload</code>），或者重启容器。</p>
 </li>
 <li><p><strong>路径中的空格和特殊字符</strong>：如果文件或目录的路径中包含空格或特殊字符，务必使用引号将其括起来。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> <span class="string">&quot;my_container:/path/with spaces/file.txt&quot;</span> ./</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">cp</span> <span class="token string">"my_container:/path/with spaces/file.txt"</span> ./<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 </li>
 <li><p><strong>与 <code>docker exec</code> 和重定向的结合使用</strong>：有时，直接生成文件内容到容器内更方便。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不推荐：先在本机创建文件，再复制</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;config_value=123&quot;</span> &gt; temp.conf</span><br><span class="line">docker <span class="built_in">cp</span> temp.conf my_container:/app/config</span><br><span class="line"></span><br><span class="line"><span class="comment"># 推荐：使用 docker exec 和重定向直接写入（更高效）</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container sh -c <span class="string">&#x27;echo &quot;config_value=123&quot; &gt; /app/config&#x27;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 不推荐：先在本机创建文件，再复制</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"config_value=123"</span> <span class="token operator">></span> temp.conf
+<span class="token function">docker</span> <span class="token function">cp</span> temp.conf my_container:/app/config
+
+<span class="token comment"># 推荐：使用 docker exec 和重定向直接写入（更高效）</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_container <span class="token function">sh</span> <span class="token parameter variable">-c</span> <span class="token string">'echo "config_value=123" > /app/config'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>性能考虑</strong>：复制大量小文件时，打包成一个归档文件（如 <code>.tar</code>）再进行复制，效率会远高于直接复制目录。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在宿主机上打包</span></span><br><span class="line">tar -czf logs.tar.gz /path/to/many/files/</span><br><span class="line">docker <span class="built_in">cp</span> logs.tar.gz my_container:/tmp/</span><br><span class="line"><span class="comment"># 在容器内解压</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container tar -xzf /tmp/logs.tar.gz -C /target/dir</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 在宿主机上打包</span>
+<span class="token function">tar</span> <span class="token parameter variable">-czf</span> logs.tar.gz /path/to/many/files/
+<span class="token function">docker</span> <span class="token function">cp</span> logs.tar.gz my_container:/tmp/
+<span class="token comment"># 在容器内解压</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_container <span class="token function">tar</span> <span class="token parameter variable">-xzf</span> /tmp/logs.tar.gz <span class="token parameter variable">-C</span> /target/dir<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ol>
 <hr>
 <p><code>docker cp</code> 是一个简单而强大的“救火队员”和“调试助手”。</p>
@@ -1479,7 +1744,7 @@ dock,"/>
 <p><code>docker diff</code> 命令用于<strong>检查一个容器相对于其基础镜像，在文件系统层面所做的更改</strong>。</p>
 <p>这些更改包括添加、修改和删除的文件和目录，它们都被记录在容器的可写层（Container Layer）中。该命令会扫描这些变更，并以列表形式呈现出来。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker diff CONTAINER</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">diff</span> CONTAINER<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>：目标容器的名称或 ID。</li>
@@ -1523,7 +1788,24 @@ dock,"/>
 <li>删除 <code>/etc/issue</code> 文件</li>
 </ol>
 <p>执行 <code>docker diff &lt;container_id&gt;</code> 后，你可能会看到如下输出：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">C /etc</span><br><span class="line">C /etc/hosts</span><br><span class="line">D /etc/issue.net</span><br><span class="line">A /var</span><br><span class="line">A /var/lib</span><br><span class="line">A /var/lib/nginx</span><br><span class="line">A /var/lib/nginx/body</span><br><span class="line">A /var/lib/nginx/fastcgi</span><br><span class="line">A /var/lib/nginx/proxy</span><br><span class="line">A /var/lib/nginx/uwsgi</span><br><span class="line">A /var/lib/nginx/scgi</span><br><span class="line">A /run</span><br><span class="line">A /run/nginx.pid</span><br><span class="line">C /var/lib/dpkg/status</span><br><span class="line">A /usr</span><br><span class="line">A /usr/sbin</span><br><span class="line">A /usr/sbin/nginx</span><br><span class="line">... (很长的一系列添加项)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">C /etc
+C /etc/hosts
+D /etc/issue.net
+A /var
+A /var/lib
+A /var/lib/nginx
+A /var/lib/nginx/body
+A /var/lib/nginx/fastcgi
+A /var/lib/nginx/proxy
+A /var/lib/nginx/uwsgi
+A /var/lib/nginx/scgi
+A /run
+A /run/nginx.pid
+C /var/lib/dpkg/status
+A /usr
+A /usr/sbin
+A /usr/sbin/nginx
+<span class="token punctuation">..</span>. <span class="token punctuation">(</span>很长的一系列添加项<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>解读：</strong></p>
 <ul>
@@ -1538,10 +1820,14 @@ dock,"/>
 <li>在浏览器中完成安装，上传一张图片，安装一个插件。</li>
 <li>使用 <code>docker diff</code> 命令，查看新增了哪些文件（<code>A</code>）。</li>
 </ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker diff wordpress_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">diff</span> wordpress_container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>输出可能会显示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">A /var/www/html/wp-content/uploads</span><br><span class="line">A /var/www/html/wp-content/uploads/2024/08</span><br><span class="line">A /var/www/html/wp-content/uploads/2024/08/my-image.jpg</span><br><span class="line">A /var/www/html/wp-content/plugins</span><br><span class="line">A /var/www/html/wp-content/plugins/my-plugin</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">A /var/www/html/wp-content/uploads
+A /var/www/html/wp-content/uploads/2024/08
+A /var/www/html/wp-content/uploads/2024/08/my-image.jpg
+A /var/www/html/wp-content/plugins
+A /var/www/html/wp-content/plugins/my-plugin<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>这清晰地告诉你，必须将 <code>/var/www/html/wp-content</code> 目录通过卷挂载出来才能持久化数据。</p>
 <p><strong>场景 3：审计容器安全性</strong><br>检查一个正在运行的容器是否被入侵，可以定期执行 <code>docker diff</code>，查看是否有异常的可执行文件（<code>A</code>）被添加到 <code>/tmp</code>、<code>/dev/shm</code> 等目录，或者系统的关键命令（如 <code>/bin/bash</code>）是否被修改（<code>C</code>）。</p>
@@ -1553,7 +1839,11 @@ dock,"/>
 <li><p><strong>理解容器层的本质</strong>：这些变更都存储在容器的可写层中。<strong>一旦容器被删除，所有这些变更都会永久丢失</strong>（除非通过 <code>docker commit</code> 提交为镜像，或通过 <code>docker cp</code> 备份出来）。这再次强调了使用<strong>数据卷（Volumes）</strong> 进行持久化的重要性。</p>
 </li>
 <li><p><strong>输出可能很长</strong>：对于安装了大量软件的容器（如通过 <code>apt install</code>），输出列表会非常长。可以结合 <code>grep</code> 等工具进行过滤。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 只查看 /etc 目录下的变更</span></span><br><span class="line">docker diff my_container | grep /etc</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只查看被删除的文件</span></span><br><span class="line">docker diff my_container | grep ^D</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 只查看 /etc 目录下的变更</span>
+<span class="token function">docker</span> <span class="token function">diff</span> my_container <span class="token operator">|</span> <span class="token function">grep</span> /etc
+
+<span class="token comment"># 只查看被删除的文件</span>
+<span class="token function">docker</span> <span class="token function">diff</span> my_container <span class="token operator">|</span> <span class="token function">grep</span> ^D<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ol>
 <hr>
 <p><code>docker diff</code> 是一个低调但极其强大的诊断和审计工具。</p>
@@ -1569,7 +1859,7 @@ dock,"/>
 <p><code>docker commit</code> 命令用于<strong>基于一个容器的当前状态创建一个新的镜像</strong>。</p>
 <p>它会将容器相对于其基础镜像所做的所有更改（包括文件系统的添加、修改和删除，但不包括挂载的卷中的数据）保存下来，形成一个新镜像的只读层。这个新镜像可以像其他任何镜像一样，被用于创建新的容器。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> commit <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>REPOSITORY<span class="token punctuation">[</span>:TAG<span class="token punctuation">]</span><span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>CONTAINER</code>：源容器的名称或 ID，其当前状态将被保存。</li>
@@ -1617,14 +1907,25 @@ dock,"/>
 </tr>
 </tbody></table>
 <h4><span id="实战示例">实战示例</span></h4><p><strong>1. 基础提交：创建一个无名镜像</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设我们在一个ubuntu容器中安装了nginx</span></span><br><span class="line">docker <span class="built_in">exec</span> my_container apt update &amp;&amp; apt install -y nginx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将安装了nginx的容器状态提交为一个新镜像</span></span><br><span class="line">docker commit my_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 假设我们在一个ubuntu容器中安装了nginx</span>
+<span class="token function">docker</span> <span class="token builtin class-name">exec</span> my_container <span class="token function">apt</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">apt</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> nginx
+
+<span class="token comment"># 将安装了nginx的容器状态提交为一个新镜像</span>
+<span class="token function">docker</span> commit my_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>输出会返回一个新镜像的 ID，如 <code>sha256:a1b2c3d4...</code>。这个镜像没有名字（REPOSITORY: TAG 为 <code>&lt;none&gt;:&lt;none&gt;</code>），但可以通过 ID 使用。</p>
 <p><strong>2. 提交并命名镜像（推荐）</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提交并指定仓库名和标签</span></span><br><span class="line">docker commit my_container my-nginx:version1</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 提交并指定仓库名和标签</span>
+<span class="token function">docker</span> commit my_container my-nginx:version1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>3. 提交并添加元信息</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 提交并添加作者信息、提交说明，同时修改启动命令</span></span><br><span class="line">docker commit \</span><br><span class="line">  -a <span class="string">&quot;Your Name &lt;email@example.com&gt;&quot;</span> \</span><br><span class="line">  -m <span class="string">&quot;Installed Nginx and configured custom homepage&quot;</span> \</span><br><span class="line">  -c <span class="string">&#x27;CMD [&quot;nginx&quot;, &quot;-g&quot;, &quot;daemon off;&quot;]&#x27;</span> \</span><br><span class="line">  my_container \</span><br><span class="line">  my-custom-app:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 提交并添加作者信息、提交说明，同时修改启动命令</span>
+<span class="token function">docker</span> commit <span class="token punctuation">\</span>
+  <span class="token parameter variable">-a</span> <span class="token string">"Your Name &lt;email@example.com>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-m</span> <span class="token string">"Installed Nginx and configured custom homepage"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-c</span> <span class="token string">'CMD ["nginx", "-g", "daemon off;"]'</span> <span class="token punctuation">\</span>
+  my_container <span class="token punctuation">\</span>
+  my-custom-app:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="最佳实践与严重警告">最佳实践与严重警告</span></h4><ol>
 <li><p><strong>Dockerfile 优先原则</strong>：<strong>永远不要用 <code>docker commit</code> 来代替 Dockerfile</strong>。通过 <code>commit</code> 生成的镜像被称为“黑盒镜像”，它缺乏透明性、可重复性和可维护性。你无法确切知道镜像中包含了哪些更改，也无法轻松地重建它。</p>
@@ -1694,20 +1995,21 @@ dock,"/>
 <h4><span id="实战示例">实战示例</span></h4><p>假设我们有一个名为 <code>my_app</code> 的容器正在运行一个 Web 服务。</p>
 <ol>
 <li><p><strong>暂停容器</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pause my_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> pause my_app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>执行后，容器的状态（在 <code>docker ps</code> 中）会从 <code>Up</code> 变为 <strong><code>Up (Paused)</code></strong>。</p>
 </li>
 <li><p><strong>尝试访问服务</strong>：<br>此时，任何尝试连接到该容器服务的请求（如 HTTP 请求）都会<strong>挂起或超时</strong>，因为处理请求的进程已经被冻结，无法响应。</p>
 </li>
 <li><p><strong>检查状态</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker ps</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">ps</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>输出示例：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CONTAINER ID   IMAGE          COMMAND                  STATUS</span><br><span class="line">a1b2c3d4e5f6   nginx:latest   <span class="string">&quot;/docker-entrypoint.…&quot;</span>   Up 5 minutes (Paused)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">CONTAINER ID   IMAGE          COMMAND                  STATUS
+a1b2c3d4e5f6   nginx:latest   <span class="token string">"/docker-entrypoint.…"</span>   Up <span class="token number">5</span> minutes <span class="token punctuation">(</span>Paused<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>恢复容器</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker unpause my_app</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> unpause my_app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>容器状态立刻恢复为 <code>Up</code>，被挂起的请求会得到处理，服务恢复正常。</p>
 </li>
@@ -1734,20 +2036,26 @@ dock,"/>
 <h4><span id="什么是-docker-rm">什么是 <code>docker rm</code>？</span></h4><p><code>docker rm</code> 命令用于<strong>删除一个或多个已停止的容器</strong>。</p>
 <p>删除容器会一并移除与其关联的可写层（容器层），从而释放磁盘空间。这是一个清理环境、保持系统整洁的核心命令。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>你可以同时删除多个容器，只需将它们的名称或 ID 用空格隔开。</p>
 <h4><span id="如何使用简单示例">如何使用？简单示例</span></h4><p><strong>1. 删除一个已停止的容器：</strong><br>这是最常用的场景。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 首先停止容器</span></span><br><span class="line">docker stop my_container</span><br><span class="line"><span class="comment"># 然后删除它</span></span><br><span class="line">docker <span class="built_in">rm</span> my_container</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用容器ID（取前几位即可）</span></span><br><span class="line">docker <span class="built_in">rm</span> a1b2c3d4</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 首先停止容器</span>
+<span class="token function">docker</span> stop my_container
+<span class="token comment"># 然后删除它</span>
+<span class="token function">docker</span> <span class="token function">rm</span> my_container
+
+<span class="token comment"># 或者使用容器ID（取前几位即可）</span>
+<span class="token function">docker</span> <span class="token function">rm</span> a1b2c3d4<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>2. 删除多个已停止的容器：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> container_1 container_2 container_3</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> container_1 container_2 container_3<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>3. 强制删除一个运行中的容器（不推荐常规使用）：</strong><br>如果你想强制删除一个还在运行的容器，可以使用 <code>-f</code> 或 <code>--force</code> 选项。但这相当于先执行 <code>docker kill</code>，再执行 <code>docker rm</code>，是一种粗暴的操作。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> -f my_running_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> <span class="token parameter variable">-f</span> my_running_container<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p><strong>4. 清理所有已停止的容器（实用技巧）：</strong><br>使用命令替换一次性删除所有已停止的容器，这是非常高效的清理方式。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> $(docker ps -aq)</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rm</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">ps</span> <span class="token parameter variable">-aq</span><span class="token variable">)</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <ul>
 <li><code>docker ps -aq</code>：列出所有容器（包括已停止的）的 ID。</li>
@@ -1793,11 +2101,22 @@ dock,"/>
 <li><strong>与非 Docker 系统交换文件系统</strong>：导出的 tar 包是一个标准的文件系统归档，可以被 <code>chroot</code>、虚拟机器或其他容器运行时使用，实现了某种程度的“互通”。</li>
 </ol>
 <h4><span id="实战示例">实战示例</span></h4><p><strong>第 1 步：导出（Export）一个容器</strong><br>假设我们有一个名为 <code>my_configured_container</code> 的容器，里面装好了我们需要的所有软件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器的文件系统导出为 tar.gz 压缩包</span></span><br><span class="line">docker <span class="built_in">export</span> my_configured_container &gt; my_container_backup.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用 -o (--output) 选项</span></span><br><span class="line">docker <span class="built_in">export</span> -o my_container_backup.tar my_configured_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将容器的文件系统导出为 tar.gz 压缩包</span>
+<span class="token function">docker</span> <span class="token builtin class-name">export</span> my_configured_container <span class="token operator">></span> my_container_backup.tar.gz
+
+<span class="token comment"># 或者使用 -o (--output) 选项</span>
+<span class="token function">docker</span> <span class="token builtin class-name">export</span> <span class="token parameter variable">-o</span> my_container_backup.tar my_configured_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>现在，你得到了一个 <code>my_container_backup.tar.gz</code> 文件，它包含了容器某时刻的完整文件系统快照。</p>
 <p><strong>第 2 步：导入（Import）为一个新镜像</strong><br>将这个 tar 包拿到另一台机器上，或者在本机将其导入为一个全新的镜像。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从 tar 包导入，并为新镜像指定仓库名和标签</span></span><br><span class="line"><span class="built_in">cat</span> my_container_backup.tar.gz | docker import - my_custom_image:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者从文件直接导入</span></span><br><span class="line">docker import my_container_backup.tar.gz my_custom_image:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 也可以在导入时添加提交信息</span></span><br><span class="line">docker import --message <span class="string">&quot;Imported from backup on <span class="subst">$(date)</span>&quot;</span> my_container_backup.tar.gz my_custom_image:latest</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 从 tar 包导入，并为新镜像指定仓库名和标签</span>
+<span class="token function">cat</span> my_container_backup.tar.gz <span class="token operator">|</span> <span class="token function">docker</span> <span class="token function">import</span> - my_custom_image:latest
+
+<span class="token comment"># 或者从文件直接导入</span>
+<span class="token function">docker</span> <span class="token function">import</span> my_container_backup.tar.gz my_custom_image:latest
+
+<span class="token comment"># 也可以在导入时添加提交信息</span>
+<span class="token function">docker</span> <span class="token function">import</span> <span class="token parameter variable">--message</span> <span class="token string">"Imported from backup on <span class="token variable"><span class="token variable">$(</span><span class="token function">date</span><span class="token variable">)</span></span>"</span> my_container_backup.tar.gz my_custom_image:latest<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>导入成功后，你就可以像使用其他镜像一样，使用 <code>my_custom_image:latest</code> 来运行新的容器了。</p>
 <h4><span id="核心注意事项与局限性非常重要">核心注意事项与局限性（非常重要！）</span></h4><ol>
@@ -1814,7 +2133,11 @@ dock,"/>
 <li><p><strong>扁平化与历史丢失</strong>：通过 <code>import</code> 创建的镜像<strong>只有一层</strong>。你丢失了所有层缓存的优势，也无法查看镜像的构建历史。这使得新镜像的构建和存储效率可能更低。</p>
 </li>
 <li><p><strong>需要手动指定运行时配置</strong>：由于元数据丢失，基于新镜像运行容器时，你很可能需要<strong>手动指定所有配置</strong>，例如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -it --<span class="built_in">rm</span> \</span><br><span class="line">  -p 8080:80 \</span><br><span class="line">  -e <span class="string">&quot;MY_VAR=value&quot;</span> \</span><br><span class="line">  my_custom_image:latest \</span><br><span class="line">  /bin/bash -c <span class="string">&quot;/usr/sbin/nginx&quot;</span> <span class="comment"># 必须手动指定启动命令！</span></span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> run <span class="token parameter variable">-it</span> <span class="token parameter variable">--rm</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-p</span> <span class="token number">8080</span>:80 <span class="token punctuation">\</span>
+  <span class="token parameter variable">-e</span> <span class="token string">"MY_VAR=value"</span> <span class="token punctuation">\</span>
+  my_custom_image:latest <span class="token punctuation">\</span>
+  /bin/bash <span class="token parameter variable">-c</span> <span class="token string">"/usr/sbin/nginx"</span> <span class="token comment"># 必须手动指定启动命令！</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
 </ol>
 <h4><span id="与-docker-save-x2f-docker-load-的区别">与 <code>docker save</code> &#x2F; <code>docker load</code> 的区别</span></h4><p>这是一个非常常见的困惑点：</p>
 <table>
@@ -1865,7 +2188,7 @@ dock,"/>
 <p><code>docker wait</code> 命令用于<strong>阻塞（等待）一个或多个容器退出，然后打印它们的退出代码</strong>。</p>
 <p>它的行为非常纯粹：调用这个命令后，Shell 会在此处等待，直到指定的容器停止运行。一旦容器退出，<code>docker wait</code> 会立即返回该容器的退出状态码（Exit Code），然后脚本才可以继续执行。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">wait</span> CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">wait</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>你可以同时等待多个容器退出，命令会阻塞直到所有指定容器都退出，并分别返回它们的退出码。</p>
 <h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><p><code>docker wait</code> 的核心价值在于<strong>自动化脚本和任务编排</strong>。</p>
@@ -1876,10 +2199,42 @@ dock,"/>
 </ol>
 <h4><span id="实战示例">实战示例</span></h4><p><strong>场景：</strong> 你有一个名为 <code>batch_job</code> 的容器，它运行着一个数据处理任务。你需要在脚本中启动它，并等待任务完成，根据成功与否决定后续步骤。</p>
 <p><strong>示例脚本：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 启动一个执行后台任务的容器，并将其放入后台运行</span></span><br><span class="line">docker run --name batch_job my_data_processor:latest &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 使用 docker wait 等待这个容器执行完毕。</span></span><br><span class="line"><span class="comment">#    脚本会在此处阻塞，直到 batch_job 容器退出。</span></span><br><span class="line">EXIT_CODE=$(docker <span class="built_in">wait</span> batch_job)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 根据退出代码判断任务是否成功</span></span><br><span class="line"><span class="keyword">if</span> [ <span class="variable">$EXIT_CODE</span> -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;✅ 任务执行成功！&quot;</span></span><br><span class="line">    <span class="comment"># 执行成功后的后续操作，例如通知、启动下一个服务等</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;❌ 任务执行失败，退出代码：<span class="variable">$EXIT_CODE</span>&quot;</span></span><br><span class="line">    <span class="comment"># 执行失败后的处理，例如错误处理、日志收集、报警等</span></span><br><span class="line">    docker logs batch_job <span class="comment"># 可以立刻获取日志来排查错误</span></span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 清理容器</span></span><br><span class="line">docker <span class="built_in">rm</span> batch_job</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;脚本继续执行...&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/bin/bash</span>
+
+<span class="token comment"># 1. 启动一个执行后台任务的容器，并将其放入后台运行</span>
+<span class="token function">docker</span> run <span class="token parameter variable">--name</span> batch_job my_data_processor:latest <span class="token operator">&amp;</span>
+
+<span class="token comment"># 2. 使用 docker wait 等待这个容器执行完毕。</span>
+<span class="token comment">#    脚本会在此处阻塞，直到 batch_job 容器退出。</span>
+<span class="token assign-left variable">EXIT_CODE</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">wait</span> batch_job<span class="token variable">)</span></span>
+
+<span class="token comment"># 3. 根据退出代码判断任务是否成功</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token variable">$EXIT_CODE</span> <span class="token parameter variable">-eq</span> <span class="token number">0</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"✅ 任务执行成功！"</span>
+    <span class="token comment"># 执行成功后的后续操作，例如通知、启动下一个服务等</span>
+<span class="token keyword">else</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"❌ 任务执行失败，退出代码：<span class="token variable">$EXIT_CODE</span>"</span>
+    <span class="token comment"># 执行失败后的处理，例如错误处理、日志收集、报警等</span>
+    <span class="token function">docker</span> logs batch_job <span class="token comment"># 可以立刻获取日志来排查错误</span>
+    <span class="token builtin class-name">exit</span> <span class="token number">1</span>
+<span class="token keyword">fi</span>
+
+<span class="token comment"># 4. 清理容器</span>
+<span class="token function">docker</span> <span class="token function">rm</span> batch_job
+
+<span class="token builtin class-name">echo</span> <span class="token string">"脚本继续执行..."</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>等待多个容器：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时启动多个任务容器</span></span><br><span class="line">docker run --name worker_1 my_worker &amp;</span><br><span class="line">docker run --name worker_2 my_worker &amp;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等待所有worker容器退出</span></span><br><span class="line">EXIT_CODE_1=$(docker <span class="built_in">wait</span> worker_1)</span><br><span class="line">EXIT_CODE_2=$(docker <span class="built_in">wait</span> worker_2)</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Worker 1 退出代码: <span class="variable">$EXIT_CODE_1</span>&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Worker 2 退出代码: <span class="variable">$EXIT_CODE_2</span>&quot;</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 同时启动多个任务容器</span>
+<span class="token function">docker</span> run <span class="token parameter variable">--name</span> worker_1 my_worker <span class="token operator">&amp;</span>
+<span class="token function">docker</span> run <span class="token parameter variable">--name</span> worker_2 my_worker <span class="token operator">&amp;</span>
+
+<span class="token comment"># 等待所有worker容器退出</span>
+<span class="token assign-left variable">EXIT_CODE_1</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">wait</span> worker_1<span class="token variable">)</span></span>
+<span class="token assign-left variable">EXIT_CODE_2</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">docker</span> <span class="token function">wait</span> worker_2<span class="token variable">)</span></span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Worker 1 退出代码: <span class="token variable">$EXIT_CODE_1</span>"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Worker 2 退出代码: <span class="token variable">$EXIT_CODE_2</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="核心注意事项">核心注意事项</span></h4><ol>
 <li><strong>它只等待已存在的容器</strong>：<code>docker wait</code> 只能作用于已经创建的容器（无论状态是运行中还是已停止）。如果指定的容器不存在，命令会报错。</li>
@@ -1899,17 +2254,23 @@ dock,"/>
 <h3><span id="docker-rename">docker rename</span></h3><p><code>docker rename</code> 命令用于<strong>修改一个容器的名称</strong>。</p>
 <hr>
 <p>容器创建时，我们会通过 <code>--name</code> 为其指定一个名称。但之后可能发现名称不合适、有拼写错误，或者想遵循新的命名规范。<code>docker rename</code> 就是为了解决这个问题，它允许你在容器创建后<strong>重新命名</strong>，而无需删除和重新创建容器。</p>
-<h4><span id="基本语法">基本语法</span></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rename OLD_NAME NEW_NAME</span><br></pre></td></tr></table></figure>
+<h4><span id="基本语法">基本语法</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rename</span> OLD_NAME NEW_NAME<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="实战示例">实战示例</span></h4><ol>
 <li><p><strong>纠正拼写错误</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不小心把名字打错了</span></span><br><span class="line">docker run -d --name ngixn nginx:latest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用 rename 修正它</span></span><br><span class="line">docker rename ngixn nginx</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 不小心把名字打错了</span>
+<span class="token function">docker</span> run <span class="token parameter variable">-d</span> <span class="token parameter variable">--name</span> ngixn nginx:latest
+
+<span class="token comment"># 用 rename 修正它</span>
+<span class="token function">docker</span> <span class="token function">rename</span> ngixn nginx<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>根据新的命名规范重命名</strong>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 旧名称：web</span></span><br><span class="line"><span class="comment"># 新名称：希望加上项目前缀 prod-frontend-web</span></span><br><span class="line">docker rename web prod-frontend-web</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 旧名称：web</span>
+<span class="token comment"># 新名称：希望加上项目前缀 prod-frontend-web</span>
+<span class="token function">docker</span> <span class="token function">rename</span> web prod-frontend-web<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 </li>
 <li><p><strong>为匿名容器命名</strong>：<br>如果最初运行容器时忘了使用 <code>--name</code> 参数，Docker 会随机分配一个名字（如 <code>dreamy_curie</code>）。你可以给它一个更有意义的名字。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker rename dreamy_curie my-app</span><br></pre></td></tr></table></figure></li>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token function">rename</span> dreamy_curie my-app<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre></li>
 </ol>
 <h4><span id="核心注意事项">核心注意事项</span></h4><ul>
 <li><strong>新旧名称不能重复</strong>：新的容器名称必须在当前 Docker 环境中是唯一的，不能与其他任何容器或镜像重名。</li>
@@ -1922,7 +2283,11 @@ dock,"/>
 <hr>
 <p>执行这个命令后，Docker 会找出所有处于 <code>exited</code> 状态的容器，并将其全部删除，释放磁盘空间。</p>
 <p><strong>基本用法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接执行会要求确认</span></span><br><span class="line">docker container prune</span><br><span class="line"></span><br><span class="line"><span class="comment"># 跳过确认提示，直接删除</span></span><br><span class="line">docker container prune -f</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 直接执行会要求确认</span>
+<span class="token function">docker</span> container prune
+
+<span class="token comment"># 跳过确认提示，直接删除</span>
+<span class="token function">docker</span> container prune <span class="token parameter variable">-f</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="为什么需要它">为什么需要它？</span></h4><p>在开发和测试过程中，我们会频繁地创建和停止大量临时容器。手动一个个删除 (<code>docker rm</code>) 非常繁琐。这个命令极大地简化了清理工作，让环境保持整洁。</p>
 <h4><span id="️-核心注意事项重中之重">⚠️ 核心注意事项（重中之重）</span></h4><p>这个命令的便利性背后藏着巨大的数据风险，请务必牢记以下几点：</p>
@@ -1954,7 +2319,7 @@ dock,"/>
 <p><code>docker update</code> 命令用于<strong>动态更新一个或多个运行中容器的配置</strong>。</p>
 <p>其核心功能是调整容器的资源限制（如 CPU、内存）和部分运行时参数，而无需停止和重新启动容器。这实现了对应用服务的“在线热调整”，对于保证服务的连续性和可用性至关重要。</p>
 <p><strong>基本语法：</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker update [OPTIONS] CONTAINER [CONTAINER...]</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> update <span class="token punctuation">[</span>OPTIONS<span class="token punctuation">]</span> CONTAINER <span class="token punctuation">[</span>CONTAINER<span class="token punctuation">..</span>.<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="为什么需要它核心价值">为什么需要它？核心价值</span></h4><ol>
 <li><strong>应用弹性伸缩</strong>：应对流量波动，在业务高峰时临时为容器增加 CPU 或内存配额，高峰过后再降低，从而高效利用资源。</li>
@@ -1979,13 +2344,16 @@ dock,"/>
 <li><strong><code>--restart string</code></strong>：修改容器的重启策略（如 <code>no</code>, <code>on-failure</code>, <code>always</code>, <code>unless-stopped</code>）。这在容器持续崩溃需要修改恢复策略时非常有用。</li>
 </ul>
 <h4><span id="实战示例">实战示例</span></h4><p><strong>场景 1：应对流量高峰，临时增加资源</strong><br>一个 Web 容器在促销期间需要更多计算能力。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 将容器 my_web 的 CPU 限制提升到 2 个核心，内存限制提升到 2GB</span></span><br><span class="line">docker update --cpus 2 -m 2g my_web</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 将容器 my_web 的 CPU 限制提升到 2 个核心，内存限制提升到 2GB</span>
+<span class="token function">docker</span> update <span class="token parameter variable">--cpus</span> <span class="token number">2</span> <span class="token parameter variable">-m</span> 2g my_web<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>场景 2：限制失控的容器</strong><br>监控发现一个容器内存泄漏，占用了过多资源。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 立即将容器的内存上限硬限制为 512MB，防止它耗尽主机内存</span></span><br><span class="line">docker update -m 512m my_buggy_container</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 立即将容器的内存上限硬限制为 512MB，防止它耗尽主机内存</span>
+<span class="token function">docker</span> update <span class="token parameter variable">-m</span> 512m my_buggy_container<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p><strong>场景 3：批量调整多个容器</strong><br>为整个应用栈的所有容器降低资源配额。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 同时更新 nginx, web_app, cache 三个容器的 CPU 份额</span></span><br><span class="line">docker update --cpus 0.5 nginx web_app cache</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 同时更新 nginx, web_app, cache 三个容器的 CPU 份额</span>
+<span class="token function">docker</span> update <span class="token parameter variable">--cpus</span> <span class="token number">0.5</span> nginx web_app cache<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="最佳实践与重要注意事项">最佳实践与重要注意事项</span></h4><ol>
 <li><p><strong>主要针对运行中的容器</strong>：虽然也可用于已停止的容器，但其主要价值体现在<strong>不中断运行中服务</strong>的动态调整上。</p>

@@ -89,6 +89,8 @@ wait 和 waitpid 的 status 参数说明
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -252,7 +254,7 @@ wait 和 waitpid 的 status 参数说明
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -261,7 +263,7 @@ wait 和 waitpid 的 status 参数说明
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li></ul>
+            <ul><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/">Linux 进程间通信--匿名管道</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -315,12 +317,12 @@ wait 和 waitpid 的 status 参数说明
 <li>父进程通过进程等待的方式，回收子进程资源，获取子进程退出信息。</li>
 </ul>
 <h2><span id="进程等待方法">进程等待方法</span></h2><h3><span id="wait">wait</span></h3><p>函数格式如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">wait</span><span class="params">(<span class="type">int</span> * status)</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token class-name">pid_t</span> <span class="token function">wait</span><span class="token punctuation">(</span><span class="token keyword">int</span> <span class="token operator">*</span> status<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>返回值：成功返回被等待进程的 pid，失败返回 -1</p>
 <p>参数：输出型参数，用户与获取子进程的退出状态，若不关心则将其设置为 nullptr</p>
 <p>下面重点介绍一下 waitpid 方法，因为 waitpid 方法是完全包括了 wait 的功能的</p>
-<h3><span id="waitpid">waitpid</span></h3><h4><span id="函数原型">函数原型</span></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">pid_t</span> <span class="title function_">waitpid</span><span class="params">(<span class="type">pid_t</span> pid, <span class="type">int</span> *status, <span class="type">int</span> options)</span>;</span><br></pre></td></tr></table></figure>
+<h3><span id="waitpid">waitpid</span></h3><h4><span id="函数原型">函数原型</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token class-name">pid_t</span> <span class="token function">waitpid</span><span class="token punctuation">(</span><span class="token class-name">pid_t</span> pid<span class="token punctuation">,</span> <span class="token keyword">int</span> <span class="token operator">*</span>status<span class="token punctuation">,</span> <span class="token keyword">int</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="返回值">返回值</span></h4><ul>
 <li><strong>成功时</strong>：返回收集到的子进程的进程 ID。</li>
@@ -340,10 +342,37 @@ wait 和 waitpid 的 status 参数说明
 <li><strong><code>WNOHANG</code></strong>：<br>若指定的子进程未结束，则 <code>waitpid()</code> 立即返回 <code>0</code>（非阻塞）；若子进程正常结束，则返回其进程 ID。</li>
 </ul>
 <h4><span id="使用方法">使用方法</span></h4><p>接下来我们来试用一下 waitpid 函数：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="type">pid_t</span> id = fork();</span><br><span class="line">    <span class="comment">// 子进程</span></span><br><span class="line">    <span class="keyword">if</span>(id == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">// 模拟子进程处理任务</span></span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 执行任务中&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 退出&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, <span class="literal">nullptr</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret == <span class="number">-1</span>)&#123;</span><br><span class="line">        <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; id &lt;&lt; std::endl;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+
+int main()
+&#123;
+    pid_t id &#x3D; fork();
+    &#x2F;&#x2F; 子进程
+    if(id &#x3D;&#x3D; 0)&#123;
+        &#x2F;&#x2F; 模拟子进程处理任务
+        std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 执行任务中&quot; &lt;&lt; std::endl;
+        sleep(5);
+        std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 退出&quot; &lt;&lt; std::endl;
+        exit(0);
+    &#125;
+    &#x2F;&#x2F; 父进程
+    int ret &#x3D; waitpid(-1, nullptr, 0);
+    if(ret &#x3D;&#x3D; -1)&#123;
+        perror(&quot;waitpid&quot;);
+        return 2;
+    &#125;
+    std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; id &lt;&lt; std::endl;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>运行结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_wait.o</span><br><span class="line">子进程 2684497 执行任务中</span><br><span class="line">子进程 2684497 退出</span><br><span class="line">父进程已回收子进程, pid: 2684497</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_wait.o
+子进程 <span class="token number">2684497</span> 执行任务中
+子进程 <span class="token number">2684497</span> 退出
+父进程已回收子进程, pid: <span class="token number">2684497</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="等待获取子进程状态-status">等待获取子进程状态 status</span></h2><p>通过 wait 函数和 waitpid 函数的 status 这个输出型参数即可获得子进程退出时的状态码</p>
 <h3><span id="wait-和-waitpid-的-status-参数说明">wait 和 waitpid 的 status 参数说明</span></h3><p><code>wait</code> 和 <code>waitpid</code> 函数都有一个 <code>status</code> 参数，该参数是<strong>输出型参数</strong>，由操作系统填充：</p>
@@ -362,10 +391,84 @@ wait 和 waitpid 的 status 参数说明
 <p>因此，我们在使用 wait 或 waitpid 函数获取进程的状态码的时候，需要对其进行位运算并通过判断终止信号是否为0来判断进程是正常终止还是被信号所杀</p>
 <p>根据 status 的底层结构，我们可以非常方便的获取一个子进程的退出状态码</p>
 <p>下面这个示例代码分别对正常终止结果正确、正常终止结果错误和异常终止的进程进行了状态码获取：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常退出且结果正确</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">success</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将正常退出且结果正确&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常退出结果不正确</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">uncurrent</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将正常退出但结果不正确&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异常退出</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">killed</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将被除零错误信号杀掉&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">5</span>);</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span> / <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::vector&lt;std::function&lt;<span class="type">void</span>()&gt;&gt; exec&#123;success, uncurrent, killed&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">3</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">pid_t</span> id = fork();</span><br><span class="line">        <span class="comment">// 子进程</span></span><br><span class="line">        <span class="keyword">if</span> (id == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            exec[i]();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= <span class="number">3</span>; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> status_code = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status_code, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (ret == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (signal_flag == <span class="number">0</span>)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">// 程序未被异常终止</span></span><br><span class="line">                <span class="type">int</span> exit_status = (status_code &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>;</span><br><span class="line">                std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，退出码为：&quot;</span> &lt;&lt; exit_status &lt;&lt;std::endl;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">// 程序被异常终止</span></span><br><span class="line">                std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，程序异常终止，终止信号为：&quot;</span> &lt;&lt; signal_flag &lt;&lt;std::endl;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;functional&gt;
+#include &lt;vector&gt;
+
+&#x2F;&#x2F; 正常退出且结果正确
+void success()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将正常退出且结果正确&quot; &lt;&lt; std::endl;
+    sleep(5);
+    exit(0);
+&#125;
+
+&#x2F;&#x2F; 正常退出结果不正确
+void uncurrent()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将正常退出但结果不正确&quot; &lt;&lt; std::endl;
+    sleep(5);
+    exit(2);
+&#125;
+
+&#x2F;&#x2F; 异常退出
+void killed()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将被除零错误信号杀掉&quot; &lt;&lt; std::endl;
+    sleep(5);
+    int a &#x3D; 10 &#x2F; 0;
+    exit(0);
+&#125;
+
+int main()
+&#123;
+    std::vector&lt;std::function&lt;void()&gt;&gt; exec&#123;success, uncurrent, killed&#125;;
+    for (int i &#x3D; 0; i &lt; 3; ++i)
+    &#123;
+        pid_t id &#x3D; fork();
+        &#x2F;&#x2F; 子进程
+        if (id &#x3D;&#x3D; 0)
+        &#123;
+            exec[i]();
+        &#125;
+    &#125;
+    &#x2F;&#x2F; 父进程
+    for (int i &#x3D; 1; i &lt;&#x3D; 3; ++i)
+    &#123;
+        int status_code &#x3D; 0;
+        int ret &#x3D; waitpid(-1, &amp;status_code, 0);
+        if (ret &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;waitpid&quot;);
+            return 2;
+        &#125;
+        else
+        &#123;
+            if (signal_flag &#x3D;&#x3D; 0)
+            &#123;
+                &#x2F;&#x2F; 程序未被异常终止
+                int exit_status &#x3D; (status_code &gt;&gt; 8) &amp; 0xff;
+                std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，退出码为：&quot; &lt;&lt; exit_status &lt;&lt;std::endl;
+            &#125;else&#123;
+                &#x2F;&#x2F; 程序被异常终止
+                std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，程序异常终止，终止信号为：&quot; &lt;&lt; signal_flag &lt;&lt;std::endl;
+            &#125;
+        &#125;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>测试结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_wait.o</span><br><span class="line">子进程 2692025 将正常退出且结果正确</span><br><span class="line">子进程 2692027 将被除零错误信号杀掉</span><br><span class="line">子进程 2692026 将正常退出但结果不正确</span><br><span class="line">父进程已回收子进程, pid: 2692025，退出码为：0</span><br><span class="line">父进程已回收子进程, pid: 2692027，程序异常终止，终止信号为：8</span><br><span class="line">父进程已回收子进程, pid: 2692026，退出码为：2</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_wait.o
+子进程 <span class="token number">2692025</span> 将正常退出且结果正确
+子进程 <span class="token number">2692027</span> 将被除零错误信号杀掉
+子进程 <span class="token number">2692026</span> 将正常退出但结果不正确
+父进程已回收子进程, pid: <span class="token number">2692025</span>，退出码为：0
+父进程已回收子进程, pid: <span class="token number">2692027</span>，程序异常终止，终止信号为：8
+父进程已回收子进程, pid: <span class="token number">2692026</span>，退出码为：2<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>其中 8 号信号正是除零错误，结果完全符合预期</p>
 <p>当然，这种位运算获取退出状态和信号的方式其实可以通过系统自带的宏函数来获取,下面是对这几个宏函数的介绍：</p>
@@ -377,15 +480,118 @@ wait 和 waitpid 的 status 参数说明
 <li><strong><code>WCOREDUMP(status)</code></strong>：检查进程是否生成了 core dump 文件（需配合 <code>WIFSIGNALED</code> 使用）。</li>
 </ol>
 <p>因此，父进程回收子进程判断状态码的地方可以这样写：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="built_in">WIFEXITED</span>(status_code))</span><br><span class="line">&#123;</span><br><span class="line">                <span class="comment">// 程序未被异常终止</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，退出码为：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status_code) &lt;&lt;std::endl;</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">// 程序被异常终止</span></span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，程序异常终止，终止信号为：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status_code) &lt;&lt;std::endl;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">if (WIFEXITED(status_code))
+&#123;
+                &#x2F;&#x2F; 程序未被异常终止
+    std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，退出码为：&quot; &lt;&lt; WEXITSTATUS(status_code) &lt;&lt;std::endl;
+&#125;else&#123;
+                &#x2F;&#x2F; 程序被异常终止
+    std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，程序异常终止，终止信号为：&quot; &lt;&lt; WTERMSIG(status_code) &lt;&lt;std::endl;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>利用宏函数来获取所需要的数据，增强了代码的可读性</p>
 <h2><span id="进程的非阻塞等待方式">进程的非阻塞等待方式</span></h2><p>通过 WNOHANG 可以让 waitpid 函数实现非阻塞等待，父进程就通过轮询的方式回收子进程，其他时间父进程可以做别的事情，使用示例如下：</p>
 <p>测试用例中我将子进程创建数量增加到了6个，检测父进程是否可以在子进程排队等待被回收的情况下马上将子进程批量回收（当检测到有子进程被回收时，立即进入下一个循环检测<br>是否还有进程需要被回收，而不是让父进程做自己的事情）</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;functional&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 子进程创建数目</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> exec_num 6</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常退出且结果正确</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">success</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将正常退出且结果正确&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">2</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 正常退出结果不正确</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">uncurrent</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将正常退出但结果不正确&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">4</span>);</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 异常退出</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">killed</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::cout &lt;&lt; <span class="string">&quot;子进程 &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; <span class="string">&quot; 将被除零错误信号杀掉&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">6</span>);</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span> / <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    std::vector&lt;std::function&lt;<span class="type">void</span>()&gt;&gt; exec&#123;success, uncurrent, killed, success, success, success&#125;;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; exec_num; ++i)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">pid_t</span> id = fork();</span><br><span class="line">        <span class="comment">// 子进程</span></span><br><span class="line">        <span class="keyword">if</span> (id == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            exec[i]();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 父进程</span></span><br><span class="line">    <span class="comment">// 计数器，计算还有多少个进程没有被回收</span></span><br><span class="line">    <span class="type">int</span> cnt = exec_num;</span><br><span class="line">    <span class="keyword">while</span>(cnt)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="type">int</span> status_code = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> ret = <span class="built_in">waitpid</span>(<span class="number">-1</span>, &amp;status_code, WNOHANG);</span><br><span class="line">        <span class="keyword">if</span> (ret == <span class="number">-1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="built_in">perror</span>(<span class="string">&quot;waitpid&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(ret != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            --cnt;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">WIFEXITED</span>(status_code))</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="comment">// 程序未被异常终止</span></span><br><span class="line">                std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，退出码为：&quot;</span> &lt;&lt; <span class="built_in">WEXITSTATUS</span>(status_code) &lt;&lt;std::endl;</span><br><span class="line">            &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">                <span class="comment">// 程序被异常终止</span></span><br><span class="line">                std::cout &lt;&lt; <span class="string">&quot;父进程已回收子进程, pid: &quot;</span> &lt;&lt; ret &lt;&lt; <span class="string">&quot;，程序异常终止，终止信号为：&quot;</span> &lt;&lt; <span class="built_in">WTERMSIG</span>(status_code) &lt;&lt;std::endl;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 马上进入下一次子进程回收检测</span></span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 模拟父进程做别的工作</span></span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;父进程在做别的事情&quot;</span> &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys&#x2F;wait.h&gt;
+#include &lt;functional&gt;
+#include &lt;vector&gt;
+
+&#x2F;&#x2F; 子进程创建数目
+#define exec_num 6
+
+&#x2F;&#x2F; 正常退出且结果正确
+void success()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将正常退出且结果正确&quot; &lt;&lt; std::endl;
+    sleep(2);
+    exit(0);
+&#125;
+
+&#x2F;&#x2F; 正常退出结果不正确
+void uncurrent()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将正常退出但结果不正确&quot; &lt;&lt; std::endl;
+    sleep(4);
+    exit(2);
+&#125;
+
+&#x2F;&#x2F; 异常退出
+void killed()
+&#123;
+    std::cout &lt;&lt; &quot;子进程 &quot; &lt;&lt; getpid() &lt;&lt; &quot; 将被除零错误信号杀掉&quot; &lt;&lt; std::endl;
+    sleep(6);
+    int a &#x3D; 10 &#x2F; 0;
+    exit(0);
+&#125;
+
+int main()
+&#123;
+    std::vector&lt;std::function&lt;void()&gt;&gt; exec&#123;success, uncurrent, killed, success, success, success&#125;;
+    for (int i &#x3D; 0; i &lt; exec_num; ++i)
+    &#123;
+        pid_t id &#x3D; fork();
+        &#x2F;&#x2F; 子进程
+        if (id &#x3D;&#x3D; 0)
+        &#123;
+            exec[i]();
+        &#125;
+    &#125;
+    &#x2F;&#x2F; 父进程
+    &#x2F;&#x2F; 计数器，计算还有多少个进程没有被回收
+    int cnt &#x3D; exec_num;
+    while(cnt)
+    &#123;
+        int status_code &#x3D; 0;
+        int ret &#x3D; waitpid(-1, &amp;status_code, WNOHANG);
+        if (ret &#x3D;&#x3D; -1)
+        &#123;
+            perror(&quot;waitpid&quot;);
+            return 2;
+        &#125;
+        else if(ret !&#x3D; 0)
+        &#123;
+            --cnt;
+            if (WIFEXITED(status_code))
+            &#123;
+                &#x2F;&#x2F; 程序未被异常终止
+                std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，退出码为：&quot; &lt;&lt; WEXITSTATUS(status_code) &lt;&lt;std::endl;
+            &#125;else&#123;
+                &#x2F;&#x2F; 程序被异常终止
+                std::cout &lt;&lt; &quot;父进程已回收子进程, pid: &quot; &lt;&lt; ret &lt;&lt; &quot;，程序异常终止，终止信号为：&quot; &lt;&lt; WTERMSIG(status_code) &lt;&lt;std::endl;
+            &#125;
+            &#x2F;&#x2F; 马上进入下一次子进程回收检测
+            continue;
+        &#125;
+        &#x2F;&#x2F; 模拟父进程做别的工作
+        sleep(1);
+        std::cout &lt;&lt; &quot;父进程在做别的事情&quot; &lt;&lt; std::endl;
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>测试结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/lesson2</span><br><span class="line">╰─➤  ./pro_wait.o</span><br><span class="line">子进程 2696573 将正常退出且结果正确</span><br><span class="line">子进程 2696574 将正常退出但结果不正确</span><br><span class="line">子进程 2696575 将被除零错误信号杀掉</span><br><span class="line">子进程 2696576 将正常退出且结果正确</span><br><span class="line">子进程 2696577 将正常退出且结果正确</span><br><span class="line">子进程 2696578 将正常退出且结果正确</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程已回收子进程, pid: 2696573，退出码为：0</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程已回收子进程, pid: 2696576，退出码为：0</span><br><span class="line">父进程已回收子进程, pid: 2696577，退出码为：0</span><br><span class="line">父进程已回收子进程, pid: 2696578，退出码为：0</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程已回收子进程, pid: 2696574，退出码为：2</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程在做别的事情</span><br><span class="line">父进程已回收子进程, pid: 2696575，程序异常终止，终止信号为：8</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/lesson2
+╰─➤  ./pro_wait.o
+子进程 <span class="token number">2696573</span> 将正常退出且结果正确
+子进程 <span class="token number">2696574</span> 将正常退出但结果不正确
+子进程 <span class="token number">2696575</span> 将被除零错误信号杀掉
+子进程 <span class="token number">2696576</span> 将正常退出且结果正确
+子进程 <span class="token number">2696577</span> 将正常退出且结果正确
+子进程 <span class="token number">2696578</span> 将正常退出且结果正确
+父进程在做别的事情
+父进程在做别的事情
+父进程已回收子进程, pid: <span class="token number">2696573</span>，退出码为：0
+父进程在做别的事情
+父进程已回收子进程, pid: <span class="token number">2696576</span>，退出码为：0
+父进程已回收子进程, pid: <span class="token number">2696577</span>，退出码为：0
+父进程已回收子进程, pid: <span class="token number">2696578</span>，退出码为：0
+父进程在做别的事情
+父进程已回收子进程, pid: <span class="token number">2696574</span>，退出码为：2
+父进程在做别的事情
+父进程在做别的事情
+父进程已回收子进程, pid: <span class="token number">2696575</span>，程序异常终止，终止信号为：8<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果表明，父进程可以在子进程排队等待被回收的情况下快速回收子进程</p>
 <link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>

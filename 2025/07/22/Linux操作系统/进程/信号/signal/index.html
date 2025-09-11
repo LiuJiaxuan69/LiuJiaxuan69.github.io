@@ -56,6 +56,8 @@ Linux 信号分类：普通信号 vs 实时信号
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     
   <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
 
@@ -219,7 +221,7 @@ Linux 信号分类：普通信号 vs 实时信号
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">63</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">64</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -228,7 +230,7 @@ Linux 信号分类：普通信号 vs 实时信号
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a></li><li><a href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/">Linux 进程间通信--匿名管道</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li></ul>
+            <ul><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -364,9 +366,26 @@ Linux 信号分类：普通信号 vs 实时信号
 <li><strong>忽略</strong>（Ignore）：<code>SIGCHLD(17)</code>（子进程退出时默认忽略）。</li>
 </ul>
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
 
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">My pid is: 274247</span><br><span class="line">My pid is: 274247</span><br><span class="line">^C                  # Ctrl + C 发送 SIGINT 信号，进程终止</span><br></pre></td></tr></table></figure>
+using namespace std;
+
+int main() &#123;
+    while (1) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+My pid is: <span class="token number">274247</span>
+My pid is: <span class="token number">274247</span>
+^C                  <span class="token comment"># Ctrl + C 发送 SIGINT 信号，进程终止</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="2-忽略信号ignore-signal">2. 忽略信号（Ignore Signal）</span></h3><p>进程可以主动忽略某些信号（但部分信号如 <code>SIGKILL</code> 和 <code>SIGSTOP</code> <strong>无法被忽略</strong>）。  </p>
 <p>为什么 <code>SIGKILL</code> 和 <code>SIGSTOP</code> 无法被忽略？  </p>
@@ -378,10 +397,30 @@ Linux 信号分类：普通信号 vs 实时信号
 <li><code>SIGSTOP(19)</code>：强制暂停。</li>
 </ul>
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 忽略 SIGINT 信号</span></span><br><span class="line">    <span class="built_in">signal</span>(SIGINT, SIG_IGN);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+
+using namespace std;
+
+int main() &#123;
+    &#x2F;&#x2F; 忽略 SIGINT 信号
+    signal(SIGINT, SIG_IGN);
+
+    while (1) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>可以看到，使用 <code>Ctrl + C</code> 无法终止进程。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o </span><br><span class="line">My pid is: 273355</span><br><span class="line">^CMy pid is: 273355                  # Ctrl + C 无法终止进程</span><br><span class="line">[1]    273355 killed     ./signal.o  # 通过 kill 命令发送 SIGKILL 信号</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o 
+My pid is: <span class="token number">273355</span>
+^CMy pid is: <span class="token number">273355</span>                  <span class="token comment"># Ctrl + C 无法终止进程</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>    <span class="token number">273355</span> killed     ./signal.o  <span class="token comment"># 通过 kill 命令发送 SIGKILL 信号</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h3><span id="3-自定义处理捕获信号">3. 自定义处理（捕获信号）</span></h3><p>进程可以注册一个<strong>信号处理函数</strong>，在信号到达时执行自定义逻辑。  </p>
@@ -392,7 +431,11 @@ Linux 信号分类：普通信号 vs 实时信号
 </ul>
 <p>在示例讲解之前，我们先学习一个用于自定义信号处理方式的函数：</p>
 <h4><span id="signal-函数"><code>signal()</code> 函数</span></h4><p>函数原型：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">typedef</span> <span class="title">void</span> <span class="params">(*<span class="type">sighandler_t</span>)</span><span class="params">(<span class="type">int</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">sighandler_t</span> <span class="title">signal</span><span class="params">(<span class="type">int</span> signum, <span class="type">sighandler_t</span> handler)</span></span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;signal.h&gt;
+
+typedef void (*sighandler_t)(int);
+
+sighandler_t signal(int signum, sighandler_t handler);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <ul>
 <li><code>signum</code>：要处理的信号编号。  </li>
@@ -400,7 +443,30 @@ Linux 信号分类：普通信号 vs 实时信号
 <li>返回值：上一个信号处理函数的指针，用于链式调用。</li>
 </ul>
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    <span class="comment">// 执行完自定义逻辑后，退出进程</span></span><br><span class="line">    _exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGINT, myhandler);</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    &#x2F;&#x2F; 执行完自定义逻辑后，退出进程
+    _exit(1);
+&#125;
+
+int main() &#123;
+
+    signal(SIGINT, myhandler);
+    while (1) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <h3><span id="总结"><strong>总结</strong></span></h3><table>
@@ -496,7 +562,10 @@ Linux 信号分类：普通信号 vs 实时信号
 <li><strong>可被捕获</strong>：程序可以自定义处理（如清理资源后退出）。</li>
 <li><strong>示例</strong>（捕获 <code>SIGINT</code>）：</li>
 </ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C 程序捕获 SIGINT</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">handler</span><span class="params">(<span class="type">int</span> sig)</span> &#123; <span class="built_in">printf</span>(<span class="string">&quot;收到 SIGINT，不退出\n&quot;</span>); &#125;</span><br><span class="line">signal(SIGINT, handler);</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token comment">// C 程序捕获 SIGINT</span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;signal.h></span></span>
+<span class="token keyword">void</span> <span class="token function">handler</span><span class="token punctuation">(</span><span class="token keyword">int</span> sig<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"收到 SIGINT，不退出\n"</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span>
+<span class="token function">signal</span><span class="token punctuation">(</span>SIGINT<span class="token punctuation">,</span> handler<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>(2) <code>Ctrl + \</code>（SIGQUIT）</p>
 <ul>
@@ -509,7 +578,9 @@ Linux 信号分类：普通信号 vs 实时信号
 <li><strong>默认行为</strong>：暂停进程并放入后台（状态变为 <code>T</code>）。</li>
 <li><strong>恢复方法</strong>：</li>
 </ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">fg</span>      <span class="comment"># 恢复到前台</span></span><br><span class="line"><span class="built_in">bg</span>      <span class="comment"># 在后台继续运行</span></span><br><span class="line"><span class="built_in">jobs</span>    <span class="comment"># 查看被暂停的任务</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">fg</span>      <span class="token comment"># 恢复到前台</span>
+<span class="token function">bg</span>      <span class="token comment"># 在后台继续运行</span>
+<span class="token function">jobs</span>    <span class="token comment"># 查看被暂停的任务</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>需要注意的是，<code>Ctrl + Z</code> 发送的 <code>SIGTSTP</code> 可被捕获，而 <code>SIGSTOP</code> 是强制暂停（不可捕获）。</p>
 <p>(4) <code>Ctrl + D</code>（EOF）</p>
@@ -523,76 +594,282 @@ Linux 信号分类：普通信号 vs 实时信号
 </ul>
 <hr>
 <h3><span id="命令发送信号">命令发送信号</span></h3><h4><span id="1-kill-命令">1. <code>kill</code> 命令</span></h4><p>该命令用于向进程发送信号，该命令只能向单个进程发送信号。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -信号编号 进程号</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">kill</span> -信号编号 进程号<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">kill</span> -9 12345  <span class="comment"># 发送 SIGKILL(9) 终止进程 12345</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">kill</span> <span class="token parameter variable">-9</span> <span class="token number">12345</span>  <span class="token comment"># 发送 SIGKILL(9) 终止进程 12345</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h4><span id="2-killall-命令">2. <code>killall</code> 命令</span></h4><p>该命令用于向所有指定名称的进程发送信号。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">killall -信号编号 进程名</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">killall</span> -信号编号 进程名<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">killall -15 firefox  <span class="comment"># 发送 SIGTERM(15) 终止所有 firefox 进程</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">killall</span> <span class="token parameter variable">-15</span> firefox  <span class="token comment"># 发送 SIGTERM(15) 终止所有 firefox 进程</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <h3><span id="函数调用发送信号">函数调用发送信号</span></h3><h4><span id="1-kill-函数">1. <code>kill()</code> 函数</span></h4><p>该函数用于向单个进程发送信号。</p>
 <p>语法如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">kill</span><span class="params">(<span class="type">pid_t</span> pid, <span class="type">int</span> sig)</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/types.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;signal.h></span></span>
+<span class="token keyword">int</span> <span class="token function">kill</span><span class="token punctuation">(</span><span class="token class-name">pid_t</span> pid<span class="token punctuation">,</span> <span class="token keyword">int</span> sig<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    _exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGINT, myhandler);</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">while</span> (cnt--) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 发送 SIGINT 信号给当前进程</span></span><br><span class="line">    <span class="built_in">kill</span>(<span class="built_in">getpid</span>(), SIGINT);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    _exit(1);
+&#125;
+
+int main() &#123;
+
+    signal(SIGINT, myhandler);
+    int cnt &#x3D; 3;
+    while (cnt--) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+    &#x2F;&#x2F; 发送 SIGINT 信号给当前进程
+    kill(getpid(), SIGINT);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">My pid is: 281270</span><br><span class="line">My pid is: 281270</span><br><span class="line">My pid is: 281270</span><br><span class="line">I get a signal: Interrupt    # kill 发送 SIGINT 信号</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+My pid is: <span class="token number">281270</span>
+My pid is: <span class="token number">281270</span>
+My pid is: <span class="token number">281270</span>
+I get a signal: Interrupt    <span class="token comment"># kill 发送 SIGINT 信号</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="2-raise-函数">2. <code>raise()</code> 函数</span></h4><p>该函数用于向当前进程发送信号，效果和 <code>kill(getpid(), signal)</code> 相同。</p>
 <p>语法如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">raise</span><span class="params">(<span class="type">int</span> sig)</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;signal.h></span></span>
+<span class="token keyword">int</span> <span class="token function">raise</span><span class="token punctuation">(</span><span class="token keyword">int</span> sig<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    _exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGINT, myhandler);</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">while</span> (cnt--) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 发送 SIGINT 信号给当前进程</span></span><br><span class="line">    <span class="built_in">raise</span>(SIGINT);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    _exit(1);
+&#125;
+
+int main() &#123;
+
+    signal(SIGINT, myhandler);
+    int cnt &#x3D; 3;
+    while (cnt--) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+    &#x2F;&#x2F; 发送 SIGINT 信号给当前进程
+    raise(SIGINT);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>效果和 <code>kill</code> 函数的示例完全相同：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">My pid is: 282049</span><br><span class="line">My pid is: 282049</span><br><span class="line">My pid is: 282049</span><br><span class="line">I get a signal: Interrupt</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+My pid is: <span class="token number">282049</span>
+My pid is: <span class="token number">282049</span>
+My pid is: <span class="token number">282049</span>
+I get a signal: Interrupt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="3-abort-函数">3. <code>abort()</code> 函数</span></h4><p>该函数用于向当前进程发送 <code>SIGABRT</code> 信号，用于异常终止程序，效果和 <code>raise(SIGABRT)</code> 或 <code>kill(getpid(), SIGABRT)</code> 相同。</p>
 <p>语法如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">abort</span><span class="params">(<span class="type">void</span>)</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdlib.h></span></span>
+<span class="token keyword">void</span> <span class="token function">abort</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    _exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGABRT, myhandler);</span><br><span class="line">    <span class="type">int</span> cnt = <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">while</span> (cnt--) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 发送 SIGABRT 信号给当前进程</span></span><br><span class="line">    <span class="built_in">abort</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    _exit(1);
+&#125;
+
+int main() &#123;
+
+    signal(SIGABRT, myhandler);
+    int cnt &#x3D; 3;
+    while (cnt--) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+    &#x2F;&#x2F; 发送 SIGABRT 信号给当前进程
+    abort();
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o               </span><br><span class="line">My pid is: 282738</span><br><span class="line">My pid is: 282738</span><br><span class="line">My pid is: 282738</span><br><span class="line">I get a signal: Aborted</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o               
+My pid is: <span class="token number">282738</span>
+My pid is: <span class="token number">282738</span>
+My pid is: <span class="token number">282738</span>
+I get a signal: Aborted<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h4><span id="4-alarm-函数">4. <code>alarm()</code> 函数</span></h4><p>该函数用于设置定时器，当定时器到期时，向当前进程发送 <code>SIGALRM</code> 信号，而这种信号发送方式和前面几种硬件方式不同，<code>alarm</code> 是软件方式发送的信号。</p>
 <p>语法如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">alarm</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> seconds)</span>;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;unistd.h></span></span>
+<span class="token keyword">unsigned</span> <span class="token keyword">int</span> <span class="token function">alarm</span><span class="token punctuation">(</span><span class="token keyword">unsigned</span> <span class="token keyword">int</span> seconds<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>示例：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    _exit(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGALRM, myhandler);</span><br><span class="line">    <span class="built_in">alarm</span>(<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 设置定时器，3 秒后发送 SIGALRM 信号给当前进程</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    _exit(1);
+&#125;
+
+int main() &#123;
+
+    signal(SIGALRM, myhandler);
+    alarm(3);
+    while (true) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+    &#x2F;&#x2F; 设置定时器，3 秒后发送 SIGALRM 信号给当前进程
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">My pid is: 284189</span><br><span class="line">My pid is: 284189</span><br><span class="line">My pid is: 284189</span><br><span class="line">I get a signal: Alarm clock</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+My pid is: <span class="token number">284189</span>
+My pid is: <span class="token number">284189</span>
+My pid is: <span class="token number">284189</span>
+I get a signal: Alarm clock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <p>利用闹钟，我们可以做出一些很好玩的机制，下面我们用闹钟做一个循环计数器：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">    <span class="built_in">alarm</span>(<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">signal</span>(SIGALRM, myhandler);</span><br><span class="line">    <span class="comment">// 设置定时器，3 秒后发送 SIGALRM 信号给当前进程</span></span><br><span class="line">    <span class="built_in">alarm</span>(<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;My pid is: &quot;</span> &lt;&lt; <span class="built_in">getpid</span>() &lt;&lt; endl;</span><br><span class="line">        <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+    alarm(3);
+&#125;
+
+int main() &#123;
+
+    signal(SIGALRM, myhandler);
+    &#x2F;&#x2F; 设置定时器，3 秒后发送 SIGALRM 信号给当前进程
+    alarm(3);
+    while (true) &#123;
+        cout &lt;&lt; &quot;My pid is: &quot; &lt;&lt; getpid() &lt;&lt; endl;
+        sleep(1);
+    &#125;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>没错，我们只将自定义函数当中的 <code>_exit(1)</code> 去掉，然后在自定义函数中重新设置定时器，这样就可以实现循环计数器了。</p>
 <p>现象如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">I get a signal: Alarm clock</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">I get a signal: Alarm clock</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">My pid is: 284711</span><br><span class="line">I get a signal: Alarm clock</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+I get a signal: Alarm clock
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+I get a signal: Alarm clock
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+My pid is: <span class="token number">284711</span>
+I get a signal: Alarm clock<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <h3><span id="异常">异常</span></h3><p>我们来实现一个除零异常的场景：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 自定义除零异常执行函数</span></span><br><span class="line">    <span class="built_in">signal</span>(SIGFPE, myhandler);</span><br><span class="line">    <span class="type">int</span> a = <span class="number">10</span> / <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    sleep(1);
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+&#125;
+
+int main() &#123;
+
+    &#x2F;&#x2F; 自定义除零异常执行函数
+    signal(SIGFPE, myhandler);
+    int a &#x3D; 10 &#x2F; 0;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">I get a signal: Floating point exception</span><br><span class="line">I get a signal: Floating point exception</span><br><span class="line">I get a signal: Floating point exception</span><br><span class="line">I get a signal: Floating point exception</span><br><span class="line">...                                       # 该自定义函数会被反复执行</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+I get a signal: Floating point exception
+I get a signal: Floating point exception
+I get a signal: Floating point exception
+I get a signal: Floating point exception
+<span class="token punctuation">..</span>.                                       <span class="token comment"># 该自定义函数会被反复执行</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>我们再试一试段错误（修改空指针）：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;cstring&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">myhandler</span><span class="params">(<span class="type">int</span> signal)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">sleep</span>(<span class="number">1</span>);</span><br><span class="line">    cout &lt;&lt; <span class="string">&quot;I get a signal: &quot;</span> &lt;&lt; <span class="built_in">strsignal</span>(signal) &lt;&lt; endl;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 自定义段错误执行函数</span></span><br><span class="line">    <span class="built_in">signal</span>(SIGSEGV, myhandler);</span><br><span class="line">    <span class="type">int</span> *p = <span class="literal">nullptr</span>;</span><br><span class="line">    *p = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c++" data-language="c++"><code class="language-c++">#include &lt;iostream&gt;
+#include &lt;signal.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;cstring&gt;
+
+using namespace std;
+
+void myhandler(int signal)
+&#123;
+    sleep(1);
+    cout &lt;&lt; &quot;I get a signal: &quot; &lt;&lt; strsignal(signal) &lt;&lt; endl;
+&#125;
+
+int main() &#123;
+
+    &#x2F;&#x2F; 自定义段错误执行函数
+    signal(SIGSEGV, myhandler);
+    int *p &#x3D; nullptr;
+    *p &#x3D; 10;
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>结果如下：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">╭─ljx@VM-16-15-debian ~/linux_review/sign  </span><br><span class="line">╰─➤  ./signal.o</span><br><span class="line">I get a signal: Segmentation fault</span><br><span class="line">I get a signal: Segmentation fault</span><br><span class="line">I get a signal: Segmentation fault</span><br><span class="line">...                                   # 该自定义函数会被反复执行</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/linux_review/sign  
+╰─➤  ./signal.o
+I get a signal: Segmentation fault
+I get a signal: Segmentation fault
+I get a signal: Segmentation fault
+<span class="token punctuation">..</span>.                                   <span class="token comment"># 该自定义函数会被反复执行</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>为什么会出现这种现象呢？</p>
 <h4><span id="深入解析异常信号如除零-段错误为何会持续触发"><strong>深入解析：异常信号（如除零、段错误）为何会持续触发</strong></span></h4><hr>
@@ -638,10 +915,24 @@ Linux 信号分类：普通信号 vs 实时信号
 </li>
 </ul>
 <p><strong>代码示例（无限循环的陷阱）</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">handler</span><span class="params">(<span class="type">int</span> sig)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;捕获到信号 %d，但拒绝退出！\n&quot;</span>, sig);</span><br><span class="line">    <span class="comment">// 未终止进程，信号会再次触发</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    signal(SIGFPE, handler);  <span class="comment">// 捕获除零错误</span></span><br><span class="line">    <span class="type">int</span> a = <span class="number">1</span> / <span class="number">0</span>;           <span class="comment">// 触发 SIGFPE</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;signal.h></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
+
+<span class="token keyword">void</span> <span class="token function">handler</span><span class="token punctuation">(</span><span class="token keyword">int</span> sig<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"捕获到信号 %d，但拒绝退出！\n"</span><span class="token punctuation">,</span> sig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 未终止进程，信号会再次触发</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">signal</span><span class="token punctuation">(</span>SIGFPE<span class="token punctuation">,</span> handler<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 捕获除零错误</span>
+    <span class="token keyword">int</span> a <span class="token operator">=</span> <span class="token number">1</span> <span class="token operator">/</span> <span class="token number">0</span><span class="token punctuation">;</span>           <span class="token comment">// 触发 SIGFPE</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p><strong>输出</strong>：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">捕获到信号 8，但拒绝退出！  </span><br><span class="line">捕获到信号 8，但拒绝退出！  </span><br><span class="line">...（无限循环）</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">捕获到信号 8，但拒绝退出！  
+捕获到信号 8，但拒绝退出！  
+...（无限循环）<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <hr>
 <ol start="3">
@@ -670,7 +961,10 @@ Linux 信号分类：普通信号 vs 实时信号
 <p>(4) 避免僵尸进程<br><code>_exit</code> 不会执行 <code>exit</code> 的父进程等待逻辑，确保子进程立即变为僵尸，便于父进程清理。</p>
 <hr>
 <p>修正后的代码：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handler</span><span class="params">(<span class="type">int</span> sig)</span> &#123;</span><br><span class="line">    <span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">&quot;错误：发生不可恢复异常（信号 %d）！\n&quot;</span>, sig);</span><br><span class="line">    _exit(<span class="number">1</span>);  <span class="comment">// 立即终止，避免循环</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">void</span> <span class="token function">handler</span><span class="token punctuation">(</span><span class="token keyword">int</span> sig<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">fprintf</span><span class="token punctuation">(</span><span class="token constant">stderr</span><span class="token punctuation">,</span> <span class="token string">"错误：发生不可恢复异常（信号 %d）！\n"</span><span class="token punctuation">,</span> sig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">_exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 立即终止，避免循环</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
 
 <blockquote>
 <p>为何部分信号可安全处理？</p>
@@ -691,7 +985,53 @@ Linux 信号分类：普通信号 vs 实时信号
         
     </div>
     <div class="spoiler-content">
-        <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">Signal      Standard   Action   Comment</span><br><span class="line">      ────────────────────────────────────────────────────────────────────────</span><br><span class="line">      SIGABRT      P1990      Core    Abort signal from abort(3)</span><br><span class="line">      SIGALRM      P1990      Term    Timer signal from alarm(2)</span><br><span class="line">      SIGBUS       P2001      Core    Bus error (bad memory access)</span><br><span class="line">      SIGCHLD      P1990      Ign     Child stopped or terminated</span><br><span class="line">      SIGCLD         -        Ign     A synonym for SIGCHLD</span><br><span class="line">      SIGCONT      P1990      Cont    Continue if stopped</span><br><span class="line">      SIGEMT         -        Term    Emulator trap</span><br><span class="line">      SIGFPE       P1990      Core    Floating-point exception</span><br><span class="line">      SIGHUP       P1990      Term    Hangup detected on controlling terminal</span><br><span class="line">                                      or death of controlling process</span><br><span class="line">      SIGILL       P1990      Core    Illegal Instruction</span><br><span class="line">      SIGINFO        -                A synonym for SIGPWR</span><br><span class="line">      SIGINT       P1990      Term    Interrupt from keyboard</span><br><span class="line">      SIGIO          -        Term    I/O now possible (4.2BSD)</span><br><span class="line">      SIGIOT         -        Core    IOT trap. A synonym for SIGABRT</span><br><span class="line">      SIGKILL      P1990      Term    Kill signal</span><br><span class="line">      SIGLOST        -        Term    File lock lost (unused)</span><br><span class="line">      SIGPIPE      P1990      Term    Broken pipe: write to pipe with no</span><br><span class="line">                                      readers; see pipe(7)</span><br><span class="line">      SIGPOLL      P2001      Term    Pollable event (Sys V);</span><br><span class="line">                                      synonym for SIGIO</span><br><span class="line">      SIGPROF      P2001      Term    Profiling timer expired</span><br><span class="line">      SIGPWR         -        Term    Power failure (System V)</span><br><span class="line"></span><br><span class="line">      SIGQUIT      P1990      Core    Quit from keyboard</span><br><span class="line">      SIGSEGV      P1990      Core    Invalid memory reference</span><br><span class="line">      SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)</span><br><span class="line">      SIGSTOP      P1990      Stop    Stop process</span><br><span class="line">      SIGTSTP      P1990      Stop    Stop typed at terminal</span><br><span class="line">      SIGSYS       P2001      Core    Bad system call (SVr4);</span><br><span class="line">                                      see also seccomp(2)</span><br><span class="line">      SIGTERM      P1990      Term    Termination signal</span><br><span class="line">      SIGTRAP      P2001      Core    Trace/breakpoint trap</span><br><span class="line">      SIGTTIN      P1990      Stop    Terminal input for background process</span><br><span class="line">      SIGTTOU      P1990      Stop    Terminal output for background process</span><br><span class="line">      SIGUNUSED      -        Core    Synonymous with SIGSYS</span><br><span class="line">      SIGURG       P2001      Ign     Urgent condition on socket (4.2BSD)</span><br><span class="line">      SIGUSR1      P1990      Term    User-defined signal 1</span><br><span class="line">      SIGUSR2      P1990      Term    User-defined signal 2</span><br><span class="line">      SIGVTALRM    P2001      Term    Virtual alarm clock (4.2BSD)</span><br><span class="line">      SIGXCPU      P2001      Core    CPU time limit exceeded (4.2BSD);</span><br><span class="line">                                      see setrlimit(2)</span><br><span class="line">      SIGXFSZ      P2001      Core    File size limit exceeded (4.2BSD);</span><br><span class="line">                                      see setrlimit(2)</span><br><span class="line">      SIGWINCH       -        Ign     Window resize signal (4.3BSD, Sun)</span><br></pre></td></tr></table></figure>
+        <pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">Signal      Standard   Action   Comment
+      ────────────────────────────────────────────────────────────────────────
+      SIGABRT      P1990      Core    Abort signal from abort(3)
+      SIGALRM      P1990      Term    Timer signal from alarm(2)
+      SIGBUS       P2001      Core    Bus error (bad memory access)
+      SIGCHLD      P1990      Ign     Child stopped or terminated
+      SIGCLD         -        Ign     A synonym for SIGCHLD
+      SIGCONT      P1990      Cont    Continue if stopped
+      SIGEMT         -        Term    Emulator trap
+      SIGFPE       P1990      Core    Floating-point exception
+      SIGHUP       P1990      Term    Hangup detected on controlling terminal
+                                      or death of controlling process
+      SIGILL       P1990      Core    Illegal Instruction
+      SIGINFO        -                A synonym for SIGPWR
+      SIGINT       P1990      Term    Interrupt from keyboard
+      SIGIO          -        Term    I&#x2F;O now possible (4.2BSD)
+      SIGIOT         -        Core    IOT trap. A synonym for SIGABRT
+      SIGKILL      P1990      Term    Kill signal
+      SIGLOST        -        Term    File lock lost (unused)
+      SIGPIPE      P1990      Term    Broken pipe: write to pipe with no
+                                      readers; see pipe(7)
+      SIGPOLL      P2001      Term    Pollable event (Sys V);
+                                      synonym for SIGIO
+      SIGPROF      P2001      Term    Profiling timer expired
+      SIGPWR         -        Term    Power failure (System V)
+
+      SIGQUIT      P1990      Core    Quit from keyboard
+      SIGSEGV      P1990      Core    Invalid memory reference
+      SIGSTKFLT      -        Term    Stack fault on coprocessor (unused)
+      SIGSTOP      P1990      Stop    Stop process
+      SIGTSTP      P1990      Stop    Stop typed at terminal
+      SIGSYS       P2001      Core    Bad system call (SVr4);
+                                      see also seccomp(2)
+      SIGTERM      P1990      Term    Termination signal
+      SIGTRAP      P2001      Core    Trace&#x2F;breakpoint trap
+      SIGTTIN      P1990      Stop    Terminal input for background process
+      SIGTTOU      P1990      Stop    Terminal output for background process
+      SIGUNUSED      -        Core    Synonymous with SIGSYS
+      SIGURG       P2001      Ign     Urgent condition on socket (4.2BSD)
+      SIGUSR1      P1990      Term    User-defined signal 1
+      SIGUSR2      P1990      Term    User-defined signal 2
+      SIGVTALRM    P2001      Term    Virtual alarm clock (4.2BSD)
+      SIGXCPU      P2001      Core    CPU time limit exceeded (4.2BSD);
+                                      see setrlimit(2)
+      SIGXFSZ      P2001      Core    File size limit exceeded (4.2BSD);
+                                      see setrlimit(2)
+      SIGWINCH       -        Ign     Window resize signal (4.3BSD, Sun)<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
     </div>
 </div>
@@ -793,7 +1133,8 @@ Linux 信号分类：普通信号 vs 实时信号
 <li>文件通常命名为 <code>core</code> 或 <code>core.&lt;PID&gt;</code>，需用 <code>gdb</code> 分析</li>
 </ul>
 <p>（2）如何启用核心转储？</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ulimit</span> -c unlimited  <span class="comment"># 解除核心转储文件大小限制</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;/tmp/core.%e.%p&quot;</span> &gt; /proc/sys/kernel/core_pattern  <span class="comment"># 指定保存路径</span></span><br></pre></td></tr></table></figure>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token builtin class-name">ulimit</span> <span class="token parameter variable">-c</span> unlimited  <span class="token comment"># 解除核心转储文件大小限制</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"/tmp/core.%e.%p"</span> <span class="token operator">></span> /proc/sys/kernel/core_pattern  <span class="token comment"># 指定保存路径</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 <blockquote>
 <p>默认情况下，某些系统可能禁用核心转储（通过 <code>ulimit -c 0</code>）。</p>
 </blockquote>
