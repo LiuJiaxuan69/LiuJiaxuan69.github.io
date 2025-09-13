@@ -1,0 +1,2396 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Docker 集群化部署 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+Docker 部署 Mysql 主从集群
+Mysql 主从集群简介
+具体实现步骤
+验证主从集群是否搭建成功
+
+
+Docker 部署 Redis 集群
+配置文件编写
+制作 Redis 集群专属中,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Docker 集群化部署 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+Docker 部署 Mysql 主从集群
+Mysql 主从集群简介
+具体实现步骤
+验证主从集群是否搭建成功
+
+
+Docker 部署 Redis 集群
+配置文件编写
+制作 Redis 集群专属中,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Docker 集群化部署 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+Docker 部署 Mysql 主从集群
+Mysql 主从集群简介
+具体实现步骤
+验证主从集群是否搭建成功
+
+
+Docker 部署 Redis 集群
+配置文件编写
+制作 Redis 集群专属中,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Docker 集群化部署</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">65</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">Docker 集群化部署</h1>
+            <div class="stuff">
+                <span>九月 12, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Dockerfile/" rel="tag">Dockerfile</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E9%9B%86%E7%BE%A4/" rel="tag">集群</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#docker-%E9%83%A8%E7%BD%B2-mysql-%E4%B8%BB%E4%BB%8E%E9%9B%86%E7%BE%A4">Docker 部署 Mysql 主从集群</a><ul>
+<li><a href="#mysql-%E4%B8%BB%E4%BB%8E%E9%9B%86%E7%BE%A4%E7%AE%80%E4%BB%8B">Mysql 主从集群简介</a></li>
+<li><a href="#%E5%85%B7%E4%BD%93%E5%AE%9E%E7%8E%B0%E6%AD%A5%E9%AA%A4">具体实现步骤</a></li>
+<li><a href="#%E9%AA%8C%E8%AF%81%E4%B8%BB%E4%BB%8E%E9%9B%86%E7%BE%A4%E6%98%AF%E5%90%A6%E6%90%AD%E5%BB%BA%E6%88%90%E5%8A%9F">验证主从集群是否搭建成功</a></li>
+</ul>
+</li>
+<li><a href="#docker-%E9%83%A8%E7%BD%B2-redis-%E9%9B%86%E7%BE%A4">Docker 部署 Redis 集群</a><ul>
+<li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%BC%96%E5%86%99">配置文件编写</a></li>
+<li><a href="#%E5%88%B6%E4%BD%9C-redis-%E9%9B%86%E7%BE%A4%E4%B8%93%E5%B1%9E%E4%B8%AD%E9%97%B4%E4%BB%B6">制作 Redis 集群专属中间件</a></li>
+<li><a href="#redis-%E9%9B%86%E7%BE%A4%E5%8C%96%E5%AE%B9%E5%99%A8%E7%BC%96%E6%8E%92">Redis 集群化容器编排</a></li>
+<li><a href="#%E5%90%AF%E5%8A%A8-redis-%E9%9B%86%E7%BE%A4">启动 Redis 集群</a></li>
+<li><a href="#%E6%94%B9%E8%BF%9B%E4%BD%BF%E7%94%A8-tls-%E5%8A%A0%E5%AF%86-redis-%E9%9B%86%E7%BE%A4%E9%80%9A%E4%BF%A1">改进：使用 TLS 加密 Redis 集群通信</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<p>在当今云计算与微服务架构盛行的时代，集群化已经成为应用部署与运维的核心诉求。而Docker的出现，无疑为集群化的发展注入了强劲动力。它以轻量化的容器技术为基础，彻底改变了应用的交付方式，让部署环境更加一致、迁移过程更加高效，也让大规模调度与弹性伸缩成为可能。从最初的镜像与容器，到原生的Swarm集群，再到与Kubernetes生态的深度结合，Docker不仅提供了标准化的运行环境，更推动了整个分布式系统的演进。可以说，Docker在集群化道路上的贡献，不仅是工具层面的革新，更是理念上的一次飞跃。</p>
+<p>下面，我将分别通过 Mysql 的主从集群和 Redis 的集群架构，来介绍 Docker 集群化部署的相关内容。</p>
+<h2><span id="docker-部署-mysql-主从集群">Docker 部署 Mysql 主从集群</span></h2><h3><span id="mysql-主从集群简介">Mysql 主从集群简介</span></h3><p>在介绍具体过程之前，我们先来了解一下如何在 docker-compose.yml 文件中使用 build 选项来编译镜像</p>
+<p>build 选项编译镜像有两种格式：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token comment"># 格式一</span>
+  <span class="token key atrule">frontend</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> awesome/webapp
+    <span class="token key atrule">build</span><span class="token punctuation">:</span> ./webapp
+  <span class="token comment"># 格式二</span>
+  <span class="token key atrule">backend</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> awesome/database
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token comment"># 构建上下文目录</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./backend
+      <span class="token comment"># Dockerfile 文件路径</span>
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> ./backed.Dockerfile<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>两种格式的区别在于，第一种格式只能指定构建上下文目录，而第二种格式可以同时指定构建上下文目录和 Dockerfile 文件路径。</p>
+<p>也就是说，第一种格式只能用于 Dockerfile 文件名为 Dockerfile 的情况，而第二种格式可以用于 Dockerfile 文件名不是 Dockerfile 的情况。</p>
+<p>MySQL 的主从同步有多种方式，这里我们使用最常见的基于二进制日志（binlog）的异步复制方式。主节点负责写操作，并将数据变更记录到二进制日志中；从节点则通过读取主节点的二进制日志来同步数据。而这些配置的实现只需要我们对 MySQL 的配置文件进行一些修改即可。</p>
+<blockquote>
+<p>什么是二进制日志（binlog）？<br>二进制日志是 MySQL 用于记录所有更改数据库数据的操作的日志文件。它以二进制格式存储，包含了所有的 INSERT、UPDATE、DELETE 等数据修改语句。二进制日志对于数据恢复、复制和审计等功能非常重要。</p>
+</blockquote>
+<h3><span id="具体实现步骤">具体实现步骤</span></h3><p>首先，我们需要分别给主从节点创建属于他们的专属目录 <code>master</code> 和 <code>slave</code></p>
+<p>然后，分别在 <code>master</code> 和 <code>slave</code> 目录下创建 <code>Dockerfile-master</code> 和 <code>Dockerfile-slave</code> 文件，内容如下：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token comment"># Dockerfile-master</span>
+<span class="token instruction"><span class="token keyword">FROM</span> mysql:8.0.41</span>
+<span class="token comment"># 设置时区为上海</span>
+<span class="token instruction"><span class="token keyword">RUN</span> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span>
+
+<span class="token comment"># Dockerfile-slave</span>
+<span class="token instruction"><span class="token keyword">FROM</span> mysql:8.0.41</span>
+<span class="token instruction"><span class="token keyword">RUN</span> ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span>
+<span class="token comment"># 设置初始化脚本</span>
+<span class="token instruction"><span class="token keyword">COPY</span> ./slave/slave.sql /docker-entrypoint-initdb.d</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>接下来我们实现从库的配置脚本 <code>slave.sql</code>，使得从库能够连接到主库并进行数据同步，内容如下：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">change master <span class="token keyword">to</span> master_host<span class="token operator">=</span><span class="token identifier"><span class="token punctuation">`</span>mysql-master<span class="token punctuation">`</span></span><span class="token punctuation">,</span>
+master_user<span class="token operator">=</span><span class="token string">'root'</span><span class="token punctuation">,</span>master_password<span class="token operator">=</span><span class="token string">'root'</span><span class="token punctuation">,</span>master_port<span class="token operator">=</span><span class="token number">3306</span><span class="token punctuation">;</span>
+<span class="token keyword">start</span> slave<span class="token punctuation">;</span>
+<span class="token comment"># 查看从库状态</span>
+<span class="token keyword">show</span> slave <span class="token keyword">status</span>\G<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>接下来我们进入主目录 <code>mysql_cluster</code>，创建 <code>docker-compose.yml</code> 文件，内容如下：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">mysql-master</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./master
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>master
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>master<span class="token punctuation">:</span>v1.0
+    <span class="token comment"># restart 用于设置容器的重启策略，always 表示无论容器退出状态如何，都会自动重启容器</span>
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>master
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./master/var/lib/mysql<span class="token punctuation">:</span>/var/lib/mysql
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9306:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+      <span class="token key atrule">MYSQL_ROOT_HOST</span><span class="token punctuation">:</span> <span class="token string">'%'</span>
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'--server-id=1'</span><span class="token punctuation">,</span>
+              <span class="token string">'--log-bin=mysql-bin'</span><span class="token punctuation">,</span>
+              <span class="token string">'--binlog-ignore-db=mysql'</span><span class="token punctuation">,</span>
+              <span class="token string">'--binlog_cache_size=256M'</span><span class="token punctuation">,</span>
+              <span class="token string">'--binlog_format=ROW'</span><span class="token punctuation">,</span>
+              <span class="token string">'--lower_case_table_names=1'</span><span class="token punctuation">,</span>
+              <span class="token string">'--character-set-server=utf8mb4'</span><span class="token punctuation">,</span>
+              <span class="token string">'--collation-server=utf8mb4_general_ci'</span><span class="token punctuation">]</span>
+  
+  <span class="token key atrule">mysql-slave1</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./slave
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>slave
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave1
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./slave/var/lib/mysql<span class="token punctuation">:</span>/var/lib/mysql
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9307:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'--server-id=2'</span><span class="token punctuation">,</span>
+              <span class="token string">'--relay_log=slave-relay'</span><span class="token punctuation">,</span>
+              <span class="token string">'--lower_case_table_names=1'</span><span class="token punctuation">,</span>
+              <span class="token string">'--character-set-server=utf8mb4'</span><span class="token punctuation">,</span>
+              <span class="token string">'--collation-server=utf8mb4_general_ci'</span><span class="token punctuation">]</span>
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mysql-master</span><span class="token punctuation">:</span>
+        <span class="token key atrule">condition</span><span class="token punctuation">:</span> service_healthy
+  <span class="token key atrule">mysql-slave2</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./slave
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>slave
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave2
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./slave/var/lib/mysql2<span class="token punctuation">:</span>/var/lib/mysql
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9308:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'--server-id=3'</span><span class="token punctuation">,</span>
+              <span class="token string">'--relay_log=slave-relay'</span><span class="token punctuation">,</span>
+              <span class="token string">'--lower_case_table_names=1'</span><span class="token punctuation">,</span>
+              <span class="token string">'--character-set-server=utf8mb4'</span><span class="token punctuation">,</span>
+              <span class="token string">'--collation-server=utf8mb4_general_ci'</span><span class="token punctuation">]</span>
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mysql-master</span><span class="token punctuation">:</span>
+        <span class="token key atrule">condition</span><span class="token punctuation">:</span> service_healthy<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>显然，通过 <code>command</code> 选项来配置参数是非常不方便的，尤其是当参数较多时，容易出错且难以维护。更好的方式是通过配置文件来进行参数配置，下面我们对 <code>master</code> 和 <code>slave</code> 目录分别创建 <code>my.cnf</code> 文件，内容如下：</p>
+<pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token comment"># master/my.cnf</span>
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">server-id</span><span class="token punctuation">=</span><span class="token value attr-value">1</span>
+<span class="token key attr-name">log-bin</span><span class="token punctuation">=</span><span class="token value attr-value">mysql-bin</span>
+<span class="token key attr-name">binlog-ignore-db</span><span class="token punctuation">=</span><span class="token value attr-value">mysql</span>
+<span class="token key attr-name">binlog_cache_size</span><span class="token punctuation">=</span><span class="token value attr-value">256M</span>
+<span class="token key attr-name">binlog_format</span><span class="token punctuation">=</span><span class="token value attr-value">ROW</span>
+<span class="token key attr-name">gtid_mode</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">enforce_gtid_consistency</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">log_slave_updates</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">lower_case_table_names</span><span class="token punctuation">=</span><span class="token value attr-value">1</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4_general_ci</span>
+
+
+<span class="token comment"># slave1/my1.cnf</span>
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">server-id</span><span class="token punctuation">=</span><span class="token value attr-value">2</span>
+<span class="token key attr-name">relay_log</span><span class="token punctuation">=</span><span class="token value attr-value">slave-relay</span>
+<span class="token key attr-name">gtid_mode</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">enforce_gtid_consistency</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">log_slave_updates</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">read_only</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">skip_slave_start</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">lower_case_table_names</span><span class="token punctuation">=</span><span class="token value attr-value">1</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4_general_ci</span>
+<span class="token comment"># slave2/my2.cnf</span>
+<span class="token section"><span class="token punctuation">[</span><span class="token section-name selector">mysqld</span><span class="token punctuation">]</span></span>
+<span class="token key attr-name">server-id</span><span class="token punctuation">=</span><span class="token value attr-value">3</span>
+<span class="token key attr-name">relay_log</span><span class="token punctuation">=</span><span class="token value attr-value">slave-relay</span>
+<span class="token key attr-name">gtid_mode</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">enforce_gtid_consistency</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">log_slave_updates</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">read_only</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">skip_slave_start</span><span class="token punctuation">=</span><span class="token value attr-value">ON</span>
+<span class="token key attr-name">lower_case_table_names</span><span class="token punctuation">=</span><span class="token value attr-value">1</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4_general_ci[mysqld]</span>
+<span class="token key attr-name">server-id</span><span class="token punctuation">=</span><span class="token value attr-value">3</span>
+<span class="token key attr-name">relay_log</span><span class="token punctuation">=</span><span class="token value attr-value">slave-relay</span>
+<span class="token key attr-name">lower_case_table_names</span><span class="token punctuation">=</span><span class="token value attr-value">1</span>
+<span class="token key attr-name">character-set-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4</span>
+<span class="token key attr-name">collation-server</span><span class="token punctuation">=</span><span class="token value attr-value">utf8mb4_general_ci</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后，我们需要修改 <code>docker-compose.yml</code> 文件，删除 <code>command</code> 选项，并将配置文件挂载到容器中，修改后内容如下：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">mysql-master</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./master
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>master
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>master<span class="token punctuation">:</span>v1.0
+    <span class="token comment"># restart 用于设置容器的重启策略，always 表示无论容器退出状态如何，都会自动重启容器</span>
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>master
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./master/var/lib/mysql<span class="token punctuation">:</span>/var/lib/mysql
+      <span class="token punctuation">-</span> ./master/my.cnf<span class="token punctuation">:</span>/etc/mysql/conf.d/my.cnf
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9306:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+      <span class="token key atrule">MYSQL_ROOT_HOST</span><span class="token punctuation">:</span> <span class="token string">'%'</span>
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+  
+  <span class="token key atrule">mysql-slave1</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./slave
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>slave
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave1
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./slave/var/lib/mysql<span class="token punctuation">:</span>/var/lib/mysql
+      <span class="token punctuation">-</span> ./slave/my1.cnf<span class="token punctuation">:</span>/etc/mysql/conf.d/my.cnf
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9307:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> mysql<span class="token punctuation">-</span>master
+  <span class="token key atrule">mysql-slave2</span><span class="token punctuation">:</span>
+    <span class="token key atrule">build</span><span class="token punctuation">:</span>
+      <span class="token key atrule">context</span><span class="token punctuation">:</span> ./slave
+      <span class="token key atrule">dockerfile</span><span class="token punctuation">:</span> Dockerfile<span class="token punctuation">-</span>slave
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> mysql<span class="token punctuation">-</span>slave2
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./slave/var/lib/mysql2<span class="token punctuation">:</span>/var/lib/mysql
+      <span class="token punctuation">-</span> ./slave/my2.cnf<span class="token punctuation">:</span>/etc/mysql/conf.d/my.cnf
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"9308:3306"</span>
+    <span class="token key atrule">environment</span><span class="token punctuation">:</span>
+      <span class="token key atrule">MYSQL_ROOT_PASSWORD</span><span class="token punctuation">:</span> root
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"mysqladmin"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">,</span> <span class="token string">"-h"</span><span class="token punctuation">,</span> <span class="token string">"localhost"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 30s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 10s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> mysql<span class="token punctuation">-</span>master<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，修改后配置文件更加清晰易懂，也更容易维护。</p>
+<p>现在，我们就可以通过命令来编译主从镜像了：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/mysql_cluster  
+╰─➤  <span class="token function">docker</span> compose build      
+<span class="token comment">#1 [internal] load local bake definitions</span>
+<span class="token comment">#1 reading from stdin 1.53kB done</span>
+<span class="token comment">#1 DONE 0.0s</span>
+
+<span class="token comment">#2 [mysql-slave2 internal] load build definition from Dockerfile-slave</span>
+<span class="token comment">#2 transferring dockerfile: 191B done</span>
+<span class="token comment">#2 DONE 0.0s</span>
+
+<span class="token comment">#3 [mysql-slave1 internal] load metadata for docker.io/library/mysql:8.0.41</span>
+<span class="token comment">#3 DONE 0.0s</span>
+
+<span class="token comment">#4 [mysql-master internal] load build definition from Dockerfile-master</span>
+<span class="token comment">#4 transferring dockerfile: 145B done</span>
+<span class="token comment">#4 DONE 0.0s</span>
+
+<span class="token comment">#3 [mysql-master internal] load metadata for docker.io/library/mysql:8.0.41</span>
+<span class="token comment">#3 DONE 0.0s</span>
+
+<span class="token comment">#5 [mysql-slave1 internal] load .dockerignore</span>
+<span class="token comment">#5 transferring context: 2B done</span>
+<span class="token comment">#5 DONE 0.0s</span>
+
+<span class="token comment">#6 [mysql-master internal] load .dockerignore</span>
+<span class="token comment">#6 transferring context: 2B done</span>
+<span class="token comment">#6 DONE 0.0s</span>
+
+<span class="token comment">#7 [mysql-master 1/3] FROM docker.io/library/mysql:8.0.41</span>
+<span class="token comment">#7 DONE 0.0s</span>
+
+<span class="token comment">#8 [mysql-slave2 2/3] RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime</span>
+<span class="token comment">#8 CACHED</span>
+
+<span class="token comment">#9 [mysql-slave1 internal] load build context</span>
+<span class="token comment">#9 transferring context: 31B done</span>
+<span class="token comment">#9 DONE 0.0s</span>
+
+<span class="token comment">#10 [mysql-slave1 3/3] COPY ./slave.sql /docker-entrypoint-initdb.d</span>
+<span class="token comment">#10 CACHED</span>
+
+<span class="token comment">#11 [mysql-master] exporting to image</span>
+<span class="token comment">#11 exporting layers done</span>
+<span class="token comment">#11 writing image sha256:e9a5cfeda1b61ce4641a13d723e8f193609d8ccfffd341f9017d58e86e59fa95 done</span>
+<span class="token comment">#11 naming to docker.io/library/mysql-master:v1.0 done</span>
+<span class="token comment">#11 DONE 0.0s</span>
+
+<span class="token comment">#12 [mysql-slave1] exporting to image</span>
+<span class="token comment">#12 exporting layers done</span>
+<span class="token comment">#12 writing image sha256:26ff73ef84d3905562391aeb8d0d7f7feffd8116a53e445d26529349138992ed done</span>
+<span class="token comment">#12 naming to docker.io/library/mysql-slave:v1.0 done</span>
+<span class="token comment">#12 DONE 0.0s</span>
+
+<span class="token comment">#13 [mysql-slave2] exporting to image</span>
+<span class="token comment">#13 exporting layers done</span>
+<span class="token comment">#13 writing image sha256:c5e5c6f68584530dee7bb856db7e5d3cb2a58bb2682270fb07665078acd37597 done</span>
+<span class="token comment">#13 naming to docker.io/library/mysql-slave:v1.0 done</span>
+<span class="token comment">#13 DONE 0.0s</span>
+
+<span class="token comment">#14 [mysql-master] resolving provenance for metadata file</span>
+<span class="token comment">#14 DONE 0.0s</span>
+
+<span class="token comment">#15 [mysql-slave1] resolving provenance for metadata file</span>
+<span class="token comment">#15 DONE 0.0s</span>
+
+<span class="token comment">#16 [mysql-slave2] resolving provenance for metadata file</span>
+<span class="token comment">#16 DONE 0.0s</span>
+<span class="token punctuation">[</span>+<span class="token punctuation">]</span> Building <span class="token number">2</span>/2
+ ✔ mysql-slave:v1.0   Built                                                                                                                                                                     <span class="token number">0</span>.0s 
+ ✔ mysql-master:v1.0  Built                                                                                                                                                                     <span class="token number">0</span>.0s 
+<span class="token comment"># 检查编译好的镜像</span>
+╭─ljx@VM-16-15-debian ~/docker_test/mysql_cluster  
+╰─➤  <span class="token function">docker</span> images <span class="token operator">|</span> <span class="token function">grep</span> mysql
+mysql-master                                                                                  v1.0                     e9a5cfeda1b6   <span class="token number">23</span> minutes ago   764MB
+mysql-slave                                                                                   v1.0                     c5e5c6f68584   <span class="token number">23</span> minutes ago   764MB
+mysql                                                                                         <span class="token number">8.0</span>.41                   1c83f38450c3   <span class="token number">7</span> months ago     764MB<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>编译完成后，我们就可以通过 <code>docker compose up -d</code> 命令来启动主从集群了：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 启动主从集群</span>
+╭─ljx@VM-16-15-debian ~/docker_test/mysql_cluster  
+╰─➤  <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
+<span class="token punctuation">[</span>+<span class="token punctuation">]</span> Running <span class="token number">3</span>/3
+ ✔ Container mysql-master  Started                                                                                                                                                        <span class="token number">5</span>.5s 
+ ✔ Container mysql-slave1  Started                                                                                                                                                        <span class="token number">3</span>.3s 
+ ✔ Container mysql-slave2  Started                                                                                                                                                        <span class="token number">3</span>.2s <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3><span id="验证主从集群是否搭建成功">验证主从集群是否搭建成功</span></h3><p>然后我们在主节点插入一个 <code>db1</code> 数据库，并添加一张 <code>info</code> 表，插入一条数据：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">╭─ljx<span class="token variable">@VM</span><span class="token operator">-</span><span class="token number">16</span><span class="token operator">-</span><span class="token number">15</span><span class="token operator">-</span>debian <span class="token operator">~</span><span class="token operator">/</span>docker_test<span class="token operator">/</span>mysql_cluster  
+╰─➤  docker <span class="token keyword">exec</span> <span class="token operator">-</span>it mysql<span class="token operator">-</span>master bash
+bash<span class="token operator">-</span><span class="token number">5.1</span><span class="token comment"># mysql -p</span>
+Enter password: 
+Welcome <span class="token keyword">to</span> the MySQL monitor<span class="token punctuation">.</span>  Commands <span class="token keyword">end</span> <span class="token keyword">with</span> <span class="token punctuation">;</span> <span class="token operator">or</span> \g<span class="token punctuation">.</span>
+Your MySQL connection id <span class="token operator">is</span> <span class="token number">13</span>
+Server version: <span class="token number">8.0</span><span class="token number">.41</span> MySQL Community Server <span class="token operator">-</span> GPL
+
+Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">2000</span><span class="token punctuation">,</span> <span class="token number">2025</span><span class="token punctuation">,</span> Oracle <span class="token operator">and</span><span class="token operator">/</span><span class="token operator">or</span> its affiliates<span class="token punctuation">.</span>
+
+Oracle <span class="token operator">is</span> a registered trademark <span class="token keyword">of</span> Oracle Corporation <span class="token operator">and</span><span class="token operator">/</span><span class="token operator">or</span> its
+affiliates<span class="token punctuation">.</span> Other names may be trademarks <span class="token keyword">of</span> their respective
+owners<span class="token punctuation">.</span>
+
+<span class="token keyword">Type</span> <span class="token string">'help;'</span> <span class="token operator">or</span> <span class="token string">'\h'</span> <span class="token keyword">for</span> help<span class="token punctuation">.</span> <span class="token keyword">Type</span> <span class="token string">'\c'</span> <span class="token keyword">to</span> clear the <span class="token keyword">current</span> input statement<span class="token punctuation">.</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">show</span> <span class="token keyword">databases</span><span class="token punctuation">;</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> <span class="token keyword">Database</span>           <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> information_schema <span class="token operator">|</span>
+<span class="token operator">|</span> mysql              <span class="token operator">|</span>
+<span class="token operator">|</span> performance_schema <span class="token operator">|</span>
+<span class="token operator">|</span> sys                <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token number">4</span> <span class="token keyword">rows</span> <span class="token operator">in</span> <span class="token keyword">set</span> <span class="token punctuation">(</span><span class="token number">0.04</span> sec<span class="token punctuation">)</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">create</span> <span class="token keyword">database</span> db1<span class="token punctuation">;</span>
+Query OK<span class="token punctuation">,</span> <span class="token number">1</span> <span class="token keyword">row</span> affected <span class="token punctuation">(</span><span class="token number">0.01</span> sec<span class="token punctuation">)</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">show</span> <span class="token keyword">databases</span><span class="token punctuation">;</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> <span class="token keyword">Database</span>           <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> db1                <span class="token operator">|</span>
+<span class="token operator">|</span> information_schema <span class="token operator">|</span>
+<span class="token operator">|</span> mysql              <span class="token operator">|</span>
+<span class="token operator">|</span> performance_schema <span class="token operator">|</span>
+<span class="token operator">|</span> sys                <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token number">5</span> <span class="token keyword">rows</span> <span class="token operator">in</span> <span class="token keyword">set</span> <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">use</span> db1
+<span class="token keyword">Database</span> changed
+mysql<span class="token operator">></span> <span class="token keyword">create</span> <span class="token keyword">table</span> info<span class="token punctuation">(</span>name <span class="token keyword">varchar</span><span class="token punctuation">(</span><span class="token number">50</span><span class="token punctuation">)</span><span class="token punctuation">,</span> age <span class="token keyword">int</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Query OK<span class="token punctuation">,</span> <span class="token number">0</span> <span class="token keyword">rows</span> affected <span class="token punctuation">(</span><span class="token number">0.14</span> sec<span class="token punctuation">)</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">insert</span> <span class="token keyword">into</span> info<span class="token punctuation">(</span>name<span class="token punctuation">,</span> age<span class="token punctuation">)</span> <span class="token keyword">values</span><span class="token punctuation">(</span><span class="token string">'ljx'</span><span class="token punctuation">,</span> <span class="token number">19</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Query OK<span class="token punctuation">,</span> <span class="token number">1</span> <span class="token keyword">row</span> affected <span class="token punctuation">(</span><span class="token number">0.09</span> sec<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后我们通过第一个从节点 <code>mysql-slave1</code> 来查看数据是否同步成功：</p>
+<pre class="line-numbers language-sql" data-language="sql"><code class="language-sql">╭─ljx<span class="token variable">@VM</span><span class="token operator">-</span><span class="token number">16</span><span class="token operator">-</span><span class="token number">15</span><span class="token operator">-</span>debian <span class="token operator">~</span><span class="token operator">/</span>docker_test<span class="token operator">/</span>mysql_cluster
+╰─➤  docker <span class="token keyword">exec</span> <span class="token operator">-</span>it mysql<span class="token operator">-</span>slave2 bash
+bash<span class="token operator">-</span><span class="token number">5.1</span><span class="token comment"># mysql -p</span>
+Enter password:
+Welcome <span class="token keyword">to</span> the MySQL monitor<span class="token punctuation">.</span>  Commands <span class="token keyword">end</span> <span class="token keyword">with</span> <span class="token punctuation">;</span> <span class="token operator">or</span> \g<span class="token punctuation">.</span>
+Your MySQL connection id <span class="token operator">is</span> <span class="token number">355</span>
+Server version: <span class="token number">8.0</span><span class="token number">.41</span> MySQL Community Server <span class="token operator">-</span> GPL
+
+Copyright <span class="token punctuation">(</span>c<span class="token punctuation">)</span> <span class="token number">2000</span><span class="token punctuation">,</span> <span class="token number">2025</span><span class="token punctuation">,</span> Oracle <span class="token operator">and</span><span class="token operator">/</span><span class="token operator">or</span> its affiliates<span class="token punctuation">.</span>
+
+Oracle <span class="token operator">is</span> a registered trademark <span class="token keyword">of</span> Oracle Corporation <span class="token operator">and</span><span class="token operator">/</span><span class="token operator">or</span> its
+affiliates<span class="token punctuation">.</span> Other names may be trademarks <span class="token keyword">of</span> their respective
+owners<span class="token punctuation">.</span>
+
+<span class="token keyword">Type</span> <span class="token string">'help;'</span> <span class="token operator">or</span> <span class="token string">'\h'</span> <span class="token keyword">for</span> help<span class="token punctuation">.</span> <span class="token keyword">Type</span> <span class="token string">'\c'</span> <span class="token keyword">to</span> clear the <span class="token keyword">current</span> input statement<span class="token punctuation">.</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">show</span> <span class="token keyword">databases</span><span class="token punctuation">;</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> <span class="token keyword">Database</span>           <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token operator">|</span> db1                <span class="token operator">|</span>
+<span class="token operator">|</span> information_schema <span class="token operator">|</span>
+<span class="token operator">|</span> mysql              <span class="token operator">|</span>
+<span class="token operator">|</span> performance_schema <span class="token operator">|</span>
+<span class="token operator">|</span> sys                <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">--------------------+</span>
+<span class="token number">5</span> <span class="token keyword">rows</span> <span class="token operator">in</span> <span class="token keyword">set</span> <span class="token punctuation">(</span><span class="token number">0.02</span> sec<span class="token punctuation">)</span>
+
+mysql<span class="token operator">></span> <span class="token keyword">use</span> db1<span class="token punctuation">;</span>
+Reading <span class="token keyword">table</span> information <span class="token keyword">for</span> completion <span class="token keyword">of</span> <span class="token keyword">table</span> <span class="token operator">and</span> <span class="token keyword">column</span> names
+You can turn <span class="token keyword">off</span> this feature <span class="token keyword">to</span> get a quicker startup <span class="token keyword">with</span> <span class="token operator">-</span>A
+
+<span class="token keyword">Database</span> changed
+mysql<span class="token operator">></span> <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> db1<span class="token punctuation">;</span>
+ERROR <span class="token number">1146</span> <span class="token punctuation">(</span><span class="token number">42</span>S02<span class="token punctuation">)</span>: <span class="token keyword">Table</span> <span class="token string">'db1.db1'</span> doesn't exist
+mysql<span class="token operator">></span> <span class="token keyword">select</span> <span class="token operator">*</span> <span class="token keyword">from</span> info<span class="token punctuation">;</span>
+<span class="token operator">+</span><span class="token comment">------+------+</span>
+<span class="token operator">|</span> name <span class="token operator">|</span> age  <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+------+</span>
+<span class="token operator">|</span> ljx  <span class="token operator">|</span>   <span class="token number">19</span> <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token comment">------+------+</span>
+<span class="token number">1</span> <span class="token keyword">row</span> <span class="token operator">in</span> <span class="token keyword">set</span> <span class="token punctuation">(</span><span class="token number">0.00</span> sec<span class="token punctuation">)</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，数据已经成功同步到从节点 <code>mysql-slave1</code> 上了。</p>
+<h2><span id="docker-部署-redis-集群">Docker 部署 Redis 集群</span></h2><p>Redis 集群是通过将数据分片存储在多个节点上来实现的，从而提高了系统的可扩展性和容错性。每个节点负责存储一部分数据，并且节点之间通过 Gossip 协议进行通信和协调。Redis 集群使用哈希槽（hash slot）来分配数据，每个键根据其哈希值被映射到一个特定的哈希槽上，而每个节点负责管理一定范围的哈希槽。</p>
+<h3><span id="配置文件编写">配置文件编写</span></h3><p>这里不做过多解释，Redis 的配置文件是可以直接配置集群的，我们只需要在配置文件中添加以下几行：</p>
+<pre class="line-numbers language-ini" data-language="ini"><code class="language-ini"><span class="token comment">#表示前台运行</span>
+daemonize no
+<span class="token comment">#端口</span>
+port 6379
+<span class="token comment">#持久化</span>
+dir /data/redis
+<span class="token comment">#启用集群</span>
+cluster-enabled yes
+<span class="token comment">#集群参数配置</span>
+cluster-config-file nodes.conf
+<span class="token comment">#集群超时时间</span>
+cluster-node-timeout 5000
+<span class="token comment">#密码配置</span>
+requirepass 123456
+<span class="token comment">#主节点密码配置</span>
+masterauth 123456
+<span class="token comment">#表示远端可以连接</span>
+bind * -::*<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>然后，针对于每一个Redis 节点，我们都需要对他们的配置文件进行一些修改，比如端口号、数据目录等，若我们一个一个手动配置，显然是非常麻烦的，因此我们可以制作一个 <code>Redis</code> 集群的专属中间件，来简化配置过程。</p>
+<h3><span id="制作-redis-集群专属中间件">制作 Redis 集群专属中间件</span></h3><p>首先，我们创建一个 <code>redis_cluster</code> 目录，创建一个 <code>redis</code> 目录，然后在该目录下创建 <code>Dockerfile</code> 文件，内容如下：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION=7.0.15</span>
+<span class="token instruction"><span class="token keyword">ARG</span> UBUNTU_VERSION=22.04</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUSYBOX_VERSION=1.37.0</span>
+
+<span class="token instruction"><span class="token keyword">FROM</span> ubuntu:<span class="token variable">$&#123;UBUNTU_VERSION&#125;</span> <span class="token keyword">AS</span> buildstage</span>
+<span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+
+<span class="token comment"># Use a local mirror for faster apt (replace only if needed), install build deps</span>
+<span class="token instruction"><span class="token keyword">RUN</span> sed -i <span class="token string">'s@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g'</span> /etc/apt/sources.list || true &amp;&amp; <span class="token operator">\</span>
+  apt-get update &amp;&amp; apt-get install -y --no-install-recommends <span class="token operator">\</span>
+    build-essential <span class="token operator">\</span>
+    ca-certificates <span class="token operator">\</span>
+    wget <span class="token operator">\</span>
+  &amp;&amp; rm -rf /var/lib/apt/lists/*</span>
+
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /tmp</span>
+
+<span class="token comment"># Copy source tarball, extract, build and cleanup in a single RUN to avoid</span>
+<span class="token comment"># leaving the tarball or full source tree in intermediate image layers.</span>
+<span class="token comment"># Note: you can use ADD redis-7.0.11.tar.gz /tmp/ to let Docker auto-extract,</span>
+<span class="token comment"># but COPY + explicit tar is preferred for clarity and to avoid unintended</span>
+<span class="token comment"># remote download side-effects when a URL is passed to ADD.</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz /tmp/</span>
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /tmp/build &amp;&amp; <span class="token operator">\</span>
+  tar xzf /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz -C /tmp/build &amp;&amp; <span class="token operator">\</span>
+  cd /tmp/build/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span> &amp;&amp; <span class="token operator">\</span>
+  make &amp;&amp; <span class="token operator">\</span>
+  mkdir -p /redis &amp;&amp; <span class="token operator">\</span>
+  mv src/redis-server src/redis-cli /redis/ &amp;&amp; <span class="token operator">\</span>
+  rm -rf /tmp/build /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz</span>
+
+<span class="token comment"># Copy the provided configuration into the image</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis.conf /redis/</span>
+
+<span class="token instruction"><span class="token keyword">FROM</span> busybox:<span class="token variable">$&#123;BUSYBOX_VERSION&#125;</span>-glibc</span>
+
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /data/redis /redis</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">buildstage</span></span> /redis /redis</span>
+<span class="token instruction"><span class="token keyword">EXPOSE</span> 6379</span>
+
+<span class="token comment"># Use ENTRYPOINT so the image runs redis-server with the supplied config by default</span>
+<span class="token instruction"><span class="token keyword">ENTRYPOINT</span> [<span class="token string">"/redis/redis-server"</span>, <span class="token string">"/redis/redis.conf"</span>]</span>
+
+<span class="token comment"># Build-time metadata: re-declare ARGs in final stage and persist as LABELs</span>
+<span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUILD_DATE=unspecified</span>
+<span class="token instruction"><span class="token keyword">ARG</span> UBUNTU_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> IMAGE_VERSION=latest</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUSYBOX_VERSION</span>
+
+<span class="token instruction"><span class="token keyword">LABEL</span> org.opencontainers.image.version=<span class="token string">"$&#123;IMAGE_VERSION&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.base.name=<span class="token string">"ubuntu:$&#123;UBUNTU_VERSION&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.ref.name=<span class="token string">"myredis"</span> <span class="token operator">\</span>
+  org.opencontainers.image.created=<span class="token string">"$&#123;BUILD_DATE&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.vendor=<span class="token string">"ljx"</span> <span class="token operator">\</span>
+  org.opencontainers.image.title=<span class="token string">"Redis Cluster"</span> <span class="token operator">\</span>
+  org.opencontainers.image.description=<span class="token string">"Redis Cluster(base on Redis: $&#123;REDIS_VERSION&#125;) build on busybox:$&#123;BUSYBOX_VERSION&#125;-glibc"</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>该配置文件非常符合 OCI 标准，并且通过多阶段构建的方式，极大地减小了最终镜像的体积。接下来我会对这个配置文件进行逐行解释：</p>
+<h4><span id="1️⃣-构建阶段build-stage">1️⃣ 构建阶段（Build Stage）</span></h4><pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">FROM</span> ubuntu:<span class="token variable">$&#123;UBUNTU_VERSION&#125;</span> <span class="token keyword">AS</span> buildstage</span>
+<span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+
+<span class="token comment"># 安装构建依赖</span>
+<span class="token instruction"><span class="token keyword">RUN</span> sed -i <span class="token string">'s@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g'</span> /etc/apt/sources.list || true &amp;&amp; <span class="token operator">\</span>
+    apt-get update &amp;&amp; apt-get install -y --no-install-recommends <span class="token operator">\</span>
+        build-essential <span class="token operator">\</span>
+        ca-certificates <span class="token operator">\</span>
+        wget <span class="token operator">\</span>
+    &amp;&amp; rm -rf /var/lib/apt/lists/*</span>
+
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /tmp</span>
+
+<span class="token comment"># 拷贝 Redis 源码并编译</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz /tmp/</span>
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /tmp/build &amp;&amp; <span class="token operator">\</span>
+    tar xzf /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz -C /tmp/build &amp;&amp; <span class="token operator">\</span>
+    cd /tmp/build/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span> &amp;&amp; <span class="token operator">\</span>
+    make &amp;&amp; <span class="token operator">\</span>
+    mkdir -p /redis &amp;&amp; <span class="token operator">\</span>
+    mv src/redis-server src/redis-cli /redis/ &amp;&amp; <span class="token operator">\</span>
+    rm -rf /tmp/build /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz</span>
+
+<span class="token comment"># 拷贝自定义配置</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis.conf /redis/</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这一部分中：</p>
+<ul>
+<li>使用 <code>ARG</code> 参数化 Redis 版本和 Ubuntu 版本，便于升级和重用。</li>
+<li>使用镜像源加速下载依赖。</li>
+<li>在单个 <code>RUN</code> 中完成源码解压、编译和清理，避免中间层冗余文件，减小镜像体积。</li>
+</ul>
+<hr>
+<h4><span id="2️⃣-运行阶段runtime-stage">2️⃣ 运行阶段（Runtime Stage）</span></h4><pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">FROM</span> busybox:<span class="token variable">$&#123;BUSYBOX_VERSION&#125;</span>-glibc</span>
+
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /data/redis /redis</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">buildstage</span></span> /redis /redis</span>
+<span class="token instruction"><span class="token keyword">EXPOSE</span> 6379</span>
+
+<span class="token instruction"><span class="token keyword">ENTRYPOINT</span> [<span class="token string">"/redis/redis-server"</span>, <span class="token string">"/redis/redis.conf"</span>]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这一部分中：</p>
+<ul>
+<li>运行阶段使用轻量级 BusyBox 镜像，并自带 glibc 兼容库。</li>
+<li>只复制最终可执行文件和配置，进一步减小镜像体积。</li>
+<li>将 Redis 默认端口 <code>6379</code> 暴露给容器外部访问。</li>
+<li>使用 <code>ENTRYPOINT</code> 固定启动命令，保证容器启动时自动加载 Redis 配置。</li>
+</ul>
+<hr>
+<h4><span id="3️⃣-oci-标签与元数据">3️⃣ OCI 标签与元数据</span></h4><pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUILD_DATE=unspecified</span>
+<span class="token instruction"><span class="token keyword">ARG</span> UBUNTU_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> IMAGE_VERSION=latest</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUSYBOX_VERSION</span>
+
+<span class="token instruction"><span class="token keyword">LABEL</span> org.opencontainers.image.version=<span class="token string">"$&#123;IMAGE_VERSION&#125;"</span> <span class="token operator">\</span>
+      org.opencontainers.image.base.name=<span class="token string">"ubuntu:$&#123;UBUNTU_VERSION&#125;"</span> <span class="token operator">\</span>
+      org.opencontainers.image.ref.name=<span class="token string">"myredis"</span> <span class="token operator">\</span>
+      org.opencontainers.image.created=<span class="token string">"$&#123;BUILD_DATE&#125;"</span> <span class="token operator">\</span>
+      org.opencontainers.image.vendor=<span class="token string">"ljx"</span> <span class="token operator">\</span>
+      org.opencontainers.image.title=<span class="token string">"Redis Cluster"</span> <span class="token operator">\</span>
+      org.opencontainers.image.description=<span class="token string">"Redis Cluster(base on Redis: $&#123;REDIS_VERSION&#125;) build on busybox:$&#123;BUSYBOX_VERSION&#125;-glibc"</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这一部分中：</p>
+<ul>
+<li>使用标准的 OCI 标签记录镜像的基础镜像、版本号、创建时间和描述信息。</li>
+<li>标签有助于镜像管理、追踪和自动化部署，符合工业规范。</li>
+</ul>
+<hr>
+<p>这个 Dockerfile 体现了以下规范化做法：</p>
+<ol>
+<li><strong>多阶段构建</strong>：编译和运行环境分离，减小最终镜像体积。</li>
+<li><strong>参数化构建</strong>：通过 <code>ARG</code> 灵活指定版本信息。</li>
+<li><strong>清理中间文件</strong>：单条 <code>RUN</code> 完成解压、编译、移动、清理，避免冗余层。</li>
+<li><strong>遵循 OCI 标签规范</strong>：记录镜像版本、基础镜像、创建时间和描述。</li>
+<li><strong>轻量化运行环境</strong>：使用 BusyBox 运行阶段，仅保留可执行文件和必要目录。</li>
+</ol>
+<hr>
+<p>通过以上方式，我们就制作好了一个符合 OCI 标准的 Redis 集群专属中间件，接下来我们就可以通过该中间件来简化 Redis 集群的配置过程了。</p>
+<h3><span id="redis-集群化容器编排">Redis 集群化容器编排</span></h3><p>在生产或测试环境中，为了实现高可用和分片存储，需要将 Redis 部署为集群模式。通过 Docker Compose，我们可以方便地在单台主机上快速搭建多节点 Redis 集群。</p>
+<h4><span id="1-服务定义">1. 服务定义</span></h4><ul>
+<li><code>redis1</code> ~ <code>redis5</code>：五个 Redis 节点，每个节点都是独立的容器。</li>
+<li>每个节点都使用自定义镜像 <code>myredis:v1.0</code>，包含 Redis 可执行文件和配置文件。</li>
+<li><code>entrypoint</code> 指定容器启动时运行 <code>redis-server</code>，并加载对应的配置文件。</li>
+<li><code>command</code> 用于覆盖默认端口、启用集群模式、开启持久化、禁用保护模式（便于集群内部通信）。</li>
+</ul>
+<h4><span id="2-端口映射">2. 端口映射</span></h4><ul>
+<li>每个节点的 Redis 客户端端口（6379）映射到宿主机的不同端口（7000~7004），方便在本地主机访问。</li>
+<li>集群内部端口（节点间通信端口）由 Redis 自动处理，不需要额外映射。</li>
+</ul>
+<h4><span id="3-数据持久化">3. 数据持久化</span></h4><ul>
+<li>每个节点的数据目录都映射到宿主机对应目录（<code>./data/7000</code> 等），保证容器重启或重建后数据不会丢失。</li>
+</ul>
+<h4><span id="4-健康检查">4. 健康检查</span></h4><ul>
+<li>每个节点配置了 <code>healthcheck</code>，定期通过 <code>redis-cli ping</code> 检查节点是否可用。</li>
+<li>健康检查有助于 Docker Compose 识别节点状态，保证集群启动顺序和稳定性。</li>
+</ul>
+<h4><span id="5-集群初始化">5. 集群初始化</span></h4><ul>
+<li><code>redis-init</code> 容器负责在所有节点启动后，执行 <code>redis-cli --cluster create</code> 命令完成集群的节点注册和槽分配。</li>
+<li>容器依赖关系通过 <code>depends_on</code> 控制，确保初始化时各节点已启动。</li>
+<li><code>restart: &#39;no&#39;</code> 表示初始化容器只运行一次，完成集群创建后退出。</li>
+</ul>
+<h4><span id="6-网络配置">6. 网络配置</span></h4><ul>
+<li>所有节点和初始化容器都连接到自定义桥接网络 <code>redis-cluster-net</code>，保证容器间可通过容器名互相访问。</li>
+</ul>
+<p>具体的 <code>docker-compose.yml</code> 文件内容如下：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">redis1</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis1
+    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> redis1
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-server"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"--port"</span><span class="token punctuation">,</span><span class="token string">"6379"</span><span class="token punctuation">,</span><span class="token string">"--cluster-enabled"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--cluster-config-file"</span><span class="token punctuation">,</span><span class="token string">"nodes-7000.conf"</span><span class="token punctuation">,</span><span class="token string">"--cluster-node-timeout"</span><span class="token punctuation">,</span><span class="token string">"5000"</span><span class="token punctuation">,</span><span class="token string">"--appendonly"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--bind"</span><span class="token punctuation">,</span><span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span><span class="token string">"--protected-mode"</span><span class="token punctuation">,</span><span class="token string">"no"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"7000:6379"</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./data/7000<span class="token punctuation">:</span>/data/redis
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span> <span class="token string">"-p"</span><span class="token punctuation">,</span> <span class="token string">"6379"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 5s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 3s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+
+  <span class="token key atrule">redis2</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis2
+    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> redis2
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-server"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"--port"</span><span class="token punctuation">,</span><span class="token string">"6379"</span><span class="token punctuation">,</span><span class="token string">"--cluster-enabled"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--cluster-config-file"</span><span class="token punctuation">,</span><span class="token string">"nodes-7001.conf"</span><span class="token punctuation">,</span><span class="token string">"--cluster-node-timeout"</span><span class="token punctuation">,</span><span class="token string">"5000"</span><span class="token punctuation">,</span><span class="token string">"--appendonly"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--bind"</span><span class="token punctuation">,</span><span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span><span class="token string">"--protected-mode"</span><span class="token punctuation">,</span><span class="token string">"no"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"7001:6379"</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./data/7001<span class="token punctuation">:</span>/data/redis
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span> <span class="token string">"-p"</span><span class="token punctuation">,</span> <span class="token string">"6379"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 5s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 3s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+
+  <span class="token key atrule">redis3</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis3
+    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> redis3
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-server"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"--port"</span><span class="token punctuation">,</span><span class="token string">"6379"</span><span class="token punctuation">,</span><span class="token string">"--cluster-enabled"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--cluster-config-file"</span><span class="token punctuation">,</span><span class="token string">"nodes-7002.conf"</span><span class="token punctuation">,</span><span class="token string">"--cluster-node-timeout"</span><span class="token punctuation">,</span><span class="token string">"5000"</span><span class="token punctuation">,</span><span class="token string">"--appendonly"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--bind"</span><span class="token punctuation">,</span><span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span><span class="token string">"--protected-mode"</span><span class="token punctuation">,</span><span class="token string">"no"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"7002:6379"</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./data/7002<span class="token punctuation">:</span>/data/redis
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span> <span class="token string">"-p"</span><span class="token punctuation">,</span> <span class="token string">"6379"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 5s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 3s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+
+  <span class="token key atrule">redis4</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis4
+    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> redis4
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-server"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"--port"</span><span class="token punctuation">,</span><span class="token string">"6379"</span><span class="token punctuation">,</span><span class="token string">"--cluster-enabled"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--cluster-config-file"</span><span class="token punctuation">,</span><span class="token string">"nodes-7003.conf"</span><span class="token punctuation">,</span><span class="token string">"--cluster-node-timeout"</span><span class="token punctuation">,</span><span class="token string">"5000"</span><span class="token punctuation">,</span><span class="token string">"--appendonly"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--bind"</span><span class="token punctuation">,</span><span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span><span class="token string">"--protected-mode"</span><span class="token punctuation">,</span><span class="token string">"no"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"7003:6379"</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./data/7003<span class="token punctuation">:</span>/data/redis
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span> <span class="token string">"-p"</span><span class="token punctuation">,</span> <span class="token string">"6379"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 5s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 3s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+
+  <span class="token key atrule">redis5</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis5
+    <span class="token key atrule">hostname</span><span class="token punctuation">:</span> redis5
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-server"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"--port"</span><span class="token punctuation">,</span><span class="token string">"6379"</span><span class="token punctuation">,</span><span class="token string">"--cluster-enabled"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--cluster-config-file"</span><span class="token punctuation">,</span><span class="token string">"nodes-7004.conf"</span><span class="token punctuation">,</span><span class="token string">"--cluster-node-timeout"</span><span class="token punctuation">,</span><span class="token string">"5000"</span><span class="token punctuation">,</span><span class="token string">"--appendonly"</span><span class="token punctuation">,</span><span class="token string">"yes"</span><span class="token punctuation">,</span><span class="token string">"--bind"</span><span class="token punctuation">,</span><span class="token string">"0.0.0.0"</span><span class="token punctuation">,</span><span class="token string">"--protected-mode"</span><span class="token punctuation">,</span><span class="token string">"no"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> <span class="token string">"7004:6379"</span>
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./data/7004<span class="token punctuation">:</span>/data/redis
+    <span class="token key atrule">healthcheck</span><span class="token punctuation">:</span>
+      <span class="token key atrule">test</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"CMD"</span><span class="token punctuation">,</span> <span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span> <span class="token string">"-p"</span><span class="token punctuation">,</span> <span class="token string">"7004"</span><span class="token punctuation">,</span> <span class="token string">"ping"</span><span class="token punctuation">]</span>
+      <span class="token key atrule">interval</span><span class="token punctuation">:</span> 5s
+      <span class="token key atrule">timeout</span><span class="token punctuation">:</span> 3s
+      <span class="token key atrule">retries</span><span class="token punctuation">:</span> <span class="token number">5</span>
+
+  <span class="token key atrule">redis-init</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> myredis<span class="token punctuation">:</span>v1.0
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>cluster<span class="token punctuation">-</span>init
+    <span class="token key atrule">depends_on</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> redis1
+      <span class="token punctuation">-</span> redis2
+      <span class="token punctuation">-</span> redis3
+      <span class="token punctuation">-</span> redis4
+      <span class="token punctuation">-</span> redis5
+    <span class="token key atrule">entrypoint</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"/redis/redis-cli"</span><span class="token punctuation">,</span><span class="token string">"--cluster"</span><span class="token punctuation">,</span><span class="token string">"create"</span><span class="token punctuation">,</span>
+             <span class="token string">"redis1:6379"</span><span class="token punctuation">,</span><span class="token string">"redis2:6379"</span><span class="token punctuation">,</span><span class="token string">"redis3:6379"</span><span class="token punctuation">,</span><span class="token string">"redis4:6379"</span><span class="token punctuation">,</span><span class="token string">"redis5:6379"</span><span class="token punctuation">,</span>
+             <span class="token string">"--cluster-replicas"</span><span class="token punctuation">,</span><span class="token string">"0"</span><span class="token punctuation">,</span><span class="token string">"--cluster-yes"</span><span class="token punctuation">]</span>
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> <span class="token string">'no'</span>
+
+<span class="token key atrule">networks</span><span class="token punctuation">:</span>
+  <span class="token key atrule">default</span><span class="token punctuation">:</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>cluster<span class="token punctuation">-</span>net
+    <span class="token key atrule">driver</span><span class="token punctuation">:</span> bridge<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这样一来，我们就完成了 Redis 集群的容器编排配置。</p>
+<h3><span id="启动-redis-集群">启动 Redis 集群</span></h3><p>首先，我们要将镜像编译好，可以直接使用指令 <code>docker build -t</code> 来完成编译，在这里我利用一个简单的脚本实现了更加简单的自动化部署，避免了每次指定构建时间参数的时候需要手动实现：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token shebang important">#!/usr/bin/env bash</span>
+<span class="token builtin class-name">set</span> <span class="token parameter variable">-euo</span> pipefail
+
+<span class="token comment"># build.sh [version] [tag]</span>
+<span class="token comment"># Example: ./build.sh 7.0.15 myredis:7.0.15</span>
+
+<span class="token assign-left variable">IMAGE_VERSION</span><span class="token operator">=</span><span class="token variable">$&#123;1<span class="token operator">:-</span>latest&#125;</span>
+<span class="token assign-left variable">REDIS_VERSION</span><span class="token operator">=</span><span class="token variable">$&#123;2<span class="token operator">:-</span>7.0.15&#125;</span>
+<span class="token assign-left variable">IMAGE_TAG</span><span class="token operator">=</span>myredis:<span class="token variable">$&#123;IMAGE_VERSION&#125;</span>
+<span class="token assign-left variable">BUILD_DATE</span><span class="token operator">=</span><span class="token variable"><span class="token variable">$(</span><span class="token function">date</span> <span class="token parameter variable">-u</span> +%Y-%m-%dT%H:%M:%SZ<span class="token variable">)</span></span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Building <span class="token variable">$&#123;IMAGE_TAG&#125;</span> with REDIS_VERSION=<span class="token variable">$&#123;REDIS_VERSION&#125;</span> BUILD_DATE=<span class="token variable">$&#123;BUILD_DATE&#125;</span>"</span>
+
+<span class="token function">docker</span> build <span class="token punctuation">\</span>
+  --build-arg <span class="token assign-left variable">REDIS_VERSION</span><span class="token operator">=</span><span class="token variable">$&#123;REDIS_VERSION&#125;</span> <span class="token punctuation">\</span>
+  --build-arg <span class="token assign-left variable">BUILD_DATE</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$&#123;BUILD_DATE&#125;</span>"</span> <span class="token punctuation">\</span>
+  --build-arg <span class="token assign-left variable">IMAGE_VERSION</span><span class="token operator">=</span><span class="token string">"<span class="token variable">$&#123;IMAGE_VERSION&#125;</span>"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-t</span> <span class="token variable">$&#123;IMAGE_TAG&#125;</span> <span class="token builtin class-name">.</span>
+
+<span class="token builtin class-name">echo</span> <span class="token string">"Built <span class="token variable">$&#123;IMAGE_TAG&#125;</span>"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>执行该脚本后，我们就可以看到编译好的镜像了：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis  
+╰─➤  ./build.sh v1.0                                                                                                                                                                                <span class="token number">1</span> ↵
+Building myredis:v1.0 with <span class="token assign-left variable">REDIS_VERSION</span><span class="token operator">=</span><span class="token number">7.0</span>.15 <span class="token assign-left variable">BUILD_DATE</span><span class="token operator">=</span><span class="token number">2025</span>-09-13T08:18:28Z
+<span class="token punctuation">[</span>+<span class="token punctuation">]</span> Building <span class="token number">1</span>.7s <span class="token punctuation">(</span><span class="token number">15</span>/15<span class="token punctuation">)</span> FINISHED                                                                                                                                                       docker:default
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>internal<span class="token punctuation">]</span> load build definition from Dockerfile                                                                                                                                               <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> transferring dockerfile: <span class="token number">2</span>.15kB                                                                                                                                                             <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>internal<span class="token punctuation">]</span> load metadata <span class="token keyword">for</span> docker.io/library/ubuntu:22.04                                                                                                                                    <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>internal<span class="token punctuation">]</span> load metadata <span class="token keyword">for</span> docker.io/library/busybox:1.37.0-glibc                                                                                                                            <span class="token number">0</span>.8s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>internal<span class="token punctuation">]</span> load .dockerignore                                                                                                                                                                  <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> transferring context: 2B                                                                                                                                                                    <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>buildstage <span class="token number">1</span>/6<span class="token punctuation">]</span> FROM docker.io/library/ubuntu:22.04                                                                                                                                           <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>stage-1 <span class="token number">1</span>/3<span class="token punctuation">]</span> FROM docker.io/library/busybox:1.37.0-glibc@sha256:a2c55ed708c564a69a695e0a3bb16a4c47d2bb268d2ebd06f0d77336801b80de                                                       <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>stage-1 <span class="token number">2</span>/3<span class="token punctuation">]</span> RUN <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /data/redis /redis                                                                                                                                                  <span class="token number">0</span>.4s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>internal<span class="token punctuation">]</span> load build context                                                                                                                                                                  <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> transferring context: 74B                                                                                                                                                                   <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>buildstage <span class="token number">2</span>/6<span class="token punctuation">]</span> RUN <span class="token function">sed</span> <span class="token parameter variable">-i</span> <span class="token string">'s@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g'</span> /etc/apt/sources.list <span class="token operator">||</span> <span class="token boolean">true</span> <span class="token operator">&amp;&amp;</span>  <span class="token function">apt-get</span> update <span class="token operator">&amp;&amp;</span> <span class="token function">apt-get</span> <span class="token function">install</span> <span class="token parameter variable">-y</span> --no-install-recommends   build-  <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>buildstage <span class="token number">3</span>/6<span class="token punctuation">]</span> WORKDIR /tmp                                                                                                                                                           <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>buildstage <span class="token number">4</span>/6<span class="token punctuation">]</span> COPY redis-7.0.15.tar.gz /tmp/                                                                                                                                         <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>buildstage <span class="token number">5</span>/6<span class="token punctuation">]</span> RUN <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /tmp/build <span class="token operator">&amp;&amp;</span>  <span class="token function">tar</span> xzf /tmp/redis-7.0.15.tar.gz <span class="token parameter variable">-C</span> /tmp/build <span class="token operator">&amp;&amp;</span>  <span class="token builtin class-name">cd</span> /tmp/build/redis-7.0.15 <span class="token operator">&amp;&amp;</span>  <span class="token function">make</span> <span class="token operator">&amp;&amp;</span>  <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /redis <span class="token operator">&amp;&amp;</span>  <span class="token function">mv</span> src/redis-server src/re  <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> CACHED <span class="token punctuation">[</span>buildstage <span class="token number">6</span>/6<span class="token punctuation">]</span> COPY redis.conf /redis/                                                                                                                                                <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token punctuation">[</span>stage-1 <span class="token number">3</span>/3<span class="token punctuation">]</span> COPY <span class="token parameter variable">--from</span><span class="token operator">=</span>buildstage /redis /redis                                                                                                                                             <span class="token number">0</span>.2s
+ <span class="token operator">=</span><span class="token operator">></span> exporting to image                                                                                                                                                                             <span class="token number">0</span>.1s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> exporting layers                                                                                                                                                                            <span class="token number">0</span>.1s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> writing image sha256:71e3a1af7bb7b86893b9f696f7c7ebbf25b7e9ccb1029e1099f4d3897c908ac9                                                                                                       <span class="token number">0</span>.0s
+ <span class="token operator">=</span><span class="token operator">></span> <span class="token operator">=</span><span class="token operator">></span> naming to docker.io/library/myredis:v1.0                                                                                                                                                    <span class="token number">0</span>.0s
+Built myredis:v1.0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，我们的镜像经过多阶段构建后，体积非常小，只有 21.6MB：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis  
+╰─➤  <span class="token function">docker</span> images <span class="token operator">|</span> <span class="token function">grep</span> myredis     
+myredis                                                                                       v1.0                     71e3a1af7bb7   <span class="token number">24</span> minutes ago   <span class="token number">21</span>.6MB<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>然后，我们可以通过以下命令来启动 Redis 集群：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis  
+╰─➤  <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
+<span class="token punctuation">[</span>+<span class="token punctuation">]</span> Running <span class="token number">7</span>/7
+ ✔ Network redis-cluster-net     Created                                                                                                                                                           <span class="token number">0</span>.1s 
+ ✔ Container redis3              Started                                                                                                                                                           <span class="token number">0</span>.7s 
+ ✔ Container redis4              Started                                                                                                                                                           <span class="token number">0</span>.7s 
+ ✔ Container redis5              Started                                                                                                                                                           <span class="token number">0</span>.8s 
+ ✔ Container redis1              Started                                                                                                                                                           <span class="token number">0</span>.6s 
+ ✔ Container redis2              Started                                                                                                                                                           <span class="token number">0</span>.8s 
+ ✔ Container redis-cluster-init  Started                                                                                                                                                           <span class="token number">0</span>.8s<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>接下来我们测试一下集群是否搭建成功：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis
+╰─➤  <span class="token function">docker</span> logs redis-cluster-init <span class="token parameter variable">--tail</span> <span class="token number">200</span> <span class="token operator">||</span> <span class="token boolean">true</span>                                                                                                                                                                                                                  <span class="token number">137</span> ↵
+<span class="token operator">>></span><span class="token operator">></span> Performing <span class="token builtin class-name">hash</span> slots allocation on <span class="token number">5</span> nodes<span class="token punctuation">..</span>.
+Master<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">0</span> - <span class="token number">3276</span>
+Master<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">3277</span> - <span class="token number">6553</span>
+Master<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">6554</span> - <span class="token number">9829</span>
+Master<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">9830</span> - <span class="token number">13106</span>
+Master<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">13107</span> - <span class="token number">16383</span>
+M: d424961a8086f707d1072e7fbd11c25293b2c685 redis1:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-3276<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: ad75ddd3d447aea214761bc940a58c3a427cccae redis2:6379
+   slots:<span class="token punctuation">[</span><span class="token number">3277</span>-6553<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: a29e96133edb3fa8fda04abcfc6dcd46d5d10c87 redis3:6379
+   slots:<span class="token punctuation">[</span><span class="token number">6554</span>-9829<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3276</span> slots<span class="token punctuation">)</span> master
+M: b40d3c33a3655881b8735835a84b4cbd9cb85f82 redis4:6379
+   slots:<span class="token punctuation">[</span><span class="token number">9830</span>-13106<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: bb68accc55da6082154662bf382aaa1a6b87a231 redis5:6379
+   slots:<span class="token punctuation">[</span><span class="token number">13107</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+<span class="token operator">>></span><span class="token operator">></span> Nodes configuration updated
+<span class="token operator">>></span><span class="token operator">></span> Assign a different config epoch to each <span class="token function">node</span>
+<span class="token operator">>></span><span class="token operator">></span> Sending CLUSTER MEET messages to <span class="token function">join</span> the cluster
+Waiting <span class="token keyword">for</span> the cluster to <span class="token function">join</span>
+
+<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> redis1:6379<span class="token punctuation">)</span>
+M: d424961a8086f707d1072e7fbd11c25293b2c685 redis1:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-3276<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: a29e96133edb3fa8fda04abcfc6dcd46d5d10c87 <span class="token number">172.20</span>.0.4:6379
+   slots:<span class="token punctuation">[</span><span class="token number">6554</span>-9829<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3276</span> slots<span class="token punctuation">)</span> master
+M: bb68accc55da6082154662bf382aaa1a6b87a231 <span class="token number">172.20</span>.0.6:6379
+   slots:<span class="token punctuation">[</span><span class="token number">13107</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: ad75ddd3d447aea214761bc940a58c3a427cccae <span class="token number">172.20</span>.0.5:6379
+   slots:<span class="token punctuation">[</span><span class="token number">3277</span>-6553<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+M: b40d3c33a3655881b8735835a84b4cbd9cb85f82 <span class="token number">172.20</span>.0.2:6379
+   slots:<span class="token punctuation">[</span><span class="token number">9830</span>-13106<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">3277</span> slots<span class="token punctuation">)</span> master
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
+<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，集群已经成功搭建完成了，我们可以通过 <code>redis-cli</code> 来连接集群：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis
+╰─➤  <span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> redis3 <span class="token function">sh</span>
+/ <span class="token comment"># keys *</span>
+sh: keys: not found
+/ <span class="token comment"># /redis/redis-cli -c</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> keys *
+<span class="token punctuation">(</span>empty array<span class="token punctuation">)</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> <span class="token builtin class-name">set</span> k1 <span class="token number">2</span>
+-<span class="token operator">></span> Redirected to slot <span class="token punctuation">[</span><span class="token number">12706</span><span class="token punctuation">]</span> located at <span class="token number">172.20</span>.0.3:6379
+OK
+<span class="token number">172.20</span>.0.3:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> <span class="token builtin class-name">exit</span>
+/ <span class="token comment"># exit</span>
+╭─ljx@VM-16-15-debian ~/docker_test/redis_cluster/redis
+╰─➤  <span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> redis4 <span class="token function">sh</span>
+/ <span class="token comment">#  /redis/redis-cli -c</span>
+<span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> get k1
+<span class="token string">"2"</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，我们成功地在 <code>redis3</code> 节点上设置了一个键 <code>k1</code>，并且在 <code>redis4</code> 节点上成功获取到了该键的值，说明我们的 Redis 集群已经搭建成功并且工作正常。</p>
+<h3><span id="改进使用-tls-加密-redis-集群通信">改进：使用 TLS 加密 Redis 集群通信</span></h3><p>在生产环境中，为了确保数据传输的安全性，建议启用 TLS 加密来保护 Redis 集群的通信。以下是如何在 Docker Compose 配置中启用 TLS 的步骤：</p>
+<p>一般来说，系统默认会有一些自签名的证书，我们可以直接利用这些证书来启用 TLS 功能。</p>
+<p>首先我们需要在 <code>redis.conf</code> 配置文件中添加以下 TLS 相关配置：</p>
+<pre class="line-numbers language-conf" data-language="conf"><code class="language-conf">tls-port 6379
+port 0
+tls-cert-file &#x2F;redis&#x2F;certs&#x2F;redis.crt
+tls-key-file &#x2F;redis&#x2F;certs&#x2F;redis.key
+tls-ca-cert-file &#x2F;redis&#x2F;certs&#x2F;ca.crt
+tls-auth-clients yes
+cluster-announce-tls-port 6379
+cluster-announce-port 0<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这些配置项的含义如下：</p>
+<ul>
+<li><code>tls-port 6379</code>：指定 Redis 监听的 TLS 端口。</li>
+<li><code>port 0</code>：禁用非 TLS 端口，确保所有通信都</li>
+<li>通过 TLS 进行。</li>
+<li><code>tls-cert-file</code>、<code>tls-key-file</code>、<code>tls-ca-cert-file</code>：指定 TLS 证书、私钥和 CA 证书的路径。</li>
+<li><code>tls-auth-clients yes</code>：启用客户端认证，确保只有持有有效证书的客户端才能连接。</li>
+<li><code>cluster-announce-tls-port 6379</code> 和 <code>cluster-announce-port 0</code>：配置集群节点在集群中宣布的 TLS 端口和非 TLS 端口。</li>
+</ul>
+<p>然后，我们通过修改 <code>Dockerfile</code> 来将证书文件复制到镜像中：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION=7.0.15</span>
+<span class="token instruction"><span class="token keyword">ARG</span> UBUNTU_VERSION=22.04</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUSYBOX_VERSION=1.37.0</span>
+
+<span class="token instruction"><span class="token keyword">FROM</span> ubuntu:<span class="token variable">$&#123;UBUNTU_VERSION&#125;</span> <span class="token keyword">AS</span> buildstage</span>
+<span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+
+<span class="token comment"># Use a local mirror for faster apt (replace only if needed), install build deps</span>
+<span class="token instruction"><span class="token keyword">RUN</span> sed -i <span class="token string">'s@//.*archive.ubuntu.com@//mirrors.ustc.edu.cn@g'</span> /etc/apt/sources.list || true &amp;&amp; <span class="token operator">\</span>
+  apt-get update &amp;&amp; apt-get install -y --no-install-recommends ca-certificates <span class="token operator">\</span>
+    build-essential <span class="token operator">\</span>
+    ca-certificates <span class="token operator">\</span>
+    wget <span class="token operator">\</span>
+    libssl-dev <span class="token operator">\</span>
+  &amp;&amp; rm -rf /var/lib/apt/lists/*</span>
+
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /tmp/certs &amp;&amp; cp -r /etc/ssl/certs/* /tmp/certs/</span>
+
+<span class="token instruction"><span class="token keyword">WORKDIR</span> /tmp</span>
+
+<span class="token comment"># Copy source tarball, extract, build and cleanup in a single RUN to avoid</span>
+<span class="token comment"># leaving the tarball or full source tree in intermediate image layers.</span>
+<span class="token comment"># Note: you can use ADD redis-7.0.11.tar.gz /tmp/ to let Docker auto-extract,</span>
+<span class="token comment"># but COPY + explicit tar is preferred for clarity and to avoid unintended</span>
+<span class="token comment"># remote download side-effects when a URL is passed to ADD.</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz /tmp/</span>
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /tmp/build &amp;&amp; <span class="token operator">\</span>
+  tar xzf /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz -C /tmp/build &amp;&amp; <span class="token operator">\</span>
+  cd /tmp/build/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span> &amp;&amp; <span class="token operator">\</span>
+  make BUILD_TLS=yes LDFLAGS=<span class="token string">"-static"</span> &amp;&amp; <span class="token operator">\</span>
+  mkdir -p /redis &amp;&amp; <span class="token operator">\</span>
+  mv src/redis-server src/redis-cli /redis/ &amp;&amp; <span class="token operator">\</span>
+  rm -rf /tmp/build /tmp/redis-<span class="token variable">$&#123;REDIS_VERSION&#125;</span>.tar.gz</span>
+
+<span class="token comment"># Copy the provided configuration into the image</span>
+<span class="token instruction"><span class="token keyword">COPY</span> redis.conf /redis/</span>
+
+<span class="token instruction"><span class="token keyword">FROM</span> busybox:<span class="token variable">$&#123;BUSYBOX_VERSION&#125;</span></span>
+
+<span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /data/redis</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">buildstage</span></span> /redis /redis</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">buildstage</span></span> /tmp/certs /redis/certs</span>
+<span class="token instruction"><span class="token keyword">EXPOSE</span> 6379</span>
+
+<span class="token comment"># Use ENTRYPOINT so the image runs redis-server with the supplied config by default</span>
+<span class="token instruction"><span class="token keyword">ENTRYPOINT</span> [<span class="token string">"/redis/redis-server"</span>, <span class="token string">"/redis/redis.conf"</span>]</span>
+
+<span class="token comment"># Build-time metadata: re-declare ARGs in final stage and persist as LABELs</span>
+<span class="token instruction"><span class="token keyword">ARG</span> REDIS_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUILD_DATE=unspecified</span>
+<span class="token instruction"><span class="token keyword">ARG</span> UBUNTU_VERSION</span>
+<span class="token instruction"><span class="token keyword">ARG</span> IMAGE_VERSION=latest</span>
+<span class="token instruction"><span class="token keyword">ARG</span> BUSYBOX_VERSION</span>
+
+<span class="token instruction"><span class="token keyword">LABEL</span> org.opencontainers.image.version=<span class="token string">"$&#123;IMAGE_VERSION&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.base.name=<span class="token string">"ubuntu:$&#123;UBUNTU_VERSION&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.ref.name=<span class="token string">"myredis"</span> <span class="token operator">\</span>
+  org.opencontainers.image.created=<span class="token string">"$&#123;BUILD_DATE&#125;"</span> <span class="token operator">\</span>
+  org.opencontainers.image.vendor=<span class="token string">"ljx"</span> <span class="token operator">\</span>
+  org.opencontainers.image.title=<span class="token string">"Redis Cluster"</span> <span class="token operator">\</span>
+  org.opencontainers.image.description=<span class="token string">"Redis Cluster(base on Redis: $&#123;REDIS_VERSION&#125;) build on busybox:$&#123;BUSYBOX_VERSION&#125;-glibc"</span></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个修改后的 <code>Dockerfile</code> 中，我们做了以下改动：</p>
+<h4><span id="1️⃣-基础镜像">1️⃣ 基础镜像</span></h4><ul>
+<li><strong>非 TLS 版本</strong>：<br>使用 <code>busybox:glibc</code> 作为最终镜像，依赖系统动态库（如 glibc）运行 Redis。</li>
+<li><strong>TLS 版本</strong>：<br>使用普通 <code>busybox</code>，结合静态编译的 Redis，Redis 二进制包含所有依赖库（包括 OpenSSL&#x2F;TLS），不再依赖镜像中的动态库。</li>
+</ul>
+<blockquote>
+<p>🔹 变化点：静态编译 + TLS 支持，让镜像可以用更轻量的 BusyBox，但二进制文件本身体积略增。</p>
+</blockquote>
+<hr>
+<h4><span id="2️⃣-编译参数">2️⃣ 编译参数</span></h4><ul>
+<li><p><strong>非 TLS 版本</strong>：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker">make<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>默认生成动态链接 Redis，不包含 TLS 功能。</p>
+</li>
+<li><p><strong>TLS 版本</strong>：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker">make BUILD_TLS=yes LDFLAGS="-static"<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<ul>
+<li><code>BUILD_TLS=yes</code>：开启 TLS&#x2F;SSL 编译支持，使 Redis 支持加密的 TCP 通信。</li>
+<li><code>LDFLAGS=&quot;-static&quot;</code>：静态编译所有依赖库（包括 OpenSSL），无需依赖宿主系统的动态库。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>🔹 变化点：通过静态编译 + TLS 支持，Redis 在镜像内自包含所有库，并可以安全传输数据。</p>
+</blockquote>
+<hr>
+<h4><span id="3️⃣-系统证书ca">3️⃣ 系统证书（CA）</span></h4><ul>
+<li><p><strong>非 TLS 版本</strong>：<br>不需要系统 CA 文件，Redis 与客户端通信都是明文。</p>
+</li>
+<li><p><strong>TLS 版本</strong>：</p>
+<pre class="line-numbers language-docker" data-language="docker"><code class="language-docker"><span class="token instruction"><span class="token keyword">RUN</span> mkdir -p /tmp/certs &amp;&amp; cp -r /etc/ssl/certs/* /tmp/certs/</span>
+<span class="token instruction"><span class="token keyword">COPY</span> <span class="token options"><span class="token property">--from</span><span class="token punctuation">=</span><span class="token string">buildstage</span></span> /tmp/certs /redis/certs</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<ul>
+<li>将宿主系统的 CA 证书拷贝到镜像中，用于 Redis TLS 验证客户端或集群节点证书。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>🔹 变化点：增加了对 CA 证书的支持，使 Redis 能够验证 TLS 连接的合法性，保证集群节点和客户端之间安全通信。</p>
+</blockquote>
+<hr>
+<h4><span id="4️⃣-镜像大小">4️⃣ 镜像大小</span></h4><ul>
+<li><strong>非 TLS 版本</strong>：约 22MB（动态依赖库，镜像较小）</li>
+<li><strong>TLS 静态编译版本</strong>：约 33MB（静态编译 + OpenSSL&#x2F;TLS 库）</li>
+</ul>
+<blockquote>
+<p>🔹 变化点：增加的体积主要来源于静态编译的 OpenSSL&#x2F;TLS 库，被打包进 Redis 二进制。</p>
+</blockquote>
+<hr>
+<h4><span id="5️⃣-总结新增功能">5️⃣ 总结新增功能</span></h4><ol>
+<li>支持 <strong>TLS&#x2F;SSL 加密</strong>，保证 Redis 集群与客户端通信安全。</li>
+<li>通过 <strong>静态编译</strong>，减少对底层系统库依赖，提高可移植性。</li>
+<li>镜像内包含 <strong>CA 证书</strong>，可验证集群节点和客户端的证书合法性。</li>
+<li>保留原有的轻量 BusyBox 镜像特性，同时适配安全生产环境需求。</li>
+</ol>
+<blockquote>
+<p>🔹 博客小结语：<br>通过这次改造，Redis 镜像不仅保留了原有的轻量化特性，还增加了数据传输安全保障，为未来生产环境部署 TLS Redis 集群打下基础。</p>
+</blockquote>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
