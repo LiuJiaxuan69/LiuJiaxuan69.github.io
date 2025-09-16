@@ -251,7 +251,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a></li><li><a href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a></li></ul>
+            <ul><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a></li><li><a href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li><li><a href="/2025/08/20/Redis/redis_trans/">Redis 事务</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/08/19/Redis/redis_rdb/">Redis 持久化</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -299,17 +299,11 @@
 </li>
 <li><a href="#hash-%E7%9B%B8%E5%85%B3%E6%8C%87%E4%BB%A4%E6%B1%87%E6%80%BB%E8%A1%A8">hash 相关指令汇总表</a></li>
 <li><a href="#%E5%86%85%E9%83%A8%E7%BC%96%E7%A0%81">内部编码</a></li>
-</ul>
-<ul>
-<li><a href="#small-number-of-entries-and-the-biggest-entry-does-not-exceed-a-given">small number of entries, and the biggest entry does not exceed a given</a></li>
-<li><a href="#threshold-these-thresholds-can-be-configured-using-the-following-directives">threshold. These thresholds can be configured using the following directives.</a><ul>
 <li><a href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E7%BC%93%E5%AD%98">使用场景：缓存</a></li>
 <li><a href="#%E4%B8%8D%E5%90%8C%E7%BC%93%E5%AD%98%E6%96%B9%E5%BC%8F%E4%B9%8B%E9%97%B4%E7%9A%84%E6%AF%94%E8%BE%83">不同缓存方式之间的比较</a><ul>
 <li><a href="#%E5%8E%9F%E7%94%9F%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E4%BD%BF%E7%94%A8%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E6%AF%8F%E4%B8%AA%E5%B1%9E%E6%80%A7%E4%B8%80%E4%B8%AA%E9%94%AE">原生字符串类型⸺使⽤字符串类型，每个属性⼀个键</a></li>
 <li><a href="#%E5%BA%8F%E5%88%97%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B%E4%BE%8B%E5%A6%82-json-%E6%A0%BC%E5%BC%8F">序列化字符串类型，例如 JSON 格式</a></li>
 <li><a href="#%E5%93%88%E5%B8%8C%E7%B1%BB%E5%9E%8B">哈希类型</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -577,11 +571,11 @@ HINCRBYFLOAT key field increment<span aria-hidden="true" class="line-numbers-row
 </li>
 </ul>
 <p>若哈希中字段数量过多或者 value 过长都会使得存储方式变为 hashtable，而具体数值是可以在 conf 文件中被配置的：</p>
-<pre class="line-numbers language-conf" data-language="conf"><code class="language-conf"># Hashes are encoded using a memory efficient data structure when they have a
-# small number of entries, and the biggest entry does not exceed a given
-# threshold. These thresholds can be configured using the following directives.
-hash-max-listpack-entries 512
-hash-max-listpack-value 64<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># Hashes are encoded using a memory efficient data structure when they have a</span>
+<span class="token comment"># small number of entries, and the biggest entry does not exceed a given</span>
+<span class="token comment"># threshold. These thresholds can be configured using the following directives.</span>
+hash-max-listpack-entries <span class="token number">512</span>
+hash-max-listpack-value <span class="token number">64</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
 <p>下面是不同长度的 value 存储方式的区别：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">127.0</span>.0.1:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> hset k1 f1 v1
