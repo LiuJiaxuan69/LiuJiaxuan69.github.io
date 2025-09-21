@@ -215,18 +215,18 @@
         </div>
         
             <div id="post0">
-                <p>九月 19, 2025</p>
+                <p>九月 20, 2025</p>
                 <h2>
-                    <a href="/2025/09/19/Redis/redis_sentinel/" title="Redis 哨兵机制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 哨兵机制</a>
+                    <a href="/2025/09/20/Redis/redis_cluster/" title="Redis 集群" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 集群</a>
                 </h2>
                 <p class="summary">
 
 
-哨兵的工作原理
-Redis Sentinel 高可用集群部署与实践
-实验环境架构
-目录结构设计
-关键配置文件...</p>
+什么是 Redis 集群
+数据分片算法
+哈希求余法
+一致性哈希算法
+Redis 集群的分片算法–哈希槽分区算...</p>
             </div>
             
 
@@ -235,10 +235,38 @@ Redis Sentinel 高可用集群部署与实践
         
 <div class="post">
     <!-- 修改点1：主图链接添加强制跳转 -->
+    <a href="/2025/09/19/Redis/redis_sentinel/" 
+       title="Redis 哨兵机制"
+       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
+        <img src="/img/bg5.jpg" class="cover" width="680" height="440">
+    </a>
+    
+    <div class="else" style="word-break: break-all;">
+        <p>九月 19, 2025</p>
+        
+        <!-- 修改点2：标题链接同步修改 -->
+        <h3><a href="/2025/09/19/Redis/redis_sentinel/" title="Redis 哨兵机制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 哨兵机制</a></h3>
+        
+        <p>
+
+
+哨兵的工作原理
+Redis Sentinel 高可用集群部署与实践
+实验环境架构
+目录结构设计
+关键配置文件详解
+重要配置注意事项
+故障转移测试实验...</p>
+    </div>
+</div>
+
+
+<div class="post">
+    <!-- 修改点1：主图链接添加强制跳转 -->
     <a href="/2025/09/12/Docker/docker_cluster/" 
        title="Docker 集群化部署"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg9.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -266,7 +294,7 @@ Docker 部署 Redis 集群...</p>
     <a href="/2025/09/08/Docker/docker_dockerfile/" 
        title="Dockerfile详解"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -294,7 +322,7 @@ C...</p>
     <a href="/2025/09/05/Docker/docker_compose/" 
        title="Docker Compose（容器编排）使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -319,7 +347,7 @@ Docker Compose 文...</p>
     <a href="/2025/09/03/Docker/docker_network/" 
        title="Docker Network（网络）使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg3.png" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -344,7 +372,7 @@ Docker 网络架构简介
     <a href="/2025/09/02/Docker/docker_volume/" 
        title="Docker Volume（存储卷）使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg7.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg1.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -374,7 +402,7 @@ Docker 网络架构简介
     <a href="/2025/08/31/Docker/docker_container/" 
        title="Docker Container（容器）使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg2.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -405,7 +433,7 @@ docker cr...</p>
     <a href="/2025/08/30/Docker/docker_image/" 
        title="Docker Image（镜像）使用指南"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg8.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -433,7 +461,7 @@ Docker Image 介绍
     <a href="/2025/08/28/Docker/docker_use/" 
        title="Docker 使用入门"
        onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg6.jpg" class="cover" width="680" height="440">
+        <img src="/img/bg4.jpg" class="cover" width="680" height="440">
     </a>
     
     <div class="else" style="word-break: break-all;">
@@ -453,38 +481,6 @@ Docker Image 介绍
 
 二、镜像仓库分类体系
 2.1 ...</p>
-    </div>
-</div>
-
-
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/2025/08/23/Docker/docker_key_tech/" 
-       title="Docker 底层关键技术-namespace && cgroup"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/img/bg10.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>八月 23, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/2025/08/23/Docker/docker_key_tech/" title="Docker 底层关键技术-namespace &amp;&amp; cgroup" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></h3>
-        
-        <p>
-
-
-namespace
-dd 命令
-mkfs 命令
-df 命令
-mount 命令
-unshare 命令
-mount 隔离
-
-
-cgroup
-管理基础：挂...</p>
     </div>
 </div>
 

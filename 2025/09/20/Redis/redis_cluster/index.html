@@ -1,0 +1,2275 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redis 集群 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是 Redis 集群
+数据分片算法
+哈希求余法
+一致性哈希算法
+Redis 集群的分片算法–哈希槽分区算法
+
+
+集群搭建实践（基于 Docker）
+第一步：创建目录和配置
+第二步：创建 D,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Redis 集群 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是 Redis 集群
+数据分片算法
+哈希求余法
+一致性哈希算法
+Redis 集群的分片算法–哈希槽分区算法
+
+
+集群搭建实践（基于 Docker）
+第一步：创建目录和配置
+第二步：创建 D,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Redis 集群 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是 Redis 集群
+数据分片算法
+哈希求余法
+一致性哈希算法
+Redis 集群的分片算法–哈希槽分区算法
+
+
+集群搭建实践（基于 Docker）
+第一步：创建目录和配置
+第二步：创建 D,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">Redis 集群</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">67</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/19/Redis/redis_rdb/">Redis 持久化</a></li><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">Redis 集群</h1>
+            <div class="stuff">
+                <span>九月 20, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Redis/" rel="tag">Redis</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E9%9B%86%E7%BE%A4/" rel="tag">集群</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-redis-%E9%9B%86%E7%BE%A4">什么是 Redis 集群</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E5%88%86%E7%89%87%E7%AE%97%E6%B3%95">数据分片算法</a><ul>
+<li><a href="#%E5%93%88%E5%B8%8C%E6%B1%82%E4%BD%99%E6%B3%95">哈希求余法</a></li>
+<li><a href="#%E4%B8%80%E8%87%B4%E6%80%A7%E5%93%88%E5%B8%8C%E7%AE%97%E6%B3%95">一致性哈希算法</a></li>
+<li><a href="#redis-%E9%9B%86%E7%BE%A4%E7%9A%84%E5%88%86%E7%89%87%E7%AE%97%E6%B3%95-%E5%93%88%E5%B8%8C%E6%A7%BD%E5%88%86%E5%8C%BA%E7%AE%97%E6%B3%95">Redis 集群的分片算法–哈希槽分区算法</a></li>
+</ul>
+</li>
+<li><a href="#%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA%E5%AE%9E%E8%B7%B5%E5%9F%BA%E4%BA%8E-docker">集群搭建实践（基于 Docker）</a><ul>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E5%88%9B%E5%BB%BA%E7%9B%AE%E5%BD%95%E5%92%8C%E9%85%8D%E7%BD%AE">第一步：创建目录和配置</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E5%88%9B%E5%BB%BA-docker-compose-%E6%96%87%E4%BB%B6">第二步：创建 Docker Compose 文件</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E5%90%AF%E5%8A%A8-redis-%E5%AE%9E%E4%BE%8B">第三步：启动 Redis 实例</a></li>
+<li><a href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E6%9E%84%E5%BB%BA%E9%9B%86%E7%BE%A4">第四步：构建集群</a></li>
+<li><a href="#%E4%B8%BB%E8%8A%82%E7%82%B9%E5%AE%95%E6%9C%BA%E6%B5%8B%E8%AF%95">主节点宕机测试</a></li>
+<li><a href="#%E9%9B%86%E7%BE%A4%E6%89%A9%E5%AE%B9%E6%B5%8B%E8%AF%95">集群扩容测试</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<h2><span id="什么是-redis-集群">什么是 Redis 集群</span></h2><p>之前我们讲到 Redis 哨兵机制，它主要用于提高 Redis 主从复制结构的高可用性，能够在主节点出现故障时自动进行故障转移，保证集群的持续可用性。然而，哨兵机制并不能解决数据分片和扩展性的问题。为了解决这些问题，Redis 提供了集群（Cluster）机制。Redis 集群允许将数据分布在多个节点上，实现数据的分片存储，从而提高系统的扩展性和性能。</p>
+<p>Redis 集群通过将数据分片存储在多个节点上，实现了水平扩展。每个节点负责存储一部分数据，并且节点之间可以相互通信，以确保数据的一致性和完整性。Redis 集群使用一种称为哈希槽（hash slot）的机制来管理数据的分布。整个键空间被划分为 16384 个哈希槽，每个键通过哈希函数映射到一个哈希槽，然后该哈希槽被分配给某个节点进行存储。</p>
+<p>下面是 Redis 集群的概览图：</p>
+<p><img src="/img/Redis/cluster/cluster_principle.png" alt="principle"></p>
+<p>在上述图中：</p>
+<ul>
+<li>Master1 和 Slave11 和 Slave12 保存的是同样的数据. 占总数据的 1&#x2F;3</li>
+<li>Master2 和 Slave21 和 Slave22 保存的是同样的数据. 占总数据的 1&#x2F;3</li>
+<li>Master3 和 Slave31 和 Slave32 保存的是同样的数据. 占总数据的 1&#x2F;3</li>
+</ul>
+<p>这三组机器的存储数据是不一样的. 这样就实现了数据的分片存储.</p>
+<p>每个 Slave 都是对应 Master 的备份，当主节点挂了，Slave 会自动提升为 Master，保证数据的高可用性。<br>每个红框部分都可以成为是一个<strong>分片</strong>，每个分片都可以独立工作，互不影响。<br>如果全量数据进一步增大，可以通过增加分片的方式来扩展集群的存储能力。</p>
+<p>分片机制让每一个节点都承担了自己的一部分责任，这样使得即便有某一个集群组完全挂掉了，所影响到的也只是那一部分的数据，因此集群的健壮性比哨兵要强不少，而集群本身就包含了哨兵机制，所以在资源管理过于繁忙且服务器资源足够的情况下，更推荐通过 Redis 集群来作为生产环境的工具。</p>
+<p>下面是哨兵和集群的对比图：</p>
+<pre class="mermaid">graph TD
+    subgraph SentinelMode[哨兵模式]
+        S_Master[主节点<br>写入/读取]
+        S_Slave1[从节点1<br>读取/备份]
+        S_Slave2[从节点2<br>读取/备份]
+
+        S_Sentinel1[Sentinel1]
+        S_Sentinel2[Sentinel2]
+        S_Sentinel3[Sentinel3]
+
+        S_Master -.-> S_Slave1
+        S_Master -.-> S_Slave2
+        S_Sentinel1 -.监控.-> S_Master
+        S_Sentinel2 -.监控.-> S_Master
+        S_Sentinel3 -.监控.-> S_Master
+    end
+
+    subgraph ClusterMode[集群模式]
+        C_Shard1[分片1<br>主节点]
+        C_Shard1_Slave[分片1从节点]
+        C_Shard2[分片2<br>主节点]
+        C_Shard2_Slave[分片2从节点]
+        C_Shard3[分片3<br>主节点]
+        C_Shard3_Slave[分片3从节点]
+
+        C_Shard1 -.-> C_Shard1_Slave
+        C_Shard2 -.-> C_Shard2_Slave
+        C_Shard3 -.-> C_Shard3_Slave
+
+        C_Shard1 -- 集群总线 --> C_Shard2
+        C_Shard2 -- 集群总线 --> C_Shard3
+        C_Shard3 -- 集群总线 --> C_Shard1
+    end
+
+    classDef master fill:#ff9999,stroke:#333
+    classDef slave fill:#99ccff,stroke:#333
+    classDef sentinel fill:#ccffcc,stroke:#333
+    classDef shard fill:#ffcc99,stroke:#333
+
+    class S_Master,S_Slave1,S_Slave2 master,slave
+    class S_Sentinel1,S_Sentinel2,S_Sentinel3 sentinel
+    class C_Shard1,C_Shard2,C_Shard3 shard
+    class C_Shard1_Slave,C_Shard2_Slave,C_Shard3_Slave slave</pre>
+
+<p>可以看到，集群虽然也用到了主从复制和哨兵机制，但它的核心在于数据的分片存储和节点间的通信，这使得集群在处理大规模数据和高并发请求时表现得更加出色。且哨兵机制的实现实际是让多个主节点互相监控，而不是单一主节点被多个哨兵监控。</p>
+<h2><span id="数据分片算法">数据分片算法</span></h2><p>在正式讲解 Redis 所采用的分片算法之前，我们先了解一下两个前置的分片算法：</p>
+<h3><span id="哈希求余法">哈希求余法</span></h3><p>哈希求余法是最简单的分片算法。它通过对键进行哈希计算（一般使用 MD5 或 SHA1），然后对节点数量取模来确定数据存储在哪个节点上。具体步骤如下：</p>
+<ol>
+<li>对键进行哈希计算，得到一个哈希值。</li>
+<li>将哈希值对节点数量取模，得到一个节点索引。</li>
+<li>将数据存储到对应的节点上。</li>
+</ol>
+<p>这种方法的优点是实现简单，分布均匀，但缺点是当节点数量发生变化时，可能会导致大量数据迁移。</p>
+<p>我们来举一个例子：</p>
+<p><img src="/img/Redis/cluster/hash.png" alt="hash"></p>
+<p>如上图示例，我们起初是将数据均匀分布到三个分片上面，当我们将分片扩容到四个分片的时候，原本在分片 3 上面的数据就会被重新分配到其他的分片上面，且被迁移的数量是非常庞大的，这就导致了系统的低效。</p>
+<h3><span id="一致性哈希算法">一致性哈希算法</span></h3><p>一致性哈希算法是一种改进的分片算法，旨在减少节点变化时的数据迁移量。它通过将节点和数据映射到一个虚拟的环上来实现分片。具体步骤如下：</p>
+<ol>
+<li>将所有节点映射到一个虚拟的哈希环上。<br><img src="/img/Redis/cluster/circle.png" alt="circle"></li>
+<li>假设当前存在三个分片，就把分片放到圆环的某个位置上。</li>
+<li>对每个数据项进行哈希计算，找到它在环上的位置。</li>
+<li>将数据项存储到顺时针方向第一个节点上。<br><img src="/img/Redis/cluster/circle2.png" alt="circle2"></li>
+</ol>
+<p>这种方法的优点是，当节点增加或减少时，只需要对环上的一部分数据进行迁移，从而大大减少了数据迁移的量。<br><img src="/img/Redis/cluster/circle3.png" alt="circle3"></p>
+<p>下面我们假设要将分片数量扩展到四个分片，我们只需要将新增的分片放到环上的某个位置上，然后顺时针方向将数据重新分配到新的节点上即可。可以看到，只有一部分数据被重新分配，其他数据仍然保持不变。<br><img src="/img/Redis/cluster/circle4.png" alt="circle4"><br>可以看到，只有（100&#x2F;2&#x2F;3）%的数据被重新分配，其他数据仍然保持不变。</p>
+<p>当然，缺点也非常明显，一致性哈希算法的实现相对复杂，且在节点数量较少时，可能会导致数据分布不均匀。如果说我们想让他分配均匀，也不是不行，我们可以插入当前分片数个分片的虚拟节点，这样就能让数据分布均匀，但同时需要修改将近 50% 的数据，不过即便如此，修改的数据量也比哈希求余法要少很多。</p>
+<h3><span id="redis-集群的分片算法哈希槽分区算法">Redis 集群的分片算法–哈希槽分区算法</span></h3><p>为了解决上述问题（搬运成本高 和 数据分布不均匀），Redis 集群引入了哈希槽分区算法。</p>
+<p>哈希槽（hash slot）分片算法，整个键空间被划分为 16384 个哈希槽，每个键通过哈希函数映射到一个哈希槽，然后该哈希槽被分配给某个节点进行存储。具体步骤如下：</p>
+<ol>
+<li>对键进行哈希计算，得到一个哈希值。</li>
+<li>将哈希值对 16384 取模，得到一个哈希槽索引。</li>
+<li>将数据存储到对应的哈希槽所在的节点上。</li>
+</ol>
+<p>假设当前有三个分配，一种可能的分配方式如下：</p>
+<ul>
+<li>分片 1：负责哈希槽 [0, 5461]，共 5462 个槽</li>
+<li>分片 2：负责哈希槽 [5462, 10922]，共 5461 个槽</li>
+<li>分片 3：负责哈希槽 [10923, 16383]，共 5461 个槽</li>
+</ul>
+<p>需要注意的是，这里的分片规则非常灵活，并不是说每一个分片分得的哈希槽得是一块完全连续的区域，我们可以将哈希槽打散分配到各个分片上面去，这样就能更均匀的分配数据。</p>
+<p>当我们需要扩展分片时，比如从 3 个分片扩展到 4 个分片，我们只需要将部分哈希槽重新分配给新的分片即可。</p>
+<p>一种可能的分配方式如下：</p>
+<ul>
+<li>分片 1：负责哈希槽 [0, 4095]，共 4096 个槽</li>
+<li>分片 2：负责哈希槽 [5462, 9557]，共 4096 个槽</li>
+<li>分片 3：负责哈希槽 [10924, 15019]，共 4096 个槽</li>
+<li>分片 4：负责哈希槽 [4096, 5461] 和 [9558, 10922] 和 [15020, 16383]，共 4096 个槽</li>
+</ul>
+<p>可以看到，我们仅改动了 25% 的哈希槽，其他 75% 的哈希槽保持不变，这样就大大减少了数据迁移的量。且 25% 是绝对最优的哈希槽分配方案，因为分片 4 必须要分配到 4096 个哈希槽，所以至少要从其他分片中拿出 25% 的哈希槽。</p>
+<p>Redis 利用位图来存储每个节点负责的哈希槽，这样可以高效地进行哈希槽的查找和分配。</p>
+<p>客户端在没有集群信息的情况下，可以通过向任意节点发送请求来获取集群的哈希槽分配信息，从而知道每个键应该存储在哪个节点上。</p>
+<p>具体流程如下：</p>
+<ol>
+<li>客户端向任意节点发送请求。</li>
+<li>该节点返回集群的哈希槽分配信息。</li>
+<li>客户端缓存该槽位的节点映射信息。</li>
+<li>客户端根据哈希槽分配信息，将请求路由到正确的节点。</li>
+</ol>
+<p>而具体到分片的管辖上，分片在接收到任意一个请求后，都会先计算出该请求对应的哈希槽，然后查看自己是否负责该哈希槽，如果不是，该切片会自动将该请求重定向到负责该哈希槽的切片上。</p>
+<pre class="mermaid">flowchart TD
+    A[客户端发送请求] --> B[服务端接收请求]
+    B --> C[计算键的哈希槽]
+    C --> D{槽位是否属于当前节点?}
+
+    D -->|是| E[执行命令并返回结果]
+    D -->|否| F[返回MOVED错误<br>包含正确节点地址]
+
+    F --> G[客户端接收MOVED错误]
+    G --> H[客户端更新本地路由表缓存]
+    H --> I[客户端重新向正确节点发送请求]
+    I --> J[正确节点执行命令]
+
+    E --> K[请求完成]
+    J --> K</pre>
+
+<p>从而保证了分片映射信息不会被客户端缓存过久，导致请求发送错误，且如果直接将缓存信息发送给客户端，一方面增加了网络开销，另一方面也增加了客户端的复杂度，且这些信息本来就是分片的职责，不应该暴露给客户端。</p>
+<p>Redis 的作者建议分片数量不应该超过 1000 个，且每个分片负责的哈希槽数量不应该少于 50 个，这样可以保证数据的均匀分布和系统的高效运行。</p>
+<p>为什么是 16384 个哈希槽呢？下面是原作者的回答：</p>
+<p>• Normal heartbeat packets carry the full configuration of a node, that can be replaced in anidempotent way with the old in order to update an old config. This means they contain theslots configuration for a node, in raw form, that uses 2k of space with 16k slots, but woulduse a prohibitive 8k of space using 65k slots.<br>• At the same time, it is unlikely that Redis Cluster would scale to more than 1000 masternodes because of other design tradeoffs.So 16k was in the right range to ensure enough slots per master with a max of 1000 masters, buta small enough number to propagate the slot configuration as a raw bitmap easily. Note that in small clusters, the bitmap would be hard to compress, because when N is small, the bitmapwould have slots&#x2F;N bits set. That is a large percentage of bits set.</p>
+<p>翻译过来大概意思是:<br>• 节点之间通过⼼跳包通信. ⼼跳包中包含了该节点持有哪些 slots. 这个是使用位图这样的数据结构表示的. 表示 16384 (16k) 个 slots, 需要的位图⼤⼩是 2KB. 如果给定的 slots 数更多了, 比如 65536 个了, 此时就需要消耗更多的空间, 8 KB 位图表示了. 8 KB, 对于内存来说不算什么, 但是在频繁的网络心跳包中, 还是一个不小的开销的.<br>• 另一方面, Redis 集群一般不建议超过 1000 个分片. 所以 16k 对于最大 1000 个分片来说是足够用的, 同时也会使对应的槽位配置位图体积不至于很大.</p>
+<h2><span id="集群搭建实践基于-docker">集群搭建实践（基于 Docker）</span></h2><p>小编手上只有 3 台机器，不方便搭建集群，因此这里使用 Docker 来搭建一个 3 主 6 从的 Redis 集群。</p>
+<p>集群拓扑图如下：</p>
+<p><img src="/img/Redis/cluster/cluster_tope.png" alt="tope"></p>
+<p>这里我们会先创建出 11 个 redis 节点，其中前 9 个节点会被用来创建集群，后两个用来演示集群扩容。</p>
+<h3><span id="第一步创建目录和配置">第一步：创建目录和配置</span></h3><p>我们先在本地创建一个目录 <code>redis-cluster</code>，然后在该目录下创建 11 个子目录，分别对应 11 个 Redis 节点。</p>
+<p>目录结构如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">..</span>/redis-cluster
+├── docker-compose.yml
+└── generate.sh<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>然后我们需要创建 11 个 Redis 配置文件，若通过手动创建的话，工作量会比较大，因此我们可以通过脚本来生成这些配置文件。</p>
+<p>创建一个 <code>generate.sh</code> 脚本，内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token keyword">for</span> <span class="token for-or-select variable">port</span> <span class="token keyword">in</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">seq</span> <span class="token number">1</span> <span class="token number">9</span><span class="token variable">)</span></span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+        <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> redis<span class="token variable">$&#123;port&#125;</span>/
+        <span class="token function">touch</span> redis<span class="token variable">$&#123;port&#125;</span>/redis.conf
+        <span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">></span>redis<span class="token variable">$&#123;port&#125;</span>/redis.conf</span>
+port 6379
+bind 0.0.0.0
+protected-mode no
+appendonly yes
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+cluster-announce-ip 172.30.0.10<span class="token variable">$&#123;port&#125;</span>
+cluster-announce-port 6379
+cluster-announce-bus-port 16379
+EOF</span>
+<span class="token keyword">done</span>
+
+<span class="token comment"># cluster-announce-ip 的值有变化（10 和 11）</span>
+<span class="token keyword">for</span> <span class="token for-or-select variable">port</span> <span class="token keyword">in</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">seq</span> <span class="token number">10</span> <span class="token number">11</span><span class="token variable">)</span></span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+        <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> redis<span class="token variable">$&#123;port&#125;</span>/
+        <span class="token function">touch</span> redis<span class="token variable">$&#123;port&#125;</span>/redis.conf
+        <span class="token function">cat</span> <span class="token operator">&lt;&lt;</span><span class="token string">EOF<span class="token bash punctuation"> <span class="token operator">></span>redis<span class="token variable">$&#123;port&#125;</span>/redis.conf</span>
+port 6379
+bind 0.0.0.0
+protected-mode no
+appendonly yes
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+cluster-announce-ip 172.30.0.1<span class="token variable">$&#123;port&#125;</span>
+cluster-announce-port 6379
+cluster-announce-bus-port 16379
+EOF</span>
+<span class="token keyword">done</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>该脚本会创建 11 个目录 <code>redis1</code> 到 <code>redis11</code>，并在每个目录下生成一个 <code>redis.conf</code> 配置文件。需要注意的是，这里我们将 <code>cluster-announce-ip</code> 设置为 Docker 网络中的 IP 地址，确保每个节点能够相互通信。</p>
+<blockquote>
+<p>配置说明：</p>
+<ul>
+<li><code>port</code>：指定 Redis 实例的端口号。</li>
+<li><code>bind</code>：指定 Redis 实例监听的 IP 地址。</li>
+<li><code>protected-mode</code>：设置为 no，表示关闭保护模式。</li>
+<li><code>appendonly</code>：设置为 yes，表示开启 AOF 持久化。</li>
+<li><code>cluster-enabled</code>：设置为 yes，表示开启集群模式。</li>
+<li><code>cluster-config-file</code>：指定集群配置文件的名称。</li>
+<li><code>cluster-node-timeout</code>：设置集群节点超时时间。</li>
+<li><code>cluster-announce-ip</code>：指定集群节点的 IP 地址。</li>
+<li><code>cluster-announce-port</code>：指定集群节点的端口号。</li>
+<li><code>cluster-announce-bus-port</code>：指定集群节点的总线端口号，集群管理的信息交互是通过这个端口进行的。</li>
+</ul>
+</blockquote>
+<p>执行该脚本后得到文件目录：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">..</span>/redis-cluster
+├── docker-compose.yml
+├── generate.sh
+├── redis
+├── redis1
+│   └── redis.conf
+├── redis10
+│   └── redis.conf
+├── redis11
+│   └── redis.conf
+├── redis2
+│   └── redis.conf
+├── redis3
+│   └── redis.conf
+├── redis4
+│   └── redis.conf
+├── redis5
+│   └── redis.conf
+├── redis6
+│   └── redis.conf
+├── redis7
+│   └── redis.conf
+├── redis8
+│   └── redis.conf
+└── redis9
+    └── redis.conf<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3><span id="第二步创建-docker-compose-文件">第二步：创建 Docker Compose 文件</span></h3><p>为了让这 11 个 Redis 节点能够互相通信，我们需要创建一个自定义的 Docker 网络，并分配网段为 <code>172.30.0.0/24</code>。</p>
+<p>创建一个 <code>docker-compose.yml</code> 文件，内容如下：</p>
+<pre class="line-numbers language-yaml" data-language="yaml"><code class="language-yaml"><span class="token key atrule">networks</span><span class="token punctuation">:</span>
+  <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+    <span class="token key atrule">ipam</span><span class="token punctuation">:</span>
+      <span class="token key atrule">config</span><span class="token punctuation">:</span>
+        <span class="token punctuation">-</span> <span class="token key atrule">subnet</span><span class="token punctuation">:</span> 172.30.0.0/24
+
+<span class="token key atrule">services</span><span class="token punctuation">:</span>
+  <span class="token key atrule">redis1</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis1
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis1/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6371<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16371<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.101
+
+  <span class="token key atrule">redis2</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis2
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis2/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6372<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16372<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.102
+
+  <span class="token key atrule">redis3</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis3
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis3/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6373<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16373<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.103
+
+  <span class="token key atrule">redis4</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis4
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis4/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6374<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16374<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.104
+
+  <span class="token key atrule">redis5</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis5
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis5/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6375<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16375<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.105
+
+  <span class="token key atrule">redis6</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis6
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis6/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6376<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16376<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.106
+
+  <span class="token key atrule">redis7</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis7
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis7/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6377<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16377<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.107
+
+  <span class="token key atrule">redis8</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis8
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis8/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6378<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16378<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.108
+
+  <span class="token key atrule">redis9</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis9
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis9/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6379<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16379<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.109
+
+  <span class="token key atrule">redis10</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis10
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis10/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6380<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16380<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.110
+
+  <span class="token key atrule">redis11</span><span class="token punctuation">:</span>
+    <span class="token key atrule">image</span><span class="token punctuation">:</span> <span class="token string">"redis:8.0.3"</span>
+    <span class="token key atrule">container_name</span><span class="token punctuation">:</span> redis11
+    <span class="token key atrule">restart</span><span class="token punctuation">:</span> always
+    <span class="token key atrule">volumes</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> ./redis11/<span class="token punctuation">:</span>/etc/redis/
+    <span class="token key atrule">ports</span><span class="token punctuation">:</span>
+      <span class="token punctuation">-</span> 6381<span class="token punctuation">:</span><span class="token number">6379</span>
+      <span class="token punctuation">-</span> 16381<span class="token punctuation">:</span><span class="token number">16379</span>
+    <span class="token key atrule">command</span><span class="token punctuation">:</span> redis<span class="token punctuation">-</span>server /etc/redis/redis.conf
+    <span class="token key atrule">networks</span><span class="token punctuation">:</span>
+      <span class="token key atrule">mynet</span><span class="token punctuation">:</span>
+        <span class="token key atrule">ipv4_address</span><span class="token punctuation">:</span> 172.30.0.111<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>该文件定义了 11 个 Redis 服务，每个服务都使用 <code>redis:8.0.3</code> 镜像，并挂载对应的配置文件目录。每个服务都暴露了两个端口，一个是 Redis 的默认端口 6379，另一个是集群总线端口 16379。<br>每个服务都连接到自定义的 <code>mynet</code> 网络，并分配了一个固定的 IP 地址，确保它们能够相互通信。</p>
+<p>小编因为有一些端口正在跑后端服务，因此将该配置文件中的某些端口做了映射修改，比如 redis1 的 6379 端口映射到了宿主机的 6389 端口，不过这无伤大雅，因为这些端口是给外界使用的，而我们的所有操作都是基于容器网络内部环境进行操作的。如果你的机器上没有端口冲突的话，建议保持一致。</p>
+<blockquote>
+<p>注意：这里的 IP 地址必须和配置文件中的 <code>cluster-announce-ip</code> 保持一致，否则集群无法正常工作。配置文件的 ip 是告诉该节点自己的 ip 是多少，而 docker-compose.yml 中的 ip 是给予该节点使用该 ip 的权利，因此两者必须保持一致。</p>
+</blockquote>
+<h3><span id="第三步启动-redis-实例">第三步：启动 Redis 实例</span></h3><p>执行以下命令启动所有 Redis 实例：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/redistest/redis-cluster
+╰─➤  <span class="token function">docker</span> compose up <span class="token parameter variable">-d</span>
+<span class="token punctuation">[</span>+<span class="token punctuation">]</span> Running <span class="token number">12</span>/12
+ ✔ Network redis-cluster_mynet  Created                                                                                                                                                                                                                                  <span class="token number">0</span>.1s
+ ✔ Container redis2             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.1s
+ ✔ Container redis3             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.4s
+ ✔ Container redis10            Started                                                                                                                                                                                                                                  <span class="token number">1</span>.5s
+ ✔ Container redis6             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.2s
+ ✔ Container redis4             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.6s
+ ✔ Container redis8             Started                                                                                                                                                                                                                                  <span class="token number">0</span>.9s
+ ✔ Container redis1             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.3s
+ ✔ Container redis5             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.5s
+ ✔ Container redis7             Started                                                                                                                                                                                                                                  <span class="token number">1</span>.4s
+ ✔ Container redis11            Started                                                                                                                                                                                                                                  <span class="token number">0</span>.7s
+ ✔ Container redis9             Started<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以通过以下命令查看所有容器的状态：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/redistest/redis-cluster
+╰─➤  <span class="token function">docker</span> <span class="token function">ps</span>
+CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS          PORTS                                                                                          NAMES
+90961a014a90   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:16379-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16379-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token number">0.0</span>.0.0:6389-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6389-<span class="token operator">></span><span class="token number">6379</span>/tcp   redis9
+facfb4214c2a   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6391-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6391-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16381-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16381-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis11
+5ab12a04a7db   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6377-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6377-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16377-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16377-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis7
+92ba490d5c8d   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6371-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6371-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16371-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16371-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis1
+46a704dfbf52   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6375-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6375-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16375-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16375-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis5
+eb367c18db29   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6390-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6390-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16380-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16380-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis10
+921ee573a2af   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6374-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6374-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16374-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16374-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis4
+6e172ab4b1fb   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6373-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6373-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16373-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16373-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis3
+d87b00443a7e   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6372-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6372-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16372-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16372-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis2
+fbd4c5160350   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6378-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6378-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16378-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16378-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis8
+a681b450472e   redis:8.0.3   <span class="token string">"docker-entrypoint.s…"</span>   <span class="token number">28</span> seconds ago   Up <span class="token number">27</span> seconds   <span class="token number">0.0</span>.0.0:6376-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:6376-<span class="token operator">></span><span class="token number">6379</span>/tcp, <span class="token number">0.0</span>.0.0:16376-<span class="token operator">></span><span class="token number">16379</span>/tcp, <span class="token punctuation">[</span>::<span class="token punctuation">]</span>:16376-<span class="token operator">></span><span class="token number">16379</span>/tcp   redis6<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3><span id="第四步构建集群">第四步：构建集群</span></h3><p>我们启动其中的一个节点，进入该节点的容器：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> redis1 <span class="token function">bash</span>
+root@92ba490d5c8d:/data<span class="token comment"># redis-cli --cluster create 172.30.0.101:6379 172.30.0.102:6379 172.30.0.103:6379 172.30.0.104:6379 172.30.0.105:6379 172.30.0.106:6379 172.30.0.107:6379 172.30.0.108:6379 172.30.0.109:6379 --cluster-replicas 2</span>
+<span class="token operator">>></span><span class="token operator">></span> Performing <span class="token builtin class-name">hash</span> slots allocation on <span class="token number">9</span> nodes<span class="token punctuation">..</span>.
+Master<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">0</span> - <span class="token number">5460</span>
+Master<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">5461</span> - <span class="token number">10922</span>
+Master<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> -<span class="token operator">></span> Slots <span class="token number">10923</span> - <span class="token number">16383</span>
+Adding replica <span class="token number">172.30</span>.0.105:6379 to <span class="token number">172.30</span>.0.101:6379
+Adding replica <span class="token number">172.30</span>.0.106:6379 to <span class="token number">172.30</span>.0.101:6379
+Adding replica <span class="token number">172.30</span>.0.107:6379 to <span class="token number">172.30</span>.0.102:6379
+Adding replica <span class="token number">172.30</span>.0.108:6379 to <span class="token number">172.30</span>.0.102:6379
+Adding replica <span class="token number">172.30</span>.0.109:6379 to <span class="token number">172.30</span>.0.103:6379
+Adding replica <span class="token number">172.30</span>.0.104:6379 to <span class="token number">172.30</span>.0.103:6379
+M: ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+M: 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379
+   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
+M: 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379
+   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+S: 61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+S: 510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+S: f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+S: 23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: 69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: 33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+Can I <span class="token builtin class-name">set</span> the above configuration? <span class="token punctuation">(</span>type <span class="token string">'yes'</span> to accept<span class="token punctuation">)</span>: <span class="token function">yes</span>
+<span class="token operator">>></span><span class="token operator">></span> Nodes configuration updated
+<span class="token operator">>></span><span class="token operator">></span> Assign a different config epoch to each <span class="token function">node</span>
+<span class="token operator">>></span><span class="token operator">></span> Sending CLUSTER MEET messages to <span class="token function">join</span> the cluster
+Waiting <span class="token keyword">for</span> the cluster to <span class="token function">join</span>
+<span class="token builtin class-name">.</span>
+<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> <span class="token number">172.30</span>.0.101:6379<span class="token punctuation">)</span>
+M: ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: 61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+S: 33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+M: 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379
+   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+M: 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379
+   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
+<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这里我们使用 <code>redis-cli --cluster create</code> 命令来创建集群，指定了 9 个节点的 IP 地址和端口号，并通过 <code>--cluster-replicas 2</code> 参数指定每个主节点有 2 个从节点。</p>
+<p>可以看到，当我们执行指令后，系统会自动为我们分配哈希槽，并将从节点分配给对应的主节点并让我们确认该配置是否符合你的预期，用户交互界面非常友好。最后系统会进行集群检查，确保所有节点都正确配置并且哈希槽覆盖完整。</p>
+<p>其中 <code>M</code> 表示主节点（Master），<code>S</code> 表示从节点（Slave）。可以看到，集群已经成功创建。</p>
+<p>我们进入任意一个节点，执行 <code>cluster nodes</code> 命令查看集群状态（我仍然在刚才的那个节点待着，并没有跑出来）：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@92ba490d5c8d:/data<span class="token comment"># redis-cli -h 172.30.0.101 -p 6379 -c</span>
+<span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758424907569</span> <span class="token number">2</span> connected
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758424907000</span> <span class="token number">3</span> connected
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758424906000</span> <span class="token number">3</span> connected
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758424908072</span> <span class="token number">3</span> connected <span class="token number">10923</span>-16383
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758424907000</span> <span class="token number">1</span> connected
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 master - <span class="token number">0</span> <span class="token number">1758424906362</span> <span class="token number">2</span> connected <span class="token number">5461</span>-10922
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758424906865</span> <span class="token number">2</span> connected
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">1</span> connected <span class="token number">0</span>-5460
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758424907368</span> <span class="token number">1</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，集群中有 3 个主节点和 6 个从节点，且每个主节点都有 2 个从节点，且会显示我们当前所在的节点（<code>myself</code> 标记）。</p>
+<p>需要注意的是，这里我们使用了 <code>-c</code> 参数来启用集群模式，这样在执行命令时，客户端会自动处理重定向。举一个简单例子：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> <span class="token builtin class-name">set</span> k1 <span class="token number">1</span>
+-<span class="token operator">></span> Redirected to slot <span class="token punctuation">[</span><span class="token number">12706</span><span class="token punctuation">]</span> located at <span class="token number">172.30</span>.0.103:6379
+OK
+<span class="token number">172.30</span>.0.103:637<span class="token operator"><span class="token file-descriptor important">9</span>></span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>当前我们在 <code>172.30.0.101:6379</code>，我们执行 <code>set k1 1</code> 命令后，客户端会自动将请求重定向到负责该键的节点 <code>172.30.0.103:6379</code>。</p>
+<p>这里的重定向机制我们上面有讲到过，客户端会先计算出该键对应的哈希槽，然后查看自己是否负责该哈希槽，如果不是，该节点会返回一个 <code>MOVED</code> 错误，告诉客户端正确的节点地址，客户端接收到该错误后，会更新本地的路由表缓存，然后重新向正确的节点发送请求。</p>
+<h3><span id="主节点宕机测试">主节点宕机测试</span></h3><h4><span id="模拟主节点宕机">模拟主节点宕机</span></h4><p>我们可以通过停止某个主节点的容器来模拟主节点宕机的场景。</p>
+<p>这里我们手动停止 <code>redis1</code> 容器：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">╭─ljx@VM-16-15-debian ~/redistest/redis-cluster
+╰─➤  <span class="token function">docker</span> stop redis1
+redis1
+╭─ljx@VM-16-15-debian ~/redistest/redis-cluster
+╰─➤  <span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> redis2 <span class="token function">bash</span>
+root@d87b00443a7e:/data<span class="token comment"># redis-cli -h 172.30.0.102 -p 6379 -c</span>
+<span class="token number">172.30</span>.0.102:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425196061</span> <span class="token number">3</span> connected
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425197569</span> <span class="token number">2</span> connected
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 master,fail - <span class="token number">1758425121844</span> <span class="token number">1758425119331</span> <span class="token number">1</span> connected
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425196000</span> <span class="token number">2</span> connected
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425196000</span> <span class="token number">10</span> connected <span class="token number">0</span>-5460
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">0</span> <span class="token number">1758425197770</span> <span class="token number">10</span> connected
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">2</span> connected <span class="token number">5461</span>-10922
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425197000</span> <span class="token number">3</span> connected <span class="token number">10923</span>-16383
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425197000</span> <span class="token number">3</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，<code>redis1</code> 节点的状态变成了 <code>fail</code>，表示该节点已经宕机。</p>
+<p>当我们重启 <code>redis1</code> 容器后：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.30</span>.0.102:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425335000</span> <span class="token number">3</span> connected
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425335583</span> <span class="token number">2</span> connected
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 slave f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">0</span> <span class="token number">1758425335683</span> <span class="token number">10</span> connected
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425335583</span> <span class="token number">2</span> connected
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425335583</span> <span class="token number">10</span> connected <span class="token number">0</span>-5460
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">0</span> <span class="token number">1758425335583</span> <span class="token number">10</span> connected
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">2</span> connected <span class="token number">5461</span>-10922
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425335000</span> <span class="token number">3</span> connected <span class="token number">10923</span>-16383
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425334579</span> <span class="token number">3</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>会发现，<code>redis1</code> 节点的状态变成了 <code>slave</code>，并且它现在是 <code>f3734a1c3bc5520977ea9ace9c8894dd55b6efd4</code>（<code>redis6</code>）的从节点。这说明在 <code>redis1</code> 宕机期间，<code>redis6</code> 被提升为了主节点，而当 <code>redis1</code> 重启后，它自动成为了 <code>redis6</code> 的从节点。</p>
+<p>我们可以使用 <code>cluster failover</code> 命令进行集群恢复，也就是把 101 节点重新提升为主节点：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.30</span>.0.102:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster failover
+<span class="token punctuation">(</span>error<span class="token punctuation">)</span> ERR You should send CLUSTER FAILOVER to a replica
+<span class="token number">172.30</span>.0.102:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> <span class="token builtin class-name">exit</span>
+root@d87b00443a7e:/data<span class="token comment"># redis-cli -h 172.30.0.101 -p 6379 -c</span>
+<span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster failover
+OK
+<span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">11</span> connected <span class="token number">0</span>-5460
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425447000</span> <span class="token number">2</span> connected
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758425447558</span> <span class="token number">11</span> connected
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425445547</span> <span class="token number">3</span> connected
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758425446653</span> <span class="token number">3</span> connected
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425446000</span> <span class="token number">2</span> connected <span class="token number">5461</span>-10922
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758425447659</span> <span class="token number">11</span> connected
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758425446000</span> <span class="token number">3</span> connected <span class="token number">10923</span>-16383
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758425446553</span> <span class="token number">2</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>若我们在其他节点上执行该操作，会发现报错，因为该命令只能在从节点上执行，而不能在主节点上执行。</p>
+<h4><span id="故障处理流程">故障处理流程</span></h4><h5><span id="故障判定">故障判定</span></h5><p>集群的故障处理和自动恢复是通过 Gossip 协议和投票机制来实现的，他和哨兵机制类似，但不完全相同，因为集群节点数量非常多，所以需要更加高效的机制。以下是一般的故障处理流程：</p>
+<ol>
+<li><p><strong>心跳检测</strong>：节点 A 给节点 B 发送 <code>ping</code> 包，B 就会给 A 返回一个 <code>pong</code> 包。<code>ping</code> 和 <code>pong</code> 除了 <code>message type</code> 属性之外，其他部分都是一样的。这里包含了集群的配置信息（该节点的 id、该节点从属于哪个分片、是主节点还是从节点、从属于谁、持有哪些 slots 的位图…）。</p>
+</li>
+<li><p><strong>Gossip 协议</strong>：每个节点，每秒钟，都会给一些<strong>随机的节点</strong>发起 <code>ping</code> 包，而不是全发一遍。这样设定是为了避免在节点很多的时候，心跳包也非常多（比如有 9 个节点，如果全发，就是 9 * 8 有 72 组心跳了，而且这是按照 N^2 这样的级别增长的）。</p>
+</li>
+<li><p><strong>主观下线（PFAIL）</strong>：当节点 A 给节点 B 发起 <code>ping</code> 包，B 不能如期回应的时候，此时 A 就会尝试重置和 B 的 TCP 连接，看能否连接成功。如果仍然连接失败，A 就会把 B 设为 <code>PFAIL</code> 状态（相当于主观下线）。</p>
+</li>
+<li><p><strong>信息传播</strong>：A 判定 B 为 <code>PFAIL</code> 之后，会通过 Redis 内置的 <strong>Gossip 协议</strong>，和其他节点进行沟通，向其他节点确认 B 的状态。（每个节点都会维护一个自己的“下线列表”，由于视角不同，每个节点的下线列表也不一定相同）。</p>
+</li>
+<li><p><strong>客观下线（FAIL）</strong>：此时 A 发现其他很多节点，也认为 B 为 <code>PFAIL</code>，并且数目超过总集群个数的一半，那么 A 就会把 B 标记成 <code>FAIL</code>（相当于客观下线），并且把这个消息同步给其他节点（其他节点收到之后，也会把 B 标记成 <code>FAIL</code>）。</p>
+</li>
+</ol>
+<hr>
+<p>流程时序图 (Mermaid)</p>
+<pre class="mermaid">sequenceDiagram
+    participant A as 节点A
+    participant B as 节点B
+    participant C as 节点C
+    participant D as 节点D
+
+    Note over A, D: 1. 常规随机心跳检测
+    loop 每秒钟的随机PING
+        A->>B: PING (携带集群信息)
+        B-->>A: PONG
+    end
+
+    Note over A, B: 2. 节点B无响应
+    A->>B: PING
+    Note right of B: 节点B故障/无响应
+    A->>B: 尝试重置TCP连接
+    Note right of B: 连接失败
+
+    Note over A: 3. 节点A将节点B标记为 PFAIL (主观下线)
+
+    Note over A, D: 4. 通过Gossip协议传播并确认状态
+    A->>C: PING (消息体中包含：B is PFAIL)
+    A->>D: PING (消息体中包含：B is PFAIL)
+    C-->>A: PONG (消息体中包含：我也认为B is PFAIL)
+    D-->>A: PONG (消息体中包含：我也认为B is PFAIL)
+
+    Note over A: 5. 统计PFAIL投票
+    Note right of A: 认为B下线的节点数 > 集群半数
+
+    Note over A: 6. 节点A将节点B标记为 FAIL (客观下线)
+
+    Note over A, D: 7. 广播FAIL消息，达成集群共识
+    A->>C: 将B标记为FAIL
+    A->>D: 将B标记为FAIL</pre>
+
+<blockquote>
+<ul>
+<li><strong>随机心跳</strong>：展示了初始的正常通信状态。</li>
+<li><strong>故障开始</strong>：节点 B 停止响应<code>PING</code>，并且 TCP 重连失败，触发了主观下线（PFAIL）。</li>
+<li><strong>Gossip 传播</strong>：节点 A 将 B 的 PFAIL 状态通过后续的<code>PING</code>消息（作为 Gossip 协议的一部分）告知其他节点，并收集它们的看法。</li>
+<li><strong>投票与裁决</strong>：节点 A 收集到足够多（超过半数）的相同观点后，将 B 的状态升级为客观下线（FAIL）。</li>
+<li><strong>集群广播</strong>：节点 A 将 FAIL 决定广播出去，使集群状态最终一致，为后续的故障转移（Failover）做好准备。</li>
+</ul>
+</blockquote>
+<p>至此，B 节点就被正式标记为 FAIL 状态了，接下来就可以进行故障转移（Failover）了。</p>
+<h5><span id="故障转移failover">故障转移（Failover）</span></h5><h4><span id="前提条件">前提条件</span></h4><p>上述例子中，主节点 B 发生故障，并且已被集群客观下线（标记为 <code>FAIL</code>）。此时，由 B 的从节点（例如 C 和 D）触发故障迁移流程，旨在选举出一个新的主节点。</p>
+<h4><span id="故障迁移流程">故障迁移流程</span></h4><ol>
+<li><p><strong>资格检查</strong>：从节点（C 和 D）判定自己是否具有参选资格。如果从节点和主节点断开通信的时间超过阈值（认为从节点的数据和主节点差异过大），就失去竞选资格。</p>
+</li>
+<li><p><strong>延迟竞选</strong>：具有资格的节点会先进入一段休眠时间，其计算公式为：<br><code>休眠时间 = 500ms 基础时间 + [0, 500ms] 随机时间 + 排名 * 1000ms</code></p>
+<ul>
+<li><strong>排名</strong>由复制偏移量（offset）决定，<code>offset</code> 越大（数据越新）的从节点排名越靠前（排名值越小），因此其休眠时间更短。</li>
+</ul>
+</li>
+<li><p><strong>发起拉票</strong>：假设节点 C 的休眠时间先到，C 就会向集群中的所有<strong>主节点</strong>发起投票请求（从节点没有投票权）。</p>
+</li>
+<li><p><strong>投票与晋升</strong>：</p>
+<ul>
+<li>每个主节点只有一票，它会将票投给最先且有效的请求者。</li>
+<li>当 C 收到的票数超过集群主节点数目的一半时，选举成功。</li>
+<li>C 会<strong>将自己晋升为主节点</strong>（执行 <code>slaveof no one</code>），并<strong>命令其他从节点（如 D）复制自己</strong>（让 D 执行 <code>slaveof C</code>）。</li>
+</ul>
+</li>
+<li><p><strong>更新集群状态</strong>：C 会将自己成为新主节点的消息通过 Gossip 协议广播给集群中的所有其他节点。所有节点都会更新本地存储的集群配置信息，指向新的拓扑结构。</p>
+</li>
+</ol>
+<p><strong>注</strong>：上述选举过程的核心思想来源于 <strong>Raft 算法</strong>。在随机休眠时间的机制下，<strong>数据最同步（offset 最大）的从节点通常会最先唤醒并赢得选举</strong>。</p>
+<hr>
+<h4><span id="故障迁移时序图-mermaid">故障迁移时序图 (Mermaid)</span></h4><pre class="mermaid">sequenceDiagram
+    participant A as 主节点A
+    participant B as 主节点B(FAIL)
+    participant C as 从节点C(B的副本)
+    participant D as 从节点D(B的副本)
+    participant E as 其他主节点
+
+    Note over C, D: 1. 资格检查
+    Note right of C: 数据同步良好，有资格
+    Note right of D: 数据同步良好，有资格
+
+    Note over C, D: 2. 计算休眠时间
+    Note right of C: Offset较大，排名靠前<br>休眠时间较短
+    Note right of D: Offset较小，排名靠后<br>休眠时间较长
+
+    Note over C: 3. C的休眠时间先到
+    C->>A: 请求投票
+    C->>E: 请求投票(广播给所有主节点)
+
+    Note over A, E: 4. 投票
+    A-->>C: 投票给C
+    E-->>C: 投票给C
+    Note right of C: 收集到超过半数的票
+
+    Note over C: 5. 选举成功，自我晋升
+    C->>C: slaveof no one
+    C->>D: SLAVEOF (命令D复制自己)
+
+    Note over C: 6. 广播新配置
+    C->>A: 通知B:FAIL, 新主为C
+    C->>E: 通知B:FAIL, 新主为C
+    C->>D: 通知B:FAIL, 新主为C
+
+    Note over All: 集群状态达成一致
+    Note over C: 新任主节点
+    Note over D: 成为C的从节点</pre>
+
+<h4><span id="图中的关键点说明">图中的关键点说明</span></h4><ul>
+<li><strong>资格与延迟</strong>：展示了从节点根据自身数据新旧程度（排名）获得不同的竞选优势（休眠时间长短）。</li>
+<li><strong>拉票与投票</strong>：展示了最先醒来的从节点 C 向所有<strong>主节点</strong>广播投票请求，并收集选票的过程。</li>
+<li><strong>晋升与接管</strong>：展示了节点 C 在获得足够票数后，执行两个关键操作：1) 解除自身从节点状态；2) 接管其他旧主的从节点。</li>
+<li><strong>信息同步</strong>：最后，新主节点 C 将集群结构变更的消息广播出去，使整个集群达成共识，完成故障迁移。</li>
+</ul>
+<h3><span id="集群扩容测试">集群扩容测试</span></h3><p>扩容在开发环境中非常常见，尤其是在业务量增长时。Redis 集群支持在线扩容，可以动态添加新的节点而不影响现有集群的运行。而在生产环境中，扩容通常需要更谨慎的操作，可能涉及数据迁移和重新分配哈希槽。</p>
+<h4><span id="第一步把新的主节点加入到集群">第一步：把新的主节点加入到集群</span></h4><p>上面我们已经把 <code>redis1 - redis9</code> 这 9 个节点加入到了集群中，现在我们再将节点 <code>redis10</code> 和 <code>redis11</code> 加入到集群中去：</p>
+<p>此处我们把 <code>redis10</code> 作为主机，而 <code>redis11</code> 作为它的从节点。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@92ba490d5c8d:/data<span class="token comment"># redis-cli --cluster add-node 172.30.0.110:6379 172.30.0.101:6379</span>
+<span class="token operator">>></span><span class="token operator">></span> Adding <span class="token function">node</span> <span class="token number">172.30</span>.0.110:6379 to cluster <span class="token number">172.30</span>.0.101:6379
+<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> <span class="token number">172.30</span>.0.101:6379<span class="token punctuation">)</span>
+M: ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: 510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+S: 61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+S: 33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+M: 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379
+   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+M: 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379
+   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
+<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.
+<span class="token operator">>></span><span class="token operator">></span> Getting functions from cluster
+<span class="token operator">>></span><span class="token operator">></span> Send FUNCTION LIST to <span class="token number">172.30</span>.0.110:6379 to verify there is no functions <span class="token keyword">in</span> it
+<span class="token operator">>></span><span class="token operator">></span> Send FUNCTION RESTORE to <span class="token number">172.30</span>.0.110:6379
+<span class="token operator">>></span><span class="token operator">></span> Send CLUSTER MEET to <span class="token function">node</span> <span class="token number">172.30</span>.0.110:6379 to <span class="token function">make</span> it <span class="token function">join</span> the cluster.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> New <span class="token function">node</span> added correctly.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>要想将新的节点加入到集群中，我们得指定一个被加入的集群中的任意节点的 IP 地址和端口号（这里我指定的是 <code>172.30.0.101:6379</code>）。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">11</span> connected <span class="token number">0</span>-5460
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758427054045</span> <span class="token number">2</span> connected
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758427054549</span> <span class="token number">11</span> connected
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758427053542</span> <span class="token number">3</span> connected
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758427053039</span> <span class="token number">3</span> connected
+c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9 <span class="token number">172.30</span>.0.110:6379@16379 master - <span class="token number">0</span> <span class="token number">1758427054246</span> <span class="token number">0</span> connected
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 master - <span class="token number">0</span> <span class="token number">1758427053039</span> <span class="token number">2</span> connected <span class="token number">5461</span>-10922
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758427053240</span> <span class="token number">11</span> connected
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758427054549</span> <span class="token number">3</span> connected <span class="token number">10923</span>-16383
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758427053000</span> <span class="token number">2</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，新加入的节点默认是主节点，但是没有分配任何哈希槽，因此下一步，我们需要手动给它分配哈希槽。</p>
+<h4><span id="第二步给新节点分配哈希槽">第二步：给新节点分配哈希槽</span></h4><p>我们可以使用 <code>redis-cli --cluster reshard</code> 命令来给新节点分配哈希槽：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@92ba490d5c8d:/data<span class="token comment"># redis-cli --cluster reshard 172.30.0.101:6379</span>
+<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> <span class="token number">172.30</span>.0.101:6379<span class="token punctuation">)</span>
+M: ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+S: 510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+S: 61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+S: 33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+M: c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9 <span class="token number">172.30</span>.0.110:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> master
+M: 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379
+   slots:<span class="token punctuation">[</span><span class="token number">5461</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5462</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+M: 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379
+   slots:<span class="token punctuation">[</span><span class="token number">10923</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">5461</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
+<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.
+How many slots <span class="token keyword">do</span> you want to move <span class="token punctuation">(</span>from <span class="token number">1</span> to <span class="token number">16384</span><span class="token punctuation">)</span>? <span class="token number">4096</span>
+What is the receiving <span class="token function">node</span> ID? c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9
+Please enter all the <span class="token builtin class-name">source</span> <span class="token function">node</span> IDs.
+  Type <span class="token string">'all'</span> to use all the nodes as <span class="token builtin class-name">source</span> nodes <span class="token keyword">for</span> the <span class="token builtin class-name">hash</span> slots.
+  Type <span class="token string">'done'</span> once you entered all the <span class="token builtin class-name">source</span> nodes IDs.
+Source <span class="token function">node</span> <span class="token comment">#1: all</span>
+<span class="token punctuation">..</span><span class="token punctuation">..</span><span class="token punctuation">..</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>迁移过程中它会现将他的计划迁移的哈希槽数、目标节点 ID 和源节点 ID 让我们确认一遍，确认无误后，它会开始迁移哈希槽（这可是给你踩刹车的好机会，过了这个村就没这个店了），如果操作不好，这在生产环境中可是会引起严重后果的。</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token number">172.30</span>.0.101:637<span class="token operator"><span class="token file-descriptor important">9</span>></span> cluster nodes
+ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379@16379 myself,master - <span class="token number">0</span> <span class="token number">0</span> <span class="token number">11</span> connected <span class="token number">1365</span>-5460
+23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379@16379 slave c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9 <span class="token number">0</span> <span class="token number">1758428052652</span> <span class="token number">12</span> connected
+510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758428052000</span> <span class="token number">11</span> connected
+61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758428051000</span> <span class="token number">3</span> connected
+33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379@16379 slave 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">0</span> <span class="token number">1758428052000</span> <span class="token number">3</span> connected
+c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9 <span class="token number">172.30</span>.0.110:6379@16379 master - <span class="token number">0</span> <span class="token number">1758428051000</span> <span class="token number">12</span> connected <span class="token number">0</span>-1364 <span class="token number">5461</span>-6826 <span class="token number">10923</span>-12287
+3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379@16379 master - <span class="token number">0</span> <span class="token number">1758428051000</span> <span class="token number">2</span> connected <span class="token number">6827</span>-10922
+f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379@16379 slave ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">0</span> <span class="token number">1758428051000</span> <span class="token number">11</span> connected
+11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379@16379 master - <span class="token number">0</span> <span class="token number">1758428051646</span> <span class="token number">3</span> connected <span class="token number">12288</span>-16383
+69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379@16379 slave 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">0</span> <span class="token number">1758428052551</span> <span class="token number">2</span> connected<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，<code>redis10</code> 节点已经被分配了部分哈希槽，分别来自 <code>redis1</code>、<code>redis3</code> 和 <code>redis2</code> 三个节点。</p>
+<h4><span id="第三步给新的主节点添加从节点">第三步：给新的主节点添加从节点</span></h4><p>为了保证集群的高可用性，我们还需要给新的主节点 <code>redis10</code> 添加一个从节点 <code>redis11</code>：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">root@92ba490d5c8d:/data<span class="token comment"># redis-cli --cluster add-node 172.30.0.111:6379 172.30.0.101:6379 --cluster-slave --cluster-master-id c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9</span>
+<span class="token operator">>></span><span class="token operator">></span> Adding <span class="token function">node</span> <span class="token number">172.30</span>.0.111:6379 to cluster <span class="token number">172.30</span>.0.101:6379
+<span class="token operator">>></span><span class="token operator">></span> Performing Cluster Check <span class="token punctuation">(</span>using <span class="token function">node</span> <span class="token number">172.30</span>.0.101:6379<span class="token punctuation">)</span>
+M: ccaf61741c1209b3bb746480b84a0ea0c8cbb87c <span class="token number">172.30</span>.0.101:6379
+   slots:<span class="token punctuation">[</span><span class="token number">1365</span>-5460<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">4096</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 23b2ee4aa3170eec669af17284982b6da13e48d2 <span class="token number">172.30</span>.0.107:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9
+S: 510e72ddb6afdb74f4a89d7eb021f8e80897c95e <span class="token number">172.30</span>.0.105:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+S: 61c77b70e815c201e56bbfc25c68cd6cbe367b8b <span class="token number">172.30</span>.0.104:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+S: 33de5344df9b7d89141d24292e91ec33d754a039 <span class="token number">172.30</span>.0.109:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 11f517397c7b986450d5ae213d0e19767944dc11
+M: c1625fb8d5441e9dd6fef7b60c5944c5519dfaa9 <span class="token number">172.30</span>.0.110:6379
+   slots:<span class="token punctuation">[</span><span class="token number">0</span>-1364<span class="token punctuation">]</span>,<span class="token punctuation">[</span><span class="token number">5461</span>-6826<span class="token punctuation">]</span>,<span class="token punctuation">[</span><span class="token number">10923</span>-12287<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">4096</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">1</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+M: 3ba092a8b1547bcf2772b7da2b96f70805923f0f <span class="token number">172.30</span>.0.102:6379
+   slots:<span class="token punctuation">[</span><span class="token number">6827</span>-10922<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">4096</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">1</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: f3734a1c3bc5520977ea9ace9c8894dd55b6efd4 <span class="token number">172.30</span>.0.106:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates ccaf61741c1209b3bb746480b84a0ea0c8cbb87c
+M: 11f517397c7b986450d5ae213d0e19767944dc11 <span class="token number">172.30</span>.0.103:6379
+   slots:<span class="token punctuation">[</span><span class="token number">12288</span>-16383<span class="token punctuation">]</span> <span class="token punctuation">(</span><span class="token number">4096</span> slots<span class="token punctuation">)</span> master
+   <span class="token number">2</span> additional replica<span class="token punctuation">(</span>s<span class="token punctuation">)</span>
+S: 69fd461e80f8b2bc7d4c2856eb20039aed56b824 <span class="token number">172.30</span>.0.108:6379
+   slots: <span class="token punctuation">(</span><span class="token number">0</span> slots<span class="token punctuation">)</span> slave
+   replicates 3ba092a8b1547bcf2772b7da2b96f70805923f0f
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All nodes agree about slots configuration.
+<span class="token operator">>></span><span class="token operator">></span> Check <span class="token keyword">for</span> <span class="token function">open</span> slots<span class="token punctuation">..</span>.
+<span class="token operator">>></span><span class="token operator">></span> Check slots coverage<span class="token punctuation">..</span>.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> All <span class="token number">16384</span> slots covered.
+<span class="token operator">>></span><span class="token operator">></span> Send CLUSTER MEET to <span class="token function">node</span> <span class="token number">172.30</span>.0.111:6379 to <span class="token function">make</span> it <span class="token function">join</span> the cluster.
+Waiting <span class="token keyword">for</span> the cluster to <span class="token function">join</span>
+
+<span class="token operator">>></span><span class="token operator">></span> Configure <span class="token function">node</span> as replica of <span class="token number">172.30</span>.0.110:6379.
+<span class="token punctuation">[</span>OK<span class="token punctuation">]</span> New <span class="token function">node</span> added correctly.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>后面填写的 ID 参数是 <code>redis10</code> 的节点 ID。</p>
+<p>执行完毕后，从节点就已经被添加完成了，至此实验结束。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
