@@ -17,17 +17,17 @@ RDB
 触发机制
 配置文件
 Redis RDB 持久化优缺点
+
+
 AOF
+AOF 工作流程
+AOF 流程图（Mermaid）
 AOF 重写机制
 AOF 优缺点
+
+
 Redis 混合持久化详解
-Redis 混合持久化在 7.0 版本后的改动
-
-
-
-
-
-R,"> 
+,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
     <link rel="icon" href="/img/favicon.png"> 
@@ -45,17 +45,17 @@ RDB
 触发机制
 配置文件
 Redis RDB 持久化优缺点
+
+
 AOF
+AOF 工作流程
+AOF 流程图（Mermaid）
 AOF 重写机制
 AOF 优缺点
+
+
 Redis 混合持久化详解
-Redis 混合持久化在 7.0 版本后的改动
-
-
-
-
-
-R,"/>
+,"/>
     
     
     
@@ -70,17 +70,17 @@ RDB
 触发机制
 配置文件
 Redis RDB 持久化优缺点
+
+
 AOF
+AOF 工作流程
+AOF 流程图（Mermaid）
 AOF 重写机制
 AOF 优缺点
+
+
 Redis 混合持久化详解
-Redis 混合持久化在 7.0 版本后的改动
-
-
-
-
-
-R,"/>
+,"/>
     
 <link rel="stylesheet" href="/css/diaspora.css">
 
@@ -254,7 +254,7 @@ R,"/>
                     </div>
                     <div>
                         <a href="/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">67</span>
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">69</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
                     </div>
@@ -263,7 +263,7 @@ R,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/09/19/Redis/redis_sentinel/">Redis 哨兵机制</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li></ul>
+            <ul><li><a href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/09/19/Redis/redis_sentinel/">Redis 哨兵机制</a></li><li><a href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a></li><li><a href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -300,11 +300,33 @@ R,"/>
 <li><a href="#%E8%A7%A6%E5%8F%91%E6%9C%BA%E5%88%B6">触发机制</a></li>
 <li><a href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6">配置文件</a></li>
 <li><a href="#redis-rdb-%E6%8C%81%E4%B9%85%E5%8C%96%E4%BC%98%E7%BC%BA%E7%82%B9">Redis RDB 持久化优缺点</a></li>
-<li><a href="#aof">AOF</a></li>
+</ul>
+</li>
+<li><a href="#aof">AOF</a><ul>
+<li><a href="#aof-%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><strong>AOF 工作流程</strong></a></li>
+<li><a href="#aof-%E6%B5%81%E7%A8%8B%E5%9B%BEmermaid"><strong>AOF 流程图（Mermaid）</strong></a></li>
 <li><a href="#aof-%E9%87%8D%E5%86%99%E6%9C%BA%E5%88%B6">AOF 重写机制</a></li>
 <li><a href="#aof-%E4%BC%98%E7%BC%BA%E7%82%B9">AOF 优缺点</a></li>
-<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E8%AF%A6%E8%A7%A3">Redis 混合持久化详解</a></li>
-<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E5%9C%A8-70-%E7%89%88%E6%9C%AC%E5%90%8E%E7%9A%84%E6%94%B9%E5%8A%A8">Redis 混合持久化在 7.0 版本后的改动</a></li>
+</ul>
+</li>
+<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E8%AF%A6%E8%A7%A3">Redis 混合持久化详解</a><ul>
+<li><a href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5">1. 基本概念</a></li>
+<li><a href="#2-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6">2. 核心实现机制</a></li>
+<li><a href="#3-%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E7%A4%BA%E4%BE%8B">3. 文件结构示例</a></li>
+<li><a href="#4-%E6%95%B0%E6%8D%AE%E6%81%A2%E5%A4%8D%E8%BF%87%E7%A8%8B">4. 数据恢复过程</a></li>
+<li><a href="#5-%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0">5. 配置参数</a></li>
+<li><a href="#6-%E4%BC%98%E7%BC%BA%E7%82%B9%E5%88%86%E6%9E%90">6. 优缺点分析</a></li>
+<li><a href="#7-%E7%94%9F%E4%BA%A7%E7%8E%AF%E5%A2%83%E5%BB%BA%E8%AE%AE">7. 生产环境建议</a></li>
+<li><a href="#8-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94">8. 性能对比</a></li>
+</ul>
+</li>
+<li><a href="#redis-%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E5%9C%A8-70-%E7%89%88%E6%9C%AC%E5%90%8E%E7%9A%84%E6%94%B9%E5%8A%A8">Redis 混合持久化在 7.0 版本后的改动</a><ul>
+<li><a href="#1-appendonlyaofmanifest%E6%B8%85%E5%8D%95%E6%96%87%E4%BB%B6">1. <strong><code>appendonly.aof.manifest</code>（清单文件）</strong></a></li>
+<li><a href="#2-appendonlyaof1baserdb%E5%9F%BA%E6%9C%AC%E6%96%87%E4%BB%B6">2. <strong><code>appendonly.aof.1.base.rdb</code>（基本文件）</strong></a></li>
+<li><a href="#3-appendonlyaof1incraof%E5%A2%9E%E9%87%8F%E6%96%87%E4%BB%B6">3. <strong><code>appendonly.aof.1.incr.aof</code>（增量文件）</strong></a></li>
+<li><a href="#%E4%B8%89%E8%80%85%E7%9A%84%E5%8D%8F%E4%BD%9C%E6%B5%81%E7%A8%8B"><strong>三者的协作流程</strong></a></li>
+<li><a href="#%E4%B8%8E%E4%BC%A0%E7%BB%9F%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E7%9A%84%E5%8C%BA%E5%88%AB"><strong>与传统混合持久化的区别</strong></a></li>
+<li><a href="#redis-%E5%AE%98%E6%96%B9%E6%8E%A8%E8%8D%90"><strong>Redis 官方推荐</strong></a></li>
 </ul>
 </li>
 </ul>
@@ -515,13 +537,13 @@ redis-cli info stats <span class="token operator">|</span> <span class="token fu
 </li>
 <li>升级时必须测试旧版 RDB 文件的加载情况</li>
 </ul>
-<h3><span id="aof">AOF</span></h3><p><code>AOF</code> 持久化，以独立日志的方式记录每次写命令，重启时再重新执行 <code>AOF</code> 文件中的命令达到恢复数据的目的。<code>AOF</code> 的主要作用是解决数据持久化的实时性，虽然 <code>AOF</code> 的使用开销比 <code>RDB</code> 要高，但是它提供了更高的数据安全性和更细粒度的恢复能力，且当代计算机的性能已经足以支撑 <code>AOF</code> 的使用</p>
+<h2><span id="aof">AOF</span></h2><p><code>AOF</code> 持久化，以独立日志的方式记录每次写命令，重启时再重新执行 <code>AOF</code> 文件中的命令达到恢复数据的目的。<code>AOF</code> 的主要作用是解决数据持久化的实时性，虽然 <code>AOF</code> 的使用开销比 <code>RDB</code> 要高，但是它提供了更高的数据安全性和更细粒度的恢复能力，且当代计算机的性能已经足以支撑 <code>AOF</code> 的使用</p>
 <p>若想使用 <code>AOF</code>，需要在配置文件中将 <code>appendonly</code>设置为yes，开启 <code>AOF</code> 持久化功能，<code>AOF</code> 文件名通过 <code>appendfilename</code> 配置，默认是 <code>appendonly.aof</code>，保存目录和 <code>RDB</code> 是一致的，通过 <code>dir</code> 配置指定。<code>AOF</code>的工作流程如下：</p>
-<h4><span id="aof-工作流程"><strong>AOF 工作流程</strong></span></h4><h5><span id="1-命令写入append"><strong>1. 命令写入（Append）</strong></span></h5><ul>
+<h3><span id="aof-工作流程"><strong>AOF 工作流程</strong></span></h3><h4><span id="1-命令写入append"><strong>1. 命令写入（Append）</strong></span></h4><ul>
 <li>所有写入命令（如 <code>SET</code>、<code>DEL</code>）会先写入 <strong>AOF 缓冲区（aof_buf）</strong>，而不是直接写入磁盘。</li>
 <li><strong>目的</strong>：避免频繁磁盘 I&#x2F;O 影响性能。</li>
 </ul>
-<h5><span id="2-同步到磁盘sync"><strong>2. 同步到磁盘（Sync）</strong></span></h5><p>Redis 提供 <strong>3 种同步策略</strong>（通过 <code>appendfsync</code> 配置）：</p>
+<h4><span id="2-同步到磁盘sync"><strong>2. 同步到磁盘（Sync）</strong></span></h4><p>Redis 提供 <strong>3 种同步策略</strong>（通过 <code>appendfsync</code> 配置）：</p>
 <table>
 <thead>
 <tr>
@@ -550,7 +572,7 @@ redis-cli info stats <span class="token operator">|</span> <span class="token fu
 <td>最好</td>
 </tr>
 </tbody></table>
-<h5><span id="3-aof-重写rewrite"><strong>3. AOF 重写（Rewrite）</strong></span></h5><ul>
+<h4><span id="3-aof-重写rewrite"><strong>3. AOF 重写（Rewrite）</strong></span></h4><ul>
 <li><strong>问题</strong>：AOF 文件会不断增长（如 <code>INCR</code> 操作 100 次会记录 100 条命令）。</li>
 <li><strong>解决方案</strong>：Redis 会定期执行 <strong>AOF 重写（BGREWRITEAOF）</strong>，生成一个更紧凑的新 AOF 文件（只保留最终状态）。</li>
 <li><strong>触发方式</strong>：<ul>
@@ -559,12 +581,12 @@ redis-cli info stats <span class="token operator">|</span> <span class="token fu
 </ul>
 </li>
 </ul>
-<h5><span id="4-数据恢复load"><strong>4. 数据恢复（Load）</strong></span></h5><ul>
+<h4><span id="4-数据恢复load"><strong>4. 数据恢复（Load）</strong></span></h4><ul>
 <li>Redis 重启时，会<strong>优先加载 AOF 文件</strong>（如果存在）来恢复数据。</li>
 <li><strong>执行方式</strong>：逐条执行 AOF 文件中的命令（类似于回放日志）。</li>
 </ul>
 <hr>
-<h4><span id="aof-流程图mermaid"><strong>AOF 流程图（Mermaid）</strong></span></h4><pre class="mermaid">flowchart TD
+<h3><span id="aof-流程图mermaid"><strong>AOF 流程图（Mermaid）</strong></span></h3><pre class="mermaid">flowchart TD
     A[客户端写入命令] --> B[写入 AOF 缓冲区 aof_buf]
     B --> C{appendfsync 策略}
     C -->|always| D[立即同步到磁盘]
@@ -608,14 +630,14 @@ redis-cli info stats <span class="token operator">|</span> <span class="token fu
 <li><strong>恢复速度慢</strong>：需要逐条执行命令。</li>
 <li><strong>写入性能略低</strong>：频繁同步会影响吞吐量。</li>
 </ol>
-<h3><span id="redis-混合持久化详解">Redis 混合持久化详解</span></h3><p>混合持久化是 Redis 4.0 引入的重要特性，它结合了 RDB 和 AOF 两种持久化方式的优点，既保证了数据安全性，又提高了恢复速度。下面我将从工作原理、实现机制、优缺点和使用建议等方面进行全面讲解。</p>
-<h4><span id="1-基本概念">1. 基本概念</span></h4><p>混合持久化（RDB-AOF Hybrid Persistence）是指：</p>
+<h2><span id="redis-混合持久化详解">Redis 混合持久化详解</span></h2><p>混合持久化是 Redis 4.0 引入的重要特性，它结合了 RDB 和 AOF 两种持久化方式的优点，既保证了数据安全性，又提高了恢复速度。下面我将从工作原理、实现机制、优缺点和使用建议等方面进行全面讲解。</p>
+<h3><span id="1-基本概念">1. 基本概念</span></h3><p>混合持久化（RDB-AOF Hybrid Persistence）是指：</p>
 <ul>
 <li>在 AOF 重写时，将当前数据集以 RDB 格式写入 AOF 文件开头</li>
 <li>后续的写命令继续以 AOF 格式追加到文件中</li>
 <li>最终生成的文件前半部分是 RDB 二进制数据，后半部分是 AOF 命令文本</li>
 </ul>
-<h4><span id="2-核心实现机制">2. 核心实现机制</span></h4><p><strong>触发条件：</strong></p>
+<h3><span id="2-核心实现机制">2. 核心实现机制</span></h3><p><strong>触发条件：</strong></p>
 <ol>
 <li>需要同时满足：<ul>
 <li>开启了 AOF（appendonly yes）</li>
@@ -644,24 +666,24 @@ redis-cli info stats <span class="token operator">|</span> <span class="token fu
 </ul>
 </li>
 </ul>
-<h4><span id="3-文件结构示例">3. 文件结构示例</span></h4><pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">[RDB二进制数据]  ← 文件开头是RDB格式的快照
+<h3><span id="3-文件结构示例">3. 文件结构示例</span></h3><pre class="line-numbers language-nano" data-language="nano"><code class="language-nano">[RDB二进制数据]  ← 文件开头是RDB格式的快照
 *3\r\n$3\r\nSET\r\n$5\r\nkey1\r\n$7\r\nvalue1\r\n  ← 后面追加AOF格式命令
 *3\r\n$3\r\nSET\r\n$5\r\nkey2\r\n$7\r\nvalue2\r\n<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="4-数据恢复过程">4. 数据恢复过程</span></h4><ol>
+<h3><span id="4-数据恢复过程">4. 数据恢复过程</span></h3><ol>
 <li>Redis 重启时检测到 AOF 文件</li>
 <li>发现文件开头是 RDB 魔数”REDIS”</li>
 <li>先快速加载 RDB 部分（二进制解析）</li>
 <li>然后按顺序执行后面的 AOF 命令</li>
 <li>完成数据恢复</li>
 </ol>
-<h4><span id="5-配置参数">5. 配置参数</span></h4><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">appendonly yes                  # 启用AOF
+<h3><span id="5-配置参数">5. 配置参数</span></h3><pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">appendonly yes                  # 启用AOF
 aof-use-rdb-preamble yes        # 启用混合持久化
 aof-rewrite-incremental-fsync yes # 重写时增量fsync
 auto-aof-rewrite-percentage 100 # 文件增长比例阈值
 auto-aof-rewrite-min-size 64mb  # 最小重写大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h4><span id="6-优缺点分析">6. 优缺点分析</span></h4><p><strong>优势：</strong></p>
+<h3><span id="6-优缺点分析">6. 优缺点分析</span></h3><p><strong>优势：</strong></p>
 <ul>
 <li>恢复速度快：RDB 二进制加载比 AOF 命令回放快很多</li>
 <li>数据更安全：AOF 部分保证了重写期间的数据不丢失</li>
@@ -674,7 +696,7 @@ auto-aof-rewrite-min-size 64mb  # 最小重写大小<span aria-hidden="true" cla
 <li>需要 Redis 4.0+ 版本支持</li>
 <li>文件可读性降低（部分二进制）</li>
 </ul>
-<h4><span id="7-生产环境建议">7. 生产环境建议</span></h4><ol>
+<h3><span id="7-生产环境建议">7. 生产环境建议</span></h3><ol>
 <li><p>对于关键业务，强烈建议开启：</p>
 <pre class="line-numbers language-ini" data-language="ini"><code class="language-ini">appendonly yes
 aof-use-rdb-preamble yes
@@ -689,7 +711,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 <li><p>配合适当的备份策略（如每小时备份到远程存储）</p>
 </li>
 </ol>
-<h4><span id="8-性能对比">8. 性能对比</span></h4><table>
+<h3><span id="8-性能对比">8. 性能对比</span></h3><table>
 <thead>
 <tr>
 <th>指标</th>
@@ -723,9 +745,9 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 <td>中</td>
 </tr>
 </tbody></table>
-<h3><span id="redis-混合持久化在-70-版本后的改动">Redis 混合持久化在 7.0 版本后的改动</span></h3><p>在 Redis 7.0+ 的 <strong>Multi-Part AOF (MP-AOF)</strong> 持久化机制中，<code>appendonly.aof.manifest</code>、<code>appendonly.aof.1.base.rdb</code> 和 <code>appendonly.aof.1.incr.aof</code> 这三个文件共同协作，实现高效的数据持久化和恢复。以下是它们的详细作用和运作机制：</p>
+<h2><span id="redis-混合持久化在-70-版本后的改动">Redis 混合持久化在 7.0 版本后的改动</span></h2><p>在 Redis 7.0+ 的 <strong>Multi-Part AOF (MP-AOF)</strong> 持久化机制中，<code>appendonly.aof.manifest</code>、<code>appendonly.aof.1.base.rdb</code> 和 <code>appendonly.aof.1.incr.aof</code> 这三个文件共同协作，实现高效的数据持久化和恢复。以下是它们的详细作用和运作机制：</p>
 <hr>
-<h4><span id="1-appendonlyaofmanifest清单文件">1. <strong><code>appendonly.aof.manifest</code>（清单文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<h3><span id="1-appendonlyaofmanifest清单文件">1. <strong><code>appendonly.aof.manifest</code>（清单文件）</strong></span></h3><p><strong>作用</strong>：</p>
 <ul>
 <li>记录所有 <strong>基本文件（base）</strong> 和 <strong>增量文件（incr）</strong> 的加载顺序，确保 Redis 重启时能正确恢复数据。  </li>
 <li>类似于一个“目录”，告诉 Redis 应该按什么顺序加载数据文件。</li>
@@ -743,7 +765,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 <li>在 <strong>AOF 重写（<code>BGREWRITEAOF</code>）</strong> 时，会生成新的 <code>base</code> 文件并更新 <code>manifest</code>，确保原子性切换。</li>
 </ul>
 <hr>
-<h4><span id="2-appendonlyaof1baserdb基本文件">2. <strong><code>appendonly.aof.1.base.rdb</code>（基本文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<h3><span id="2-appendonlyaof1baserdb基本文件">2. <strong><code>appendonly.aof.1.base.rdb</code>（基本文件）</strong></span></h3><p><strong>作用</strong>：</p>
 <ul>
 <li>存储 <strong>全量数据快照</strong>，采用 <strong>RDB 二进制格式</strong>（默认情况下，<code>aof-use-rdb-preamble yes</code>）。  </li>
 <li>相当于传统混合持久化中的 <strong>RDB 头部</strong>，但现在是独立文件。</li>
@@ -754,7 +776,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 <li>由于 RDB 是压缩的二进制格式，<strong>恢复速度极快</strong>（相比纯 AOF 重放命令）。</li>
 </ul>
 <hr>
-<h4><span id="3-appendonlyaof1incraof增量文件">3. <strong><code>appendonly.aof.1.incr.aof</code>（增量文件）</strong></span></h4><p><strong>作用</strong>：</p>
+<h3><span id="3-appendonlyaof1incraof增量文件">3. <strong><code>appendonly.aof.1.incr.aof</code>（增量文件）</strong></span></h3><p><strong>作用</strong>：</p>
 <ul>
 <li>记录 <strong>AOF 重写之后的所有写操作</strong>，采用 <strong>Redis 协议文本格式</strong>（RESP）。  </li>
 <li>类似于传统 AOF 的尾部，但现在是独立文件。</li>
@@ -772,7 +794,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 <li>当 <strong>AOF 重写完成</strong> 后，增量命令会追加到 <code>incr.aof</code>，并更新 <code>manifest</code>。</li>
 </ul>
 <hr>
-<h4><span id="三者的协作流程"><strong>三者的协作流程</strong></span></h4><ol>
+<h3><span id="三者的协作流程"><strong>三者的协作流程</strong></span></h3><ol>
 <li><p><strong>AOF 重写触发</strong>（手动 <code>BGREWRITEAOF</code> 或自动触发）：</p>
 <ul>
 <li>子进程生成新的 <code>base.rdb</code>（全量快照）。</li>
@@ -796,7 +818,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 </li>
 </ol>
 <hr>
-<h4><span id="与传统混合持久化的区别"><strong>与传统混合持久化的区别</strong></span></h4><table>
+<h3><span id="与传统混合持久化的区别"><strong>与传统混合持久化的区别</strong></span></h3><table>
 <thead>
 <tr>
 <th>特性</th>
@@ -826,7 +848,7 @@ appendfsync everysec<span aria-hidden="true" class="line-numbers-rows"><span></s
 </tr>
 </tbody></table>
 <hr>
-<h4><span id="redis-官方推荐"><strong>Redis 官方推荐</strong></span></h4><ul>
+<h3><span id="redis-官方推荐"><strong>Redis 官方推荐</strong></span></h3><ul>
 <li><strong>默认开启 MP-AOF</strong>（Redis 7.0+），因为它：<ul>
 <li>更<strong>健壮</strong>（文件损坏时影响更小）。</li>
 <li>更<strong>高效</strong>（<code>base.rdb</code> 加载快，<code>incr.aof</code> 增量小）。</li>
