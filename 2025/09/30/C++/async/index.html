@@ -1,0 +1,2180 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>C++ 异步编程 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+std::future 和 std::promise
+基本用法
+
+
+共享状态(shared state)
+概览
+典型的 shared_state 内容
+生命周期 &amp;#x2F; 状态迁移（常见操,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="C++ 异步编程 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+std::future 和 std::promise
+基本用法
+
+
+共享状态(shared state)
+概览
+典型的 shared_state 内容
+生命周期 &amp;#x2F; 状态迁移（常见操,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="C++ 异步编程 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+std::future 和 std::promise
+基本用法
+
+
+共享状态(shared state)
+概览
+典型的 shared_state 内容
+生命周期 &amp;#x2F; 状态迁移（常见操,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 全屏背景层（添加过渡类名） -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">C++ 异步编程</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">70</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">C++ 异步编程</h1>
+            <div class="stuff">
+                <span>九月 30, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" rel="tag">多线程</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag">并发</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/" rel="tag">异步编程</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#stdfuture-%E5%92%8C-stdpromise">std::future 和 std::promise</a><ul>
+<li><a href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95">基本用法</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%B1%E4%BA%AB%E7%8A%B6%E6%80%81shared-state">共享状态(shared state)</a><ul>
+<li><a href="#%E6%A6%82%E8%A7%88">概览</a></li>
+<li><a href="#%E5%85%B8%E5%9E%8B%E7%9A%84-shared_state-%E5%86%85%E5%AE%B9">典型的 shared_state 内容</a></li>
+<li><a href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F-%E7%8A%B6%E6%80%81%E8%BF%81%E7%A7%BB%E5%B8%B8%E8%A7%81%E6%93%8D%E4%BD%9C%E5%BD%B1%E5%93%8D">生命周期 &#x2F; 状态迁移（常见操作影响）</a></li>
+<li><a href="#valid-%E7%9A%84%E8%AF%AD%E4%B9%89"><code>valid()</code> 的语义</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E5%BC%82%E5%B8%B8-%E9%94%99%E8%AF%AF%E4%B8%8E-shared-state-%E7%9B%B8%E5%85%B3">常见异常 &#x2F; 错误（与 shared state 相关）</a></li>
+<li><a href="#%E5%B9%B6%E5%8F%91-%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82%E8%A6%81%E7%82%B9">并发 &#x2F; 实现细节要点</a></li>
+<li><a href="#%E7%A4%BA%E4%BE%8B">示例</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</li>
+<li><a href="#stdpackaged_task">std::packaged_task</a><ul>
+<li><a href="#%E6%A6%82%E8%A7%88-1">概览</a></li>
+</ul>
+</li>
+<li><a href="#stdasync">std::async</a><ul>
+<li><a href="#%E6%A6%82%E8%A7%88-2">概览</a></li>
+<li><a href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8">实际应用</a></li>
+</ul>
+</li>
+<li><a href="#stdshared_future">std::shared_future</a><ul>
+<li><a href="#%E6%A6%82%E8%A7%88-3">概览</a></li>
+</ul>
+</li>
+<li><a href="#c11-%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B%E7%9A%84%E8%B6%85%E6%97%B6%E5%92%8C%E7%AD%89%E5%BE%85%E7%AD%96%E7%95%A5">C++11 异步编程的超时和等待策略</a><ul>
+<li><a href="#1-wait-%E6%96%B9%E6%B3%95">1. <code>wait()</code> 方法</a></li>
+<li><a href="#2-wait_for-%E6%96%B9%E6%B3%95">2. <code>wait_for()</code> 方法</a></li>
+<li><a href="#3-wait_until-%E6%96%B9%E6%B3%95">3. <code>wait_until()</code> 方法</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BB%BC%E5%90%88%E7%A4%BA%E4%BE%8B-%E7%BA%BF%E7%A8%8B%E6%B1%A0">综合示例–线程池</a><ul>
+<li><a href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B">线程池的工作流程</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<p>C++ 11 引入了对异步编程的支持，主要通过 <code>std::async</code>、<code>std::future</code> 和 <code>std::promise</code> 等标准库组件实现。这些工具使得在 C++ 中编写异步代码变得更加简单和直观。</p>
+<p>所谓的异步编程，指的是程序在执行某些操作时，不需要等待这些操作完成，而是可以继续执行其他任务。当这些异步操作完成后，程序可以通过回调函数、事件或其他机制来处理结果，就好比一个程序员在编译运行一个较长的任务时，可以同时处理其他任务，任务运行完后会告诉他结果。</p>
+<p>一般来说，我们会直接从最基础的 std::async 开始讲起，因为它是最简单的异步编程方式，但它底层本质上就是对 <code>std::future</code> 和 <code>std::promise</code> 的封装，我们先将更接近底层的 <code>std::future</code> 和 <code>std::promise</code> 讲解完，这样更方便我们理解 C++ 异步编程的原理，不然一开始讲解更高级的接口封装难免会让大家心里一直有疑惑。</p>
+<h2><span id="stdfuture-和-stdpromise">std::future 和 std::promise</span></h2><p><code>std::future</code> 和 <code>std::promise</code> 是 C++11 引入的两个标准库组件，用于实现异步编程和线程间通信。它们通常一起使用，<code>std::promise</code> 用于在一个线程中设置一个值，而 <code>std::future</code> 用于在另一个线程中获取这个值。</p>
+<p><code>std::future</code> 就是一个消费者，负责获取值，而 <code>std::promise</code> 就是一个生产者，负责设置值。它们之间通过共享状态进行通信。因此， <code>std::promise</code> 和 <code>std::future</code> 之间通信的关键就在于这个共享状态，不过我们先不急着讲解它，我们先来了解一下 <code>std::promise</code> 和 <code>std::future</code> 的基本用法。</p>
+<h3><span id="基本用法">基本用法</span></h3><p><code>std::promise</code> 是一个模板类，用于在一个线程中设置一个值，这个值可以是任何类型。它提供了一个 <code>set_value</code> 方法，用于设置值，以及一个 <code>set_exception</code> 方法，用于设置异常。<br><code>std::future</code> 也是一个模板类，用于在另一个线程中获取这个值。它提供了一个 <code>get</code> 方法，用于获取值，如果值还没有被设置，<code>get</code> 方法会阻塞直到值被设置。</p>
+<p>当 <code>std::promise</code> 设置了一个值后，任何等待这个值的 <code>std::future</code> 都会被通知，并且可以获取这个值。因此，在 <code>std::promise</code> 设置值之前，<code>std::future</code> 处于等待状态，也就是说，<code>std::future</code> 只能在 <code>std::promise</code> 设置值之后才能获取到这个值，否则会被阻塞。</p>
+<p>下面是一个简单的例子，演示了如何使用 <code>std::promise</code> 来设置一个值以及如何使用 <code>std::future</code> 来获取这个值：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">basic_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+  <span class="token comment">// 创建 promise-future 对</span>
+  std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> prom<span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 启动一个线程来设置 promise 的值</span>
+  std<span class="token double-colon punctuation">::</span>thread <span class="token function">producer</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>prom<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 模拟一些工作</span>
+    prom<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 设置 promise 的值</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// 主线程等待 future 的值</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Waiting for the value..."</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token keyword">int</span> value<span class="token punctuation">;</span>
+    <span class="token punctuation">&#123;</span>
+        Timer<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>seconds<span class="token operator">></span> timer<span class="token punctuation">;</span> <span class="token comment">// 计时开始</span>
+      value <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 阻塞直到 promise 设置了值</span>
+    <span class="token punctuation">&#125;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Received value: "</span> <span class="token operator">&lt;&lt;</span> value <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+
+  producer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 等待生产者线程结束</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们创建了一个 <code>std::promise&lt;int&gt;</code> 对象 <code>prom</code>，并通过 <code>prom.get_future()</code> 获取了一个与之关联的 <code>std::future&lt;int&gt;</code> 对象 <code>fut</code>。然后，我们启动了一个线程，在这个线程中模拟了一些工作（通过 <code>sleep_for</code>），然后调用 <code>prom.set_value(42)</code> 来设置值。<br>在主线程中，我们调用 <code>fut.get()</code> 来等待并获取这个值。由于 <code>fut.get()</code> 会阻塞直到 <code>prom</code> 设置了值，所以主线程会等待生产者线程完成工作并设置值后，才会继续执行并打印出接收到的值。</p>
+<p>代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Waiting <span class="token keyword">for</span> the value<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Elapsed time: 2 s
+Received value: 42<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>正如上面所说，<code>std::promise</code> 不仅可以设置值，还可以设置异常。我们可以使用 <code>set_exception</code> 方法来设置一个异常，这样当 <code>std::future</code> 调用 <code>get</code> 方法时，就会抛出这个异常。下面是一个例子：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">exception_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> prom<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">worker</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>prom<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 模拟一些可能抛出异常的工作</span>
+            <span class="token keyword">throw</span> std<span class="token double-colon punctuation">::</span><span class="token function">runtime_error</span><span class="token punctuation">(</span><span class="token string">"Something went wrong!"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            prom<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 这行不会执行</span>
+        <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 捕获异常并传递给 future</span>
+            prom<span class="token punctuation">.</span><span class="token function">set_exception</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">current_exception</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> result <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Result: "</span> <span class="token operator">&lt;&lt;</span> result <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>exception<span class="token operator">&amp;</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Caught exception: "</span> <span class="token operator">&lt;&lt;</span> e<span class="token punctuation">.</span><span class="token function">what</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    worker<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，工作线程模拟了一些可能抛出异常的工作，并在捕获到异常后调用 <code>prom.set_exception(std::current_exception())</code> 将异常传递给 <code>std::future</code>。当主线程调用 <code>fut.get()</code> 时，会抛出这个异常，我们在主线程中捕获并处理它。代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Caught exception: Something went wrong!<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p><code>std::future</code> 还有一些其他有用的方法，比如 <code>wait</code> 和 <code>wait_for</code>，它们可以用来等待值的设置而不阻塞线程。<code>wait</code> 方法会一直等待直到值被设置，而 <code>wait_for</code> 方法允许我们指定一个超时时间，如果在这个时间内值没有被设置，它会返回一个状态，表示等待超时。比较简单，我们这里就不展开讲解了。</p>
+<p>而 <code>std::future</code> 中有一个方法叫做 <code>valid()</code>，它用于检查 <code>std::future</code> 对象是否与一个有效的共享状态关联。也就是说，如果 <code>std::future</code> 对象是通过 <code>std::promise</code> 创建的，并且还没有被移动或者已经获取了值，那么 <code>valid()</code> 会返回 <code>true</code>。否则，它会返回 <code>false</code>。我们会在共享状态中提及它，届时我们会对这个接口有更深入的理解。</p>
+<h2><span id="共享状态shared-state">共享状态(shared state)</span></h2><p>那么，<code>std::promise</code> 和 <code>std::future</code> 之间是如何通信的呢？它们之间通过一个共享状态进行通信。这个共享状态包含了 <code>std::promise</code> 设置的值或者异常，以及一个标志，表示值是否已经被设置。 当 <code>std::promise</code> 调用 <code>set_value</code> 或 <code>set_exception</code> 时，它会更新这个共享状态，并通知所有等待这个值的 <code>std::future</code>。当 <code>std::future</code> 调用 <code>get</code> 方法时，它会检查这个共享状态，如果值已经被设置，它就会返回这个值或者抛出异常；如果值还没有被设置，它就会阻塞，直到值被设置。 这个共享状态是由 C++ 标准库内部管理的，用户不需要直接操作它。 需要注意的是，<code>std::promise</code> 和 <code>std::future</code> 之间的通信是单向的，也就是说，一个 <code>std::promise</code> 只能与一个 <code>std::future</code> 关联，反之亦然。如果需要多个线程等待同一个值，可以使用 <code>std::shared_future</code>，它允许多个 <code>std::future</code> 实例共享同一个值。</p>
+<h3><span id="概览">概览</span></h3><ul>
+<li><strong>shared state</strong>：<code>std::promise&lt;T&gt;</code> 和 <code>std::future&lt;T&gt;</code> 之间真正交换值&#x2F;异常、等待&#x2F;通知的那块内部数据结构。它通常是一个控制块（control block），由实现以堆上对象的形式保存，供 promise&#x2F;future&#x2F; shared_future 持有引用。</li>
+<li><code>promise</code> 和 <code>future</code>（或 <code>shared_future</code>）<strong>持有或引用</strong>这块 shared state；<code>valid()</code> 就是用来判断对象当前是否仍然关联到这块 shared state（即“是否有有效的 shared state”）。</li>
+</ul>
+<h3><span id="典型的-shared_state-内容">典型的 shared_state 内容</span></h3><p>以下代码是一段伪代码，展示了一个典型的 shared state 可能包含的内容（实际实现会更复杂且依赖于具体标准库实现）：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">struct</span> <span class="token class-name">shared_state</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>mutex m<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>condition_variable cv<span class="token punctuation">;</span>   <span class="token comment">// wait/notify</span>
+    <span class="token keyword">bool</span> ready <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>           <span class="token comment">// 是否已就绪（set_value / set_exception）</span>
+    <span class="token comment">// storage for value T (placement-new) or specialization for void / reference</span>
+    std<span class="token double-colon punctuation">::</span>aligned_storage_t<span class="token operator">&lt;</span><span class="token keyword">sizeof</span><span class="token punctuation">(</span>T<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">alignof</span><span class="token punctuation">(</span>T<span class="token punctuation">)</span><span class="token operator">></span> storage<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>exception_ptr ex<span class="token punctuation">;</span>        <span class="token comment">// 如果是异常，就放这里</span>
+    std<span class="token double-colon punctuation">::</span>atomic<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> ref_count<span class="token punctuation">;</span>   <span class="token comment">// 引用计数（promise/future/shared_future）</span>
+    <span class="token keyword">bool</span> future_retrieved <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span> <span class="token comment">// 是否已经从 promise 调用了 get_future（实现可选的标志）</span>
+    <span class="token comment">// 可能还有：等待线程计数、协程/continuation 列表（实现细节随库而异）</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3><span id="生命周期-x2f-状态迁移常见操作影响">生命周期 &#x2F; 状态迁移（常见操作影响）</span></h3><ul>
+<li><p><strong>创建</strong></p>
+<ul>
+<li><code>std::promise&lt;T&gt; p;</code>：通常会创建一个新的 shared state -&gt; <code>p.valid() == true</code>。</li>
+</ul>
+</li>
+<li><p><strong>取 future</strong></p>
+<ul>
+<li><code>auto f = p.get_future();</code>：<code>f</code> 与该 shared state 关联（只能成功调用一次，否则抛 <code>std::future_error</code>）。<code>p</code> 仍然保持与 shared state 的关联（<code>p.valid()</code> 仍然为 <code>true</code>）。</li>
+</ul>
+</li>
+<li><p><strong>设置值&#x2F;异常</strong></p>
+<ul>
+<li><code>p.set_value(v)</code> 或 <code>p.set_exception(ep)</code>：把值或 <code>std::exception_ptr</code> 写入 shared state，并把 <code>ready = true</code>，然后 <code>notify_all()</code> 唤醒等待的 <code>future::wait()</code>&#x2F;<code>get()</code>。如果已经设置过，通常抛 <code>std::future_error</code>（<code>promise_already_satisfied</code>）。</li>
+</ul>
+</li>
+<li><p><strong>future.get()</strong></p>
+<ul>
+<li>如果 shared state 里是值，<code>get()</code> 会返回该值（或移动出）；如果是异常，<code>get()</code> 会 <code>std::rethrow_exception()</code> 抛出原始异常。对于普通的 <code>std::future</code>，<strong>调用 <code>get()</code> 后该 future 会释放它与 shared state 的关联</strong>，随后 <code>f.valid()</code> 变成 <code>false</code>（不能再次 get）。</li>
+<li>对于 <code>std::shared_future</code>，<code>get()</code> 可以多次调用且不会使其失效。</li>
+</ul>
+</li>
+<li><p><strong>移动构造&#x2F;赋值</strong></p>
+<ul>
+<li>对 <code>promise</code> 或 <code>future</code> 做 <code>std::move</code> 会把 shared state 的“所有权&#x2F;引用”转给目标对象，源对象变为“空”（<code>valid() == false</code>）。</li>
+</ul>
+</li>
+<li><p><strong>析构&#x2F;未满足的 promise</strong></p>
+<ul>
+<li>如果 <code>promise</code> 在没有调用 <code>set_value/set_exception</code> 的情况下被析构，通常实现会把 shared state 标记为就绪并存入一个 <code>broken_promise</code> 类型的异常（或等价的 <code>std::future_error</code>），这样之后 <code>future.get()</code> 会抛 <code>std::future_error</code>&#x2F;<code>broken_promise</code>。这避免 future 永远等待。</li>
+</ul>
+</li>
+<li><p><strong>shared_state 的销毁</strong></p>
+<ul>
+<li>shared state 本身在所有持有它的句柄（promise、future、shared_future）都被销毁后才销毁（通过引用计数或类似机制）。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="valid-的语义"><code>valid()</code> 的语义</span></h3><ul>
+<li><p><code>promise::valid()</code> &#x2F; <code>future::valid()</code>：<strong>返回该对象当前是否与 shared state 关联</strong>（即是否有效）。</p>
+</li>
+<li><p>常见返回情形：</p>
+<ul>
+<li>新创建的 <code>promise</code>：<code>true</code>（通常有 shared state）。</li>
+<li><code>promise</code> 被 <code>std::move</code> 走之后的源对象：<code>false</code>。</li>
+<li><code>future</code> 在 <code>get()</code> 之后（非 <code>shared_future</code>）：<code>false</code>（因为它释放了关联）。</li>
+<li><code>shared_future</code> 的拷贝仍然 <code>true</code>（它是可复制的、多次使用）。</li>
+</ul>
+</li>
+<li><p><strong>注意并发</strong>：<code>valid()</code> 不是万能的线程安全检查器。若同时有另一个线程在移动&#x2F;销毁该对象，则并发调用 <code>valid()</code> 可能出现数据竞争 —— 要避免并发修改与并发读同一对象，除非额外同步。</p>
+</li>
+</ul>
+<h3><span id="常见异常-x2f-错误与-shared-state-相关">常见异常 &#x2F; 错误（与 shared state 相关）</span></h3><ul>
+<li><code>std::future_error</code>（<code>promise_already_satisfied</code>）：<code>set_value</code> &#x2F; <code>set_exception</code> 被重复调用。</li>
+<li><code>std::future_error</code>（<code>no_state</code>）：在没有 shared state（<code>valid() == false</code>）上调用诸如 <code>get()</code>、<code>set_value()</code> 等操作。</li>
+<li><code>std::future_error</code>（<code>broken_promise</code>）：<code>promise</code> 析构但未设置值&#x2F;异常，<code>future.get()</code> 抛出。</li>
+</ul>
+<h3><span id="并发-x2f-实现细节要点">并发 &#x2F; 实现细节要点</span></h3><ul>
+<li><p>实现一般使用 <code>mutex + condition_variable</code> 或原子加自旋&#x2F;事件机制，保证：</p>
+<ul>
+<li><code>set_value/set_exception</code> 原子地写入结果并标记 ready；</li>
+<li><code>future.get()</code> 等待直到 ready，再取值或重新抛出 exception；</li>
+<li>适当的内存序（release on writer, acquire on reader）以保证写入的值对 reader 可见。</li>
+</ul>
+</li>
+<li><p>对于大多数用户代码，<strong>不需要关心这些低层细节</strong>，只需知道：promise 写，future 读；同步由 shared state 内部保证；不要并发在同一个 <code>promise</code> 上做 conflicting 操作（除非你能保证同步）。</p>
+</li>
+</ul>
+<h3><span id="示例">示例</span></h3><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;future></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;thread></span></span>
+
+<span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">typename</span> <span class="token class-name">U</span><span class="token operator">></span>
+<span class="token keyword">void</span> <span class="token function">show_valid</span><span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token keyword">char</span><span class="token operator">*</span> name<span class="token punctuation">,</span> U<span class="token operator">&amp;</span> obj<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> name <span class="token operator">&lt;&lt;</span> <span class="token string">".valid() = "</span>
+              <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span>obj<span class="token punctuation">.</span><span class="token function">valid</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token string">"true"</span> <span class="token operator">:</span> <span class="token string">"false"</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> p<span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> f <span class="token operator">=</span> p<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">show_valid</span><span class="token punctuation">(</span><span class="token string">"f (after get_future)"</span><span class="token punctuation">,</span> f<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// true</span>
+
+    p<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"f.get() = "</span> <span class="token operator">&lt;&lt;</span> f<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> <span class="token char">'\n'</span><span class="token punctuation">;</span> <span class="token comment">// 42</span>
+    <span class="token function">show_valid</span><span class="token punctuation">(</span><span class="token string">"f (after get)"</span><span class="token punctuation">,</span> f<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// false，因为 get 后失效</span>
+
+    <span class="token comment">// move 行为</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> p2<span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> f2 <span class="token operator">=</span> p2<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> f3 <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>f2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 转移 shared state</span>
+    <span class="token function">show_valid</span><span class="token punctuation">(</span><span class="token string">"f2 (moved-from)"</span><span class="token punctuation">,</span> f2<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// false</span>
+    <span class="token function">show_valid</span><span class="token punctuation">(</span><span class="token string">"f3 (moved-to)"</span><span class="token punctuation">,</span> f3<span class="token punctuation">)</span><span class="token punctuation">;</span>   <span class="token comment">// true</span>
+<span class="token punctuation">&#125;</span>
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>上面程序展示了 <code>valid()</code> 的行为，以及 <code>promise</code> 和 <code>future</code> 之间的交互。</p>
+<h3><span id="总结">总结</span></h3><ul>
+<li><strong>shared state</strong> 是值&#x2F;异常 + 就绪标志 + 同步原语的集合。</li>
+<li><code>promise</code> 写，<code>future</code> 读；写操作会 <code>notify</code>，读操作会等待并读取&#x2F;重新抛异常。</li>
+<li><code>valid()</code> 判断的是“是否关联 shared state”，不是“是否已就绪”。</li>
+<li><code>future.get()</code>（普通 future）会在取走值后使该 future 失效（<code>valid()</code> -&gt; false）。</li>
+<li><code>promise</code> 析构而未设置值会导致 <code>future.get()</code> 抛 <code>broken_promise</code>。</li>
+<li>切记：不要并发地在同一个 <code>promise</code>&#x2F;<code>future</code> 上做修改（move&#x2F;销毁&#x2F;设置等）而不同步——那是数据竞争。</li>
+</ul>
+<h2><span id="stdpackaged_task">std::packaged_task</span></h2><h3><span id="概览">概览</span></h3><p><code>std::packaged_task</code> 是 C++11 引入的一个标准库组件，用于将一个可调用对象（如函数、函数指针、lambda 表达式等）包装成一个任务，并与一个 <code>std::future</code> 关联，以便在将来某个时间点获取该任务的结果。它允许我们将任务的执行与结果的获取分离开来，从而实现异步编程。</p>
+<p><code>std::packaged_task</code> 是一个模板类，接受一个函数签名作为模板参数。它提供了一个 <code>operator()</code> 方法，用于执行包装的可调用对象，并将结果存储在与之关联的 <code>std::future</code> 中。我们可以通过调用 <code>get_future</code> 方法来获取这个 <code>std::future</code> 对象，以便在任务完成后获取结果。也正是因为它提供了 <code>operator()</code> 方法，我们可以将 <code>std::packaged_task</code> 对象传递给线程或线程池来执行任务。</p>
+<p>下面是一个简单的例子，演示了如何使用 <code>std::packaged_task</code> 来包装一个函数，并在另一个线程中执行这个任务，然后在主线程中获取结果：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">basic_packaged_task</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 创建一个 packaged_task，包装一个普通函数</span>
+    <span class="token keyword">auto</span> simple_function <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">,</span> <span class="token keyword">int</span> y<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Calculating in thread "</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">get_id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+        <span class="token keyword">return</span> x <span class="token operator">*</span> y<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 包装函数，模板参数是函数签名</span>
+    std<span class="token double-colon punctuation">::</span>packaged_task<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">(</span><span class="token keyword">int</span><span class="token punctuation">,</span> <span class="token keyword">int</span><span class="token punctuation">)</span><span class="token operator">></span> <span class="token function">task</span><span class="token punctuation">(</span>simple_function<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 获取与任务关联的 future</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> result <span class="token operator">=</span> task<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 在另一个线程中执行任务</span>
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">worker</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 注意：task 需要移动</span>
+
+    <span class="token comment">// 获取结果</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Result: "</span> <span class="token operator">&lt;&lt;</span> result<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    worker<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们首先定义了一个简单的 lambda 函数 <code>simple_function</code>，它接受两个整数参数并返回它们的乘积。然后，我们创建了一个 <code>std::packaged_task&lt;int(int, int)&gt;</code> 对象 <code>task</code>，并将 <code>simple_function</code> 传递给它。接下来，我们调用 <code>task.get_future()</code> 获取与任务关联的 <code>std::future&lt;int&gt;</code> 对象 <code>result</code>，以便在任务完成后获取结果。然后，我们启动了一个线程 <code>worker</code>，并将 <code>task</code> 移动到这个线程中执行，同时传递参数 <code>6</code> 和 <code>7</code>。最后，我们在主线程中调用 <code>result.get()</code> 来获取任务的结果，并打印出来。</p>
+<p>代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Calculating in thread 99048
+Result: 42<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>它同样可以处理异常。如果包装的函数抛出异常，这个异常会被存储在与之关联的 <code>std::future</code> 中，当我们调用 <code>get</code> 方法时，会重新抛出这个异常。下面是一个例子：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">exception_handling</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>packaged_task<span class="token operator">&lt;</span><span class="token keyword">double</span><span class="token punctuation">(</span><span class="token keyword">double</span><span class="token punctuation">)</span><span class="token operator">></span> <span class="token function">task</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">double</span> x<span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token keyword">double</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>x <span class="token operator">&lt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">throw</span> std<span class="token double-colon punctuation">::</span><span class="token function">invalid_argument</span><span class="token punctuation">(</span><span class="token string">"Negative value not allowed"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> std<span class="token double-colon punctuation">::</span><span class="token function">sqrt</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">double</span><span class="token operator">></span> fut <span class="token operator">=</span> task<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">worker</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1.0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">try</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">double</span> result <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Result: "</span> <span class="token operator">&lt;&lt;</span> result <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token keyword">const</span> std<span class="token double-colon punctuation">::</span>exception<span class="token operator">&amp;</span> e<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Caught exception: "</span> <span class="token operator">&lt;&lt;</span> e<span class="token punctuation">.</span><span class="token function">what</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    worker<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们创建了一个 <code>std::packaged_task&lt;double(double)&gt;</code> 对象 <code>task</code>，它包装了一个计算平方根的 lambda 函数。如果传递给这个函数的参数是负数，它会抛出一个 <code>std::invalid_argument</code> 异常。我们启动了一个线程 <code>worker</code>，并将 <code>-1.0</code> 传递给任务。然后，在主线程中调用 <code>fut.get()</code> 来获取结果，由于任务抛出了异常，我们在主线程中捕获并处理了这个异常。代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Caught exception: Negative value not allowed<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>当我们使用 <code>std::packaged_task</code> 时，是不需要手动创建 <code>std::promise</code> 的，因为 <code>std::packaged_task</code> 内部已经封装了一个 <code>std::promise</code>，并且通过 <code>get_future</code> 方法提供了与之关联的 <code>std::future</code>。因此，使用 <code>std::packaged_task</code> 可以简化代码，使得任务的创建和结果的获取更加方便。</p>
+<h2><span id="stdasync">std::async</span></h2><h3><span id="概览">概览</span></h3><p><code>std::async</code> 是 C++11 引入的一个标准库函数，用于启动一个异步任务，并返回一个 <code>std::future</code> 对象，以便在将来某个时间点获取该任务的结果。它允许我们轻松地将函数调用异步化，从而实现并发编程。</p>
+<p>在我们了解了 <code>std::future</code>、<code>std::promise</code> 和 <code>std::packaged_task</code> 之后，<code>std::async</code> 可以看作是对这些组件的一个高级封装。它简化了异步任务的创建和管理，使得我们不需要手动创建 <code>std::promise</code> 或 <code>std::packaged_task</code>，而只需调用 <code>std::async</code> 并传递一个可调用对象（如函数、函数指针、lambda 表达式等）以及其参数。</p>
+<p><code>std::async</code> 的基本用法如下：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">basic_async_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 简单的异步函数</span>
+    <span class="token keyword">auto</span> multiply <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> b<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Async task running in thread: "</span>
+            <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">get_id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> a <span class="token operator">*</span> b<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 启动异步任务 - 最简单的形式</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> result <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>multiply<span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 主线程可以继续做其他工作</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Main thread working...\n"</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">milliseconds</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 获取结果（如果需要）</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Result: "</span> <span class="token operator">&lt;&lt;</span> result<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们定义了一个简单的 lambda 函数 <code>multiply</code>，它接受两个整数参数并返回它们的乘积。然后，我们调用 <code>std::async</code> 并传递 <code>multiply</code> 以及参数 <code>6</code> 和 <code>7</code>，这会启动一个异步任务，并返回一个与之关联的 <code>std::future&lt;int&gt;</code> 对象 <code>result</code>。主线程可以继续执行其他工作，而不需要等待异步任务完成。最后，我们调用 <code>result.get()</code> 来获取任务的结果，这会阻塞直到任务完成并返回结果。</p>
+<p>代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Main thread working<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Async task running in thread: 70252
+Result: 42<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>std::async 还有一个重要的参数 <code>std::launch</code>，它用于指定任务的启动策略。<code>std::launch</code> 有两个选项：</p>
+<ul>
+<li><code>std::launch::async</code>：强制任务在一个新的线程中异步执行。</li>
+<li><code>std::launch::deferred</code>：任务的执行被延迟，直到调用 <code>get()</code> 或 <code>wait()</code> 方法时才执行，此时任务会在调用线程中执行。</li>
+<li><code>std::launch::async | std::launch::deferred</code>（默认值）：允许实现选择最合适的策略，可能是异步执行，也可能是延迟执行。</li>
+</ul>
+<p>下面我们举一个例子，来演示两种策略的区别：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">launch_policy_compare</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">auto</span> task <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+  <span class="token comment">// 使用 std::launch::deferred</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">auto</span> fut1 <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>deferred<span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Deferred task created.\n"</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Main thread doing other work...\n"</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 任务不会立即执行，直到调用 get() 或 wait()</span>
+        <span class="token punctuation">&#123;</span>
+            Timer<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>seconds<span class="token operator">></span> timer<span class="token punctuation">;</span>
+            fut1<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 现在任务才会执行</span>
+        <span class="token punctuation">&#125;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Deferred task completed.\n"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 使用 std::launch::async</span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">auto</span> fut2 <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>async<span class="token punctuation">,</span> task<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Async task created.\n"</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Main thread doing other work...\n"</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 任务会立即在新线程中执行</span>
+        <span class="token punctuation">&#123;</span>
+      Timer<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>seconds<span class="token operator">></span> timer<span class="token punctuation">;</span>
+            fut2<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 等待任务完成</span>
+        <span class="token punctuation">&#125;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Async task completed.\n"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们定义了一个简单的任务 <code>task</code>，它会睡眠两秒钟。然后，我们分别使用 <code>std::launch::deferred</code> 和 <code>std::launch::async</code> 启动了两个异步任务：</p>
+<ul>
+<li>对于使用 <code>std::launch::deferred</code> 启动的任务，任务不会立即执行，而是等到我们调用 <code>fut1.wait()</code> 时才会执行，这时任务会在调用线程中执行，主线程在做其他任务的时候，任务并没有开始执行。因此，主线程等待任务完成的时间需要两秒钟。</li>
+<li>对于使用 <code>std::launch::async</code> 启动的任务，任务会立即在一个新的线程中执行，主线程在做其他任务的时候，任务已经开始执行了。因此，主线程等待任务完成的时间只需要一秒钟。</li>
+</ul>
+<p>代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Deferred task created<span class="token punctuation">.</span>
+Main thread doing other work<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Elapsed time: 2 s
+Deferred task completed<span class="token punctuation">.</span>
+
+Async task created<span class="token punctuation">.</span>
+Main thread doing other work<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Elapsed time: 1 s
+Async task completed<span class="token punctuation">.</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>使用 <code>std::async</code> 同样可以处理异常。如果异步任务抛出异常，这个异常会被存储在与之关联的 <code>std::future</code> 中，当我们调用 <code>get</code> 方法时，会重新抛出这个异常，使用方法和上面讲解的 <code>std::packaged_task</code> 类似，这里就不再赘述。</p>
+<h3><span id="实际应用">实际应用</span></h3><p>使用 <code>std::async</code>，我们可以实现一些有趣的程序，我来列举一个生产中常见的应用：异步任务链。</p>
+<p>假设我们有一系列需要依次执行的任务，每个任务的输出是下一个任务的输入。我们可以使用 <code>std::async</code> 来实现这个任务链，每个任务都在一个新的线程中异步执行，并且我们可以通过 <code>std::future</code> 来获取每个任务的结果。使用 <code>std::async</code> 实现的异步任务链天然支持异常传播，如果某个任务抛出异常，后续的任务将不会执行，并且异常会被传递到最终的 <code>get</code> 调用处。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">async_chain_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 创建数据</span>
+    <span class="token keyword">auto</span> create_data <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-></span> std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span><span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> <span class="token function">data</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span><span class="token function">iota</span><span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 填充数据 1 到 100</span>
+        <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+  <span class="token comment">// 筛选数据</span>
+    <span class="token keyword">auto</span> process_data <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> data<span class="token punctuation">)</span> <span class="token operator">-></span> std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> filtered<span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span><span class="token function">copy_if</span><span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span><span class="token function">back_inserter</span><span class="token punctuation">(</span>filtered<span class="token punctuation">)</span><span class="token punctuation">,</span>
+      <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> x<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span> x <span class="token operator">%</span> <span class="token number">2</span> <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 只保留偶数</span>
+        <span class="token keyword">return</span> filtered<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+  <span class="token comment">// 汇总数据</span>
+    <span class="token keyword">auto</span> aggregate_data <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> data<span class="token punctuation">)</span> <span class="token operator">-></span> <span class="token keyword">int</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> std<span class="token double-colon punctuation">::</span><span class="token function">accumulate</span><span class="token punctuation">(</span>data<span class="token punctuation">.</span><span class="token function">begin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> data<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 求和</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 链式调用</span>
+  <span class="token keyword">auto</span> data_future <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>async<span class="token punctuation">,</span> create_data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> processed_future <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>async<span class="token punctuation">,</span> <span class="token punctuation">[</span>data_future <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>data_future<span class="token punctuation">)</span><span class="token punctuation">,</span> process_data<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">mutable</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">process_data</span><span class="token punctuation">(</span>data_future<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> aggregated_future <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>async<span class="token punctuation">,</span> <span class="token punctuation">[</span>processed_future <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span>processed_future<span class="token punctuation">)</span><span class="token punctuation">,</span> aggregate_data<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">mutable</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">return</span> <span class="token function">aggregate_data</span><span class="token punctuation">(</span>processed_future<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 获取最终结果</span>
+  <span class="token keyword">int</span> result <span class="token operator">=</span> aggregated_future<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Final aggregated result: "</span> <span class="token operator">&lt;&lt;</span> result <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们定义了三个任务：<code>create_data</code> 用于创建一个包含 1 到 100 的整数的向量，<code>process_data</code> 用于筛选出其中的偶数，<code>aggregate_data</code> 用于计算筛选后的偶数的和。然后，我们使用 <code>std::async</code> 来异步执行这些任务，并通过捕获前一个任务的 <code>std::future</code> 来实现任务链。最后，我们调用 <code>aggregated_future.get()</code> 来获取最终的结果。代码输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Final aggregated result: 2550<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h2><span id="stdshared_future">std::shared_future</span></h2><h3><span id="概览">概览</span></h3><p><code>std::shared_future</code> 是 C++11 引入的一个标准库组件，用于实现多个线程共享同一个异步任务的结果。与 <code>std::future</code> 不同，<code>std::shared_future</code> 允许多个 <code>std::shared_future</code> 实例共享同一个结果，这使得我们可以在多个线程中同时获取同一个异步任务的结果，而不需要担心结果被多次获取后失效。与 <code>std::future</code> 一样，<code>std::shared_future</code> 也可以与 <code>std::promise</code> 或 <code>std::packaged_task</code> 结合使用，以实现异步编程，但 <code>std::shared_future</code> 是可以被复制的，而 <code>std::future</code> 只能被移动。</p>
+<p>下面是一个简单的例子，演示了如何使用 <code>std::shared_future</code> 来共享一个异步任务的结果：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">basic_shared_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 创建 promise 和 future</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> prom<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 将 future 转换为 shared_future（可以复制）</span>
+    std<span class="token double-colon punctuation">::</span>shared_future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> shared_fut <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">share</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 创建多个消费者线程</span>
+    std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>thread<span class="token operator">></span> consumers<span class="token punctuation">;</span>
+
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        consumers<span class="token punctuation">.</span><span class="token function">emplace_back</span><span class="token punctuation">(</span><span class="token punctuation">[</span>i<span class="token punctuation">,</span> shared_fut<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 复制 shared_future</span>
+            <span class="token comment">// 每个消费者都可以调用 get()</span>
+            <span class="token keyword">int</span> result <span class="token operator">=</span> shared_fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Consumer "</span> <span class="token operator">&lt;&lt;</span> i <span class="token operator">&lt;&lt;</span> <span class="token string">" got result: "</span> <span class="token operator">&lt;&lt;</span> result
+                      <span class="token operator">&lt;&lt;</span> <span class="token string">" in thread "</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">get_id</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 生产者设置值</span>
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">producer</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>prom<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Producer setting value to 100\n"</span><span class="token punctuation">;</span>
+        prom<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    producer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span><span class="token operator">&amp;</span> consumer <span class="token operator">:</span> consumers<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        consumer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们首先创建了一个 <code>std::promise&lt;int&gt;</code> 对象 <code>prom</code>，并通过 <code>prom.get_future()</code> 获取了一个与之关联的 <code>std::future&lt;int&gt;</code> 对象 <code>fut</code>。然后，我们调用 <code>fut.share()</code> 将其转换为一个 <code>std::shared_future&lt;int&gt;</code> 对象 <code>shared_fut</code>，这样我们就可以在多个线程中共享这个结果。接下来，我们创建了三个消费者线程，每个线程都复制了 <code>shared_fut</code> 并调用 <code>get()</code> 方法来获取结果。最后，我们启动了一个生产者线程，在这个线程中模拟了一些工作（通过 <code>sleep_for</code>），然后调用 <code>prom.set_value(100)</code> 来设置值。打印输出如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Producer setting value to 100
+Consumer 0 got result: 100 in thread 101436
+Consumer 2 got result: 100 in thread 101444
+Consumer 1 got result: 100 in thread 101440<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个输出中，我们可以看到生产者线程设置了值 <code>100</code>，然后三个消费者线程都成功地获取到了这个值，并且它们的线程 ID 也不同，说明它们是在不同的线程中执行的。</p>
+<p>其实，下面这段代码可以合并成一行代码：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 将 future 转换为 shared_future（可以复制）</span>
+std<span class="token double-colon punctuation">::</span>shared_future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> shared_fut <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">share</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>我们可以直接通过 <code>std::shared_future</code> 去接收 <code>fut.share()</code> 的返回值：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">std<span class="token double-colon punctuation">::</span>shared_future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> shared_fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<p>这是因为 <code>std::shared_future</code> 提供了通过 <code>std::future</code> 移动构造函数来创建 <code>std::shared_future</code> 的能力。</p>
+<p>我们查询官网，可以看到：</p>
+<p><img src="/img/C++/async/shared_future_move.png" alt="shared_future_constructor"></p>
+<p>这说明 <code>std::shared_future</code> 可以通过一个 <code>std::future</code> 对象来构造，并且这个构造函数是一个移动构造函数，这意味着我们可以直接将 <code>prom.get_future()</code> 的结果传递给 <code>std::shared_future</code> 的构造函数，而不需要先将其存储在一个临时的 <code>std::future</code> 变量中。需要注意的是，通过 <code>shared()</code> 方法获得的 <code>std::shared_future</code> 对象是通过移动构造函数创建的，因此原始的 <code>std::future</code> 对象在调用 <code>share()</code> 后将变为无效（<code>valid()</code> 返回 <code>false</code>），而 <code>std::shared_future</code> 对象则可以被复制和共享，而该 <code>std::future</code> 对象不再可用。</p>
+<h2><span id="c11-异步编程的超时和等待策略">C++11 异步编程的超时和等待策略</span></h2><p>在 C++11 中，异步编程主要通过 <code>std::async</code>、<code>std::future</code> 和 <code>std::promise</code> 等组件实现。为了更好地控制异步任务的执行和结果获取，C++11 提供了一些超时和等待策略，主要体现在 <code>std::future</code> 类中。以下是一些常见的超时和等待策略：</p>
+<h3><span id="1-wait-方法">1. <code>wait()</code> 方法</span></h3><p><code>wait()</code> 方法用于阻塞当前线程，直到与 <code>std::future</code> 关联的异步任务完成。这个方法没有超时机制，它会一直等待，直到任务完成或异常被抛出。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">basic_wait_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> prom<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token operator">></span> fut <span class="token operator">=</span> prom<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">worker</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>prom<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Worker: Setting value to 100\n"</span><span class="token punctuation">;</span>
+        prom<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Main: Waiting for result...\n"</span><span class="token punctuation">;</span>
+    fut<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 阻塞直到结果就绪</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Main: Got result: "</span> <span class="token operator">&lt;&lt;</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+
+    worker<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，主线程调用 <code>fut.wait()</code>，它会阻塞直到工作线程设置了值。同样，如果我们直接调用 <code>fut.get()</code>，它也会阻塞直到结果就绪。</p>
+<h3><span id="2-wait_for-方法">2. <code>wait_for()</code> 方法</span></h3><p><code>wait_for()</code> 方法允许我们指定一个超时时间，等待与 <code>std::future</code> 关联的异步任务完成。如果在指定的时间内任务没有完成，<code>wait_for()</code> 会返回一个状态，表示等待超时。</p>
+<p><code>wait_for()</code> 的返回值是一个 <code>std::future_status</code> 枚举，可能的值有：</p>
+<ul>
+<li><code>std::future_status::ready</code>：任务已经完成，可以调用 <code>get()</code> 获取结果。</li>
+<li><code>std::future_status::timeout</code>：等待超时，任务还没有完成。</li>
+<li><code>std::future_status::deferred</code>：任务被延迟执行（如果使用了 <code>std::launch::deferred</code> 启动策略）。</li>
+</ul>
+<p>所以说，我们在批量化管理异步任务超时处理的时候，需要同时管理三种状态，是可以通过 <code>switch</code> 语句来处理的。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">wait_for_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    Timer<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>seconds<span class="token operator">></span> timer<span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> slow_task <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> seconds<span class="token punctuation">)</span> <span class="token operator">-></span> std<span class="token double-colon punctuation">::</span>string <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span>seconds<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token string">"Task completed after "</span> <span class="token operator">+</span> std<span class="token double-colon punctuation">::</span><span class="token function">to_string</span><span class="token punctuation">(</span>seconds<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">" seconds"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 启动一个需要3秒的任务</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>string<span class="token operator">></span> fut <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">async</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>launch<span class="token double-colon punctuation">::</span>async<span class="token punctuation">,</span> slow_task<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Waiting with 2 second timeout...\n"</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 等待最多2秒</span>
+    <span class="token keyword">auto</span> status <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">wait_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>status <span class="token operator">==</span> std<span class="token double-colon punctuation">::</span>future_status<span class="token double-colon punctuation">::</span>ready<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Success: "</span> <span class="token operator">&lt;&lt;</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Timeout after 2 seconds. Task still running.\n"</span><span class="token punctuation">;</span>
+        <span class="token comment">// 在实际应用中，这里可能需要取消任务或记录日志</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Now waiting indefinitely: "</span> <span class="token operator">&lt;&lt;</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个示例中，我们启动了一个需要 3 秒钟完成的异步任务，并使用 <code>wait_for</code> 方法等待最多 2 秒钟。如果任务在 2 秒内没有完成，<code>wait_for</code> 会返回 <code>std::future_status::timeout</code>，我们可以选择继续等待或者采取其他措施。</p>
+<p>执行结果如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Waiting with 2 second timeout<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Timeout after 2 seconds<span class="token punctuation">.</span> Task still running<span class="token punctuation">.</span>
+Now waiting indefinitely: Task completed after 3 seconds
+Elapsed time: 3 s<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>若我们将任务执行时间改为 1 秒钟，结果会有所不同：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">Waiting with <span class="token number">2</span> second timeout<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Success<span class="token operator">:</span> Task completed after <span class="token number">1</span> seconds
+Elapsed time<span class="token operator">:</span> <span class="token number">1</span> s<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，任务在 2 秒内完成，<code>wait_for</code> 返回 <code>std::future_status::ready</code>，我们成功获取了结果。整个过程持续了 1 秒钟，这说明 <code>wait_for</code> 在任务完成后会立即返回，而不是等到超时。</p>
+<h3><span id="3-wait_until-方法">3. <code>wait_until()</code> 方法</span></h3><p><code>wait_until()</code> 方法允许我们指定一个绝对时间点，等待与 <code>std::future</code> 关联的异步任务完成。如果在指定的时间点之前任务没有完成，<code>wait_until()</code> 会返回一个状态，表示等待超时。</p>
+<p><code>wait_until()</code> 的返回值与 <code>wait_for()</code> 相同，也是一个 <code>std::future_status</code> 枚举。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">wait_until_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>promise<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> data_ready<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> ready_future <span class="token operator">=</span> data_ready<span class="token punctuation">.</span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>thread <span class="token function">data_producer</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">&amp;</span>data_ready<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token comment">// 模拟数据处理时间</span>
+        std<span class="token double-colon punctuation">::</span>this_thread<span class="token double-colon punctuation">::</span><span class="token function">sleep_for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Data producer: Data is ready!\n"</span><span class="token punctuation">;</span>
+        data_ready<span class="token punctuation">.</span><span class="token function">set_value</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 设置截止时间：当前时间 + 3秒</span>
+    <span class="token keyword">auto</span> deadline <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span>steady_clock<span class="token double-colon punctuation">::</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> std<span class="token double-colon punctuation">::</span>chrono<span class="token double-colon punctuation">::</span><span class="token function">seconds</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Waiting for data until deadline...\n"</span><span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> status <span class="token operator">=</span> ready_future<span class="token punctuation">.</span><span class="token function">wait_until</span><span class="token punctuation">(</span>deadline<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>status <span class="token operator">==</span> std<span class="token double-colon punctuation">::</span>future_status<span class="token double-colon punctuation">::</span>ready<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Data received before deadline!\n"</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    <span class="token keyword">else</span> <span class="token punctuation">&#123;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Deadline exceeded! Data not ready in time.\n"</span><span class="token punctuation">;</span>
+        <span class="token comment">// 可以触发超时处理逻辑</span>
+    <span class="token punctuation">&#125;</span>
+
+    data_producer<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>ready_future<span class="token punctuation">.</span><span class="token function">valid</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        ready_future<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 清理状态</span>
+    <span class="token punctuation">&#125;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>该示例当中，我们创建了一个 <code>std::promise&lt;void&gt;</code> 对象 <code>data_ready</code>，并通过 <code>data_ready.get_future()</code> 获取了一个与之关联的 <code>std::future&lt;void&gt;</code> 对象 <code>ready_future</code>。然后，我们启动了一个数据生产者线程 <code>data_producer</code>，它模拟了一些数据处理时间（4 秒钟），然后调用 <code>data_ready.set_value()</code> 来表示数据已经准备好。</p>
+<p>执行结果如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Waiting <span class="token keyword">for</span> <span class="token keyword">data</span> <span class="token keyword">until</span> deadline<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Deadline exceeded! <span class="token keyword">Data</span> not ready in time<span class="token punctuation">.</span>
+<span class="token keyword">Data</span> producer: <span class="token keyword">Data</span> is ready!<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<h2><span id="综合示例线程池">综合示例–线程池</span></h2><p>下面是一个基于 C++11 标准库实现的简单线程池示例，展示了如何使用 <code>std::thread</code>、<code>std::mutex</code>、<code>std::condition_variable</code> 和 <code>std::future</code> 来管理和执行异步任务。这个线程池允许我们提交任意返回值和任意参数的任务，并在多个工作线程中并发执行这些任务，同时支持任务结果的异步获取，利用 <code>std::packaged_task</code> 实现任务的封装，从而方便统一管理。</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">class</span> <span class="token class-name">ThreadPool</span> <span class="token punctuation">&#123;</span>
+<span class="token keyword">public</span><span class="token operator">:</span>
+    <span class="token comment">// 构造函数：创建指定数量的工作线程</span>
+    <span class="token function">ThreadPool</span><span class="token punctuation">(</span>size_t threads<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> threads<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token comment">// 每个线程执行一个无限循环，从任务队列里取任务</span>
+            workers<span class="token punctuation">.</span><span class="token function">emplace_back</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>
+                <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                    std<span class="token double-colon punctuation">::</span>function<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">></span> task<span class="token punctuation">;</span>
+                    <span class="token punctuation">&#123;</span>
+                        <span class="token comment">// 加锁保护任务队列</span>
+                        std<span class="token double-colon punctuation">::</span>unique_lock<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>mutex<span class="token operator">></span> <span class="token function">lock</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token operator">-></span>queue_mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                        <span class="token comment">// 条件变量等待，直到：</span>
+                        <span class="token comment">// 1) 线程池被停止 (stop == true)，或者</span>
+                        <span class="token comment">// 2) 任务队列不为空</span>
+                        <span class="token keyword">this</span><span class="token operator">-></span>condition<span class="token punctuation">.</span><span class="token function">wait</span><span class="token punctuation">(</span>lock<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">]</span> <span class="token punctuation">&#123;</span>
+                            <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token operator">-></span>stop <span class="token operator">||</span> <span class="token operator">!</span><span class="token keyword">this</span><span class="token operator">-></span>tasks<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                        <span class="token comment">// 如果线程池停止并且没有任务了，就退出线程</span>
+                        <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token operator">-></span>stop <span class="token operator">&amp;&amp;</span> <span class="token keyword">this</span><span class="token operator">-></span>tasks<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+                            <span class="token keyword">return</span><span class="token punctuation">;</span>
+
+                        <span class="token comment">// 从任务队列取出一个任务（用 move 避免拷贝）</span>
+                        task <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token function">move</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token operator">-></span>tasks<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">this</span><span class="token operator">-></span>tasks<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">&#125;</span>
+                    <span class="token comment">// 解锁后执行任务</span>
+                    <span class="token function">task</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">&#125;</span>
+            <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 析构函数：等待所有线程完成，安全关闭线程池</span>
+    <span class="token operator">~</span><span class="token function">ThreadPool</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+        <span class="token punctuation">&#123;</span>
+            std<span class="token double-colon punctuation">::</span>unique_lock<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>mutex<span class="token operator">></span> <span class="token function">lock</span><span class="token punctuation">(</span>queue_mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            stop <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>  <span class="token comment">// 标记线程池停止</span>
+        <span class="token punctuation">&#125;</span>
+        condition<span class="token punctuation">.</span><span class="token function">notify_all</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 唤醒所有等待的线程，让它们退出</span>
+        <span class="token keyword">for</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span>thread <span class="token operator">&amp;</span>worker<span class="token operator">:</span> workers<span class="token punctuation">)</span>
+            worker<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 等待所有线程结束</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token comment">// 提交任务到线程池，返回一个 future 获取结果</span>
+    <span class="token keyword">template</span><span class="token operator">&lt;</span><span class="token keyword">class</span> <span class="token class-name">F</span><span class="token punctuation">,</span> <span class="token keyword">class</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> Args<span class="token operator">></span>
+    <span class="token keyword">auto</span> <span class="token function">enqueue</span><span class="token punctuation">(</span>F<span class="token operator">&amp;&amp;</span> f<span class="token punctuation">,</span> Args<span class="token operator">&amp;&amp;</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span> args<span class="token punctuation">)</span>
+        <span class="token operator">-></span> std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>invoke_result_t<span class="token operator">&lt;</span>F<span class="token punctuation">,</span> Args<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token operator">>></span>
+    <span class="token punctuation">&#123;</span>
+        <span class="token keyword">using</span> return_type <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span>invoke_result_t<span class="token operator">&lt;</span>F<span class="token punctuation">,</span> Args<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token operator">></span><span class="token punctuation">;</span>
+
+        <span class="token comment">// 将函数和参数绑定到一个 packaged_task 中</span>
+        <span class="token comment">// packaged_task 能把函数执行的结果放入 future</span>
+        <span class="token keyword">auto</span> task <span class="token operator">=</span> std<span class="token double-colon punctuation">::</span><span class="token generic-function"><span class="token function">make_shared</span><span class="token generic class-name"><span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>packaged_task<span class="token operator">&lt;</span><span class="token function">return_type</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">>></span></span></span><span class="token punctuation">(</span>
+            std<span class="token double-colon punctuation">::</span><span class="token function">bind</span><span class="token punctuation">(</span>std<span class="token double-colon punctuation">::</span><span class="token generic-function"><span class="token function">forward</span><span class="token generic class-name"><span class="token operator">&lt;</span>F<span class="token operator">></span></span></span><span class="token punctuation">(</span>f<span class="token punctuation">)</span><span class="token punctuation">,</span> std<span class="token double-colon punctuation">::</span><span class="token generic-function"><span class="token function">forward</span><span class="token generic class-name"><span class="token operator">&lt;</span>Args<span class="token operator">></span></span></span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// 获取 future，用于异步获取返回值</span>
+        std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span>return_type<span class="token operator">></span> res <span class="token operator">=</span> task<span class="token operator">-></span><span class="token function">get_future</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#123;</span>
+            std<span class="token double-colon punctuation">::</span>unique_lock<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>mutex<span class="token operator">></span> <span class="token function">lock</span><span class="token punctuation">(</span>queue_mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">// 如果线程池已经停止，不能再提交任务</span>
+            <span class="token keyword">if</span><span class="token punctuation">(</span>stop<span class="token punctuation">)</span>
+                <span class="token keyword">throw</span> std<span class="token double-colon punctuation">::</span><span class="token function">runtime_error</span><span class="token punctuation">(</span><span class="token string">"enqueue on stopped ThreadPool"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">// 将任务包装成无参函数，放入任务队列</span>
+            tasks<span class="token punctuation">.</span><span class="token function">emplace</span><span class="token punctuation">(</span><span class="token punctuation">[</span>task<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token punctuation">(</span><span class="token operator">*</span>task<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        condition<span class="token punctuation">.</span><span class="token function">notify_one</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 唤醒一个等待的工作线程</span>
+        <span class="token keyword">return</span> res<span class="token punctuation">;</span> <span class="token comment">// 返回 future 给调用者</span>
+    <span class="token punctuation">&#125;</span>
+
+<span class="token keyword">private</span><span class="token operator">:</span>
+    <span class="token comment">// 线程池成员变量</span>
+    std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>thread<span class="token operator">></span> workers<span class="token punctuation">;</span>               <span class="token comment">// 工作线程集合</span>
+    std<span class="token double-colon punctuation">::</span>queue<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>function<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">>></span> tasks<span class="token punctuation">;</span>        <span class="token comment">// 任务队列</span>
+
+    std<span class="token double-colon punctuation">::</span>mutex queue_mutex<span class="token punctuation">;</span>                         <span class="token comment">// 队列互斥锁</span>
+    std<span class="token double-colon punctuation">::</span>condition_variable condition<span class="token punctuation">;</span>              <span class="token comment">// 条件变量，用来唤醒工作线程</span>
+    <span class="token keyword">bool</span> stop <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>                              <span class="token comment">// 标记线程池是否关闭</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3><span id="线程池的工作流程">线程池的工作流程</span></h3><h4><span id="1-初始化构造函数">1. <strong>初始化（构造函数）</strong></span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp">ThreadPool <span class="token function">pool</span><span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 创建一个有4个工作线程的线程池</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<ul>
+<li><p>构造函数里启动 <code>threads</code> 个工作线程，每个线程都在循环执行：</p>
+<ol>
+<li>等待任务队列里有任务（<code>condition.wait</code>）。</li>
+<li>取出一个任务。</li>
+<li>执行任务。</li>
+<li>再回去等待下一个任务。</li>
+</ol>
+</li>
+<li><p>如果线程池被关闭 (<code>stop = true</code>) 并且任务队列为空，线程就会退出。</p>
+</li>
+<li><p>线程池一旦构造好，就有若干个<strong>空闲的后台线程</strong>在等待任务。</p>
+</li>
+</ul>
+<hr>
+<h4><span id="2-提交任务enqueue">2. <strong>提交任务（enqueue）</strong></span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">auto</span> fut <span class="token operator">=</span> pool<span class="token punctuation">.</span><span class="token function">enqueue</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token keyword">int</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> b<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span> <span class="token keyword">return</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span> <span class="token punctuation">&#125;</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<ul>
+<li><p><code>enqueue</code> 接收任意可调用对象（函数、lambda、函数对象等）和参数。</p>
+</li>
+<li><p>内部用 <code>std::packaged_task</code> 包装任务：</p>
+<ul>
+<li><code>packaged_task</code> 能在任务执行后，把结果放到一个 <strong>共享状态</strong>，供 <code>std::future</code> 获取。</li>
+</ul>
+</li>
+<li><p>返回一个 <code>std::future</code>，调用者可以用它获取结果：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> result <span class="token operator">=</span> fut<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 等待并获取 2 + 3 的结果</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</li>
+<li><p>任务被加入队列 (<code>tasks.emplace(...)</code>)。</p>
+</li>
+<li><p><code>condition.notify_one()</code> 唤醒一个正在等待的工作线程去执行这个任务。</p>
+</li>
+<li><p>调用者只需提交任务，线程池会负责挑选一个空闲线程去执行。</p>
+</li>
+</ul>
+<hr>
+<h4><span id="3-工作线程的循环">3. <strong>工作线程的循环</strong></span></h4><p>每个工作线程在后台执行类似这样的逻辑：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span><span class="token punctuation">;</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 1. 等待任务（条件变量阻塞，直到有任务或线程池关闭）</span>
+    <span class="token function">wait_for_task</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 2. 如果线程池关闭并且没有任务，退出循环</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>stop <span class="token operator">&amp;&amp;</span> tasks<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 3. 取出队列中的一个任务</span>
+    task <span class="token operator">=</span> tasks<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    tasks<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 4. 执行任务</span>
+    <span class="token function">task</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<ul>
+<li>线程一直在“取任务 → 执行 → 再取任务”的循环里，直到线程池销毁。</li>
+</ul>
+<hr>
+<h4><span id="4-销毁析构函数">4. <strong>销毁（析构函数）</strong></span></h4><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token comment">// ThreadPool 对象生命周期结束时，自动调用析构函数</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<ul>
+<li><p>设置 <code>stop = true</code>，通知所有线程池里的线程该退出了。</p>
+</li>
+<li><p><code>condition.notify_all()</code>：唤醒所有还在等待的线程。</p>
+</li>
+<li><p>每个工作线程发现 <code>stop == true</code> 且任务队列为空时，就安全退出。</p>
+</li>
+<li><p>最后，主线程调用 <code>worker.join()</code> 等待所有线程结束，保证线程池资源完全释放。</p>
+</li>
+<li><p>确保线程池在销毁时不会有线程“悬空”运行。</p>
+</li>
+</ul>
+<hr>
+<p>下面我们通过计算某个数据之间的素数数量来测试一下该线程池的性能：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">void</span> <span class="token function">thread_pool_example</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">const</span> size_t thread_num <span class="token operator">=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> size_t max_num <span class="token operator">=</span> <span class="token number">1000000</span><span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Calculating prime numbers up to "</span> <span class="token operator">&lt;&lt;</span> max_num <span class="token operator">&lt;&lt;</span> <span class="token string">" using "</span> <span class="token operator">&lt;&lt;</span> thread_num <span class="token operator">&lt;&lt;</span> <span class="token string">" threads.\n"</span><span class="token punctuation">;</span>
+    ThreadPool <span class="token function">pool</span><span class="token punctuation">(</span>thread_num<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 创建一个包含4个线程的线程池</span>
+    <span class="token comment">// 计算 1 到 1000000 之间的素数数量</span>
+  size_t range_per_thread <span class="token operator">=</span> max_num <span class="token operator">/</span> thread_num<span class="token punctuation">;</span>
+  std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>std<span class="token double-colon punctuation">::</span>future<span class="token operator">&lt;</span>size_t<span class="token operator">>></span> results<span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> is_prime <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">(</span>size_t n<span class="token punctuation">)</span><span class="token operator">-></span> <span class="token keyword">bool</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">&lt;=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span> i <span class="token operator">*</span> i <span class="token operator">&lt;=</span> n<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">%</span> i <span class="token operator">==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    <span class="token keyword">auto</span> count_primes_in_range <span class="token operator">=</span> <span class="token punctuation">[</span>is_prime<span class="token punctuation">]</span><span class="token punctuation">(</span>size_t begin<span class="token punctuation">,</span> size_t end<span class="token punctuation">)</span><span class="token operator">-></span> size_t <span class="token punctuation">&#123;</span>
+        size_t count <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> begin<span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> end<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">is_prime</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+                <span class="token operator">++</span>count<span class="token punctuation">;</span>
+            <span class="token punctuation">&#125;</span>
+        <span class="token punctuation">&#125;</span>
+        <span class="token keyword">return</span> count<span class="token punctuation">;</span>
+  <span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+    <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Multi-threaded prime number calculation...\n"</span><span class="token punctuation">;</span>
+        Timer<span class="token operator">&lt;</span><span class="token operator">></span> timer<span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>size_t i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> thread_num<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            size_t begin <span class="token operator">=</span> i <span class="token operator">*</span> range_per_thread <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">;</span>
+            size_t end <span class="token operator">=</span> <span class="token punctuation">(</span>i <span class="token operator">==</span> thread_num <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">?</span> max_num <span class="token operator">:</span> <span class="token punctuation">(</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> range_per_thread<span class="token punctuation">;</span>
+            results<span class="token punctuation">.</span><span class="token function">emplace_back</span><span class="token punctuation">(</span>pool<span class="token punctuation">.</span><span class="token function">enqueue</span><span class="token punctuation">(</span>count_primes_in_range<span class="token punctuation">,</span> begin<span class="token punctuation">,</span> end<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        size_t total_primes <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">auto</span><span class="token operator">&amp;</span> res <span class="token operator">:</span> results<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+            total_primes <span class="token operator">+=</span> res<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">&#125;</span>
+        std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Total prime numbers between 1 and "</span> <span class="token operator">&lt;&lt;</span> max_num <span class="token operator">&lt;&lt;</span> <span class="token string">": "</span> <span class="token operator">&lt;&lt;</span> total_primes <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+
+    <span class="token punctuation">&#123;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Single-threaded prime number calculation for comparison...\n"</span><span class="token punctuation">;</span>
+    Timer<span class="token operator">&lt;</span><span class="token operator">></span> timer<span class="token punctuation">;</span>
+    size_t total_primes <span class="token operator">=</span> <span class="token function">count_primes_in_range</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> max_num<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Total prime numbers between 1 and "</span> <span class="token operator">&lt;&lt;</span> max_num <span class="token operator">&lt;&lt;</span> <span class="token string">": "</span> <span class="token operator">&lt;&lt;</span> total_primes <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span>
+    
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在这个例子中，我们创建了一个包含 4 个工作线程的线程池，并将计算 1 到 1,000,000 之间素数数量的任务分配给这些线程。每个线程负责计算一个范围内的素数数量，最后我们汇总所有线程的结果。为了对比，我们还实现了一个单线程版本的素数计算。</p>
+<p>运行结果如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Calculating prime numbers up to 1000000 <span class="token keyword">using</span> 4 threads<span class="token punctuation">.</span>
+Multi-threaded prime number calculation<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Total prime numbers between 1 and 1000000: 78498
+Elapsed time: 53 ms
+Single-threaded prime number calculation <span class="token keyword">for</span> comparison<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+Total prime numbers between 1 and 1000000: 78498
+Elapsed time: 154 ms<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到，多线程版本的计算时间明显少于单线程版本，展示了线程池在处理 CPU 密集型任务时的优势。</p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数
+        fetch('https://api.github.com/users/LiuJiaxuan69')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('github-followers').textContent = data.followers;
+            });
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+</div>
+
+<div id="single">
+  <!-- 新增：黑白模式切换按钮（固定在左下角） -->
+  <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+    <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  </button>
+</div>
+
+<style>
+
+  /* 新增：背景图平滑过渡 */
+  #custom-bg {
+}
+
+
+  /* 原有按钮样式保持不变 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    // ================ 共享变量 ================
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 宇宙星空背景系统 ================
+    
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+ 
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+    
+  })();
+</script>
+
+
+<style>
+  .spoiler:not(.collapsed) .spoiler-title::after {
+  content: "(ゝ∀･)已展开~";
+}
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+  content: "( ´ﾟДﾟ`)要走了吗";
+}
+  .spoiler:not(.open) .spoiler-title::before {
+  content: "";
+}
+  .spoiler.collapsed .spoiler-title::after {
+  content: "点我点我(≧∀≦)ゞ";
+}
+
+.spoiler.collapsed .spoiler-title:hover::after {
+  content: "对的对的(*ﾟ∀ﾟ*)";
+  margin-right: 5px;
+}
+
+.dark-mode .spoiler-title{
+  background-color: #2d2d2d;
+}
+
+a[href^="#"] {
+  color: #444444 !important;  /* 浅黑色 */
+}
+
+
+  /* 新增：黑白模式切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* 新增：黑白模式样式 */
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    /* 浅色文字 */
+    border-color: #444 !important;
+    /* 边框色 */
+  }
+
+  .dark-mode table {
+    color:#444 !important;
+  }
+
+  /* ===== 基础样式（亮色模式） ===== */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    /* 主色调（绿色） */
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+    /* 悬停色（蓝绿色） */
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  /* ===== 暗黑模式覆盖 ===== */
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    /* 深灰背景 */
+    --gt-text-color: #e0e0e0;
+    /* 浅灰文字 */
+    --gt-border-color: none;
+    /* 深色边框 */
+    --gt-card-bg: none;
+    /* 评论卡片背景 */
+    --gt-input-bg: #2d2d2d;
+    /* 输入框背景 */
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+    /* 缩进区分 */
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  /* 暗黑模式下的链接悬停效果 */
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* 全局修改连接线颜色和箭头 */
+.mermaid {
+  padding: 10px;
+  border-radius: 5px;
+}
+.mermaid path, .mermaid line {
+    stroke: #f0f0f0 !important; /* 线条 */
+}
+/* 重置 rect 内部的 path */
+.mermaid rect path {
+    stroke: inherit !important; /* 恢复默认或继承父级样式 */
+}
+
+/* 修改文本颜色 */
+.mermaid text {
+    fill: #4a8ecd !important; /* 文字 */
+}
+</style>
+
+<style>
+.theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);    /* 改：与返回顶部一致 */
+    height: var(--back-to-top-size);   /* 改：与返回顶部一致 */
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+  .theme-toggle:hover { background: rgba(0, 0, 0, 0.9); transform: scale(1.1); }
+  .theme-icon { width: 24px; height: 24px; }
+
+  /* 小屏：放到返回顶部按钮的左边，同一底边对齐 */
+  @media (max-width: 1600px){
+    .theme-toggle{
+      left: auto; /* 取消左侧固定 */
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在其左侧，留12px间距 */
+      bottom: var(--back-to-top-margin);
+    }
+  }
+
+  /* 保持你原有的小屏 back-to-top 尺寸设置，这样两者会一起变小 */
+  @media (max-width: 1600px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+    .back-to-top-icon { width: 20px; height: 20px; }
+    .back-to-top-text { display: none; }
+  }
+</style>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
