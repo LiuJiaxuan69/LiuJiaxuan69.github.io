@@ -1,0 +1,747 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Archive: 2025/10</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="Archive: 2025/10"/>
+    
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="Archive: 2025/10"/>
+    
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <!-- ...existing code... -->
+<div id="single" class="page" style="background-color: rgb(255, 255, 255);">
+  <div id="top">
+    <a class="iconfont icon-left image-icon" href="javascript:history.back()"></a>
+  </div>
+  <div class="section">
+    <div class="article">
+      <div class="main" style="background: none;">
+        <div class="content">
+          <div class="timeline" id="archive-timeline">
+            <h2 class="timeline-title">归档: 71篇</h2><hr>
+            
+            
+              
+                <h3 class="timeline-subtitle" data-year="2025">2025</h3>
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-10-06</time>
+                <a target="_self" href="/2025/10/06/C++/constexpr/">现代 C++ 之 constexpr 编程</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-30</time>
+                <a target="_self" href="/2025/09/30/C++/async/">C++ 异步编程</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-20</time>
+                <a target="_self" href="/2025/09/20/Redis/redis_cluster/">Redis 集群</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-19</time>
+                <a target="_self" href="/2025/09/19/Redis/Redis_cache/">Redis 应用--缓存</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-19</time>
+                <a target="_self" href="/2025/09/19/Redis/Redis_dist_lock/">Redis 应用--分布式锁</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-19</time>
+                <a target="_self" href="/2025/09/19/Redis/redis_sentinel/">Redis 哨兵机制</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-12</time>
+                <a target="_self" href="/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-08</time>
+                <a target="_self" href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-05</time>
+                <a target="_self" href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-03</time>
+                <a target="_self" href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-09-02</time>
+                <a target="_self" href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-31</time>
+                <a target="_self" href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-30</time>
+                <a target="_self" href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-28</time>
+                <a target="_self" href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-23</time>
+                <a target="_self" href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-22</time>
+                <a target="_self" href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-20</time>
+                <a target="_self" href="/2025/08/20/Redis/redis_slave/">Redis 主从复制</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-20</time>
+                <a target="_self" href="/2025/08/20/Redis/redis_trans/">Redis 事务</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-19</time>
+                <a target="_self" href="/2025/08/19/Redis/redis_rdb/">Redis 持久化</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-16</time>
+                <a target="_self" href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-16</time>
+                <a target="_self" href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-15</time>
+                <a target="_self" href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-15</time>
+                <a target="_self" href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-15</time>
+                <a target="_self" href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-14</time>
+                <a target="_self" href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-02</time>
+                <a target="_self" href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Reactor/">Linux 基于 Epoll 的主从 Reactor 多线程模型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-02</time>
+                <a target="_self" href="/2025/08/02/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/Epoll/">Linux IO 多路转接--Epoll</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-08-01</time>
+                <a target="_self" href="/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/">Linux IO 多路转接--Poll</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-31</time>
+                <a target="_self" href="/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/">自定义协议 &amp;&amp; 序列化与反序列化</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-29</time>
+                <a target="_self" href="/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/">Socket 套接字编程-TCP</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-28</time>
+                <a target="_self" href="/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/">Socket 套接字编程-UDP</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-27</time>
+                <a target="_self" href="/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-26</time>
+                <a target="_self" href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-26</time>
+                <a target="_self" href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-25</time>
+                <a target="_self" href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-24</time>
+                <a target="_self" href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-24</time>
+                <a target="_self" href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-23</time>
+                <a target="_self" href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-23</time>
+                <a target="_self" href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-22</time>
+                <a target="_self" href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-22</time>
+                <a target="_self" href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal/">Linux 信号产生</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-20</time>
+                <a target="_self" href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-20</time>
+                <a target="_self" href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/fifo_communication/">Linux 进程间通信--命名管道</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-20</time>
+                <a target="_self" href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/">Linux 进程间通信--匿名管道</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-19</time>
+                <a target="_self" href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-19</time>
+                <a target="_self" href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-18</time>
+                <a target="_self" href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-18</time>
+                <a target="_self" href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-17</time>
+                <a target="_self" href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_desc/">文件读写及文件描述符</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-17</time>
+                <a target="_self" href="/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-16</time>
+                <a target="_self" href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-15</time>
+                <a target="_self" href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-15</time>
+                <a target="_self" href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-14</time>
+                <a target="_self" href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/">Linux 命令行参数和环境变量</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-14</time>
+                <a target="_self" href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-13</time>
+                <a target="_self" href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-13</time>
+                <a target="_self" href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/authority/">Linux 权限管理</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-13</time>
+                <a target="_self" href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-12</time>
+                <a target="_self" href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_basic/">Linux 最基础的命令</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-10</time>
+                <a target="_self" href="/2025/07/10/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Zset/">Redis 常见数据类型-Zset 类型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-09</time>
+                <a target="_self" href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Set/">Redis 常见数据类型-Set 类型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-09</time>
+                <a target="_self" href="/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-08</time>
+                <a target="_self" href="/2025/07/08/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/Hash/">Redis 常见数据类型-Hash 类型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-07</time>
+                <a target="_self" href="/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-07-05</time>
+                <a target="_self" href="/2025/07/05/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/">串口通信</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-06-25</time>
+                <a target="_self" href="/2025/06/25/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/8%E4%BD%8DCPU%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/">8位CPU硬件设计</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-06-23</time>
+                <a target="_self" href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/4bit_alu/">4bit ALU verilog 设计</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-06-23</time>
+                <a target="_self" href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-06-19</time>
+                <a target="_self" href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-06-16</time>
+                <a target="_self" href="/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a>
+              </div>
+            
+              
+              <div class="timeline-item" data-year="2025">
+                <time>2025-05-29</time>
+                <a target="_self" href="/2025/05/29/Hello-World/">Hello World</a>
+              </div>
+            
+          </div>
+
+          <!-- 加载更多 -->
+          <div class="archive-loadmore-wrap">
+            <button id="archive-load-more" class="archive-btn" data-step="10">加载更多</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ...existing code... -->
+
+<style>
+/* 归档页——简约按钮与隐藏控制 */
+.archive-loadmore-wrap {
+  display: flex; justify-content: center; margin: 16px 0 32px;
+}
+.archive-btn {
+  padding: 10px 16px; border-radius: 10px;
+  background: rgba(13,148,136,.1); color: #0d9488;
+  border: 1px solid rgba(13,148,136,.25);
+  cursor: pointer; transition: background .2s, color .2s, transform .1s;
+}
+.archive-btn:hover { background: rgba(13,148,136,.18); }
+.archive-btn:active { transform: scale(0.98); }
+.archive-btn[disabled] { opacity: .5; cursor: not-allowed; }
+.timeline-item.is-hidden, .timeline-subtitle.is-hidden { display: none; }
+</style>
+
+<script>
+(function(){
+  var box = document.getElementById('archive-timeline');
+  var btn = document.getElementById('archive-load-more');
+  if (!box || !btn) return;
+
+  var step = parseInt(btn.getAttribute('data-step') || '10', 10);
+  var items = Array.prototype.slice.call(box.querySelectorAll('.timeline-item'));
+  var years = Array.prototype.slice.call(box.querySelectorAll('.timeline-subtitle'));
+
+  // 首屏仅显示前 step 条
+  function initHide() {
+    items.forEach(function(el, i){
+      if (i >= step) el.classList.add('is-hidden');
+    });
+    refreshYearTitles();
+    updateBtn();
+  }
+
+  // 有可见条目的年份才显示标题
+  function refreshYearTitles() {
+    years.forEach(function(h){
+      var y = h.getAttribute('data-year');
+      var hasVisible = items.some(function(it){
+        return it.getAttribute('data-year') === y && !it.classList.contains('is-hidden');
+      });
+      h.classList.toggle('is-hidden', !hasVisible);
+    });
+  }
+
+  function updateBtn() {
+    var hidden = items.filter(function(el){ return el.classList.contains('is-hidden'); });
+    if (hidden.length === 0) {
+      btn.setAttribute('disabled', 'disabled');
+      btn.textContent = '没有更多了';
+    }
+  }
+
+  function loadMore() {
+    var hidden = items.filter(function(el){ return el.classList.contains('is-hidden'); });
+    var count = Math.min(step, hidden.length);
+    for (var i = 0; i < count; i++) hidden[i].classList.remove('is-hidden');
+    refreshYearTitles();
+    updateBtn();
+    // 滚动到新内容开始处
+    var firstNew = hidden[0];
+    if (firstNew) firstNew.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
+  btn.addEventListener('click', loadMore);
+  initHide();
+})();
+</script>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
