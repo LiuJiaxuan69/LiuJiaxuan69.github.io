@@ -257,7 +257,7 @@ pthread_c,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li><li><a href="/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a></li><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li></ul>
+            <ul><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li><li><a href="/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li><li><a href="/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/">Linux 线程概念</a></li><li><a href="/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -306,6 +306,14 @@ pthread_c,"/>
 <li><a href="#pthread_cond_signal-%E5%92%8C-pthread_cond_broadcast"><code>pthread_cond_signal</code> 和 <code>pthread_cond_broadcast</code></a></li>
 </ul>
 </li>
+<li><a href="#%E7%94%9F%E4%BA%A7%E8%80%85-%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0">生产者-消费者模型实现</a><ul>
+<li><a href="#%E4%BB%BB%E5%8A%A1%E5%AE%9A%E4%B9%89%E5%AE%9E%E7%8E%B0-taskhpp">任务定义实现 (Task.hpp)</a></li>
+<li><a href="#%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%AE%9E%E7%8E%B0-block_queuehpp">阻塞队列实现 (block_queue.hpp)</a></li>
+<li><a href="#%E4%B8%BB%E7%A8%8B%E5%BA%8F%E5%AE%9E%E7%8E%B0-cpcc">主程序实现 (cp.cc)</a></li>
+<li><a href="#%E7%A8%8B%E5%BA%8F%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C%E7%A4%BA%E4%BE%8B">程序运行结果示例</a></li>
+<li><a href="#%E5%AE%9E%E7%8E%B0%E7%89%B9%E7%82%B9%E5%88%86%E6%9E%90">实现特点分析</a></li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -317,7 +325,7 @@ pthread_c,"/>
 <li><code>notify</code>：当条件改变时，其他线程通过<code>notify_one</code>或<code>notify_all</code>唤醒等待的线程。</li>
 </ul>
 </li>
-<li><strong>避免忙等待</strong>：条件变量通过让线程休眠来减少不必要的CPU资源消耗。</li>
+<li><strong>避免忙等待</strong>：条件变量通过让线程休眠来减少不必要的 CPU 资源消耗。</li>
 </ol>
 <h3><span id="典型应用场景">典型应用场景</span></h3><ul>
 <li>生产者-消费者问题：当队列为空时，消费者线程等待；生产者线程添加数据后通知消费者。</li>
@@ -337,30 +345,27 @@ pthread_c,"/>
 </ul>
 <h3><span id="竞态条件">竞态条件</span></h3><p>竞态条件是指程序的输出或行为依赖于不可控的事件时序，通常因多个线程或进程对共享资源的访问顺序不确定而导致。</p>
 <h2><span id="条件变量函数">条件变量函数</span></h2><h3><span id="pthread_cond_init-与-pthread_cond_destroy"><code>pthread_cond_init</code> 与 <code>pthread_cond_destroy</code></span></h3><h4><span id="函数原型">函数原型</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">pthread_cond_init</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">,</span> <span class="token keyword">const</span> <span class="token class-name">pthread_condattr_t</span> <span class="token operator">*</span>attr<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 初始化条件变量</span>
-<span class="token keyword">int</span> <span class="token function">pthread_cond_destroy</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>                              <span class="token comment">// 销毁条件变量</span>
-```  
+<span class="token keyword">int</span> <span class="token function">pthread_cond_destroy</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>                              <span class="token comment">// 销毁条件变量</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
-#### 功能
-
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>`pthread_cond_init`<span class="token operator">*</span><span class="token operator">*</span>：动态初始化一个条件变量（`<span class="token class-name">pthread_cond_t</span>`），使其可用于线程同步。  
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>`pthread_cond_destroy`<span class="token operator">*</span><span class="token operator">*</span>：销毁已初始化的条件变量，释放相关资源。  
-
-#### 参数
-
-<span class="token number">1.</span> <span class="token operator">*</span><span class="token operator">*</span>`cond`<span class="token operator">*</span><span class="token operator">*</span>（`<span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>`）  
-   <span class="token operator">-</span> 要初始化或销毁的条件变量指针。  
-<span class="token number">2.</span> <span class="token operator">*</span><span class="token operator">*</span>`attr`<span class="token operator">*</span><span class="token operator">*</span>（`<span class="token keyword">const</span> <span class="token class-name">pthread_condattr_t</span> <span class="token operator">*</span>`，仅 `init` 使用）  
-   <span class="token operator">-</span> 条件变量属性，通常设为 `<span class="token constant">NULL</span>` 表示默认属性。  
-
-#### 返回值
-
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>成功<span class="token operator">*</span><span class="token operator">*</span>：返回 `<span class="token number">0</span>`。  
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>失败<span class="token operator">*</span><span class="token operator">*</span>：返回错误码（如 `EINVAL` 表示无效参数）。  
-
-#### 示例
-
-```c
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;pthread.h></span></span>
+<h4><span id="功能">功能</span></h4><ul>
+<li><strong><code>pthread_cond_init</code></strong>：动态初始化一个条件变量（<code>pthread_cond_t</code>），使其可用于线程同步。</li>
+<li><strong><code>pthread_cond_destroy</code></strong>：销毁已初始化的条件变量，释放相关资源。</li>
+</ul>
+<h4><span id="参数">参数</span></h4><ol>
+<li><strong><code>cond</code></strong>（<code>pthread_cond_t *</code>）<ul>
+<li>要初始化或销毁的条件变量指针。</li>
+</ul>
+</li>
+<li><strong><code>attr</code></strong>（<code>const pthread_condattr_t *</code>，仅 <code>init</code> 使用）<ul>
+<li>条件变量属性，通常设为 <code>NULL</code> 表示默认属性。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li><strong>成功</strong>：返回 <code>0</code>。</li>
+<li><strong>失败</strong>：返回错误码（如 <code>EINVAL</code> 表示无效参数）。</li>
+</ul>
+<h4><span id="示例">示例</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;pthread.h></span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
@@ -385,85 +390,80 @@ pthread_c,"/>
     <span class="token comment">// 静态初始化示例（无需 destroy）</span>
     <span class="token class-name">pthread_cond_t</span> static_cond <span class="token operator">=</span> PTHREAD_COND_INITIALIZER<span class="token punctuation">;</span>
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h4><span id="关键说明">关键说明</span></h4><ol>
+<li><p><strong>静态初始化</strong>：</p>
+<ul>
+<li>使用宏 <code>PTHREAD_COND_INITIALIZER</code> 直接初始化静态分配的条件变量，无需调用 <code>destroy</code>。</li>
+</ul>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token class-name">pthread_cond_t</span> static_cond <span class="token operator">=</span> PTHREAD_COND_INITIALIZER<span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</li>
+<li><p><strong>动态初始化</strong>：</p>
+<ul>
+<li>必须成对调用 <code>pthread_cond_init</code> 和 <code>pthread_cond_destroy</code>，避免资源泄漏。</li>
+<li>销毁后条件变量不可再使用，除非重新初始化。</li>
+</ul>
+</li>
+<li><p><strong>线程安全</strong>：</p>
+<ul>
+<li>初始化后的条件变量可被多线程使用，但需配合互斥锁（如 <code>pthread_mutex_t</code>）实现同步。</li>
+</ul>
+</li>
+<li><p><strong>错误处理</strong>：</p>
+<ul>
+<li>检查返回值以确保操作成功，尤其在动态初始化时。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="注意事项">注意事项</span></h4><ul>
+<li><strong><code>pthread_cond_destroy</code> 调用时机</strong>：<ul>
+<li>必须在所有线程结束使用条件变量后调用，否则行为未定义。</li>
+<li>若条件变量是静态初始化的（<code>PTHREAD_COND_INITIALIZER</code>），不可调用 <code>destroy</code>。</li>
+</ul>
+</li>
+</ul>
+<h3><span id="pthread_cond_wait"><code>pthread_cond_wait</code></span></h3><h4><span id="函数原型">函数原型</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">,</span> <span class="token class-name">pthread_mutex_t</span> <span class="token operator">*</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+
+<h4><span id="功能">功能</span></h4><p>使调用线程阻塞等待条件变量 <code>cond</code> 被唤醒，同时释放关联的互斥锁 <code>mutex</code>。当线程被唤醒后，该函数会重新获取 <code>mutex</code> 并返回。</p>
+<h4><span id="参数">参数</span></h4><ol>
+<li><strong><code>cond</code></strong>（<code>pthread_cond_t *</code>）<ul>
+<li>指向已初始化的条件变量的指针。</li>
+</ul>
+</li>
+<li><strong><code>mutex</code></strong>（<code>pthread_mutex_t *</code>）<ul>
+<li>指向已锁定的互斥锁的指针，调用前必须由当前线程锁定。</li>
+</ul>
+</li>
+</ol>
+<h4><span id="返回值">返回值</span></h4><ul>
+<li><strong>成功</strong>：返回 <code>0</code>。</li>
+<li><strong>失败</strong>：返回错误码（如 <code>EINVAL</code> 表示参数无效）。</li>
+</ul>
+<hr>
+<h4><span id="关键行为">关键行为</span></h4><ol>
+<li><p><strong>原子操作</strong>：</p>
+<ul>
+<li><strong>释放 <code>mutex</code></strong>：在进入等待状态前，自动释放 <code>mutex</code>，允许其他线程操作共享数据。</li>
+<li><strong>重新获取 <code>mutex</code></strong>：被唤醒后，函数返回前会自动重新锁定 <code>mutex</code>。</li>
+</ul>
+</li>
+<li><p><strong>虚假唤醒</strong>：</p>
+<ul>
+<li>即使没有其他线程调用 <code>pthread_cond_signal</code> 或 <code>pthread_cond_broadcast</code>，线程也可能被唤醒。因此，条件判断必须使用 <strong><code>while</code> 循环</strong>而非 <code>if</code>。</li>
+<li>在调用 <code>pthread_cond_broadcast</code> 的情况下，所有等待线程都会被唤醒，其中一些线程可能在条件未满足时继续执行，导致竞态条件。</li>
+</ul>
+</li>
+<li><p><strong>典型使用模式</strong>：</p>
+<pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">while</span> <span class="token punctuation">(</span>condition_is_false<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 必须用 while 检查条件</span>
+    <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>cond<span class="token punctuation">,</span> <span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">&#125;</span>
-```  
-
-#### 关键说明
-
-<span class="token number">1.</span> <span class="token operator">*</span><span class="token operator">*</span>静态初始化<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 使用宏 `PTHREAD_COND_INITIALIZER` 直接初始化静态分配的条件变量，无需调用 `destroy`。  
-   ```c
-   <span class="token class-name">pthread_cond_t</span> static_cond <span class="token operator">=</span> PTHREAD_COND_INITIALIZER<span class="token punctuation">;</span>
-   ```  
-
-<span class="token number">2.</span> <span class="token operator">*</span><span class="token operator">*</span>动态初始化<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 必须成对调用 `pthread_cond_init` 和 `pthread_cond_destroy`，避免资源泄漏。  
-   <span class="token operator">-</span> 销毁后条件变量不可再使用，除非重新初始化。  
-
-<span class="token number">3.</span> <span class="token operator">*</span><span class="token operator">*</span>线程安全<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 初始化后的条件变量可被多线程使用，但需配合互斥锁（如 `<span class="token class-name">pthread_mutex_t</span>`）实现同步。  
-
-<span class="token number">4.</span> <span class="token operator">*</span><span class="token operator">*</span>错误处理<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 检查返回值以确保操作成功，尤其在动态初始化时。  
-
-#### 注意事项
-
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>`pthread_cond_destroy` 调用时机<span class="token operator">*</span><span class="token operator">*</span>：  
-  <span class="token operator">-</span> 必须在所有线程结束使用条件变量后调用，否则行为未定义。  
-  <span class="token operator">-</span> 若条件变量是静态初始化的（`PTHREAD_COND_INITIALIZER`），不可调用 `destroy`。  
-
-### `pthread_cond_wait`  
-
-#### 函数原型
-
-```c
-<span class="token keyword">int</span> <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">,</span> <span class="token class-name">pthread_mutex_t</span> <span class="token operator">*</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-```  
-
-#### 功能
-
-使调用线程阻塞等待条件变量 `cond` 被唤醒，同时释放关联的互斥锁 `mutex`。当线程被唤醒后，该函数会重新获取 `mutex` 并返回。  
-
-#### 参数
-
-<span class="token number">1.</span> <span class="token operator">*</span><span class="token operator">*</span>`cond`<span class="token operator">*</span><span class="token operator">*</span>（`<span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>`）  
-   <span class="token operator">-</span> 指向已初始化的条件变量的指针。  
-<span class="token number">2.</span> <span class="token operator">*</span><span class="token operator">*</span>`mutex`<span class="token operator">*</span><span class="token operator">*</span>（`<span class="token class-name">pthread_mutex_t</span> <span class="token operator">*</span>`）  
-   <span class="token operator">-</span> 指向已锁定的互斥锁的指针，调用前必须由当前线程锁定。  
-
-#### 返回值
-
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>成功<span class="token operator">*</span><span class="token operator">*</span>：返回 `<span class="token number">0</span>`。  
-<span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>失败<span class="token operator">*</span><span class="token operator">*</span>：返回错误码（如 `EINVAL` 表示参数无效）。  
-
-<span class="token operator">--</span><span class="token operator">-</span>
-
-#### 关键行为
-
-<span class="token number">1.</span> <span class="token operator">*</span><span class="token operator">*</span>原子操作<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>释放 `mutex`<span class="token operator">*</span><span class="token operator">*</span>：在进入等待状态前，自动释放 `mutex`，允许其他线程操作共享数据。  
-   <span class="token operator">-</span> <span class="token operator">*</span><span class="token operator">*</span>重新获取 `mutex`<span class="token operator">*</span><span class="token operator">*</span>：被唤醒后，函数返回前会自动重新锁定 `mutex`。  
-
-<span class="token number">2.</span> <span class="token operator">*</span><span class="token operator">*</span>虚假唤醒<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 即使没有其他线程调用 `pthread_cond_signal` 或 `pthread_cond_broadcast`，线程也可能被唤醒。因此，条件判断必须使用 <span class="token operator">*</span><span class="token operator">*</span>`<span class="token keyword">while</span>` 循环<span class="token operator">*</span><span class="token operator">*</span>而非 `<span class="token keyword">if</span>`。
-   <span class="token operator">-</span> 在调用 `pthread_cond_broadcast` 的情况下，所有等待线程都会被唤醒，其中一些线程可能在条件未满足时继续执行，导致竞态条件。 
-
-<span class="token number">3.</span> <span class="token operator">*</span><span class="token operator">*</span>典型使用模式<span class="token operator">*</span><span class="token operator">*</span>：  
-   ```c
-   <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-   <span class="token keyword">while</span> <span class="token punctuation">(</span>condition_is_false<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>  <span class="token comment">// 必须用 while 检查条件</span>
-       <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>cond<span class="token punctuation">,</span> <span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-   <span class="token punctuation">&#125;</span>
-   <span class="token comment">// 操作共享数据...</span>
-   <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-   ```  
-
-<span class="token operator">--</span><span class="token operator">-</span>
-
-#### 示例
-
-```c
-<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;pthread.h></span></span>
+<span class="token comment">// 操作共享数据...</span>
+<span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
+</ol>
+<hr>
+<h4><span id="示例">示例</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;pthread.h></span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;stdio.h></span></span>
 
 <span class="token class-name">pthread_cond_t</span> cond <span class="token operator">=</span> PTHREAD_COND_INITIALIZER<span class="token punctuation">;</span>
@@ -497,37 +497,32 @@ pthread_c,"/>
     <span class="token function">pthread_join</span><span class="token punctuation">(</span>tid1<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token function">pthread_join</span><span class="token punctuation">(</span>tid2<span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
-<span class="token punctuation">&#125;</span>
-```  
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-#### 输出示例
+<h4><span id="输出示例">输出示例</span></h4><pre class="line-numbers language-none"><code class="language-none">Consumer: Waiting for data...
+Producer: Sending data...
+Consumer: Received data 42<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
-```plaintext
-Consumer<span class="token operator">:</span> Waiting <span class="token keyword">for</span> data<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-Producer<span class="token operator">:</span> Sending data<span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
-Consumer<span class="token operator">:</span> Received data <span class="token number">42</span>
-```  
-
-<span class="token operator">--</span><span class="token operator">-</span>
-
-#### 注意事项
-
-<span class="token number">1.</span> <span class="token operator">*</span><span class="token operator">*</span>必须持有 `mutex`<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 调用 `pthread_cond_wait` 前，线程必须已锁定 `mutex`，否则行为未定义。  
-
-<span class="token number">2.</span> <span class="token operator">*</span><span class="token operator">*</span>条件检查<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 必须使用 `<span class="token keyword">while</span>` 循环检查条件，防止虚假唤醒导致逻辑错误。  
-
-<span class="token number">3.</span> <span class="token operator">*</span><span class="token operator">*</span>性能优化<span class="token operator">*</span><span class="token operator">*</span>：  
-   <span class="token operator">-</span> 在复杂场景中，可结合 `pthread_cond_broadcast`（唤醒所有等待线程）和 `pthread_cond_signal`（唤醒一个线程）选择唤醒策略。  
-
-### `pthread_cond_signal` 和 `pthread_cond_broadcast`
-
-#### 函数原型
-
-```c
-<span class="token keyword">int</span> <span class="token function">pthread_cond_signal</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// 唤醒至少一个等待线程</span>
-<span class="token keyword">int</span> <span class="token function">pthread_cond_broadcast</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 唤醒所有等待线程</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<h4><span id="注意事项">注意事项</span></h4><ol>
+<li><p><strong>必须持有 <code>mutex</code></strong>：</p>
+<ul>
+<li>调用 <code>pthread_cond_wait</code> 前，线程必须已锁定 <code>mutex</code>，否则行为未定义。</li>
+</ul>
+</li>
+<li><p><strong>条件检查</strong>：</p>
+<ul>
+<li>必须使用 <code>while</code> 循环检查条件，防止虚假唤醒导致逻辑错误。</li>
+</ul>
+</li>
+<li><p><strong>性能优化</strong>：</p>
+<ul>
+<li>在复杂场景中，可结合 <code>pthread_cond_broadcast</code>（唤醒所有等待线程）和 <code>pthread_cond_signal</code>（唤醒一个线程）选择唤醒策略。</li>
+</ul>
+</li>
+</ol>
+<h3><span id="pthread_cond_signal-和-pthread_cond_broadcast"><code>pthread_cond_signal</code> 和 <code>pthread_cond_broadcast</code></span></h3><h4><span id="函数原型">函数原型</span></h4><pre class="line-numbers language-c" data-language="c"><code class="language-c"><span class="token keyword">int</span> <span class="token function">pthread_cond_signal</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>    <span class="token comment">// 唤醒至少一个等待线程</span>
+<span class="token keyword">int</span> <span class="token function">pthread_cond_broadcast</span><span class="token punctuation">(</span><span class="token class-name">pthread_cond_t</span> <span class="token operator">*</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 唤醒所有等待线程</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <h4><span id="功能">功能</span></h4><p>这两个函数用于唤醒正在等待条件变量 <code>cond</code> 的线程：</p>
 <ul>
@@ -538,8 +533,8 @@ Consumer<span class="token operator">:</span> Received data <span class="token n
 <li><strong><code>cond</code></strong>（<code>pthread_cond_t *</code>）：指向已初始化的条件变量的指针</li>
 </ul>
 <h4><span id="返回值">返回值</span></h4><ul>
-<li>成功返回0</li>
-<li>失败返回错误码（如EINVAL表示参数无效）</li>
+<li>成功返回 0</li>
+<li>失败返回错误码（如 EINVAL 表示参数无效）</li>
 </ul>
 <h4><span id="关键区别">关键区别</span></h4><table>
 <thead>
@@ -591,24 +586,24 @@ shared_condition <span class="token operator">=</span> <span class="token number
 
 <span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
     <span class="token class-name">pthread_t</span> threads<span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-    
+
     <span class="token comment">// 创建3个工作线程</span>
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">long</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>threads<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">,</span> worker<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>i<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-    
+
     <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 确保所有线程都进入等待</span>
-    
+
     <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
     data_ready <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
     <span class="token comment">// pthread_cond_signal(&amp;cond);  // 只会唤醒一个线程</span>
     <span class="token function">pthread_cond_broadcast</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>cond<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 会唤醒所有线程</span>
     <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    
+
     <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">pthread_join</span><span class="token punctuation">(</span>threads<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token constant">NULL</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-    
+
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
@@ -640,7 +635,7 @@ shared_condition <span class="token operator">=</span> <span class="token number
 <li><code>signal</code>：生产者-消费者模型（单个资源）</li>
 <li><code>broadcast</code>：读写锁实现、屏障同步、多个等待者需要响应状态变化</li>
 </ul>
-<h2><span id="生产者-消费者模型实现">生产者-消费者模型实现</span></h2><p>下面我将完整展示一个基于POSIX线程的生产者-消费者模型实现，包含任务定义、阻塞队列和主程序三个部分。</p>
+<h2><span id="生产者-消费者模型实现">生产者-消费者模型实现</span></h2><p>下面我将完整展示一个基于 POSIX 线程的生产者-消费者模型实现，包含任务定义、阻塞队列和主程序三个部分。</p>
 <h3><span id="任务定义实现-taskhpp">任务定义实现 (Task.hpp)</span></h3><pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">ifndef</span> <span class="token expression">_TASK_HPP_</span></span>
 <span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">define</span> <span class="token macro-name">_TASK_HPP_</span> <span class="token expression"><span class="token number">1</span></span></span>
 
@@ -658,7 +653,7 @@ shared_condition <span class="token operator">=</span> <span class="token number
     <span class="token function">Task</span><span class="token punctuation">(</span><span class="token keyword">int</span> num1<span class="token punctuation">,</span> <span class="token keyword">int</span> num2<span class="token punctuation">,</span> <span class="token keyword">char</span> op<span class="token punctuation">)</span>
         <span class="token operator">:</span> <span class="token function">num1_</span><span class="token punctuation">(</span>num1<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">num2_</span><span class="token punctuation">(</span>num2<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">op_</span><span class="token punctuation">(</span>op<span class="token punctuation">)</span><span class="token punctuation">,</span>
           <span class="token function">result_</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token function">exitcode_</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span><span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">// 执行计算任务</span>
     <span class="token keyword">void</span> <span class="token function">Run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         exitcode_ <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
@@ -754,7 +749,7 @@ shared_condition <span class="token operator">=</span> <span class="token number
         <span class="token function">pthread_cond_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>c_cond_<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 消费者条件变量</span>
         <span class="token function">pthread_cond_init</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>p_cond_<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 生产者条件变量</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">/**
      * @brief 析构函数
      */</span>
@@ -764,47 +759,47 @@ shared_condition <span class="token operator">=</span> <span class="token number
         <span class="token function">pthread_cond_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>c_cond_<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token function">pthread_cond_destroy</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>p_cond_<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">/**
      * @brief 向队列中添加元素
      * @param task 要添加的元素
      */</span>
     <span class="token keyword">void</span> <span class="token function">Push</span><span class="token punctuation">(</span><span class="token keyword">const</span> T<span class="token operator">&amp;</span> task<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 加锁</span>
-        
+
         <span class="token comment">// 如果队列已满，生产者等待</span>
         <span class="token keyword">while</span><span class="token punctuation">(</span>task_queue<span class="token punctuation">.</span><span class="token function">size</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">>=</span> cap_<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
             <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>p_cond_<span class="token punctuation">,</span> <span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">&#125;</span>
-        
+
         task_queue<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 添加元素到队列</span>
-        
+
         <span class="token comment">// 通知消费者有数据可取</span>
         <span class="token function">pthread_cond_signal</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>c_cond_<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        
+
         <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 解锁</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">/**
      * @brief 从队列中取出元素
      * @return 队列首元素
      */</span>
     T <span class="token function">Pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 加锁</span>
-        
+
         <span class="token comment">// 如果队列为空，消费者等待</span>
         <span class="token keyword">while</span><span class="token punctuation">(</span>task_queue<span class="token punctuation">.</span><span class="token function">empty</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
             <span class="token function">pthread_cond_wait</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>c_cond_<span class="token punctuation">,</span> <span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>
         <span class="token punctuation">&#125;</span>
-        
+
         T task <span class="token operator">=</span> task_queue<span class="token punctuation">.</span><span class="token function">front</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 获取队列首元素</span>
         task_queue<span class="token punctuation">.</span><span class="token function">pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token comment">// 移除队列首元素</span>
-        
+
         <span class="token comment">// 通知生产者有空位可生产</span>
         <span class="token function">pthread_cond_signal</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>p_cond_<span class="token punctuation">)</span><span class="token punctuation">;</span>
-        
+
         <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mtx_<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 解锁</span>
-        
+
         <span class="token keyword">return</span> task<span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
 
@@ -843,18 +838,18 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
     <span class="token keyword">auto</span><span class="token operator">*</span> td <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>thread_data<span class="token operator">*</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">usleep</span><span class="token punctuation">(</span><span class="token number">10000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 10ms延迟</span>
-      
+
         <span class="token comment">// 生成随机任务</span>
         <span class="token keyword">int</span> num1 <span class="token operator">=</span> <span class="token function">rand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">;</span>
         <span class="token keyword">int</span> num2 <span class="token operator">=</span> <span class="token function">rand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token number">10</span><span class="token punctuation">;</span>
         <span class="token keyword">char</span> op <span class="token operator">=</span> opers<span class="token punctuation">[</span><span class="token function">rand</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token number">5</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
         Task task<span class="token punctuation">&#123;</span>num1<span class="token punctuation">,</span> num2<span class="token punctuation">,</span> op<span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
-      
+
         <span class="token comment">// 同步输出</span>
         <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
         std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> td<span class="token operator">-></span>name <span class="token operator">&lt;&lt;</span> <span class="token string">" 生产: "</span> <span class="token operator">&lt;&lt;</span> task<span class="token punctuation">.</span><span class="token function">GetTask</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
         <span class="token function">pthread_mutex_unlock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
-      
+
         td<span class="token operator">-></span>bq<span class="token operator">-></span><span class="token function">Push</span><span class="token punctuation">(</span>task<span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 放入队列</span>
         <span class="token function">sleep</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 控制生产速度</span>
     <span class="token punctuation">&#125;</span>
@@ -866,10 +861,10 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
     <span class="token keyword">auto</span><span class="token operator">*</span> td <span class="token operator">=</span> <span class="token generic-function"><span class="token function">static_cast</span><span class="token generic class-name"><span class="token operator">&lt;</span>thread_data<span class="token operator">*</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">while</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">usleep</span><span class="token punctuation">(</span><span class="token number">10000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 10ms延迟</span>
-      
+
         Task task <span class="token operator">=</span> td<span class="token operator">-></span>bq<span class="token operator">-></span><span class="token function">Pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 获取任务</span>
         <span class="token function">task</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>  <span class="token comment">// 执行计算</span>
-      
+
         <span class="token comment">// 同步输出结果</span>
         <span class="token function">pthread_mutex_lock</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>mutex<span class="token punctuation">)</span><span class="token punctuation">;</span>
         std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> td<span class="token operator">-></span>name <span class="token operator">&lt;&lt;</span> <span class="token string">" 消费: "</span> <span class="token operator">&lt;&lt;</span> task<span class="token punctuation">.</span><span class="token function">GetResult</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
@@ -882,7 +877,7 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
     <span class="token function">srand</span><span class="token punctuation">(</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     BlockQueue<span class="token operator">&lt;</span>Task<span class="token operator">></span> bq<span class="token punctuation">;</span>
     std<span class="token double-colon punctuation">::</span>vector<span class="token operator">&lt;</span>pthread_t<span class="token operator">></span> tids<span class="token punctuation">;</span>
-  
+
     <span class="token comment">// 创建生产者线程</span>
     <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> producer_num<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token keyword">auto</span><span class="token operator">*</span> td <span class="token operator">=</span> <span class="token keyword">new</span> thread_data<span class="token punctuation">&#123;</span>
@@ -893,7 +888,7 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
         <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tid<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">,</span> Producer<span class="token punctuation">,</span> td<span class="token punctuation">)</span><span class="token punctuation">;</span>
         tids<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">// 创建消费者线程</span>
     <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">int</span> i <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> consumer_num<span class="token punctuation">;</span> <span class="token operator">++</span>i<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token keyword">auto</span><span class="token operator">*</span> td <span class="token operator">=</span> <span class="token keyword">new</span> thread_data<span class="token punctuation">&#123;</span>
@@ -904,12 +899,12 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
         <span class="token function">pthread_create</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>tid<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">,</span> Consumer<span class="token punctuation">,</span> td<span class="token punctuation">)</span><span class="token punctuation">;</span>
         tids<span class="token punctuation">.</span><span class="token function">push_back</span><span class="token punctuation">(</span>tid<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token comment">// 等待线程结束</span>
     <span class="token keyword">for</span><span class="token punctuation">(</span><span class="token keyword">auto</span> tid <span class="token operator">:</span> tids<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
         <span class="token function">pthread_join</span><span class="token punctuation">(</span>tid<span class="token punctuation">,</span> <span class="token keyword">nullptr</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token punctuation">&#125;</span>
-  
+
     <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
 <span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
@@ -950,7 +945,7 @@ pthread_mutex_t mutex <span class="token operator">=</span> PTHREAD_MUTEX_INITIA
 </li>
 <li><p><strong>资源管理</strong>：</p>
 <ul>
-<li>使用RAII风格管理互斥锁和条件变量</li>
+<li>使用 RAII 风格管理互斥锁和条件变量</li>
 <li>通过对象生命周期管理线程参数</li>
 </ul>
 </li>
