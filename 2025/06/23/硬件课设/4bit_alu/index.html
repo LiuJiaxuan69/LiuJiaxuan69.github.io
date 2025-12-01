@@ -248,7 +248,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/06/25/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/8%E4%BD%8DCPU%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/">8位CPU硬件设计</a></li><li><a href="/2025/07/05/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/">串口通信</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a></li></ul>
+            <ul><li><a href="/2025/06/25/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/8%E4%BD%8DCPU%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1/">8位CPU硬件设计</a></li><li><a href="/2025/06/23/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/simulated_vending_machine/">模拟自动售货机（加法器）</a></li><li><a href="/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/2025/07/05/%E7%A1%AC%E4%BB%B6%E8%AF%BE%E8%AE%BE/%E4%B8%B2%E5%8F%A3%E9%80%9A%E4%BF%A1/">串口通信</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -1314,6 +1314,25 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     --confirm-gray-dark: #9ca3af;
     --confirm-text: #374151;
     --confirm-text-light: #6b7280;
+    /* AI 对话框夜间模式变量 */
+    --ai-bg-light: #fff;
+    --ai-bg-dark: #1f2937; /* 深色模式弹窗背景 */
+    --ai-head-border-light: rgba(0, 0, 0, 0.08);
+    --ai-head-border-dark: rgba(255, 255, 255, 0.1); /* 深色模式边框 */
+    --ai-msg-user-light: #e5f6f5;
+    --ai-msg-user-dark: #115e59; /* 深色模式用户消息背景 */
+    --ai-msg-ai-light: #f3f4f6;
+    --ai-msg-ai-dark: #374151; /* 深色模式AI消息背景 */
+    --ai-input-border-light: #d1d5db;
+    --ai-input-border-dark: #4b5563; /* 深色模式输入框边框 */
+    --ai-input-bg-light: #fff;
+    --ai-input-bg-dark: #2d3748; /* 深色模式输入框背景 */
+    --ai-text-light: #374151;
+    --ai-text-dark: #e5e7eb; /* 深色模式文字颜色 */
+    --ai-placeholder-light: #9ca3af;
+    --ai-placeholder-dark: #9ca3af; /* 深色模式占位符颜色 */
+    --ai-scrollbar-thumb-light: #ddd;
+    --ai-scrollbar-thumb-dark: #4b5563; /* 深色模式滚动条 */
   }
 
   /* 返回顶部按钮样式 */
@@ -1435,13 +1454,21 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
   }
 
-  /* AI 弹窗样式 */
+  /* AI 弹窗样式 - 基础样式 */
   .ai-mask {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.05);
+    /* 关键修改1：取消遮罩层背景和模糊，仅作为点击穿透的容器 */
+    background: transparent;
     z-index: 9998;
+    pointer-events: none; /* 允许点击穿透到博客内容 */
+  }
+
+  /* 深色模式遮罩层 - 同样取消背景和模糊 */
+  .dark-mode .ai-mask {
+    background: transparent;
+    backdrop-filter: none; /* 取消模糊效果 */
   }
 
   .ai-dialog {
@@ -1449,11 +1476,12 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     position: fixed;
     right: var(--back-to-top-margin);
     bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 72px); /* 在AI按钮上方 */
-    width: 360px;
+    /* 关键修改2：缩小对话框宽度（原360px → 340px，缩小20px，约半个字宽度） */
+    width: 340px;
     max-width: 92vw;
     height: 440px;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: var(--ai-bg-light); /* 浅色模式背景 */
+    border: 1px solid var(--ai-head-border-light);
     border-radius: 14px;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
     display: flex;
@@ -1462,6 +1490,16 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     transition: transform 0.2s, opacity 0.2s;
     transform: translateY(10px);
     opacity: 0;
+    color: var(--ai-text-light); /* 浅色模式文字 */
+    pointer-events: auto; /* 确保弹窗自身可交互 */
+  }
+
+  /* 深色模式弹窗主体 */
+  .dark-mode .ai-dialog {
+    background: var(--ai-bg-dark);
+    border-color: var(--ai-head-border-dark);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+    color: var(--ai-text-dark);
   }
 
   .ai-dialog.show {
@@ -1475,9 +1513,14 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     justify-content: space-between;
     align-items: center;
     padding: 10px 12px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid var(--ai-head-border-light);
     font-weight: 600;
     font-size: 15px;
+  }
+
+  /* 深色模式头部边框 */
+  .dark-mode .ai-head {
+    border-bottom-color: var(--ai-head-border-dark);
   }
 
   /* 清空历史按钮样式 */
@@ -1497,9 +1540,21 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     margin-right: 8px;
   }
 
+  /* 深色模式按钮颜色 */
+  .dark-mode .ai-clear,
+  .dark-mode .ai-close {
+    color: #9ca3af;
+  }
+
   .ai-clear:hover {
     background-color: rgba(0, 0, 0, 0.05);
     color: #000;
+  }
+
+  .dark-mode .ai-clear:hover,
+  .dark-mode .ai-close:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
   }
 
   .ai-close {
@@ -1530,13 +1585,18 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     font-size: 14px;
   }
 
+  /* 深色模式滚动条 */
+  .dark-mode .ai-msgs::-webkit-scrollbar-thumb {
+    background: var(--ai-scrollbar-thumb-dark);
+  }
+
   .ai-msgs::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   .ai-msgs::-webkit-scrollbar-thumb {
-    background: #ddd;
+    background: var(--ai-scrollbar-thumb-light);
     border-radius: 3px;
   }
 
@@ -1544,7 +1604,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     background: transparent;
   }
 
-  /* 消息气泡样式 */
+  /* 消息气泡样式 - 浅色模式 */
   .ai-msg {
     margin: 8px 0;
     max-width: 86%;
@@ -1556,22 +1616,37 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
 
   .ai-msg.user {
     margin-left: auto;
-    background: #e5f6f5;
+    background: var(--ai-msg-user-light);
     color: #0f766e;
   }
 
   .ai-msg.ai {
     margin-right: auto;
-    background: #f3f4f6;
-    color: #374151;
+    background: var(--ai-msg-ai-light);
+    color: var(--ai-text-light);
   }
 
-  /* AI 加载中提示样式 */
+  /* 深色模式消息气泡 */
+  .dark-mode .ai-msg.user {
+    background: var(--ai-msg-user-dark);
+    color: #d1fae5; /* 深色模式用户消息文字 */
+  }
+
+  .dark-mode .ai-msg.ai {
+    background: var(--ai-msg-ai-dark);
+    color: var(--ai-text-dark);
+  }
+
+  /* AI 加载中提示样式 - 深色模式适配 */
   .ai-loading {
     color: #9ca3af;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+  }
+
+  .dark-mode .ai-loading {
+    color: #6b7280;
   }
 
   /* 加载动画（三个点依次闪烁） */
@@ -1588,25 +1663,48 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     100% { content: ''; }
   }
 
-  /* AI 输入区样式 */
+  /* AI 输入区样式 - 基础样式 */
   .ai-input {
     display: flex;
     gap: 8px;
     padding: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid var(--ai-head-border-light);
+  }
+
+  /* 深色模式输入区边框 */
+  .dark-mode .ai-input {
+    border-top-color: var(--ai-head-border-dark);
   }
 
   #ai-q {
     flex: 1;
     padding: 10px;
-    border: 1px solid #d1d5db;
+    border: 1px solid var(--ai-input-border-light);
     border-radius: 8px;
     font-size: 14px;
     outline: none;
     transition: border-color 0.2s, background-color 0.2s;
+    background: var(--ai-input-bg-light);
+    color: var(--ai-text-light);
   }
 
-  /* 新增：输入框禁用状态样式 */
+  /* 深色模式输入框 */
+  .dark-mode #ai-q {
+    border-color: var(--ai-input-border-dark);
+    background: var(--ai-input-bg-dark);
+    color: var(--ai-text-dark);
+  }
+
+  /* 输入框占位符样式 - 深色模式适配 */
+  #ai-q::placeholder {
+    color: var(--ai-placeholder-light);
+  }
+
+  .dark-mode #ai-q::placeholder {
+    color: var(--ai-placeholder-dark);
+  }
+
+  /* 输入框禁用状态样式 */
   #ai-q:disabled {
     background-color: #f9fafb;
     color: #9ca3af;
@@ -1623,6 +1721,10 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
   #ai-q:focus {
     border-color: #0d9488;
     box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+  }
+
+  .dark-mode #ai-q:focus {
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3);
   }
 
   .ai-send {
@@ -1645,7 +1747,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     cursor: not-allowed;
   }
 
-  /* Markdown 解析样式 */
+  /* Markdown 解析样式 - 深色模式适配 */
   .ai-msg strong {
     font-weight: 600;
   }
@@ -1673,6 +1775,11 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     font-size: 13px;
   }
 
+  .dark-mode .ai-msg code {
+    background: #1f2937;
+    color: #f8fafc;
+  }
+
   .ai-msg pre {
     background: #f1f5f9;
     padding: 10px;
@@ -1681,11 +1788,25 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     margin: 10px 0;
   }
 
+  .dark-mode .ai-msg pre {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .dark-mode .ai-msg pre code {
+    background: transparent;
+  }
+
   .ai-msg blockquote {
     border-left: 3px solid #ddd;
     padding: 8px 12px;
     margin: 10px 0;
     color: #6b7280;
+  }
+
+  .dark-mode .ai-msg blockquote {
+    border-left-color: #4b5563;
+    color: #9ca3af;
   }
 
   .ai-msg table {
@@ -1696,6 +1817,10 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     border: 1px solid #e5e7eb;
   }
 
+  .dark-mode .ai-msg table {
+    border-color: #374151;
+  }
+
   .ai-msg th,
   .ai-msg td {
     border: 1px solid #e5e7eb;
@@ -1703,13 +1828,27 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     text-align: left;
   }
 
+  .dark-mode .ai-msg th,
+  .dark-mode .ai-msg td {
+    border-color: #374151;
+  }
+
   .ai-msg th {
     background: #f9fafb;
     font-weight: 600;
   }
 
+  .dark-mode .ai-msg th {
+    background: #2d3748;
+    color: #f9fafb;
+  }
+
   .ai-msg tr:nth-child(even) {
     background: #fdfdfe;
+  }
+
+  .dark-mode .ai-msg tr:nth-child(even) {
+    background: #2d3748;
   }
 
   /* 小屏幕适配 */
@@ -1741,6 +1880,8 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     .ai-dialog {
       bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + var(--back-to-top-size) + 24px);
       height: 380px;
+      /* 小屏幕保持原有宽度比例，不额外缩小 */
+      width: 92vw;
     }
   }
 
@@ -2209,7 +2350,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       // 1. 创建AI消息气泡（默认显示加载提示）
       const msgEl = document.createElement('div');
       msgEl.className = 'ai-msg ai';
-      msgEl.innerHTML = '<span class="ai-loading">AI 思考中</span>';
+      msgEl.innerHTML = '<span class="ai-loading">🤖 AI 思考中...</span>';
       container.appendChild(msgEl);
 
       const stream = {
@@ -2315,7 +2456,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
 })();
 </script>
 
-<!-- AI 功能主脚本（修复回车发送 + 所有功能整合） -->
+<!-- AI 功能主脚本（完整功能整合 + 需求修改） -->
 <script>
   (function () {
     // 后端地址
@@ -2353,9 +2494,9 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
 
     let isOpen = false;
     let confirmCallback = null; // 确认弹窗的回调函数
-    let isAiResponding = false; // 新增：标记AI是否正在回复
+    let isAiResponding = false; // 标记AI是否正在回复
 
-    // ================ 关键修复：阻止滚动事件冒泡 ================
+    // ================ 关键修复：阻止滚动事件冒泡（仅保留消息区内部滚动） ================
     function preventScrollBubble(e) {
       e.stopPropagation(); // 阻止滚动事件冒泡到父元素（页面）
       // 可选：当消息区滚动到顶部/底部时，禁止继续滚动（避免页面滚动）
@@ -2422,7 +2563,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       }
     });
 
-    // ================ 新增：控制输入框和发送功能的启用/禁用 ================
+    // ================ 控制输入框和发送功能的启用/禁用 ================
     /**
      * 设置发送功能的启用状态
      * @param {boolean} enabled - true: 启用，false: 禁用
@@ -2559,6 +2700,8 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       $msgs.addEventListener('wheel', preventScrollBubble);
       // 打开时启用发送功能
       setSendEnabled(true);
+      // 初始化夜间模式样式（确保打开时样式正确）
+      updateDarkMode();
     }
 
     // 关闭 AI 窗口（解绑滚动阻止）
@@ -2589,7 +2732,7 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       addHistory('ai', content);
     }
 
-    // ================ 发送提问（核心逻辑，修复回车发送） ================
+    // ================ 发送提问（核心逻辑） ================
     async function send() {
       // 如果AI正在回复，直接返回（防止重复发送）
       if (isAiResponding) return;
@@ -2701,8 +2844,9 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       isOpen ? closeDialog() : openDialog();
     });
 
+    // 关键修改3：仅保留关闭按钮关闭弹窗，移除遮罩层点击关闭
     $closeBtn.addEventListener('click', closeDialog);
-    $mask.addEventListener('click', closeDialog);
+    // 移除遮罩层点击关闭事件：$mask.addEventListener('click', closeDialog);
 
     // 清空历史（自定义确认弹窗）
     $clearBtn.addEventListener('click', () => {
@@ -2715,10 +2859,10 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
     // 发送提问
     $sendBtn.addEventListener('click', send);
 
-    // 回车发送（修复：AI回复中禁用回车）
+    // 回车发送（AI回复中禁用）
     $q.addEventListener('keydown', (e) => {
       // 只有发送功能启用时，才允许回车发送
-      if (enabled && e.key === 'Enter' && !e.shiftKey) {
+      if (!isAiResponding && e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         send();
       }
@@ -2731,22 +2875,23 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
       }
     });
 
-    // 初始化暗色模式
+    // 初始化暗色模式（完善样式同步）
     const updateDarkMode = () => {
       const isDark = document.documentElement.classList.contains('dark-mode');
-      if (isDark) {
-        $dlg.style.background = 'rgba(30,41,59,.96)';
-        $dlg.style.color = '#e5e7eb';
-      } else {
-        $dlg.style.background = '#fff';
-        $dlg.style.color = '#374151';
-      }
+      // 弹窗主体样式已通过CSS变量适配，此处无需重复设置
+      // 确保输入框、按钮等元素样式同步
+      $q.style.backgroundColor = isDark ? 'var(--ai-input-bg-dark)' : 'var(--ai-input-bg-light)';
+      $q.style.borderColor = isDark ? 'var(--ai-input-border-dark)' : 'var(--ai-input-border-light)';
+      $q.style.color = isDark ? 'var(--ai-text-dark)' : 'var(--ai-text-light)';
     };
     updateDarkMode();
     window.addEventListener('resize', updateDarkMode);
 
-    // 监听暗色模式切换，同步更新弹窗样式
-    document.getElementById('theme-toggle').addEventListener('click', updateDarkMode);
+    // 监听暗色模式切换，实时同步样式
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      // 延迟执行，确保dark-mode类已切换
+      setTimeout(updateDarkMode, 10);
+    });
 
     // 工具函数：HTML转义
     function escapeHtml(unsafe) {
@@ -2758,11 +2903,6 @@ CPU中简单的4位ALU（算术逻辑单元,"/>
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
     }
-
-    // 修复：回车事件中判断发送功能状态（之前的enabled变量未定义）
-    Object.defineProperty(window, 'enabled', {
-      get: () => !isAiResponding
-    });
   })();
 </script>
 </body>
