@@ -179,7 +179,7 @@
 
     <div id="loader"></div>
     <div id="single">
-  <!-- 全屏背景层（添加过渡类名） -->
+  <!-- 背景图平滑过渡 -->
   <div id="custom-bg" style="position: fixed;
               top: 0;
               left: 0;
@@ -242,7 +242,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_sigchld/">Linux SIGCHLD信号处理与僵尸进程清理实验</a></li><li><a href="/2025/07/12/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_basic/">Linux 最基础的命令</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E5%91%BD%E4%BB%A4/Common_commands_adv/">Linux 其他基础命令</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a></li></ul>
+            <ul><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/environment_argc_argv/">Linux 命令行参数和环境变量</a></li><li><a href="/2025/07/22/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_manage/">Linux 信号管理</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a></li><li><a href="/2025/07/14/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_status/">Linux 进程状态及优先级</a></li><li><a href="/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_termination/">Linux 进程终止</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -1298,6 +1298,18 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
   </div>
 </div>
 
+<!-- 自定义确认弹窗（默认隐藏） -->
+<div id="custom-confirm-mask" class="custom-confirm-mask"></div>
+<div id="custom-confirm" class="custom-confirm">
+  <div class="custom-confirm-icon">⚠️</div>
+  <div class="custom-confirm-title">确认清空对话历史？</div>
+  <div class="custom-confirm-desc">清空后将删除当前文章的所有对话记录，且无法恢复</div>
+  <div class="custom-confirm-btns">
+    <button id="confirm-cancel" class="confirm-btn cancel-btn">取消</button>
+    <button id="confirm-ok" class="confirm-btn ok-btn">确认清空</button>
+  </div>
+</div>
+
 <style>
   /* 背景图平滑过渡 */
   #custom-bg {
@@ -1313,6 +1325,13 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
     --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* 自定义弹窗颜色变量 */
+    --confirm-primary: #0d9488;
+    --confirm-primary-hover: #0f766e;
+    --confirm-gray: #f3f4f6;
+    --confirm-gray-dark: #9ca3af;
+    --confirm-text: #374151;
+    --confirm-text-light: #6b7280;
   }
 
   /* 返回顶部按钮样式 */
@@ -1479,7 +1498,7 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     font-size: 15px;
   }
 
-  /* 新增：清空历史按钮样式 */
+  /* 清空历史按钮样式 */
   .ai-clear {
     border: none;
     background: transparent;
@@ -1602,7 +1621,21 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     border-radius: 8px;
     font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  /* 新增：输入框禁用状态样式 */
+  #ai-q:disabled {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+  }
+
+  .dark-mode #ai-q:disabled {
+    background-color: #2d3748;
+    color: #6b7280;
+    border-color: #4b5563;
   }
 
   #ai-q:focus {
@@ -1695,70 +1728,6 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
 
   .ai-msg tr:nth-child(even) {
     background: #fdfdfe;
-  }
-
-  /* 暗色模式适配 */
-  .dark-mode .ai-dialog {
-    background: rgba(30, 41, 59, 0.96);
-    color: #e5e7eb;
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-
-  .dark-mode .ai-head {
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .dark-mode .ai-msg.user {
-    background: rgba(13, 148, 136, 0.25);
-    color: #a7f3d0;
-  }
-
-  .dark-mode .ai-msg.ai {
-    background: rgba(148, 163, 184, 0.18);
-    color: #e5e7eb;
-  }
-
-  /* 暗色模式加载提示适配 */
-  .dark-mode .ai-loading {
-    color: #6b7280;
-  }
-
-  .dark-mode #ai-q {
-    background: rgba(148, 163, 184, 0.08);
-    color: #e5e7eb;
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
-  .dark-mode #ai-q:focus {
-    border-color: #14b8a6;
-    box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2);
-  }
-
-  .dark-mode .ai-msg code,
-  .dark-mode .ai-msg pre {
-    background: rgba(148, 163, 184, 0.15);
-  }
-
-  .dark-mode .ai-msg blockquote {
-    border-left-color: #4b5563;
-    color: #bbb;
-  }
-
-  .dark-mode .ai-msg table {
-    border-color: #4b5563;
-  }
-
-  .dark-mode .ai-msg th,
-  .dark-mode .ai-msg td {
-    border-color: #4b5563;
-  }
-
-  .dark-mode .ai-msg th {
-    background: rgba(148, 163, 184, 0.1);
-  }
-
-  .dark-mode .ai-msg tr:nth-child(even) {
-    background: rgba(148, 163, 184, 0.05);
   }
 
   /* 小屏幕适配 */
@@ -1973,11 +1942,128 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
   .mermaid text {
     fill: #4a8ecd !important;
   }
+
+  /* 自定义确认弹窗样式 */
+  .custom-confirm-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    z-index: 10000; /* 高于AI弹窗 */
+    display: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .custom-confirm {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 350px;
+    padding: 24px;
+    text-align: center;
+    z-index: 10001;
+    display: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0;
+  }
+
+  /* 弹窗显示状态 */
+  .custom-confirm-mask.show {
+    display: block;
+    opacity: 1;
+  }
+
+  .custom-confirm.show {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  /* 暗色模式适配 */
+  .dark-mode .custom-confirm {
+    background: #1f2937;
+    color: #e5e7eb;
+  }
+
+  .custom-confirm-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+
+  .custom-confirm-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--confirm-text);
+  }
+
+  .dark-mode .custom-confirm-title {
+    color: #f9fafb;
+  }
+
+  .custom-confirm-desc {
+    font-size: 14px;
+    color: var(--confirm-text-light);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .dark-mode .custom-confirm-desc {
+    color: #d1d5db;
+  }
+
+  .custom-confirm-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .confirm-btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: none;
+  }
+
+  .cancel-btn {
+    background: var(--confirm-gray);
+    color: var(--confirm-text);
+  }
+
+  .dark-mode .cancel-btn {
+    background: #374151;
+    color: #e5e7eb;
+  }
+
+  .cancel-btn:hover {
+    background: #e5e7eb;
+  }
+
+  .dark-mode .cancel-btn:hover {
+    background: #4b5563;
+  }
+
+  .ok-btn {
+    background: var(--confirm-primary);
+    color: #fff;
+  }
+
+  .ok-btn:hover {
+    background: var(--confirm-primary-hover);
+  }
 </style>
 
 <script>
   (function () {
-    // ================ 共享变量 ================
+    // 背景图平滑过渡
     const bgContainer = document.getElementById('custom-bg');
     const lightBg = '/img/bg3.png';  // 日间模式背景
     const darkBg = '/img/bg9.jpg';  // 夜间模式背景
@@ -2126,9 +2212,10 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     return fixedContent;
   }
 
-  // 每个提问对应一个独立的流管理器（修复 msgEl 作用域 + 分段解析 + 加载提示）
+  // 暴露给全局，供其他脚本复用
   window.__AI_STREAM_MANAGER__ = {
     currentStream: null,
+    fixTableFormat: fixTableFormat,
     // 触发Markdown解析的分隔符（常用标点，可自定义）
     markdownTriggers: [',', '。', '；', '！', '？', '：', '】', ')', '}', '\n', '、', '"', "'"],
     createStream() {
@@ -2140,7 +2227,7 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
       // 1. 创建AI消息气泡（默认显示加载提示）
       const msgEl = document.createElement('div');
       msgEl.className = 'ai-msg ai';
-      msgEl.innerHTML = '<span class="ai-loading">🤖 AI 思考中</span>';
+      msgEl.innerHTML = '<span class="ai-loading">AI 思考中</span>';
       container.appendChild(msgEl);
 
       const stream = {
@@ -2171,7 +2258,10 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
             
             // 修复表格格式 + 解析Markdown
             const fixedSegment = fixTableFormat(completeSegment);
-            this.parsedContent += this.parseMarkdown(fixedSegment);
+            this.parsedContent += md ? md.render(fixedSegment)
+              .replace(/<p>/g, '')
+              .replace(/<\/p>/g, '<br>')
+              .replace(/<br><br>/g, '<br>') : escapeHtml(fixedSegment);
             
             // 实时渲染
             this.render();
@@ -2191,21 +2281,6 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
             }
           }
           return minIndex;
-        },
-
-        // 解析Markdown（基础语法，避免复杂冲突）
-        parseMarkdown(segment) {
-          if (!md) return escapeHtml(segment);
-          
-          try {
-            let html = md.render(segment);
-            // 优化换行显示，适配消息气泡样式
-            html = html.replace(/<p>/g, '').replace(/<\/p>/g, '<br>').replace(/<br><br>/g, '<br>');
-            return html;
-          } catch (e) {
-            console.warn('Markdown解析失败，降级为纯文本', e);
-            return escapeHtml(segment);
-          }
         },
 
         // 实时渲染（确保msgEl存在）
@@ -2230,7 +2305,10 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
           
           if (this.buffer.trim()) {
             const fixedSegment = fixTableFormat(this.buffer);
-            this.parsedContent += this.parseMarkdown(fixedSegment);
+            this.parsedContent += md ? md.render(fixedSegment)
+              .replace(/<p>/g, '')
+              .replace(/<\/p>/g, '<br>')
+              .replace(/<br><br>/g, '<br>') : escapeHtml(fixedSegment);
             this.buffer = '';
           }
           
@@ -2255,7 +2333,7 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
 })();
 </script>
 
-<!-- AI 功能主脚本（新增历史对话管理） -->
+<!-- AI 功能主脚本（修复回车发送 + 所有功能整合） -->
 <script>
   (function () {
     // 后端地址
@@ -2279,13 +2357,111 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     const $fab = document.getElementById('ai-fab');
     const $mask = document.getElementById('ai-mask');
     const $dlg = document.getElementById('ai-dialog');
-    const $clearBtn = document.getElementById('ai-clear'); // 新增：清空历史按钮
+    const $clearBtn = document.getElementById('ai-clear'); // 清空历史按钮
     const $closeBtn = document.getElementById('ai-close');
     const $msgs = document.getElementById('ai-msgs');
     const $q = document.getElementById('ai-q');
     const $sendBtn = document.getElementById('ai-send');
 
+    // 自定义确认弹窗元素
+    const $confirmMask = document.getElementById('custom-confirm-mask');
+    const $confirmDialog = document.getElementById('custom-confirm');
+    const $confirmOkBtn = document.getElementById('confirm-ok');
+    const $confirmCancelBtn = document.getElementById('confirm-cancel');
+
     let isOpen = false;
+    let confirmCallback = null; // 确认弹窗的回调函数
+    let isAiResponding = false; // 新增：标记AI是否正在回复
+
+    // ================ 关键修复：阻止滚动事件冒泡 ================
+    function preventScrollBubble(e) {
+      e.stopPropagation(); // 阻止滚动事件冒泡到父元素（页面）
+      // 可选：当消息区滚动到顶部/底部时，禁止继续滚动（避免页面滚动）
+      const isAtTop = $msgs.scrollTop === 0;
+      const isAtBottom = $msgs.scrollTop + $msgs.clientHeight >= $msgs.scrollHeight - 1; // -1 兼容浮点精度
+
+      if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+        e.preventDefault(); // 滚动到边界时，阻止默认滚动行为
+      }
+    }
+
+    // ================ 自定义确认弹窗功能 ================
+    /**
+     * 显示自定义确认弹窗
+     * @param {Function} okCallback - 确认按钮回调
+     * @param {Function} cancelCallback - 取消按钮回调（可选）
+     */
+    function showConfirm(okCallback, cancelCallback) {
+      confirmCallback = { ok: okCallback, cancel: cancelCallback };
+      // 显示弹窗
+      $confirmMask.classList.add('show');
+      $confirmDialog.classList.add('show');
+      // 阻止页面滚动
+      document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * 隐藏自定义确认弹窗
+     */
+    function hideConfirm() {
+      $confirmMask.classList.remove('show');
+      $confirmDialog.classList.remove('show');
+      confirmCallback = null;
+      // 恢复页面滚动
+      document.body.style.overflow = '';
+    }
+
+    // 确认弹窗按钮事件
+    $confirmOkBtn.addEventListener('click', () => {
+      if (confirmCallback?.ok) {
+        confirmCallback.ok();
+      }
+      hideConfirm();
+    });
+
+    $confirmCancelBtn.addEventListener('click', () => {
+      if (confirmCallback?.cancel) {
+        confirmCallback.cancel();
+      }
+      hideConfirm();
+    });
+
+    // 点击遮罩层关闭弹窗
+    $confirmMask.addEventListener('click', (e) => {
+      if (e.target === $confirmMask) {
+        hideConfirm();
+      }
+    });
+
+    // ESC 键关闭弹窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $confirmDialog.classList.contains('show')) {
+        hideConfirm();
+      }
+    });
+
+    // ================ 新增：控制输入框和发送功能的启用/禁用 ================
+    /**
+     * 设置发送功能的启用状态
+     * @param {boolean} enabled - true: 启用，false: 禁用
+     */
+    function setSendEnabled(enabled) {
+      isAiResponding = !enabled;
+      $sendBtn.disabled = !enabled;
+      $q.disabled = !enabled;
+      
+      // 禁用时修改输入框提示文字，提示用户AI正在回复
+      if (!enabled) {
+        $q.setAttribute('data-original-placeholder', $q.placeholder);
+        $q.placeholder = 'AI正在回复中...';
+      } else {
+        // 启用时恢复原始提示文字
+        const originalPlaceholder = $q.getAttribute('data-original-placeholder');
+        if (originalPlaceholder) {
+          $q.placeholder = originalPlaceholder;
+        }
+      }
+    }
 
     // ================ 历史对话核心功能 ================
     /**
@@ -2348,8 +2524,12 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
         
         if (item.role === 'ai') {
           // AI消息需要解析Markdown
-          const fixedContent = fixTableFormat(item.content);
-          const html = md ? md.render(fixedContent)
+          const fixedContent = window.__AI_STREAM_MANAGER__.fixTableFormat(item.content);
+          const html = window.markdownit ? window.markdownit({
+            html: false,
+            linkify: true,
+            breaks: true
+          }).render(fixedContent)
             .replace(/<p>/g, '')
             .replace(/<\/p>/g, '<br>')
             .replace(/<br><br>/g, '<br>') : escapeHtml(fixedContent);
@@ -2375,7 +2555,7 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
       const history = getHistoryFromStorage();
       if (!history.length) return currentQuestion;
 
-      // 拼接历史对话（格式：Human: xxx\nAI: xxx\nHuman: 当前提问）
+      // 拼接历史对话（格式：HumanMessage：xxx\nAIMessage：xxx\nHumanMessage：当前提问）
       let context = '';
       history.forEach(item => {
         context += `${item.role === 'human' ? 'HumanMessage：' : 'AIMessage：'}${item.content}\n`;
@@ -2386,22 +2566,28 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     }
 
     // ================ 弹窗控制 ================
-    // 打开 AI 窗口（同时渲染历史对话）
+    // 打开 AI 窗口（同时渲染历史对话 + 绑定滚动阻止）
     function openDialog() {
       $mask.style.display = 'block';
       $dlg.classList.add('show');
       renderHistory(); // 打开时渲染历史对话
       $q.focus();
       isOpen = true;
+      // 绑定滚动阻止事件（只在弹窗打开时绑定）
+      $msgs.addEventListener('wheel', preventScrollBubble);
+      // 打开时启用发送功能
+      setSendEnabled(true);
     }
 
-    // 关闭 AI 窗口
+    // 关闭 AI 窗口（解绑滚动阻止）
     function closeDialog() {
       $dlg.classList.remove('show');
       setTimeout(() => {
         $mask.style.display = 'none';
       }, 200);
       isOpen = false;
+      // 解绑滚动阻止事件（避免影响其他区域）
+      $msgs.removeEventListener('wheel', preventScrollBubble);
     }
 
     // 添加用户消息气泡（同时保存到历史）
@@ -2421,10 +2607,16 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
       addHistory('ai', content);
     }
 
-    // ================ 发送提问（核心逻辑，新增上下文拼接） ================
+    // ================ 发送提问（核心逻辑，修复回车发送） ================
     async function send() {
+      // 如果AI正在回复，直接返回（防止重复发送）
+      if (isAiResponding) return;
+
       let currentQuestion = $q.value.trim();
       if (!currentQuestion) return;
+
+      // 发送前禁用发送功能（按钮+回车）
+      setSendEnabled(false);
 
       // 构建包含历史上下文的完整提问
       const fullQuestion = buildQuestionWithContext(currentQuestion);
@@ -2432,13 +2624,12 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
       // 添加用户消息气泡
       addUserMsg(currentQuestion);
       $q.value = '';
-      $sendBtn.disabled = true;
 
       // 创建新的流实例（每次提问都新建，确保气泡独立）
       const stream = window.__AI_STREAM_MANAGER__.createStream();
       if (!stream) {
         alert('AI回复初始化失败，请刷新页面重试！');
-        $sendBtn.disabled = false;
+        setSendEnabled(true); // 失败时恢复启用
         return;
       }
 
@@ -2517,7 +2708,8 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
         // 错误消息也保存到历史（可选，方便用户查看）
         saveAiReply(errMsg);
       } finally {
-        $sendBtn.disabled = false;
+        // 无论成功失败，都恢复发送功能
+        setSendEnabled(true);
       }
     }
 
@@ -2530,32 +2722,37 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     $closeBtn.addEventListener('click', closeDialog);
     $mask.addEventListener('click', closeDialog);
 
-    // 清空历史
+    // 清空历史（自定义确认弹窗）
     $clearBtn.addEventListener('click', () => {
-      if (confirm('确定要清空当前文章的对话历史吗？')) {
-        clearHistory();
-      }
+      showConfirm(
+        () => { clearHistory(); }, // 确认回调：清空历史
+        () => { /* 取消回调：无操作 */ }
+      );
     });
 
     // 发送提问
     $sendBtn.addEventListener('click', send);
 
-    // 回车发送（Shift+Enter 换行）
+    // 回车发送（修复：AI回复中禁用回车）
     $q.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      // 只有发送功能启用时，才允许回车发送
+      if (enabled && e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         send();
       }
     });
 
-    // ESC 键关闭
+    // ESC 键关闭弹窗
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen) closeDialog();
+      if (e.key === 'Escape' && isOpen && !$confirmDialog.classList.contains('show')) {
+        closeDialog();
+      }
     });
 
     // 初始化暗色模式
     const updateDarkMode = () => {
-      if (document.documentElement.classList.contains('dark-mode')) {
+      const isDark = document.documentElement.classList.contains('dark-mode');
+      if (isDark) {
         $dlg.style.background = 'rgba(30,41,59,.96)';
         $dlg.style.color = '#e5e7eb';
       } else {
@@ -2566,18 +2763,24 @@ I am child, pid: <span class="token number">2302658</span>, ppid: <span class="t
     updateDarkMode();
     window.addEventListener('resize', updateDarkMode);
 
-    // 工具函数：修复表格格式（复用核心脚本的函数，避免重复）
-    function fixTableFormat(content) {
-      return window.__AI_STREAM_MANAGER__.fixTableFormat ? 
-        window.__AI_STREAM_MANAGER__.fixTableFormat(content) : content;
+    // 监听暗色模式切换，同步更新弹窗样式
+    document.getElementById('theme-toggle').addEventListener('click', updateDarkMode);
+
+    // 工具函数：HTML转义
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    // 初始化 markdown-it（复用核心脚本的实例）
-    const md = window.markdownit ? window.markdownit({
-      html: false,
-      linkify: true,
-      breaks: true
-    }) : null;
+    // 修复：回车事件中判断发送功能状态（之前的enabled变量未定义）
+    Object.defineProperty(window, 'enabled', {
+      get: () => !isAiResponding
+    });
   })();
 </script>
 </body>
