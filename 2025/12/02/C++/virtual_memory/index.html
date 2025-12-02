@@ -1,0 +1,2967 @@
+
+<!DOCTYPE html>
+<html lang="zh" class="loading">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>现代 C++ 中的虚拟内存分布 - 刘家炫的博客</title>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google" content="notranslate" />
+    <meta name="keywords" content="Fechin,"> 
+    <meta name="description" content="
+
+
+什么是虚拟内存？
+虚拟内存的地址分布
+1. 栈（Stack）
+2. 内存空洞（Gap &amp;#x2F; Unused Area）
+3. 堆（Heap）
+4. 内存映射区（Memory Mappin,"> 
+    <meta name="author" content="Jiaxuan Liu"> 
+    <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
+    <link rel="icon" href="/img/favicon.png"> 
+    
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+    
+    
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:title" content="现代 C++ 中的虚拟内存分布 - 刘家炫的博客"/>
+    <meta name="twitter:description" content="
+
+
+什么是虚拟内存？
+虚拟内存的地址分布
+1. 栈（Stack）
+2. 内存空洞（Gap &amp;#x2F; Unused Area）
+3. 堆（Heap）
+4. 内存映射区（Memory Mappin,"/>
+    
+    
+    
+    
+    <meta property="og:site_name" content="刘家炫的博客"/>
+    <meta property="og:type" content="object"/>
+    <meta property="og:title" content="现代 C++ 中的虚拟内存分布 - 刘家炫的博客"/>
+    <meta property="og:description" content="
+
+
+什么是虚拟内存？
+虚拟内存的地址分布
+1. 栈（Stack）
+2. 内存空洞（Gap &amp;#x2F; Unused Area）
+3. 堆（Heap）
+4. 内存映射区（Memory Mappin,"/>
+    
+<link rel="stylesheet" href="/css/diaspora.css">
+
+    <script>window.searchDbPath = "/search.xml";</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Prism.js 官方主题 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    
+  <script src='https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js'></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+<script src="https://cdn.jsdelivr.net/npm/TagCloud@2.2.0/dist/TagCloud.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.13.2/dist/av-min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+
+<body class="loading">
+    <span id="config-title" style="display:none">刘家炫的博客</span>
+
+  <!-- 永远渲染导航栏，但通过动画类控制初始状态 -->
+<nav class="navbar 
+  animate__animated animate__fadeInDown
+  ">
+
+    <div class="navbar-container">
+        <a href="/" class="site-title">
+            刘家炫的博客
+        </a>
+        <div class="nav-menu">
+            <a href="/">首页</a>
+            <a href="/archives/">归档</a>
+            <a href="/categories/">分类</a>
+            <a href="/tags/">标签</a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function is_home() {
+        // 获取当前路径（去掉末尾的斜杠和查询参数）
+        const path = window.location.pathname.replace(/\/$/, '');
+        // 判断是否是首页（根据您的网站结构调整）
+        return path === '' ||
+            path === '/' ||
+            path === '/index' ||
+            path === '/index.html' ||
+            path.startsWith('/zh-cn/'); // 如果是多语言网站
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log(localStorage.getItem('navbarVisible'))
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+
+        // 1. 获取存储的 navbar 上次状态（默认 false）
+        const wasNavbarVisible = localStorage.getItem('navbarVisible') === 'true';
+        // 2. 判断当前页面是否需要 navbar（假设 is_home() 返回布尔值）
+        const shouldShowNavbar = !is_home();
+        console.log(shouldShowNavbar);
+
+        // 3. 处理四种状态变化
+        if (!wasNavbarVisible && shouldShowNavbar) {
+            // 状态 1：从无到有 → 显示 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown');
+            localStorage.setItem('navbarVisible', 'true');
+        } else if (wasNavbarVisible && !shouldShowNavbar) {
+            // 状态 2：从有到无 → 隐藏 + 动画 + 更新状态
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp');
+            localStorage.setItem('navbarVisible', 'false');
+        } else if (wasNavbarVisible && shouldShowNavbar) {
+            // 状态 3：从有到有 → 保持显示（无动画）
+            navbar.classList.remove('animate__fadeOutUp');
+            navbar.classList.add('animate__fadeInDown', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        } else {
+            // 状态 4：从无到无 → 保持隐藏（无动画）
+            navbar.classList.remove('animate__fadeInDown');
+            navbar.classList.add('animate__fadeOutUp', 'no-transition');
+            setTimeout(() => navbar.classList.remove('no-transition'), 10);
+        }
+
+        // 4. 滚动控制（仅在需要 navbar 的页面生效）
+        if (shouldShowNavbar) {
+            const blogpage = document.querySelector('.section'); // 替换成你的博客内容容器选择器
+            const navbar = document.querySelector('.navbar'); // 替换成导航栏选择器
+            let lastScrollDirection = null; // 记录上一次滚轮方向
+
+            blogpage.addEventListener('wheel', (e) => {
+                const currentScrollDirection = e.deltaY > 0 ? 'down' : 'up';
+
+                // 避免重复触发（防抖）
+                if (currentScrollDirection === lastScrollDirection) return;
+                lastScrollDirection = currentScrollDirection;
+
+                if (currentScrollDirection === 'down') {
+                    // 鼠标滚轮向下 → 隐藏导航栏
+                    navbar.classList.remove('animate__fadeInDown');
+                    navbar.classList.add('animate__fadeOutUp');
+                    localStorage.setItem('navbarVisible', 'false');
+                } else {
+                    // 鼠标滚轮向上 → 显示导航栏
+                    navbar.classList.remove('animate__fadeOutUp');
+                    navbar.classList.add('animate__fadeInDown');
+                    localStorage.setItem('navbarVisible', 'true');
+                }
+            });
+        }
+
+    });
+
+</script>
+
+
+    <div id="loader"></div>
+    <div id="single">
+  <!-- 背景图平滑过渡 -->
+  <div id="custom-bg" style="position: fixed;
+              top: 0;
+              left: 0;
+              width: 100vw;
+              height: 100vh;
+              background-size: cover;
+              background-position: center;">
+  </div>
+
+  <!-- 内容区 -->
+  <div id="top" style="display: block;">
+    <div class="bar" style="width: 0;"></div>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <div title="播放/暂停" class="iconfont icon-play"></div>
+    <h3 class="subtitle">现代 C++ 中的虚拟内存分布</h3>
+    <div class="social">
+        <div>
+            <div class="share">
+                <a title="获取二维码" class="iconfont icon-scan" href="javascript:;"></a>
+            </div>
+            <div id="qr"></div>
+        </div>
+    </div>
+    <div class="scrollbar"></div>
+</div>
+    <div class="section">
+      <div class="article" style="padding-top: 10vh;padding-bottom: 13vh;">
+    <div class="container-wrapper" style="display: flex; justify-content: center; gap: 20px;">
+        <div class="follow-sidebar">
+            <div class="github-avatar" style="text-align: center; margin-bottom: 20px;">
+                <a href="https://github.com/LiuJiaxuan69" target="_blank" rel="noopener">
+                    <img src="https://github.com/LiuJiaxuan69.png" alt="GitHub头像"
+                        style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                </a>
+                <div class="github-name"
+                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    LiuJiaxuan69
+                </div>
+                <button class="github-follow-btn"
+                    onclick="window.open('https://github.com/LiuJiaxuan69?tab=followers', '_blank')">
+                    关注我的 GitHub
+                </button>
+                <div class="github-info" style="display: flex; justify-content: center; gap: 20px; margin-top: 8px;">
+                    <div>
+                        <a href="https://github.com/LiuJiaxuan69?tab=followers" target="_blank"
+                            style="text-decoration: none; color: inherit;">
+                            <span id="github-followers"
+                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
+                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                            <span style="font-weight:bold; font-size:20px;color:#000!important;">74</span>
+                            <span style="font-size:20px;color:#666!important;">文章</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="recommendations">
+            <h2>相关推荐</h2>
+            <ul><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/2025/10/06/C++/constexpr/">现代 C++ 之 constexpr 编程</a></li><li><a href="/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/2025/09/30/C++/async/">C++ 异步编程</a></li></ul>
+        </div>
+        <div class='main' style="/* 基础样式 */
+    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
+    
+    /* 毛玻璃关键效果 */
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    
+    /* 边缘增强效果 */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    /* 其他增强属性 */
+    border-radius: 12px; /* 可选圆角 */
+    position: relative; /* 确保堆叠上下文 */
+    z-index: 1;">
+            <h1 class="title">现代 C++ 中的虚拟内存分布</h1>
+            <div class="stuff">
+                <span>十二月 02, 2025</span>
+                <!-- 阅读数统计 -->
+                <span id="leancloud_container_page_pv" class="leancloud">
+                    <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
+                </span>
+                
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/C/" rel="tag">C++</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" rel="tag">操作系统</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98/" rel="tag">虚拟内存</a></li></ul>
+
+
+            </div>
+            <div class="content markdown" id="post-content" style="color: var(--text-color, inherit);">
+                <!-- toc -->
+
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98">什么是虚拟内存？</a></li>
+<li><a href="#%E8%99%9A%E6%8B%9F%E5%86%85%E5%AD%98%E7%9A%84%E5%9C%B0%E5%9D%80%E5%88%86%E5%B8%83">虚拟内存的地址分布</a><ul>
+<li><a href="#1-%E6%A0%88stack">1. 栈（Stack）</a></li>
+<li><a href="#2-%E5%86%85%E5%AD%98%E7%A9%BA%E6%B4%9Egap-unused-area">2. 内存空洞（Gap &#x2F; Unused Area）</a></li>
+<li><a href="#3-%E5%A0%86heap">3. 堆（Heap）</a></li>
+<li><a href="#4-%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E5%8C%BAmemory-mapping-area">4. 内存映射区（Memory Mapping Area）</a></li>
+<li><a href="#5-bss-%E6%AE%B5%E6%9C%AA%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E6%AE%B5">5. BSS 段（未初始化数据段）</a></li>
+<li><a href="#6-%E6%95%B0%E6%8D%AE%E6%AE%B5data-segment%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE">6. 数据段（Data Segment，初始化数据）</a></li>
+<li><a href="#7-%E4%BB%A3%E7%A0%81%E6%AE%B5text-segment">7. 代码段（Text Segment）</a></li>
+</ul>
+</li>
+<li><a href="#%E6%A0%88%E4%B8%8E%E5%85%B1%E4%BA%AB%E5%BA%93%E4%B9%8B%E9%97%B4%E7%9A%84%E7%89%B9%E6%AE%8A%E5%86%85%E6%A0%B8%E6%98%A0%E5%B0%84vdso-vvar-%E4%B8%8E-stack-guard">栈与共享库之间的特殊内核映射：VDSO、VVAR 与 Stack Guard</a><ul>
+<li><a href="#1-vdsovirtual-dynamic-shared-object">1. VDSO（Virtual Dynamic Shared Object）</a></li>
+<li><a href="#2-vvarvdso-variables-area">2. VVAR（VDSO Variables Area）</a></li>
+<li><a href="#3-stack-guard%E6%A0%88%E4%BF%9D%E6%8A%A4%E9%A1%B5-guard-page">3. Stack Guard（栈保护页 &#x2F; Guard Page）</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<p>在现代 C++ 开发中，理解虚拟内存的地址分布对于优化程序性能和调试内存相关问题至关重要。本文将深入探讨虚拟内存的基本概念、地址分布以及各个区域的用途和特点。</p>
+<p>首先我放一张典型的 Linux 64 位进程虚拟内存布局图，方便大家理解：</p>
+<h2><span id="什么是虚拟内存">什么是虚拟内存？</span></h2><p>虚拟内存是一种内存管理技术，它使得每个进程都拥有一个独立的地址空间。操作系统通过将虚拟地址映射到物理内存地址，实现了内存的抽象化。这种机制允许程序使用比实际物理内存更大的内存空间，并且提高了内存的利用效率，有关进程地址空间的介绍，我在之前的文章中讲过，详细可见：<a href="../Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1.md">进程地址空间</a></p>
+<h2><span id="虚拟内存的地址分布">虚拟内存的地址分布</span></h2><p>现代操作系统（如 Linux）在每个进程中都采用 <strong>虚拟内存（Virtual Memory）</strong> 的方式来组织地址空间。虚拟地址空间逻辑上是连续的，但实际映射到物理内存、磁盘或文件时会经过内核调度与分页管理。下面从地址高低顺序出发，对典型的 Linux 64 位进程地址空间结构逐一说明。</p>
+<h3><span id="1-栈stack">1. 栈（Stack）</span></h3><p>栈位于虚拟内存的高地址区域，并且 <strong>向下增长</strong>。<br>主要用于存放：</p>
+<ul>
+<li>函数的局部变量</li>
+<li>函数参数</li>
+<li>返回地址</li>
+<li>保存寄存器值</li>
+<li>临时结构体、数组等</li>
+</ul>
+<p>栈由内核根据需要动态调整大小（如启用了 Guard Page 防止溢出），但其最大空间受 <code>ulimit -s</code> 限制。由于栈的生命周期严格与函数调用相关，因此其地址位置通常最高且变化最为频繁。<br>这里的栈又可称之为线程栈，因为每个线程都有独立的栈空间。主线程创建的栈通常较大（如 8MB），而子线程的栈大小可以通过 <code>pthread_attr_setstacksize</code> 设置。同样，主线程创建的子线程的栈空间也位于高地址区域，且向下增长。这里可以回顾到，子线程的栈是独立于主线程的栈的，这也是主线程和子线程之间数据隔离的一部分，除了这个之外，子线程还会有自己的寄存器状态等。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>地址最高</li>
+<li>向低地址增长</li>
+<li>自动分配&#x2F;回收，速度极快</li>
+<li>容量有限：典型默认 8MB（Linux）</li>
+<li>生命周期随函数调用结束</li>
+</ul>
+<hr>
+<h3><span id="2-内存空洞gap-x2f-unused-area">2. 内存空洞（Gap &#x2F; Unused Area）</span></h3><p>在栈与堆之间通常存在一大段空闲区域。这是为了使 <strong>堆向上增长</strong>、<strong>栈向下增长</strong> 时拥有足够空间，不会立即相遇造成冲突。</p>
+<p>系统通常在地址空间中保留足够的未映射区域，用于：</p>
+<ul>
+<li>堆扩展</li>
+<li>栈扩展</li>
+<li>mmap 区域分配（及其罕见，通常不会占用这部分空间，一般不需要考虑）</li>
+</ul>
+<p>这部分不是一个真正的“段”，但在内存布局图中通常被标注为“空闲区域”。</p>
+<hr>
+<h3><span id="3-堆heap">3. 堆（Heap）</span></h3><p>堆位于虚拟内存的中间区域，<strong>从低地址向高地址增长</strong>。<br>主要由 <code>malloc</code>、<code>new</code> 等动态分配函数使用。</p>
+<p>底层通过：</p>
+<ul>
+<li><code>brk()</code> &#x2F; <code>sbrk()</code> 扩大传统堆空间</li>
+<li>或通过 <code>mmap()</code> 分配更大的对象（如 glibc 分配 &gt;128KB）</li>
+</ul>
+<p><strong>特点：</strong></p>
+<ul>
+<li>向高地址增长</li>
+<li>生命周期由程序控制（new&#x2F;delete，malloc&#x2F;free）</li>
+<li>地址变化不频繁，但受分配策略影响会有碎片</li>
+<li>大对象通常直接 mmap，绕过常规堆，也就是说，堆空间并不一定全部来自 brk&#x2F;sbrk 分配的区域，有些大对象操作系统会直接通过 mmap 分配内存，这部分内存地址可能会分布在堆区域之外。通常情况下，glibc 会将小对象（小于 128KB）分配在堆区域，而大对象则通过 mmap 分配。</li>
+</ul>
+<hr>
+<h3><span id="4-内存映射区memory-mapping-area">4. 内存映射区（Memory Mapping Area）</span></h3><p><strong>内存映射区域</strong>（mmap 区域）。通常位于栈和堆之间，这里需要注意，内存空洞部分我也提到了mmap区域的分配，这是因为现代 64 位操作系统堆共享内存的存放不再仅限于堆和栈之间的空洞区域，mmap 区域可以分布在空洞区域内，也可以分布在堆和栈的其他位置，但是需要注意，<strong>通常情况下 mmap 是不会分配空间在内存空洞区的</strong>，你可以直接理解成共享内存只会分配在内存映射区。</p>
+<p>这里存放：</p>
+<ul>
+<li>共享库（<code>.so</code>）</li>
+<li>加载的文件映射（例如 mmap 打开文件）</li>
+<li>匿名内存映射（如你的 <code>mmap(NULL, 4096,...)</code>）</li>
+<li>JIT 或栈保护页等系统映射区域</li>
+</ul>
+<p><strong>特点：</strong></p>
+<ul>
+<li>动态分布，可根据 mmap 调用自动扩展</li>
+<li>与文件系统关联密切，可将文件直接映射到内存</li>
+<li>是分配大型对象与共享库的主要区域</li>
+</ul>
+<hr>
+<h3><span id="5-bss-段未初始化数据段">5. BSS 段（未初始化数据段）</span></h3><p>存放所有 <strong>未初始化或初始化为 0 的全局变量与静态变量</strong>：</p>
+<p>例如：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> uninit_global<span class="token punctuation">;</span>
+<span class="token keyword">static</span> <span class="token keyword">int</span> uninit_static<span class="token punctuation">;</span>
+<span class="token keyword">char</span> buffer<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>这些变量在程序启动时由内核置为 0，不占用可执行文件大小。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>位于内存映射区下方</li>
+<li>内容全为 0，实际不占文件大小</li>
+<li>程序加载时自动清零</li>
+</ul>
+<hr>
+<h3><span id="6-数据段data-segment初始化数据">6. 数据段（Data Segment，初始化数据）</span></h3><p>存放 <strong>已初始化的全局变量、静态变量以及部分常量数据</strong>：</p>
+<p>例如：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token keyword">int</span> global_var <span class="token operator">=</span> <span class="token number">100</span><span class="token punctuation">;</span>
+<span class="token keyword">static</span> <span class="token keyword">int</span> static_var <span class="token operator">=</span> <span class="token number">50</span><span class="token punctuation">;</span>
+<span class="token keyword">char</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"Hello World"</span><span class="token punctuation">;</span>
+<span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14159</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这部分在可执行文件中占有实际空间。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>处于 BSS 之下</li>
+<li>在程序加载时从 ELF 文件读入</li>
+<li>包含可写数据</li>
+</ul>
+<hr>
+<h3><span id="7-代码段text-segment">7. 代码段（Text Segment）</span></h3><p>位于最低地址区域，是程序可执行指令的存放位置。</p>
+<p>包含：</p>
+<ul>
+<li>所有函数代码（如 <code>add()</code>、<code>printMessage()</code>）</li>
+<li>常量字符串文字区域（有时也被划分到只读数据段 <code>.rodata</code>）</li>
+<li>只读数据（const）</li>
+</ul>
+<p>操作系统通常将其设为 <strong>只读 + 可执行</strong>，以防止修改和注入攻击。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>最低地址</li>
+<li>只读（可执行）</li>
+<li>包含指令与常量数据</li>
+</ul>
+<p>下面我用一份代码来更清楚的呈现虚拟内存的分布情况：</p>
+<pre class="line-numbers language-cpp" data-language="cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
+<span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;sys/mman.h></span></span>
+
+
+<span class="token comment">/*
+    代码段
+*/</span>
+<span class="token comment">// 所有函数代码都存储在这里</span>
+<span class="token keyword">int</span> <span class="token function">add</span><span class="token punctuation">(</span><span class="token keyword">int</span> a<span class="token punctuation">,</span> <span class="token keyword">int</span> b<span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">void</span> <span class="token function">printMessage</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token function">printf</span><span class="token punctuation">(</span><span class="token string">"Hello"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+
+<span class="token comment">/*
+    初始化数据段
+*/</span>
+<span class="token keyword">int</span> global_var <span class="token operator">=</span> <span class="token number">100</span><span class="token punctuation">;</span>           <span class="token comment">// 全局变量（已初始化）</span>
+<span class="token keyword">static</span> <span class="token keyword">int</span> static_var <span class="token operator">=</span> <span class="token number">50</span><span class="token punctuation">;</span>     <span class="token comment">// 静态变量（已初始化）</span>
+<span class="token keyword">const</span> <span class="token keyword">int</span> const_var <span class="token operator">=</span> <span class="token number">200</span><span class="token punctuation">;</span>      <span class="token comment">// 常量（通常放在只读区域）</span>
+
+<span class="token keyword">char</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"Hello World"</span><span class="token punctuation">;</span>     <span class="token comment">// 字符串常量</span>
+<span class="token keyword">double</span> pi <span class="token operator">=</span> <span class="token number">3.14159</span><span class="token punctuation">;</span>            <span class="token comment">// 双精度浮点数</span>
+
+<span class="token comment">/*
+    未初始化数据段
+*/</span>
+<span class="token keyword">int</span> uninit_global<span class="token punctuation">;</span>              <span class="token comment">// 未初始化的全局变量（BSS）</span>
+<span class="token keyword">static</span> <span class="token keyword">int</span> uninit_static<span class="token punctuation">;</span>       <span class="token comment">// 未初始化的静态变量（BSS）</span>
+
+<span class="token keyword">char</span> buffer<span class="token punctuation">[</span><span class="token number">1024</span><span class="token punctuation">]</span><span class="token punctuation">;</span>              <span class="token comment">// 未初始化的数组（BSS）</span>
+<span class="token keyword">long</span> big_array<span class="token punctuation">[</span><span class="token number">10000</span><span class="token punctuation">]</span><span class="token punctuation">;</span>          <span class="token comment">// 大数组（BSS）</span>
+
+
+<span class="token comment">/*
+    堆
+*/</span>
+<span class="token keyword">void</span> <span class="token function">heapExample</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 动态分配内存（堆）</span>
+    <span class="token keyword">int</span><span class="token operator">*</span> heap_var <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span><span class="token punctuation">;</span>            <span class="token comment">// 单个整数</span>
+    <span class="token keyword">char</span><span class="token operator">*</span> heap_str <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">char</span><span class="token punctuation">[</span><span class="token number">50</span><span class="token punctuation">]</span><span class="token punctuation">;</span>          <span class="token comment">// 字符数组</span>
+    <span class="token keyword">double</span><span class="token operator">*</span> heap_array <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">double</span><span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">;</span>   <span class="token comment">// 双精度浮点数组</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Heap variable address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>heap_var <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Heap string address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>heap_str <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Heap array address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>heap_array <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+
+    <span class="token comment">// 使用完毕后释放内存</span>
+    <span class="token keyword">delete</span> heap_var<span class="token punctuation">;</span>
+    <span class="token keyword">delete</span><span class="token punctuation">[</span><span class="token punctuation">]</span> heap_str<span class="token punctuation">;</span>
+    <span class="token keyword">delete</span><span class="token punctuation">[</span><span class="token punctuation">]</span> heap_array<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+
+<span class="token comment">/*
+    内存映射段
+*/</span>
+<span class="token keyword">void</span><span class="token operator">*</span> <span class="token function">create_mmap</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 创建内存映射区域</span>
+    <span class="token keyword">void</span> <span class="token operator">*</span>addr <span class="token operator">=</span> <span class="token function">mmap</span><span class="token punctuation">(</span><span class="token constant">NULL</span><span class="token punctuation">,</span> <span class="token number">4096</span><span class="token punctuation">,</span> PROT_READ <span class="token operator">|</span> PROT_WRITE<span class="token punctuation">,</span>
+                     MAP_PRIVATE <span class="token operator">|</span> MAP_ANONYMOUS<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> addr<span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token comment">/*
+    栈
+*/</span>
+<span class="token keyword">void</span> <span class="token function">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token keyword">int</span> local_var <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>         <span class="token comment">// 局部变量（栈）</span>
+    <span class="token keyword">char</span> local_str<span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span><span class="token punctuation">;</span>        <span class="token comment">// 局部数组（栈）</span>
+    <span class="token keyword">double</span> temp <span class="token operator">=</span> <span class="token number">3.14</span><span class="token punctuation">;</span>         <span class="token comment">// 局部浮点数（栈）</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Local variable address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>local_var <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Local array address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>local_str <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Local double address: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>temp <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 函数调用时参数压栈</span>
+    <span class="token function">add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">// 结构体变量（栈）</span>
+    <span class="token keyword">struct</span> <span class="token class-name">Point</span> <span class="token punctuation">&#123;</span>
+        <span class="token keyword">int</span> x<span class="token punctuation">;</span>
+        <span class="token keyword">int</span> y<span class="token punctuation">;</span>
+    <span class="token punctuation">&#125;</span> p <span class="token operator">=</span> <span class="token punctuation">&#123;</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">&#125;</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">&#123;</span>
+    <span class="token comment">// 代码段</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Code Segment:"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of function printMessage: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>printMessage <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of function add: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>add <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"-------------------------"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 初始化数据段</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Initialized Data Segment:"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of global_var: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>global_var <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of static_var: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>static_var <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of const_var: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>const_var <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of str: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>str <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of pi: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>pi <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"-------------------------"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 未初始化数据段</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Uninitialized Data Segment (BSS):"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of uninit_global: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>uninit_global <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of uninit_static: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span><span class="token operator">&amp;</span>uninit_static <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of buffer: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>buffer <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of big_array: "</span> <span class="token operator">&lt;&lt;</span> <span class="token punctuation">(</span><span class="token keyword">void</span><span class="token operator">*</span><span class="token punctuation">)</span>big_array <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"-------------------------"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 堆</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Heap Segment:"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token function">heapExample</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"-------------------------"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 内存映射段</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Memory Mapped Segment:"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token keyword">void</span><span class="token operator">*</span> mmap_addr <span class="token operator">=</span> <span class="token function">create_mmap</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"The addr of mmaped region: "</span> <span class="token operator">&lt;&lt;</span> mmap_addr <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token comment">// 释放内存映射区域</span>
+    <span class="token function">munmap</span><span class="token punctuation">(</span>mmap_addr<span class="token punctuation">,</span> <span class="token number">4096</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 栈</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"-------------------------"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    std<span class="token double-colon punctuation">::</span>cout <span class="token operator">&lt;&lt;</span> <span class="token string">"Stack Segment:"</span> <span class="token operator">&lt;&lt;</span> std<span class="token double-colon punctuation">::</span>endl<span class="token punctuation">;</span>
+    <span class="token function">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>通过运行上述代码，你可以观察到各个变量和函数在虚拟内存中的地址分布情况，从而更好地理解现代 C++ 程序的内存布局。运行结果如下：</p>
+<pre class="line-numbers language-powershell" data-language="powershell"><code class="language-powershell">Code Segment:
+The addr of <span class="token keyword">function</span> printMessage: 0x5603e4da31fd
+The addr of <span class="token keyword">function</span> add: 0x5603e4da31e9
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Initialized <span class="token keyword">Data</span> Segment:
+The addr of global_var: 0x5603e4da6070
+The addr of static_var: 0x5603e4da6074
+The addr of const_var: 0x5603e4da4010
+The addr of str: 0x5603e4da6078
+The addr of pi: 0x5603e4da6088
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Uninitialized <span class="token keyword">Data</span> Segment <span class="token punctuation">(</span>BSS<span class="token punctuation">)</span>:
+The addr of uninit_global: 0x5603e4da61e0
+The addr of uninit_static: 0x5603e4db9e84
+The addr of buffer: 0x5603e4da6200
+The addr of big_array: 0x5603e4da6600
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Heap Segment:
+Heap variable address: 0x5604196082c0
+Heap string address: 0x5604196082e0
+Heap array address: 0x560419608320
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Memory Mapped Segment:
+The addr of mmaped region: 0x7f5540982000
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Stack Segment:
+Local variable address: 0x7ffc0b10e94c
+Local array address: 0x7ffc0b10e8e0
+Local double address: 0x7ffc0b10e8d8<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h2><span id="栈与共享库之间的特殊内核映射vdso-vvar-与-stack-guard">栈与共享库之间的特殊内核映射：VDSO、VVAR 与 Stack Guard</span></h2><p>在典型的 64 位 Linux 进程虚拟地址空间中，用户态代码能看到的“最上方”（接近高地址）是栈（stack）。而在 <strong>栈与共享库（mmap 区）之间</strong>，系统还会自动插入若干 <strong>特殊的只读或不可执行的内核辅助映射</strong>，主要包括：</p>
+<ul>
+<li><strong>VDSO</strong>（Virtual Dynamic Shared Object）</li>
+<li><strong>VVAR</strong></li>
+<li><strong>Stack Guard（栈保护页）</strong></li>
+</ul>
+<p>这些区域不是程序编译产物，而是 <strong>由内核在进程创建时自动加入</strong>，作用是提高安全性和效率。</p>
+<p>下文对这三者逐一展开说明。</p>
+<hr>
+<h3><span id="1-vdsovirtual-dynamic-shared-object">1. VDSO（Virtual Dynamic Shared Object）</span></h3><p><strong>VDSO 是 Linux 为用户态提供特定内核功能而引入的一段共享库。</strong><br>本质上，VDSO 是内核伪造的一段只读空间，被映射进 mmap 区域附近，带有 ELF 格式但绝不是磁盘文件。</p>
+<h4><span id="作用">作用</span></h4><p>VDSO 的主要目的是让用户态可以 <strong>快速调用某些系统服务，而不用真正进入内核态</strong> （即不执行 <code>syscall</code> 或中断指令）。</p>
+<p>常通过 VDSO 优化的系统调用包括：</p>
+<ul>
+<li><code>gettimeofday()</code></li>
+<li><code>clock_gettime()</code></li>
+<li><code>time()</code></li>
+</ul>
+<p>这些调用非常频繁，传统 syscall 会带来用户态 ↔ 内核态切换，而 VDSO 允许直接在用户态执行内核提前准备好的数据和逻辑，提高性能。</p>
+<h4><span id="特点">特点</span></h4><ul>
+<li>内核动态生成，不在磁盘上存在。</li>
+<li>带有 ELF 结构，因此在调试器里看起来像一个“.so”。</li>
+<li>位于：</li>
+</ul>
+<pre class="line-numbers language-text" data-language="text"><code class="language-text">高地址
+  [ stack ]
+  [ VDSO ]
+  [ VVAR ]
+  [ stack guard ]
+  ↓
+  [ mmap 区域 ]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<h3><span id="2-vvarvdso-variables-area">2. VVAR（VDSO Variables Area）</span></h3><p><strong>VVAR 是 VDSO 的数据区</strong>，用来存放内核向用户态共享的只读变量，例如：</p>
+<ul>
+<li>内核 monotonic clock 基准值</li>
+<li>实时时钟偏移量</li>
+<li>与时钟相关的校准数据</li>
+</ul>
+<p>VDSO 的函数通过访问 VVAR 中的数据来返回时间结果（如 <code>clock_gettime()</code>）。</p>
+<h4><span id="特点">特点</span></h4><ul>
+<li>只读映射，用户态无法修改。</li>
+<li>必须与 VDSO 配套出现。</li>
+<li>大小较小，一般只有几页。</li>
+</ul>
+<p><strong>可以理解为：</strong></p>
+<blockquote>
+<p><strong>VDSO 是代码段，VVAR 是它的数据段。</strong></p>
+</blockquote>
+<hr>
+<h3><span id="3-stack-guard栈保护页-x2f-guard-page">3. Stack Guard（栈保护页 &#x2F; Guard Page）</span></h3><p>为了防止栈溢出直接覆盖下方的映射区域，内核会在栈底部（朝向低地址方向）插入一块 <strong>不可访问的保护页</strong>，通常称为 Guard Page。</p>
+<h4><span id="作用">作用</span></h4><ul>
+<li>一旦程序的栈指针向下越过正常栈空间进入这个区域，访问会立即触发 <strong>段错误（Segmentation Fault）</strong>。</li>
+<li>防止无意或恶意的堆栈碰撞攻击。</li>
+</ul>
+<h4><span id="特点">特点</span></h4><ul>
+<li>通常大小为 1 页（4KB）。</li>
+<li>具有 <code>PROT_NONE</code> 权限，其访问会触发错误。</li>
+<li>位置如下：</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">[ stack 顶部（高地址） ]
+        ↓增长方向
+[ stack 内容 ]
+[ guard page (PROT_NONE) ]
+-------------------------------------
+[ mmap 区域 &#x2F; shared libraries ]<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<hr>
+<p>mmap 区域作为一个 <strong>灵活可扩展的映射池</strong>，共享库、文件映射等均从此处分配，而栈是从顶部向下扩展。<br>为了避免冲突并加入安全 &amp; 性能优化层，Linux 在两者之间插入 VDSO&#x2F;VVAR&#x2F;guard page 等内核辅助页。</p>
+<p><strong>它们不属于传统意义上的堆、栈、数据段，而是内核附加的系统级支持。</strong></p>
+<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+                    <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
+                    <audio id="audio" loop="1" preload="auto" controls="controls"
+                        data-autoplay=" false">
+                        <source type="audio/mpeg" src="">
+                    </audio>
+                    
+                        <ul id="audio-list" style="display:none">
+                            
+                                
+                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        
+                                            
+                                
+                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        
+                                            
+                        </ul>
+                        
+            </div>
+            
+                        
+    <div id="gitalk-container" class="comment link"
+		data-enable="true"
+        data-ae="true"
+        data-ci="Ov23liAMVJGsSVpYEORo"
+        data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
+        data-r="blog-comments"
+        data-o="LiuJiaxuan69"
+        data-a="LiuJiaxuan69"
+        data-d="false"
+    >查看评论</div>
+
+
+
+        </div>
+        <!-- 右侧目录栏 -->
+        <aside class="toc-sidebar">
+            <div class="toc-header">
+                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ...existing code... -->
+    <style>
+        .recommendations li a,
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active {
+            text-decoration: none !important;
+        }
+
+        .recommendations {
+            position: fixed;
+            top: calc(10% + 80px + 350px + 20px);
+            right: 50%;
+            transform: translateX(-439px);
+            width: 264px;
+            height: 35%;
+            max-height: calc(100% - 550px);
+            z-index: 100;
+            box-sizing: border-box;
+
+            background-color: rgba(232, 245, 233, 0.9);
+            /* 薄荷青 */
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
+            padding: 14px 6px 12px;
+            /* 原来只有 padding-top:60px，排版会怪 */
+            overflow-y: auto;
+        }
+
+        .recommendations h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #0f5132;
+            /* 与背景协调的深绿 */
+        }
+
+        .recommendations ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: rec;
+        }
+
+        /* 每项做成小卡片，提高可读性 */
+        .recommendations li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.55);
+        }
+
+        .recommendations li+li {
+            margin-top: 8px;
+        }
+
+        /* 左侧编号（不需要可删除本块） */
+        /* .recommendations li::before {
+            counter-increment: rec;
+            content: counter(rec);
+            flex: 0 0 1.4em;
+            width: 1.4em;
+            height: 1.4em;
+            line-height: 1.4em;
+            text-align: center;
+            border-radius: 999px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, .18);
+            color: #0f766e;
+            margin-top: 2px;
+        } */
+
+        .recommendations li a {
+            color: #1f2937;
+            text-decoration: none;
+            transition: color .15s ease, background-color .15s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* 先放 visited */
+        .recommendations li a:visited {
+            color: #374151;
+        }
+
+        /* 再放 hover，确保覆盖 visited */
+        .recommendations li a:hover,
+        .recommendations li a:focus,
+        .recommendations li a:active,
+        .recommendations li a:visited:hover {
+            color: #0d9488;
+            text-decoration: none;
+            background: rgba(13, 148, 136, .06);
+            border-radius: 6px;
+        }
+    </style>
+    <!-- ...existing code... -->
+    <style>
+        .follow-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            right: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(-439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            background-color: rgba(237, 231, 246, 0.8);
+            border-radius: 12px;
+            padding-top: 60px;
+            height: 350px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+        .github-avatar {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            height: 200px;
+            /* 可根据需要调整高度 */
+        }
+
+        .github-info {
+            padding-top: 40px;
+        }
+
+        .github-info span:first-child {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .github-info span:last-child {
+            font-size: 20px;
+        }
+
+        .github-follow-btn {
+            margin: 16px 0 8px 0;
+            padding: 6px 18px;
+            background: #24292f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .github-follow-btn:hover {
+            background: #444c56;
+        }
+    </style>
+
+    <style>
+        .dark-mode .main {
+            background-color: rgb(0, 0, 0, 0.3) !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        .post-tags-list-link {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .dark-mode .post-tags-list-link {
+            color: white;
+        }
+
+        .toc-sidebar ul {
+            list-style: none;
+            padding-left: 1em;
+        }
+
+        .toc-sidebar li {
+            margin: 0.2em 0;
+        }
+
+        .toc-sidebar a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .toc-sidebar li ul {
+            margin-left: 1em;
+            border-left: 1px solid #eee;
+            padding-left: 0.7em;
+        }
+
+        .toc-sidebar {
+            position: fixed;
+            top: calc(10% + 80px);
+            left: 50%;
+            /* 660px + 1320px*0.325 + 10px = 660 + 429 + 10 = 1099px */
+            transform: translateX(439px);
+            /* 660px + 396px/2 + 10px，396px为目录宽度 */
+            width: 264px;
+            /* 1320*0.15=198px，或你想要的宽度 */
+            min-width: 160px;
+            background-color: rgb(185, 207, 214, 0.8);
+            border-radius: 12px;
+            padding: 10px;
+            height: 70%;
+            min-height: 500px;
+            overflow-y: auto;
+            z-index: 100;
+            box-sizing: border-box;
+        }
+
+
+        .toc-sidebar>ul>li>a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .toc-sidebar>ul>li>ul>li>a {
+            font-size: 1em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li>a {
+            font-size: 0.8em;
+            font-weight: normal;
+        }
+
+        .toc-sidebar>ul>li {
+            margin-top: 1.2em;
+            /* 一级标题间距最大 */
+        }
+
+        .toc-sidebar>ul>li>ul>li {
+            margin-top: 0.8em;
+            /* 二级标题间距适中 */
+        }
+
+        .toc-sidebar>ul>li>ul>li>ul>li {
+            margin-top: 0.5em;
+            /* 三级标题间距较小 */
+        }
+
+        /* 目录标题 */
+        .toc-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .toc-title {
+            font-size: 20px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .toc-highlight {
+            animation: toc-highlight-fade 1.2s;
+            background: #ffe082;
+            color: #d32f2f;
+            box-shadow: 0 0 10px #ffe082;
+            transition: color 0.6s, background 0.6s;
+        }
+
+        @keyframes toc-highlight-fade {
+            0% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            60% {
+                background: #ffe082;
+                color: #d32f2f;
+            }
+
+            100% {
+                background: transparent;
+                color: inherit;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+    <script>
+        const isLocalhost = (
+            ['localhost', '127.0.0.1', '::1'].includes(location.hostname) ||
+            /^192\.168\.\d+\.\d+$/.test(location.hostname) ||
+            /^10\.\d+\.\d+\.\d+$/.test(location.hostname) ||
+            /^172\.(1[6-9]|2[0-9]|3[0-1])\.\d+\.\d+$/.test(location.hostname)
+        );
+
+        // 获取 GitHub 关注数（增加 UA / Accept 头 + 本地缓存 + 错误回退，避免 403 和频繁请求）
+        (function loadGitHubFollowers(){
+            const el = document.getElementById('github-followers');
+            if(!el) return;
+            if(isLocalhost){
+                // 本地不请求，使用缓存或占位
+                const cachedLocal = localStorage.getItem('gh_followers');
+                el.textContent = cachedLocal || '—';
+                return;
+            }
+            const url = 'https://api.github.com/users/LiuJiaxuan69';
+            fetch(url, {
+                headers: {
+                    'Accept': 'application/vnd.github+json',
+                    'User-Agent': 'hexo-site'
+                }
+            }).then(r => {
+                if(!r.ok) throw new Error('status ' + r.status);
+                return r.json();
+            }).then(data => {
+                const count = (data && typeof data.followers === 'number') ? data.followers : '—';
+                el.textContent = count;
+                if(count !== '—') localStorage.setItem('gh_followers', count);
+            }).catch(err => {
+                const cached = localStorage.getItem('gh_followers');
+                el.textContent = cached || '—';
+            });
+        })();
+        window.addEventListener('DOMContentLoaded', function () {
+            // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
+            var content = document.querySelector('.content.markdown');
+            if (!content) return;
+            // 查找第一个 ul，且它前面是 toc 注释
+            var childNodes = content.childNodes;
+            for (var i = 0; i < childNodes.length; i++) {
+                var node = childNodes[i];
+                // 找到 toc 注释
+                if (node.nodeType === 8 && node.nodeValue.trim() === 'toc') {
+                    // 下一个元素节点就是 ul
+                    for (var j = i + 1; j < childNodes.length; j++) {
+                        var next = childNodes[j];
+                        if (next.nodeType === 1 && next.tagName === 'UL') {
+                            var tocSidebar = document.querySelector('.toc-sidebar');
+                            if (tocSidebar) tocSidebar.appendChild(next);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // 目录平滑滚动并让标题居中
+            var tocSidebar = document.querySelector('.toc-sidebar');
+            if (tocSidebar) {
+                tocSidebar.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.hash) {
+                        var targetId = decodeURIComponent(e.target.hash.substring(1));
+                        var target = document.getElementById(targetId);
+                        if (target) {
+                            e.preventDefault();
+                            var rect = target.getBoundingClientRect();
+                            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            var viewportHeight = window.innerHeight;
+                            var offset = rect.top + scrollTop - viewportHeight * 0.3;
+                            window.scrollTo({
+                                top: offset,
+                                behavior: 'smooth'
+                            });
+
+                            // 使用 IntersectionObserver 等待标题进入视口指定区域再高亮
+                            var observer = new IntersectionObserver(function (entries, obs) {
+                                entries.forEach(function (entry) {
+                                    if (entry.isIntersecting) {
+                                        setTimeout(function () {
+                                            target.classList.remove('toc-highlight');
+                                            void target.offsetWidth;
+                                            target.classList.add('toc-highlight');
+                                            target.addEventListener('animationend', function handler() {
+                                                target.classList.remove('toc-highlight');
+                                                target.removeEventListener('animationend', handler);
+                                            });
+                                        }, 500); // 延迟0.5秒
+                                        obs.disconnect();
+                                    }
+                                });
+                            }, {
+                                root: null,
+                                threshold: 0.6 // 进入视口60%区域时触发
+                            });
+                            observer.observe(target);
+                        }
+                    }
+                });
+            }
+            if (typeof AV !== 'undefined' && !isLocalhost) {
+                AV.init({
+                    appId: 'DeDpSsgoQ9tvOCpA405bP6Jb-gzGzoHsz',
+                    appKey: 'HEHycsODe2IoaZkZCJk1RaPY',
+                    serverURLs: 'https://dedpssgo.lc-cn-n1-shared.com'
+                });
+                updatePageView();
+            } else {
+                console.log('本地环境，跳过 LeanCloud 阅读统计初始化/上报');
+            }
+
+        });
+        function updatePageView() {
+            console.log('更新阅读量');
+            const counterElement = document.getElementById('leancloud_value_page_pv');
+            if (!counterElement) return;
+
+            const url = window.location.pathname;
+            const query = new AV.Query('Counter');
+            query.equalTo('url', url);
+
+            query.first().then(function (counter) {
+                if (counter) {
+                    // 使用原子操作避免并发问题
+                    counter.increment('time', 1);
+                    return counter.save();
+                } else {
+                    const newCounter = new AV.Object('Counter');
+                    newCounter.set('title', document.title);
+                    newCounter.set('url', url);
+                    newCounter.set('time', 1);
+                    return newCounter.save();
+                }
+            }).then(function (counter) {
+                counterElement.textContent = counter.get('time');
+            }).catch(function (error) {
+                console.error('统计错误:', error);
+                counterElement.textContent = '0';
+            });
+        }
+
+    </script>
+
+    <!-- 滚动样式 -->
+    <style>
+        /* 阻止右侧目录滚动到底/顶时冒泡到页面（现代浏览器） */
+        .toc-sidebar,
+        .follow-sidebar,
+        .recommendations {
+            overscroll-behavior: contain;
+            /* 关键 */
+        }
+
+        /* 目录栏滚动条美化（与背景 rgb(185,207,214,0.8) 融合） */
+        :root {
+            --toc-thumb: #6f8f99;
+            /* 常态拇指色：蓝灰 */
+            --toc-thumb-hover: #517a86;
+            /* 悬停时更深一点 */
+        }
+
+        .toc-sidebar {
+            scrollbar-gutter: stable both-edges;
+            /* 避免出现/消失引发抖动 */
+            overscroll-behavior: contain;
+            /* 已有，防止滚动串联 */
+        }
+
+        /* Firefox */
+        .toc-sidebar {
+            scrollbar-width: thin;
+            scrollbar-color: var(--toc-thumb) transparent;
+        }
+
+        .toc-sidebar:hover {
+            scrollbar-color: var(--toc-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .toc-sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .toc-sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 让拇指更细、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .toc-sidebar:hover::-webkit-scrollbar-thumb {
+            background-color: var(--toc-thumb-hover);
+        }
+    </style>
+    <style>
+        /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
+        :root {
+            --rec-thumb: #7bbfae;
+            /* 常态拇指色：薄荷青系 */
+            --rec-thumb-hover: #53ad98;
+            /* 悬停更深一点 */
+        }
+
+        .recommendations {
+            scrollbar-gutter: stable both-edges;
+            /* 防抖动 */
+            /* 已有 overscroll-behavior: contain; */
+        }
+
+        /* Firefox */
+        .recommendations {
+            scrollbar-width: thin;
+            scrollbar-color: var(--rec-thumb) transparent;
+        }
+
+        .recommendations:hover {
+            scrollbar-color: var(--rec-thumb-hover) transparent;
+        }
+
+        /* WebKit (Chrome/Edge/Safari) */
+        .recommendations::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .recommendations::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .recommendations::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb);
+            border-radius: 8px;
+            border: 2px solid transparent;
+            /* 细一些、更柔和 */
+            background-clip: padding-box;
+        }
+
+        .recommendations:hover::-webkit-scrollbar-thumb {
+            background-color: var(--rec-thumb-hover);
+        }
+
+        /* 可选：仅悬停时显示滚轮
+  .recommendations::-webkit-scrollbar{ width: 0; }
+  .recommendations:hover::-webkit-scrollbar{ width: 8px; }
+  */
+    </style>
+
+    <!-- 分割线 -->
+    <style>
+        :root {
+            --hr-color: rgba(0, 0, 0, 0.22);
+            /* 日间分割线颜色 */
+        }
+
+        .dark-mode {
+            --hr-color: rgba(255, 255, 255, 0.28);
+            /* 夜间分割线颜色 */
+        }
+
+        /* Markdown 分割线（由 --- 或 *** 生成） */
+        .content.markdown hr,
+        #post-content hr {
+            border: 0;
+            height: 1px;
+            background: var(--hr-color);
+            margin: 1.5em 0;
+        }
+    </style>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" aria-label="返回顶部" class="back-to-top">
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+      </svg>
+      <span class="back-to-top-text">TOP</span>
+    </button>
+
+    <!-- 黑白模式切换按钮 -->
+    <button id="theme-toggle" aria-label="黑白模式切换" class="theme-toggle">
+      <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    </button>
+
+    <!-- AI 悬浮按钮（新增，位置在返回顶部按钮上方） -->
+    <button id="ai-fab" title="AI 问答" class="ai-fab">🤖</button>
+</div>
+
+<!-- AI 弹窗容器 -->
+<div id="ai-mask" class="ai-mask"></div>
+<div id="ai-dialog" class="ai-dialog" aria-modal="true" role="dialog">
+  <!-- 弹窗头部 -->
+  <div class="ai-head">
+    <span>AI 问答（基于本文）</span>
+    <button id="ai-clear" aria-label="清空历史" class="ai-clear">🗑️</button>
+    <button id="ai-close" aria-label="关闭" class="ai-close">✕</button>
+  </div>
+  <!-- 消息区 -->
+  <div id="ai-msgs" class="ai-msgs" aria-live="polite"></div>
+  <!-- 输入区 -->
+  <div class="ai-input">
+    <input id="ai-q" type="text" placeholder="就本文提问…（支持上下文对话）" />
+    <button id="ai-send" class="ai-send">发送</button>
+  </div>
+</div>
+
+<!-- 自定义确认弹窗（默认隐藏） -->
+<div id="custom-confirm-mask" class="custom-confirm-mask"></div>
+<div id="custom-confirm" class="custom-confirm">
+  <div class="custom-confirm-icon">⚠️</div>
+  <div class="custom-confirm-title">确认清空对话历史？</div>
+  <div class="custom-confirm-desc">清空后将删除当前文章的所有对话记录，且无法恢复</div>
+  <div class="custom-confirm-btns">
+    <button id="confirm-cancel" class="confirm-btn cancel-btn">取消</button>
+    <button id="confirm-ok" class="confirm-btn ok-btn">确认清空</button>
+  </div>
+</div>
+
+<style>
+  /* 背景图平滑过渡 */
+  #custom-bg {
+    transition: background-image 0.5s ease-in-out;
+  }
+
+  /* 基础变量 */
+  :root {
+    --back-to-top-size: 56px;
+    --back-to-top-margin: 24px;
+    --back-to-top-color: #fff;
+    --back-to-top-bg: rgba(0, 0, 0, 0.7);
+    --back-to-top-hover-bg: rgba(0, 0, 0, 0.9);
+    --back-to-top-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --back-to-top-transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* 自定义弹窗颜色变量 */
+    --confirm-primary: #0d9488;
+    --confirm-primary-hover: #0f766e;
+    --confirm-gray: #f3f4f6;
+    --confirm-gray-dark: #9ca3af;
+    --confirm-text: #374151;
+    --confirm-text-light: #6b7280;
+    /* AI 对话框夜间模式变量 */
+    --ai-bg-light: #fff;
+    --ai-bg-dark: #1f2937; /* 深色模式弹窗背景 */
+    --ai-head-border-light: rgba(0, 0, 0, 0.08);
+    --ai-head-border-dark: rgba(255, 255, 255, 0.1); /* 深色模式边框 */
+    --ai-msg-user-light: #e5f6f5;
+    --ai-msg-user-dark: #115e59; /* 深色模式用户消息背景 */
+    --ai-msg-ai-light: #f3f4f6;
+    --ai-msg-ai-dark: #374151; /* 深色模式AI消息背景 */
+    --ai-input-border-light: #d1d5db;
+    --ai-input-border-dark: #4b5563; /* 深色模式输入框边框 */
+    --ai-input-bg-light: #fff;
+    --ai-input-bg-dark: #2d3748; /* 深色模式输入框背景 */
+    --ai-text-light: #374151;
+    --ai-text-dark: #e5e7eb; /* 深色模式文字颜色 */
+    --ai-placeholder-light: #9ca3af;
+    --ai-placeholder-dark: #9ca3af; /* 深色模式占位符颜色 */
+    --ai-scrollbar-thumb-light: #ddd;
+    --ai-scrollbar-thumb-dark: #4b5563; /* 深色模式滚动条 */
+  }
+
+  /* 返回顶部按钮样式 */
+  .back-to-top {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: var(--back-to-top-margin);
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: var(--back-to-top-bg);
+    color: var(--back-to-top-color);
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: var(--back-to-top-shadow);
+    transition: var(--back-to-top-transition);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--back-to-top-hover-bg);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .back-to-top:active {
+    transform: scale(0.95);
+  }
+
+  .back-to-top-icon {
+    width: 24px;
+    height: 24px;
+    transition: var(--back-to-top-transition);
+    margin-bottom: 2px;
+  }
+
+  .back-to-top-text {
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: var(--back-to-top-transition);
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  .back-to-top:hover .back-to-top-text {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* 主题切换按钮样式 */
+  .theme-toggle {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .theme-toggle:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: scale(1.1);
+  }
+
+  .theme-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* AI 悬浮按钮样式（关键：添加显示样式） */
+  .ai-fab {
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在返回顶部上方，间距12px */
+    width: var(--back-to-top-size);
+    height: var(--back-to-top-size);
+    border-radius: 50%;
+    border: none;
+    background: #0d9488; /* 绿色主题，和你的博客风格匹配 */
+    color: #fff;
+    font-size: 22px;
+    box-shadow: var(--back-to-top-shadow);
+    cursor: pointer;
+    z-index: 999;
+    transition: var(--back-to-top-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-fab:hover {
+    background: #0f766e;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  /* AI 弹窗样式 - 基础样式 */
+  .ai-mask {
+    display: none;
+    position: fixed;
+    inset: 0;
+    /* 关键修改1：取消遮罩层背景和模糊，仅作为点击穿透的容器 */
+    background: transparent;
+    z-index: 9998;
+    pointer-events: none; /* 允许点击穿透到博客内容 */
+  }
+
+  /* 深色模式遮罩层 - 同样取消背景和模糊 */
+  .dark-mode .ai-mask {
+    background: transparent;
+    backdrop-filter: none; /* 取消模糊效果 */
+  }
+
+  .ai-dialog {
+    display: none;
+    position: fixed;
+    right: var(--back-to-top-margin);
+    bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 72px); /* 在AI按钮上方 */
+    /* 关键修改2：缩小对话框宽度（原360px → 340px，缩小20px，约半个字宽度） */
+    width: 340px;
+    max-width: 92vw;
+    height: 440px;
+    background: var(--ai-bg-light); /* 浅色模式背景 */
+    border: 1px solid var(--ai-head-border-light);
+    border-radius: 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    display: flex;
+    flex-direction: column;
+    z-index: 9999;
+    transition: transform 0.2s, opacity 0.2s;
+    transform: translateY(10px);
+    opacity: 0;
+    color: var(--ai-text-light); /* 浅色模式文字 */
+    pointer-events: auto; /* 确保弹窗自身可交互 */
+  }
+
+  /* 深色模式弹窗主体 */
+  .dark-mode .ai-dialog {
+    background: var(--ai-bg-dark);
+    border-color: var(--ai-head-border-dark);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
+    color: var(--ai-text-dark);
+  }
+
+  .ai-dialog.show {
+    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .ai-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--ai-head-border-light);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* 深色模式头部边框 */
+  .dark-mode .ai-head {
+    border-bottom-color: var(--ai-head-border-dark);
+  }
+
+  /* 清空历史按钮样式 */
+  .ai-clear {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    margin-right: 8px;
+  }
+
+  /* 深色模式按钮颜色 */
+  .dark-mode .ai-clear,
+  .dark-mode .ai-close {
+    color: #9ca3af;
+  }
+
+  .ai-clear:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
+  }
+
+  .dark-mode .ai-clear:hover,
+  .dark-mode .ai-close:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .ai-close {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    color: #666;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+  }
+
+  .ai-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #000;
+  }
+
+  .ai-msgs {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+    line-height: 1.6;
+    font-size: 14px;
+  }
+
+  /* 深色模式滚动条 */
+  .dark-mode .ai-msgs::-webkit-scrollbar-thumb {
+    background: var(--ai-scrollbar-thumb-dark);
+  }
+
+  .ai-msgs::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .ai-msgs::-webkit-scrollbar-thumb {
+    background: var(--ai-scrollbar-thumb-light);
+    border-radius: 3px;
+  }
+
+  .ai-msgs::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* 消息气泡样式 - 浅色模式 */
+  .ai-msg {
+    margin: 8px 0;
+    max-width: 86%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    word-break: break-word;
+    font-size: 14px;
+  }
+
+  .ai-msg.user {
+    margin-left: auto;
+    background: var(--ai-msg-user-light);
+    color: #0f766e;
+  }
+
+  .ai-msg.ai {
+    margin-right: auto;
+    background: var(--ai-msg-ai-light);
+    color: var(--ai-text-light);
+  }
+
+  /* 深色模式消息气泡 */
+  .dark-mode .ai-msg.user {
+    background: var(--ai-msg-user-dark);
+    color: #d1fae5; /* 深色模式用户消息文字 */
+  }
+
+  .dark-mode .ai-msg.ai {
+    background: var(--ai-msg-ai-dark);
+    color: var(--ai-text-dark);
+  }
+
+  /* AI 加载中提示样式 - 深色模式适配 */
+  .ai-loading {
+    color: #9ca3af;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dark-mode .ai-loading {
+    color: #6b7280;
+  }
+
+  /* 加载动画（三个点依次闪烁） */
+  .ai-loading::after {
+    content: '';
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+  }
+
+  /* AI 输入区样式 - 基础样式 */
+  .ai-input {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--ai-head-border-light);
+  }
+
+  /* 深色模式输入区边框 */
+  .dark-mode .ai-input {
+    border-top-color: var(--ai-head-border-dark);
+  }
+
+  #ai-q {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--ai-input-border-light);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, background-color 0.2s;
+    background: var(--ai-input-bg-light);
+    color: var(--ai-text-light);
+  }
+
+  /* 深色模式输入框 */
+  .dark-mode #ai-q {
+    border-color: var(--ai-input-border-dark);
+    background: var(--ai-input-bg-dark);
+    color: var(--ai-text-dark);
+  }
+
+  /* 输入框占位符样式 - 深色模式适配 */
+  #ai-q::placeholder {
+    color: var(--ai-placeholder-light);
+  }
+
+  .dark-mode #ai-q::placeholder {
+    color: var(--ai-placeholder-dark);
+  }
+
+  /* 输入框禁用状态样式 */
+  #ai-q:disabled {
+    background-color: #f9fafb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+  }
+
+  .dark-mode #ai-q:disabled {
+    background-color: #2d3748;
+    color: #6b7280;
+    border-color: #4b5563;
+  }
+
+  #ai-q:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+  }
+
+  .dark-mode #ai-q:focus {
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3);
+  }
+
+  .ai-send {
+    padding: 0 16px;
+    border: none;
+    background: #0d9488;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+  }
+
+  .ai-send:hover:not(:disabled) {
+    background: #0f766e;
+  }
+
+  .ai-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Markdown 解析样式 - 深色模式适配 */
+  .ai-msg strong {
+    font-weight: 600;
+  }
+
+  .ai-msg em {
+    font-style: italic;
+  }
+
+  .ai-msg ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+
+  .ai-msg ol {
+    list-style: decimal;
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+
+  .ai-msg code {
+    background: #f1f5f9;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+
+  .dark-mode .ai-msg code {
+    background: #1f2937;
+    color: #f8fafc;
+  }
+
+  .ai-msg pre {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 10px 0;
+  }
+
+  .dark-mode .ai-msg pre {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .dark-mode .ai-msg pre code {
+    background: transparent;
+  }
+
+  .ai-msg blockquote {
+    border-left: 3px solid #ddd;
+    padding: 8px 12px;
+    margin: 10px 0;
+    color: #6b7280;
+  }
+
+  .dark-mode .ai-msg blockquote {
+    border-left-color: #4b5563;
+    color: #9ca3af;
+  }
+
+  .ai-msg table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 13px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .dark-mode .ai-msg table {
+    border-color: #374151;
+  }
+
+  .ai-msg th,
+  .ai-msg td {
+    border: 1px solid #e5e7eb;
+    padding: 8px 10px;
+    text-align: left;
+  }
+
+  .dark-mode .ai-msg th,
+  .dark-mode .ai-msg td {
+    border-color: #374151;
+  }
+
+  .ai-msg th {
+    background: #f9fafb;
+    font-weight: 600;
+  }
+
+  .dark-mode .ai-msg th {
+    background: #2d3748;
+    color: #f9fafb;
+  }
+
+  .ai-msg tr:nth-child(even) {
+    background: #fdfdfe;
+  }
+
+  .dark-mode .ai-msg tr:nth-child(even) {
+    background: #2d3748;
+  }
+
+  /* 小屏幕适配 */
+  @media (max-width: 768px) {
+    :root {
+      --back-to-top-size: 48px;
+      --back-to-top-margin: 16px;
+    }
+
+    .back-to-top-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .back-to-top-text {
+      display: none;
+    }
+
+    .theme-toggle {
+      left: auto;
+      right: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px);
+      bottom: var(--back-to-top-margin);
+    }
+
+    .ai-fab {
+      bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px);
+    }
+
+    .ai-dialog {
+      bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + var(--back-to-top-size) + 24px);
+      height: 380px;
+      /* 小屏幕保持原有宽度比例，不额外缩小 */
+      width: 92vw;
+    }
+  }
+
+  /* 原有样式保持不变 */
+  .spoiler:not(.collapsed) .spoiler-title::after {
+    content: "(ゝ∀･)已展开~";
+  }
+
+  .spoiler:not(.collapsed) .spoiler-title:hover::after {
+    content: "( ´ﾟДﾟ`)要走了吗";
+  }
+
+  .spoiler:not(.open) .spoiler-title::before {
+    content: "";
+  }
+
+  .spoiler.collapsed .spoiler-title::after {
+    content: "点我点我(≧∀≦)ゞ";
+  }
+
+  .spoiler.collapsed .spoiler-title:hover::after {
+    content: "对的对的(*ﾟ∀ﾟ*)";
+    margin-right: 5px;
+  }
+
+  .dark-mode .spoiler-title {
+    background-color: #2d2d2d;
+  }
+
+  a[href^="#"] {
+    color: #444444 !important;
+  }
+
+  .dark-mode *:not(table):not(table *):not(button):not(input):not(textarea):not(a):not(pre):not(pre *) {
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+  }
+
+  .dark-mode table {
+    color: #444 !important;
+  }
+
+  /* 评论区样式 */
+  .gt-container {
+    --gt-primary-color: #10D07A;
+    --gt-bg-color: none;
+    --gt-text-color: #333333;
+    --gt-border-color: none;
+    --gt-card-bg: #f9f9f9;
+    --gt-input-bg: #ffffff;
+    --gt-hover-color: #25cdd0;
+  }
+
+  .gt-container {
+    background-color: var(--gt-bg-color);
+    color: var(--gt-text-color);
+    border: 1px solid var(--gt-border-color);
+  }
+
+  .gt-avatar {
+    border-radius: 50% !important;
+  }
+
+  .gt-ico-text,
+  .gt-btn-text {
+    color: var(--gt-text-color);
+  }
+
+  .gt-container .gt-btn-login,
+  .gt-container .gt-btn-public {
+    background-color: rgb(16, 208, 122);
+    border-color: rgb(16, 208, 122);
+    color: white !important;
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.3);
+    margin-left: 20px;
+  }
+
+  .gt-container .gt-btn-preview {
+    border-radius: 10px;
+    border: none;
+    background-color: aqua;
+    border-color: aqua;
+  }
+
+  .gt-container .gt-comment-content {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-btn-public:hover {
+    background-color: var(--gt-hover-color);
+  }
+
+  .gt-container a,
+  .gt-container .gt-comment-username,
+  .gt-container .gt-svg svg {
+    color: var(--gt-primary-color);
+    fill: var(--gt-primary-color);
+  }
+
+  .gt-container .gt-header-textarea {
+    border-radius: 10px;
+  }
+
+  .gt-container .gt-popup .gt-action.is--active:before {
+    background: var(--gt-primary-color);
+  }
+
+  .dark-mode .gt-container {
+    --gt-bg-color: none;
+    --gt-text-color: #e0e0e0;
+    --gt-border-color: none;
+    --gt-card-bg: none;
+    --gt-input-bg: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-comment-content {
+    background: none;
+  }
+
+  .dark-mode .gt-container .gt-header-textarea {
+    background-color: #2d2d2d;
+  }
+
+  .dark-mode .gt-container .gt-btn-preview {
+    background-color: rgb(0, 255, 255, 0.3);
+    border-color: rgb(0, 255, 255, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-btn-login {
+    background-color: rgb(16, 208, 122, 0.3);
+    border-color: rgb(16, 208, 122, 0.3);
+  }
+
+  .dark-mode .gt-container .gt-comment .gt-comment-content {
+    background-color: rgb(255, 255, 255, 0.1);
+    margin-left: 20px;
+  }
+
+  .dark-mode .gt-header-textarea,
+  .dark-mode .gt-comment-admin .gt-comment-content {
+    background-color: var(--gt-input-bg);
+    color: var(--gt-text-color);
+  }
+
+  .dark-mode .gt-container a:hover {
+    opacity: 0.8;
+  }
+
+  .dark-mode #post-content {
+    color: var(--text-color);
+  }
+
+  .dark-mode #custom-bg {
+    filter: brightness(0.6);
+  }
+
+  .dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+  }
+
+  /* mermaid 图表样式 */
+  .mermaid {
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .mermaid path,
+  .mermaid line {
+    stroke: #f0f0f0 !important;
+  }
+
+  .mermaid rect path {
+    stroke: inherit !important;
+  }
+
+  .mermaid text {
+    fill: #4a8ecd !important;
+  }
+
+  /* 自定义确认弹窗样式 */
+  .custom-confirm-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    z-index: 10000; /* 高于AI弹窗 */
+    display: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .custom-confirm {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 350px;
+    padding: 24px;
+    text-align: center;
+    z-index: 10001;
+    display: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0;
+  }
+
+  /* 弹窗显示状态 */
+  .custom-confirm-mask.show {
+    display: block;
+    opacity: 1;
+  }
+
+  .custom-confirm.show {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+
+  /* 暗色模式适配 */
+  .dark-mode .custom-confirm {
+    background: #1f2937;
+    color: #e5e7eb;
+  }
+
+  .custom-confirm-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+
+  .custom-confirm-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--confirm-text);
+  }
+
+  .dark-mode .custom-confirm-title {
+    color: #f9fafb;
+  }
+
+  .custom-confirm-desc {
+    font-size: 14px;
+    color: var(--confirm-text-light);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .dark-mode .custom-confirm-desc {
+    color: #d1d5db;
+  }
+
+  .custom-confirm-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .confirm-btn {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: none;
+  }
+
+  .cancel-btn {
+    background: var(--confirm-gray);
+    color: var(--confirm-text);
+  }
+
+  .dark-mode .cancel-btn {
+    background: #374151;
+    color: #e5e7eb;
+  }
+
+  .cancel-btn:hover {
+    background: #e5e7eb;
+  }
+
+  .dark-mode .cancel-btn:hover {
+    background: #4b5563;
+  }
+
+  .ok-btn {
+    background: var(--confirm-primary);
+    color: #fff;
+  }
+
+  .ok-btn:hover {
+    background: var(--confirm-primary-hover);
+  }
+</style>
+
+<script>
+  (function () {
+    // 背景图平滑过渡
+    const bgContainer = document.getElementById('custom-bg');
+    const lightBg = '/img/bg3.png';  // 日间模式背景
+    const darkBg = '/img/bg9.jpg';  // 夜间模式背景
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 预加载背景图
+    new Image().src = lightBg;
+    new Image().src = darkBg;
+
+    let universeCanvas = null;
+    let animationId = null;
+
+    // ================ 背景设置函数 ================
+    function setBackground(isDark) {
+      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
+      bgContainer.style.backgroundColor = 'transparent';
+    }
+
+    // ================ 主题切换逻辑 ================
+    function setDarkMode(enable) {
+      setBackground(enable);
+      localStorage.setItem('darkMode', enable);
+    }
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      htmlElement.classList.add('dark-mode');
+      setDarkMode(true);
+    } else {
+      setDarkMode(false);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = htmlElement.classList.toggle('dark-mode');
+      setDarkMode(isDarkMode);
+    });
+
+    // ================ 返回顶部按钮 ================
+    const backToTopBtn = document.getElementById('back-to-top');
+    const scrollThreshold = 300;
+    let isScrolling = false;
+
+    window.addEventListener('scroll', function () {
+      if (isScrolling) return;
+      isScrolling = true;
+      requestAnimationFrame(function () {
+        backToTopBtn.classList.toggle('visible', window.pageYOffset > scrollThreshold);
+        isScrolling = false;
+      });
+    });
+
+    backToTopBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backToTopBtn.addEventListener('touchstart', function () {
+      this.classList.add('touching');
+    });
+    backToTopBtn.addEventListener('touchend', function () {
+      this.classList.remove('touching');
+    });
+
+  })();
+</script>
+
+<!-- AI 流式渲染核心脚本（修复 innerHTML 错误 + 实时分段解析 Markdown + 加载提示） -->
+<script>
+;(function(){
+  const container = document.getElementById('ai-msgs');
+  if(!container) return;
+
+  // 初始化 markdown-it（使用全局变量，确保已在页面头部引入）
+  const md = window.markdownit ? window.markdownit({
+    html: false,    // 关闭原始 HTML 渲染，确保安全
+    linkify: true,  // 自动链接URL
+    breaks: true    // 换行符转换为 <br>
+  }) : null;
+
+  // 工具函数：HTML 转义
+  function escapeHtml(unsafe) {
+    if (!unsafe) return '';
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // 核心修复：自动修复表格格式（给表格行添加换行符）
+  function fixTableFormat(content) {
+    if (!content.includes('|') || !content.includes(':')) return content;
+
+    // 匹配 Markdown 表格特征：包含 | 分隔列，且有 :--- 分隔线
+    const tableRegex = /(\|.*?\|)(?:\s*\|.*?\|)*\s*\|.*?:---.*?\|/s;
+    if (!tableRegex.test(content)) return content;
+
+    // 按 | 分割内容，再重新拼接（给每行添加换行）
+    const lines = content.split(/\r?\n/);
+    const fixedLines = [];
+
+    let inTable = false;
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) {
+        fixedLines.push(line);
+        inTable = false;
+        continue;
+      }
+
+      // 检测表格开始（包含 | 且不是纯分隔线）
+      if (line.startsWith('|') && !line.match(/^\|[:\- ]+\|$/)) {
+        inTable = true;
+        fixedLines.push(line);
+      }
+      // 检测表格分隔线（| :--- | 格式）
+      else if (line.match(/^\|[:\- ]+\|$/)) {
+        fixedLines.push(line);
+      }
+      // 表格内容行（在表格中，且包含 |）
+      else if (inTable && line.includes('|')) {
+        fixedLines.push(line);
+      }
+      // 非表格内容
+      else {
+        fixedLines.push(line);
+        inTable = false;
+      }
+    }
+
+    // 特殊处理：如果后端返回的表格是一行连写（没有换行），手动拆分
+    const fixedContent = fixedLines.join('\n');
+    if (fixedContent.includes('|') && fixedContent.includes(':---') && !fixedContent.includes('\n|')) {
+      // 按 | 拆分后，重新按表格结构拼接（假设表头、分隔线、内容行的列数一致）
+      const parts = fixedContent.split('|').filter(part => part.trim());
+      const colCount = Math.floor(parts.length / 3); // 假设 表头 + 分隔线 + 内容行
+      if (colCount >= 2) {
+        const header = '| ' + parts.slice(0, colCount).join(' | ') + ' |';
+        const separator = '| ' + Array(colCount).fill(':---').join(' | ') + ' |';
+        const content = '| ' + parts.slice(colCount * 2, colCount * 3).join(' | ') + ' |';
+        return [header, separator, content].join('\n');
+      }
+    }
+
+    return fixedContent;
+  }
+
+  // 暴露给全局，供其他脚本复用
+  window.__AI_STREAM_MANAGER__ = {
+    currentStream: null,
+    fixTableFormat: fixTableFormat,
+    // 触发Markdown解析的分隔符（常用标点，可自定义）
+    markdownTriggers: [',', '。', '；', '！', '？', '：', '】', ')', '}', '\n', '、', '"', "'"],
+    createStream() {
+      // 销毁旧流（如果存在）- 仅销毁状态，不删除DOM（保留历史对话）
+      if (this.currentStream) {
+        this.currentStream.destroy();
+      }
+
+      // 1. 创建AI消息气泡（默认显示加载提示）
+      const msgEl = document.createElement('div');
+      msgEl.className = 'ai-msg ai';
+      msgEl.innerHTML = '<span class="ai-loading">🤖 AI 思考中</span>';
+      container.appendChild(msgEl);
+
+      const stream = {
+        buffer: '', // 未完成的内容（未遇到分隔符）
+        parsedContent: '', // 已解析为HTML的完整片段
+        msgEl: msgEl, // 直接挂载到流对象，避免作用域丢失
+        destroyed: false,
+        hasReceivedData: false, // 标记是否已收到第一个流数据
+
+        // 追加流数据（核心：检测分隔符，分段解析）
+        append(chunk) {
+          if (this.destroyed || !this.msgEl) return;
+          
+          // 收到第一个数据时，清空加载提示
+          if (!this.hasReceivedData) {
+            this.parsedContent = ''; // 重置已解析内容
+            this.hasReceivedData = true;
+          }
+
+          this.buffer += chunk;
+          const triggerIndex = this.findFirstTriggerIndex(this.buffer);
+          
+          if (triggerIndex !== -1) {
+            // 截取完整片段（包含分隔符）
+            const completeSegment = this.buffer.slice(0, triggerIndex + 1);
+            // 剩余内容保留在缓冲区
+            this.buffer = this.buffer.slice(triggerIndex + 1);
+            
+            // 修复表格格式 + 解析Markdown
+            const fixedSegment = fixTableFormat(completeSegment);
+            this.parsedContent += md ? md.render(fixedSegment)
+              .replace(/<p>/g, '')
+              .replace(/<\/p>/g, '<br>')
+              .replace(/<br><br>/g, '<br>') : escapeHtml(fixedSegment);
+            
+            // 实时渲染
+            this.render();
+          } else {
+            // 未遇到分隔符，仅渲染已解析内容 + 未解析原文
+            this.render();
+          }
+        },
+
+        // 查找第一个触发分隔符的索引
+        findFirstTriggerIndex(str) {
+          let minIndex = -1;
+          for (const trigger of window.__AI_STREAM_MANAGER__.markdownTriggers) {
+            const index = str.indexOf(trigger);
+            if (index !== -1 && (minIndex === -1 || index < minIndex)) {
+              minIndex = index;
+            }
+          }
+          return minIndex;
+        },
+
+        // 实时渲染（确保msgEl存在）
+        render() {
+          if (this.destroyed || !this.msgEl) return;
+          
+          // 未收到数据时，保持加载提示
+          if (!this.hasReceivedData) return;
+          
+          const unparsedContent = escapeHtml(this.buffer);
+          this.msgEl.innerHTML = this.parsedContent + unparsedContent;
+          // 自动滚动到底部
+          container.scrollTop = container.scrollHeight;
+        },
+
+        // 流结束：解析剩余内容
+        flush() {
+          if (this.destroyed || !this.msgEl) return;
+          
+          // 未收到数据时，不处理（保持加载提示或错误信息）
+          if (!this.hasReceivedData) return;
+          
+          if (this.buffer.trim()) {
+            const fixedSegment = fixTableFormat(this.buffer);
+            this.parsedContent += md ? md.render(fixedSegment)
+              .replace(/<p>/g, '')
+              .replace(/<\/p>/g, '<br>')
+              .replace(/<br><br>/g, '<br>') : escapeHtml(fixedSegment);
+            this.buffer = '';
+          }
+          
+          this.msgEl.innerHTML = this.parsedContent;
+          container.scrollTop = container.scrollHeight;
+        },
+
+        // 销毁流：仅重置状态，不删除DOM（保留历史对话）
+        destroy() {
+          this.destroyed = true;
+          this.buffer = '';
+          this.parsedContent = '';
+          this.hasReceivedData = false;
+          this.msgEl = null; // 解除引用，不删除DOM
+        }
+      };
+
+      this.currentStream = stream;
+      return stream;
+    }
+  };
+})();
+</script>
+
+<!-- AI 功能主脚本（完整功能整合 + 需求修改） -->
+<script>
+  (function () {
+    // 后端地址
+    const STREAM_URL = "https://blog-ai-abryylmdyu.cn-shanghai.fcapp.run";
+
+    // 当前文章路径（Hexo 变量）
+    const rawSource = "_posts/C++/virtual_memory.md";
+    const slug = rawSource
+      .replace(/\\/g, '/')
+      .replace(/\.md$/i, '')
+      .replace(/^source\/_posts\//i, '')
+      .replace(/^_posts\//i, '')
+      .replace(/^posts\//i, '')
+      .replace(/^post\//i, '');
+
+    // 存储相关配置
+    const STORAGE_KEY = `ai_chat_history_${slug}`; // 按文章slug存储，不同文章独立对话
+    const MAX_HISTORY_COUNT = 20; // 最大20个消息气泡（10条来回对话）
+
+    // 获取 DOM 元素
+    const $fab = document.getElementById('ai-fab');
+    const $mask = document.getElementById('ai-mask');
+    const $dlg = document.getElementById('ai-dialog');
+    const $clearBtn = document.getElementById('ai-clear'); // 清空历史按钮
+    const $closeBtn = document.getElementById('ai-close');
+    const $msgs = document.getElementById('ai-msgs');
+    const $q = document.getElementById('ai-q');
+    const $sendBtn = document.getElementById('ai-send');
+
+    // 自定义确认弹窗元素
+    const $confirmMask = document.getElementById('custom-confirm-mask');
+    const $confirmDialog = document.getElementById('custom-confirm');
+    const $confirmOkBtn = document.getElementById('confirm-ok');
+    const $confirmCancelBtn = document.getElementById('confirm-cancel');
+
+    let isOpen = false;
+    let confirmCallback = null; // 确认弹窗的回调函数
+    let isAiResponding = false; // 标记AI是否正在回复
+
+    // ================ 关键修复：阻止滚动事件冒泡（仅保留消息区内部滚动） ================
+    function preventScrollBubble(e) {
+      e.stopPropagation(); // 阻止滚动事件冒泡到父元素（页面）
+      // 可选：当消息区滚动到顶部/底部时，禁止继续滚动（避免页面滚动）
+      const isAtTop = $msgs.scrollTop === 0;
+      const isAtBottom = $msgs.scrollTop + $msgs.clientHeight >= $msgs.scrollHeight - 1; // -1 兼容浮点精度
+
+      if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
+        e.preventDefault(); // 滚动到边界时，阻止默认滚动行为
+      }
+    }
+
+    // ================ 自定义确认弹窗功能 ================
+    /**
+     * 显示自定义确认弹窗
+     * @param {Function} okCallback - 确认按钮回调
+     * @param {Function} cancelCallback - 取消按钮回调（可选）
+     */
+    function showConfirm(okCallback, cancelCallback) {
+      confirmCallback = { ok: okCallback, cancel: cancelCallback };
+      // 显示弹窗
+      $confirmMask.classList.add('show');
+      $confirmDialog.classList.add('show');
+      // 阻止页面滚动
+      document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * 隐藏自定义确认弹窗
+     */
+    function hideConfirm() {
+      $confirmMask.classList.remove('show');
+      $confirmDialog.classList.remove('show');
+      confirmCallback = null;
+      // 恢复页面滚动
+      document.body.style.overflow = '';
+    }
+
+    // 确认弹窗按钮事件
+    $confirmOkBtn.addEventListener('click', () => {
+      if (confirmCallback?.ok) {
+        confirmCallback.ok();
+      }
+      hideConfirm();
+    });
+
+    $confirmCancelBtn.addEventListener('click', () => {
+      if (confirmCallback?.cancel) {
+        confirmCallback.cancel();
+      }
+      hideConfirm();
+    });
+
+    // 点击遮罩层关闭弹窗
+    $confirmMask.addEventListener('click', (e) => {
+      if (e.target === $confirmMask) {
+        hideConfirm();
+      }
+    });
+
+    // ESC 键关闭弹窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && $confirmDialog.classList.contains('show')) {
+        hideConfirm();
+      }
+    });
+
+    // ================ 控制输入框和发送功能的启用/禁用 ================
+    /**
+     * 设置发送功能的启用状态
+     * @param {boolean} enabled - true: 启用，false: 禁用
+     */
+    function setSendEnabled(enabled) {
+      isAiResponding = !enabled;
+      $sendBtn.disabled = !enabled;
+      $q.disabled = !enabled;
+      
+      // 禁用时修改输入框提示文字，提示用户AI正在回复
+      if (!enabled) {
+        $q.setAttribute('data-original-placeholder', $q.placeholder);
+        $q.placeholder = 'AI正在回复中...';
+      } else {
+        // 启用时恢复原始提示文字
+        const originalPlaceholder = $q.getAttribute('data-original-placeholder');
+        if (originalPlaceholder) {
+          $q.placeholder = originalPlaceholder;
+        }
+      }
+    }
+
+    // ================ 历史对话核心功能 ================
+    /**
+     * 从本地存储获取历史对话
+     * @returns {Array} 对话数组，每个元素 {role: 'human/ai', content: '消息内容'}
+     */
+    function getHistoryFromStorage() {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    /**
+     * 保存对话到本地存储（自动截取最大条数）
+     * @param {Array} history 对话数组
+     */
+    function saveHistoryToStorage(history) {
+      // 截取最新的 MAX_HISTORY_COUNT 条消息
+      const trimmedHistory = history.slice(-MAX_HISTORY_COUNT);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmedHistory));
+    }
+
+    /**
+     * 添加一条对话到历史
+     * @param {string} role - 'human' 或 'ai'
+     * @param {string} content - 消息内容
+     */
+    function addHistory(role, content) {
+      const history = getHistoryFromStorage();
+      history.push({ role, content });
+      saveHistoryToStorage(history);
+    }
+
+    /**
+     * 清空历史对话（本地存储 + 页面DOM）
+     */
+    function clearHistory() {
+      // 清空本地存储
+      localStorage.removeItem(STORAGE_KEY);
+      // 清空页面消息区
+      $msgs.innerHTML = '';
+      // 销毁当前流
+      if (window.__AI_STREAM_MANAGER__.currentStream) {
+        window.__AI_STREAM_MANAGER__.currentStream.destroy();
+      }
+    }
+
+    /**
+     * 渲染历史对话到页面
+     */
+    function renderHistory() {
+      const history = getHistoryFromStorage();
+      if (!history.length) return;
+
+      // 清空现有内容（避免重复渲染）
+      $msgs.innerHTML = '';
+
+      history.forEach(item => {
+        const msgEl = document.createElement('div');
+        msgEl.className = `ai-msg ${item.role === 'human' ? 'user' : 'ai'}`;
+        
+        if (item.role === 'ai') {
+          // AI消息需要解析Markdown
+          const fixedContent = window.__AI_STREAM_MANAGER__.fixTableFormat(item.content);
+          const html = window.markdownit ? window.markdownit({
+            html: false,
+            linkify: true,
+            breaks: true
+          }).render(fixedContent)
+            .replace(/<p>/g, '')
+            .replace(/<\/p>/g, '<br>')
+            .replace(/<br><br>/g, '<br>') : escapeHtml(fixedContent);
+          msgEl.innerHTML = html;
+        } else {
+          // 用户消息纯文本显示
+          msgEl.textContent = item.content;
+        }
+
+        $msgs.appendChild(msgEl);
+      });
+
+      // 滚动到底部
+      $msgs.scrollTop = $msgs.scrollHeight;
+    }
+
+    /**
+     * 构建包含历史上下文的提问内容
+     * @param {string} currentQuestion - 当前提问
+     * @returns {string} 包含上下文的完整提问
+     */
+    function buildQuestionWithContext(currentQuestion) {
+      const history = getHistoryFromStorage();
+      if (!history.length) return currentQuestion;
+
+      // 拼接历史对话（格式：HumanMessage：xxx\nAIMessage：xxx\nHumanMessage：当前提问）
+      let context = '';
+      history.forEach(item => {
+        context += `${item.role === 'human' ? 'HumanMessage：' : 'AIMessage：'}${item.content}\n`;
+      });
+      context += `HumanMessage：${currentQuestion}`;
+
+      return context;
+    }
+
+    // ================ 弹窗控制 ================
+    // 打开 AI 窗口（同时渲染历史对话 + 绑定滚动阻止）
+    function openDialog() {
+      $mask.style.display = 'block';
+      $dlg.classList.add('show');
+      renderHistory(); // 打开时渲染历史对话
+      $q.focus();
+      isOpen = true;
+      // 绑定滚动阻止事件（只在弹窗打开时绑定）
+      $msgs.addEventListener('wheel', preventScrollBubble);
+      // 打开时启用发送功能
+      setSendEnabled(true);
+      // 初始化夜间模式样式（确保打开时样式正确）
+      updateDarkMode();
+    }
+
+    // 关闭 AI 窗口（解绑滚动阻止）
+    function closeDialog() {
+      $dlg.classList.remove('show');
+      setTimeout(() => {
+        $mask.style.display = 'none';
+      }, 200);
+      isOpen = false;
+      // 解绑滚动阻止事件（避免影响其他区域）
+      $msgs.removeEventListener('wheel', preventScrollBubble);
+    }
+
+    // 添加用户消息气泡（同时保存到历史）
+    function addUserMsg(content) {
+      const div = document.createElement('div');
+      div.className = 'ai-msg user';
+      div.textContent = content;
+      $msgs.appendChild(div);
+      $msgs.scrollTop = $msgs.scrollHeight;
+
+      // 保存到历史
+      addHistory('human', content);
+    }
+
+    // 保存AI回复到历史
+    function saveAiReply(content) {
+      addHistory('ai', content);
+    }
+
+    // ================ 发送提问（核心逻辑） ================
+    async function send() {
+      // 如果AI正在回复，直接返回（防止重复发送）
+      if (isAiResponding) return;
+
+      let currentQuestion = $q.value.trim();
+      if (!currentQuestion) return;
+
+      // 发送前禁用发送功能（按钮+回车）
+      setSendEnabled(false);
+
+      // 构建包含历史上下文的完整提问
+      const fullQuestion = buildQuestionWithContext(currentQuestion);
+
+      // 添加用户消息气泡
+      addUserMsg(currentQuestion);
+      $q.value = '';
+
+      // 创建新的流实例（每次提问都新建，确保气泡独立）
+      const stream = window.__AI_STREAM_MANAGER__.createStream();
+      if (!stream) {
+        alert('AI回复初始化失败，请刷新页面重试！');
+        setSendEnabled(true); // 失败时恢复启用
+        return;
+      }
+
+      // 存储AI回复的完整内容（用于保存到历史）
+      let aiFullReply = '';
+
+      try {
+        const res = await fetch(STREAM_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            question: fullQuestion, // 发送包含上下文的完整提问
+            slug: slug 
+          }),
+          credentials: 'omit'
+        });
+
+        if (!res.ok || !res.body) throw new Error(`网络错误: ${res.status}`);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let sseBuffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          sseBuffer += decoder.decode(value, { stream: true });
+          const lines = sseBuffer.split(/\r?\n/);
+          sseBuffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine === '') continue;
+
+            if (trimmedLine.startsWith('data:')) {
+              let payload = trimmedLine.slice(5).trim();
+              // 移除 [DONE] 标记
+              payload = payload.replace(/\[DONE\]/g, '');
+
+              if (payload) {
+                stream.append(payload);
+                aiFullReply += payload; // 累加完整回复
+                await new Promise(resolve => setTimeout(resolve, 25)); // 打字延迟（25ms/字）
+              }
+            }
+          }
+        }
+
+        // 处理剩余缓冲
+        if (sseBuffer.trim().startsWith('data:')) {
+          let payload = sseBuffer.trim().slice(5).trim();
+          payload = payload.replace(/\[DONE\]/g, '');
+          if (payload) {
+            stream.append(payload);
+            aiFullReply += payload;
+          }
+        }
+
+        // 流结束，完成最终解析
+        stream.flush();
+        // 保存AI回复到历史
+        saveAiReply(aiFullReply);
+
+      } catch (e) {
+        // 错误处理（替换加载提示为错误信息）
+        const errMsg = `❌ 请求失败：${e.message || '未知错误'}`;
+        if (stream && stream.msgEl) {
+          stream.msgEl.innerHTML = errMsg;
+        } else {
+          const errEl = document.createElement('div');
+          errEl.className = 'ai-msg ai';
+          errEl.innerHTML = errMsg;
+          $msgs.appendChild(errEl);
+        }
+        // 错误消息也保存到历史（可选，方便用户查看）
+        saveAiReply(errMsg);
+      } finally {
+        // 无论成功失败，都恢复发送功能
+        setSendEnabled(true);
+      }
+    }
+
+    // ================ 事件绑定 ================
+    // 打开/关闭弹窗
+    $fab.addEventListener('click', () => {
+      isOpen ? closeDialog() : openDialog();
+    });
+
+    // 关键修改3：仅保留关闭按钮关闭弹窗，移除遮罩层点击关闭
+    $closeBtn.addEventListener('click', closeDialog);
+    // 移除遮罩层点击关闭事件：$mask.addEventListener('click', closeDialog);
+
+    // 清空历史（自定义确认弹窗）
+    $clearBtn.addEventListener('click', () => {
+      showConfirm(
+        () => { clearHistory(); }, // 确认回调：清空历史
+        () => { /* 取消回调：无操作 */ }
+      );
+    });
+
+    // 发送提问
+    $sendBtn.addEventListener('click', send);
+
+    // 回车发送（AI回复中禁用）
+    $q.addEventListener('keydown', (e) => {
+      // 只有发送功能启用时，才允许回车发送
+      if (!isAiResponding && e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    // ESC 键关闭弹窗
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen && !$confirmDialog.classList.contains('show')) {
+        closeDialog();
+      }
+    });
+
+    // 初始化暗色模式（完善样式同步）
+    const updateDarkMode = () => {
+      const isDark = document.documentElement.classList.contains('dark-mode');
+      // 弹窗主体样式已通过CSS变量适配，此处无需重复设置
+      // 确保输入框、按钮等元素样式同步
+      $q.style.backgroundColor = isDark ? 'var(--ai-input-bg-dark)' : 'var(--ai-input-bg-light)';
+      $q.style.borderColor = isDark ? 'var(--ai-input-border-dark)' : 'var(--ai-input-border-light)';
+      $q.style.color = isDark ? 'var(--ai-text-dark)' : 'var(--ai-text-light)';
+    };
+    updateDarkMode();
+    window.addEventListener('resize', updateDarkMode);
+
+    // 监听暗色模式切换，实时同步样式
+    document.getElementById('theme-toggle').addEventListener('click', () => {
+      // 延迟执行，确保dark-mode类已切换
+      setTimeout(updateDarkMode, 10);
+    });
+
+    // 工具函数：HTML转义
+    function escapeHtml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  })();
+</script>
+</body>
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+<script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
+<script src="/js/plugin.js"></script>
+<script src="/js/typed.js"></script>
+<script src="/js/diaspora.js"></script>
+
+
+<link rel="stylesheet" href="/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+
+
+<script src="/photoswipe/photoswipe.min.js"></script>
+<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+
+
+<!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+            <div class="pswp__top-bar">
+                <!--  Controls are self-explanatory. Order can be changed. -->
+                <div class="pswp__counter"></div>
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+</html>
