@@ -274,7 +274,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a></li><li><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li><li><a href="/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a></li><li><a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li><li><a href="/blog/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li></ul>
+            <ul><li><a href="/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/">Linux 线程互斥</a></li><li><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/">Linux 线程同步</a></li><li><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></li><li><a href="/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/">Linux 线程池</a></li><li><a href="/blog/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/">Linux 线程控制</a></li></ul>
         </div>
         <div class='main' style="
     background: transparent;
@@ -719,6 +719,7 @@
         .toc-sidebar a {
             color: #333;
             text-decoration: none;
+            cursor: pointer;
         }
 
         .toc-sidebar li ul {
@@ -744,7 +745,8 @@
             height: 70%;
             min-height: 500px;
             overflow-y: auto;
-            z-index: 100;
+            z-index: 1000;
+            pointer-events: auto;
             box-sizing: border-box;
         }
 
@@ -855,6 +857,53 @@
             });
         })();
         window.addEventListener('DOMContentLoaded', function () {
+            // 统一 slugify：重写标题 id 与 headerlink href，确保与目录一致
+            (function unifyHeadingIds(){
+                const content = document.getElementById('post-content') || document.querySelector('.content.markdown');
+                if (!content) return;
+                const slugify = (s)=>{
+                    let txt = (s||'').trim();
+                    try { txt = decodeURIComponent(txt); } catch(e) {}
+                    if (txt.normalize) txt = txt.normalize('NFKC');
+                    // HTML 实体到可见字符（覆盖常见斜杠实体）
+                    txt = txt.replace(/&#x2F;|&#47;/gi, '/').replace(/\bx2f\b/gi, '/');
+                    // 全角到半角
+                    txt = txt.replace(/[\uFF01-\uFF5E]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+                    return txt
+                        .replace(/[()\[\]{}]/g, '')
+                        .replace(/[\/\\]/g, '-')
+                        .replace(/[:;,\.?!\'"`]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-+|-+$/g, '')
+                        .toLowerCase();
+                };
+                const heads = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                heads.forEach(h=>{
+                    const txt = (h.textContent||'').trim();
+                    const id = slugify(txt);
+                    if (id) h.id = id;
+                    // 更新 headerlink
+                    const a = h.querySelector('a.headerlink');
+                    if (a) a.setAttribute('href', `#${id}`);
+                });
+            })();
+            // 轻量诊断输出：现有 heading id 与目录链接解析
+            (function(){
+                try {
+                    const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')).map(h => h.id);
+                    const tocLinks = Array.from(document.querySelectorAll('#toc a, .toc a, .toc ul a')).map(a => {
+                        const raw = a.getAttribute('href') || '';
+                        const hash = raw.includes('#') ? raw.split('#').slice(1).join('#') : '';
+                        let decoded = hash; try { decoded = decodeURIComponent(hash); } catch(e) {}
+                        const nfc = decoded.normalize ? decoded.normalize('NFKC') : decoded;
+                        const entityFixed = (nfc || '').replace(/&#x2F;|&#47;|x2f/gi, '/');
+                        return { text: (a.textContent||'').trim(), raw, hash, idGuess: entityFixed };
+                    });
+                    console.log('[TOC-Debug] headings:', headings);
+                    console.log('[TOC-Debug] tocLinks:', tocLinks);
+                } catch(err) { console.warn('[TOC-Debug] failed', err); }
+            })();
             // 只查找正文里的第一个 ul，且它前面有 <!-- toc --> 注释
             var content = document.querySelector('.content.markdown');
             if (!content) return;
@@ -869,7 +918,60 @@
                         var next = childNodes[j];
                         if (next.nodeType === 1 && next.tagName === 'UL') {
                             var tocSidebar = document.querySelector('.toc-sidebar');
-                            if (tocSidebar) tocSidebar.appendChild(next);
+                            if (tocSidebar) {
+                                tocSidebar.appendChild(next);
+                                // 追加：规范并重写目录链接为实际标题ID，避免斜杠等符号不一致
+                                try {
+                                    const qsId = (id)=> { try { return `#${CSS.escape(id)}`; } catch { return `#${id}`; } };
+                                    const buildCandidates = (rawHash)=> {
+                                        const raw = (rawHash || '').replace(/^#/, '');
+                                        const decoded = decodeURIComponent(raw);
+                                        const set = new Set();
+                                        const push = v => { if (v) set.add(v); };
+                                        push(raw);
+                                        push(decoded);
+                                        const stripPunc = decoded
+                                            .replace(/[()\[\]{}]/g, '')
+                                            .replace(/[\/\\]/g, '-')
+                                            .replace(/[:;,\.?!'"`]/g, '');
+                                        const dash = stripPunc.replace(/\s+/g, '-').replace(/-+/g, '-');
+                                        push(dash);
+                                        push(dash.toLowerCase());
+                                        push(stripPunc.replace(/\s+/g, '_'));
+                                        push(stripPunc.replace(/\s+/g, ''));
+                                        return Array.from(set);
+                                    };
+                                    const findTargetByHash = (hash)=>{
+                                        const cands = buildCandidates(hash);
+                                        for (const id of cands) {
+                                            const el = document.getElementById(id);
+                                            if (el) return el;
+                                        }
+                                        for (const id of cands) {
+                                            const el = document.querySelector(qsId(id));
+                                            if (el) return el;
+                                        }
+                                        for (const id of cands) {
+                                            const a = document.querySelector(`a.headerlink[href="#${id}"]`);
+                                            if (a && a.parentElement) return a.parentElement;
+                                        }
+                                        return null;
+                                    };
+                                    const anchors = next.querySelectorAll('a[href]');
+                                    anchors.forEach(a=>{
+                                        const href = a.getAttribute('href') || '';
+                                        // 只处理含有 # 的链接
+                                        const hashIndex = href.indexOf('#');
+                                        if (hashIndex < 0) return;
+                                        const hash = href.slice(hashIndex);
+                                        const target = findTargetByHash(hash);
+                                        if (target && target.id) {
+                                            // 重写为本页哈希，彻底避免绝对URL干扰
+                                            a.setAttribute('href', `#${target.id}`);
+                                        }
+                                    });
+                                } catch(err) { /* 安静失败，不影响目录显示 */ }
+                            }
                             break;
                         }
                     }
@@ -1018,6 +1120,20 @@
         .toc-sidebar:hover::-webkit-scrollbar-thumb {
             background-color: var(--toc-thumb-hover);
         }
+        @media (max-width: 768px) {
+            .toc-sidebar {
+                position: static;
+                transform: none;
+                left: auto;
+                width: auto;
+                min-width: 0;
+                height: auto;
+                min-height: 0;
+                max-height: none;
+                margin: 12px 0;
+            }
+            .container-wrapper { flex-direction: column; align-items: stretch; }
+        }
     </style>
     <style>
         /* 推荐栏滚动条美化（与 rgba(232,245,233,0.9) 融合） */
@@ -1162,17 +1278,139 @@
             const toc = document.querySelector('.toc-sidebar');
             if(!toc) return;
 
-            const isHashLink = (el)=> el && el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').startsWith('#');
+            const getHash = (href)=> {
+                if (!href) return null;
+                // 支持绝对/相对URL，统一提取 # 之后的片段
+                try {
+                    const u = new URL(href, window.location.origin);
+                    return u.hash || null;
+                } catch {
+                    const i = href.indexOf('#');
+                    return i >= 0 ? href.slice(i) : null;
+                }
+            };
+
+            const buildCandidates = (hash)=> {
+                const raw = (hash || '').replace(/^#/, '');
+                const decoded = decodeURIComponent(raw);
+                const set = new Set();
+                const push = v => { if (v) set.add(v); };
+                push(raw);
+                push(decoded);
+                // 常见ID归一：去除括号/标点，空白转连字符/下划线/移除，小写化
+                const stripPunc = decoded
+                    .replace(/[()\[\]{}]/g, '')
+                    .replace(/[\/\\]/g, '-')
+                    // 处理HTML实体形式的斜杠以及文本中的 x2f 标记
+                    .replace(/&#x2F;/gi, '-')
+                    .replace(/\bx2f\b/gi, '-')
+                    .replace(/[:;,\.?!'"`]/g, '');
+                const dash = stripPunc.replace(/\s+/g, '-').replace(/-+/g, '-');
+                push(dash);
+                push(dash.toLowerCase());
+                push(stripPunc.replace(/\s+/g, '_'));
+                push(stripPunc.replace(/\s+/g, ''));
+                return Array.from(set);
+            };
+
+            const qsId = (id)=> {
+                try { return `#${CSS.escape(id)}`; } catch { return `#${id}`; }
+            };
+
             const findTarget = (hash)=> {
-                try { return document.getElementById(decodeURIComponent(hash.replace('#',''))); } catch { return null; }
+                if (!hash) return null;
+                const candidates = buildCandidates(hash);
+                // 直接通过 getElementById
+                for (const id of candidates) {
+                    const el = document.getElementById(id);
+                    if (el) return el;
+                }
+                // 通过选择器（处理需转义的字符）
+                for (const id of candidates) {
+                    const el = document.querySelector(qsId(id));
+                    if (el) return el;
+                }
+                // markdown-it-anchor 等会生成 headerlink，回溯到父级标题
+                for (const id of candidates) {
+                    const a = document.querySelector(`a.headerlink[href="#${id}"]`);
+                    if (a && a.parentElement) return a.parentElement;
+                }
+                // 兜底：按链接文本匹配标题文本（归一规则与上面一致）
+                const content = document.getElementById('post-content') || document.querySelector('.content.markdown');
+                if (content) {
+                    const heads = content.querySelectorAll('h1, h2, h3, h4, h5, h6');
+                    // 将标题可见文本进行与 candidates 相同的归一
+                    const norm = (s)=> {
+                        const decoded = decodeURIComponent(s || '');
+                        const stripPunc = decoded
+                            .replace(/[()\[\]{}]/g, '')
+                            .replace(/[\/\\]/g, '-')
+                            .replace(/&#x2F;/gi, '-')
+                            .replace(/\bx2f\b/gi, '-')
+                            .replace(/[:;,\.?!'"`]/g, '');
+                        const dash = stripPunc.replace(/\s+/g, '-').replace(/-+/g, '-');
+                        return [decoded, stripPunc, dash, dash.toLowerCase(), stripPunc.replace(/\s+/g, '_'), stripPunc.replace(/\s+/g, '')];
+                    };
+                    for (const h of heads) {
+                        const txt = (h.textContent || '').trim();
+                        const hv = norm(txt);
+                        for (const c of candidates) {
+                            if (hv.includes(c) || hv.includes(decodeURIComponent(c))) {
+                                return h;
+                            }
+                        }
+                    }
+                }
+                return null;
+            };
+
+            // 计算并滚动到目标：适配窗口或内部滚动容器
+            const getScrollableAncestor = (el)=> {
+                let node = el.parentElement;
+                while (node) {
+                    const style = getComputedStyle(node);
+                    const overflowY = style.overflowY;
+                    if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+                        return node;
+                    }
+                    node = node.parentElement;
+                }
+                return null; // 回退到窗口滚动
+            };
+            const scrollToTarget = (target)=> {
+                // 期望目标在视口顶部偏下 30%
+                const viewport = { h: window.innerHeight, top: 0 };
+                const rect = target.getBoundingClientRect();
+                const desiredTop = rect.top - viewport.h * 0.3; // 让标题略下移
+
+                const container = getScrollableAncestor(target);
+                if (container) {
+                    // 将目标相对容器的偏移滚动到可视范围
+                    const containerRect = container.getBoundingClientRect();
+                    const targetOffsetInContainer = rect.top - containerRect.top + container.scrollTop;
+                    const top = Math.max(0, targetOffsetInContainer - container.clientHeight * 0.3);
+                    container.scrollTo({ top, behavior: 'auto' });
+                } else {
+                    const currentScroll = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                    const top = currentScroll + Math.max(0, desiredTop);
+                    window.scrollTo({ top, behavior: 'auto' });
+                }
             };
 
             toc.addEventListener('click', function(e){
                 const a = e.target.closest('a');
-                if(!isHashLink(a)) return;
+                if(!a) return;
+                const href = a.getAttribute('href');
+                // 如果是跨页面链接（不同路径），不拦截，交给浏览器默认跳转
+                try {
+                    const u = new URL(href, window.location.origin);
+                    if (u.pathname !== window.location.pathname) {
+                        return; // 允许默认行为，前往目标页面
+                    }
+                } catch {}
+                const hash = getHash(href);
+                if(!hash) return;
                 e.preventDefault();
-
-                const hash = a.getAttribute('href');
                 const target = findTarget(hash);
                 if(!target) { location.hash = hash; return; }
 
@@ -1180,15 +1418,13 @@
                 const prevBehavior = document.documentElement.style.scrollBehavior;
                 document.documentElement.style.scrollBehavior = 'auto';
                 location.hash = hash;
+                // 使用自定义滚动，适配内部滚动容器或窗口
+                scrollToTarget(target);
                 // 小延迟确保定位完成后再触发加粗脉冲
                 setTimeout(()=>{
-                    // 移除旧效果
                     document.querySelectorAll('.toc-pulse-bold').forEach(el=> el.classList.remove('toc-pulse-bold'));
-                    // 触发新效果
                     target.classList.add('toc-pulse-bold');
-                    // 动画结束后恢复字体权重（通过移除类）
                     setTimeout(()=>{ target.classList.remove('toc-pulse-bold'); }, 700);
-                    // 恢复滚动行为设置
                     document.documentElement.style.scrollBehavior = prevBehavior || '';
                 }, 50);
             }, { passive: false });
@@ -1212,8 +1448,8 @@
       </svg>
     </button>
 
-    <!-- AI 悬浮按钮（新增，位置在返回顶部按钮上方） -->
-    <button id="ai-fab" title="AI 问答" class="ai-fab">🤖</button>
+    <!-- AI 悬浮按钮（简约无背景风格） -->
+    <button id="ai-fab" title="AI 问答" class="ai-fab">AI</button>
 </div>
 
 <!-- AI 弹窗容器 -->
@@ -1222,7 +1458,6 @@
   <!-- 弹窗头部 -->
   <div class="ai-head">
     <span>AI 问答（基于本文）</span>
-    <button id="ai-clear" aria-label="清空历史" class="ai-clear">🗑️</button>
     <button id="ai-close" aria-label="关闭" class="ai-close">✕</button>
   </div>
   <!-- 消息区 -->
@@ -1234,17 +1469,6 @@
   </div>
 </div>
 
-<!-- 自定义确认弹窗（默认隐藏） -->
-<div id="custom-confirm-mask" class="custom-confirm-mask"></div>
-<div id="custom-confirm" class="custom-confirm">
-  <div class="custom-confirm-icon">⚠️</div>
-  <div class="custom-confirm-title">确认清空对话历史？</div>
-  <div class="custom-confirm-desc">清空后将删除当前文章的所有对话记录，且无法恢复</div>
-  <div class="custom-confirm-btns">
-    <button id="confirm-cancel" class="confirm-btn cancel-btn">取消</button>
-    <button id="confirm-ok" class="confirm-btn ok-btn">确认清空</button>
-  </div>
-</div>
 
 <style>
   /* 背景图模块已移除 */
@@ -1393,7 +1617,7 @@
     height: 24px;
   }
 
-  /* AI 悬浮按钮样式（关键：添加显示样式） */
+  /* AI 悬浮按钮样式（简约无背景风格） */
   .ai-fab {
     position: fixed;
     right: var(--back-to-top-margin);
@@ -1401,40 +1625,19 @@
     width: var(--back-to-top-size);
     height: var(--back-to-top-size);
     border-radius: 50%;
-    border: none;
-    background: #0d9488; /* 绿色主题，和你的博客风格匹配 */
-    color: #fff;
-    font-size: 22px;
-    box-shadow: var(--back-to-top-shadow);
+    border: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.75);
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.06);
     cursor: pointer;
     z-index: 999;
     transition: var(--back-to-top-transition);
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .ai-fab:hover {
-    background: #0f766e;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  }
-
-  /* AI 弹窗样式 - 基础样式 */
-  .ai-mask {
-    display: none;
-    position: fixed;
-    inset: 0;
-    /* 关键修改1：取消遮罩层背景和模糊，仅作为点击穿透的容器 */
-    background: transparent;
-    z-index: 9998;
-    pointer-events: none; /* 允许点击穿透到博客内容 */
-  }
-
-  /* 深色模式遮罩层 - 同样取消背景和模糊 */
-  .dark-mode .ai-mask {
-    background: transparent;
-    backdrop-filter: none; /* 取消模糊效果 */
   }
 
   .ai-dialog {
@@ -1460,6 +1663,19 @@
     pointer-events: auto; /* 确保弹窗自身可交互 */
   }
 
+  /* 深色模式适配：悬浮按钮与弹窗主体 */
+  .dark-mode .ai-fab {
+    border-color: #374151;
+    background: rgba(31, 41, 55, 0.85);
+    color: #e5e7eb;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+  .dark-mode .ai-fab:hover {
+    background: rgba(31, 41, 55, 0.95);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+    font-size: 22px;
+  }
+
   /* 深色模式弹窗主体 */
   .dark-mode .ai-dialog {
     background: var(--ai-bg-dark);
@@ -1472,6 +1688,7 @@
     display: flex;
     transform: translateY(0);
     opacity: 1;
+    pointer-events: auto; /* 打开时可交互 */
   }
 
   .ai-head {
@@ -1891,49 +2108,6 @@
   }
 
   /* 评论区样式 */
-  .gt-container {
-    --gt-primary-color: #10D07A;
-    --gt-bg-color: none;
-    --gt-text-color: #333333;
-    --gt-border-color: none;
-    --gt-card-bg: #f9f9f9;
-    --gt-input-bg: #ffffff;
-    --gt-hover-color: #25cdd0;
-  }
-
-  .gt-container {
-    background-color: var(--gt-bg-color);
-    color: var(--gt-text-color);
-    border: 1px solid var(--gt-border-color);
-  }
-
-  .gt-avatar {
-    border-radius: 50% !important;
-  }
-
-  .gt-ico-text,
-  .gt-btn-text {
-    color: var(--gt-text-color);
-  }
-
-  .gt-container .gt-btn-login,
-  .gt-container .gt-btn-public {
-    background-color: rgb(16, 208, 122);
-    border-color: rgb(16, 208, 122);
-    color: white !important;
-    border-radius: 10px;
-  }
-
-  .gt-container .gt-comment .gt-comment-content {
-    background-color: rgb(255, 255, 255, 0.3);
-    margin-left: 20px;
-  }
-
-  .gt-container .gt-btn-preview {
-    border-radius: 10px;
-    border: none;
-    background-color: aqua;
-    border-color: aqua;
   }
 
   .gt-container .gt-comment-content {
@@ -2301,7 +2475,7 @@
       // 1. 创建AI消息气泡（默认显示加载提示）
       const msgEl = document.createElement('div');
       msgEl.className = 'ai-msg ai';
-      msgEl.innerHTML = '<span class="ai-loading">🤖 AI 思考中</span>';
+      msgEl.innerHTML = '<span class="ai-loading">AI 思考中</span>';
       container.appendChild(msgEl);
 
       const stream = {
@@ -2431,20 +2605,27 @@
     const $fab = document.getElementById('ai-fab');
     const $mask = document.getElementById('ai-mask');
     const $dlg = document.getElementById('ai-dialog');
-    const $clearBtn = document.getElementById('ai-clear'); // 清空历史按钮
     const $closeBtn = document.getElementById('ai-close');
     const $msgs = document.getElementById('ai-msgs');
     const $q = document.getElementById('ai-q');
     const $sendBtn = document.getElementById('ai-send');
 
     // 自定义确认弹窗元素
-    const $confirmMask = document.getElementById('custom-confirm-mask');
-    const $confirmDialog = document.getElementById('custom-confirm');
-    const $confirmOkBtn = document.getElementById('confirm-ok');
-    const $confirmCancelBtn = document.getElementById('confirm-cancel');
+    // 已移除清空历史与确认弹窗相关功能
 
     let isOpen = false;
-    let confirmCallback = null; // 确认弹窗的回调函数
+        // 初始化：确保首次进入页面时完全隐藏并不可交互，避免遮挡
+        if ($dlg) {
+          $dlg.classList.remove('show');
+          $dlg.style.display = 'none';
+          $dlg.style.pointerEvents = 'none';
+        }
+        if ($mask) {
+          $mask.style.display = 'none';
+          $mask.style.pointerEvents = 'none';
+        }
+
+    // 已移除清空历史确认弹窗
     let isAiResponding = false; // 标记AI是否正在回复
 
     // ================ 关键修复：阻止滚动事件冒泡（仅保留消息区内部滚动） ================
@@ -2459,60 +2640,7 @@
       }
     }
 
-    // ================ 自定义确认弹窗功能 ================
-    /**
-     * 显示自定义确认弹窗
-     * @param {Function} okCallback - 确认按钮回调
-     * @param {Function} cancelCallback - 取消按钮回调（可选）
-     */
-    function showConfirm(okCallback, cancelCallback) {
-      confirmCallback = { ok: okCallback, cancel: cancelCallback };
-      // 显示弹窗
-      $confirmMask.classList.add('show');
-      $confirmDialog.classList.add('show');
-      // 阻止页面滚动
-      document.body.style.overflow = 'hidden';
-    }
-
-    /**
-     * 隐藏自定义确认弹窗
-     */
-    function hideConfirm() {
-      $confirmMask.classList.remove('show');
-      $confirmDialog.classList.remove('show');
-      confirmCallback = null;
-      // 恢复页面滚动
-      document.body.style.overflow = '';
-    }
-
-    // 确认弹窗按钮事件
-    $confirmOkBtn.addEventListener('click', () => {
-      if (confirmCallback?.ok) {
-        confirmCallback.ok();
-      }
-      hideConfirm();
-    });
-
-    $confirmCancelBtn.addEventListener('click', () => {
-      if (confirmCallback?.cancel) {
-        confirmCallback.cancel();
-      }
-      hideConfirm();
-    });
-
-    // 点击遮罩层关闭弹窗
-    $confirmMask.addEventListener('click', (e) => {
-      if (e.target === $confirmMask) {
-        hideConfirm();
-      }
-    });
-
-    // ESC 键关闭弹窗
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && $confirmDialog.classList.contains('show')) {
-        hideConfirm();
-      }
-    });
+    // 自定义确认弹窗相关功能已移除
 
     // ================ 控制输入框和发送功能的启用/禁用 ================
     /**
@@ -2568,19 +2696,7 @@
       saveHistoryToStorage(history);
     }
 
-    /**
-     * 清空历史对话（本地存储 + 页面DOM）
-     */
-    function clearHistory() {
-      // 清空本地存储
-      localStorage.removeItem(STORAGE_KEY);
-      // 清空页面消息区
-      $msgs.innerHTML = '';
-      // 销毁当前流
-      if (window.__AI_STREAM_MANAGER__.currentStream) {
-        window.__AI_STREAM_MANAGER__.currentStream.destroy();
-      }
-    }
+    // 清空历史功能已移除
 
     /**
      * 渲染历史对话到页面
@@ -2643,6 +2759,8 @@
     // 打开 AI 窗口（同时渲染历史对话 + 绑定滚动阻止）
     function openDialog() {
       $mask.style.display = 'block';
+      $mask.style.pointerEvents = 'none'; // 遮罩透明且不拦截
+      $dlg.style.display = 'flex'; // 明确显示
       $dlg.classList.add('show');
       renderHistory(); // 打开时渲染历史对话
       $q.focus();
@@ -2657,10 +2775,12 @@
 
     // 关闭 AI 窗口（解绑滚动阻止）
     function closeDialog() {
+      // 立即移除显示与交互，避免透明层遮挡任何内容
       $dlg.classList.remove('show');
-      setTimeout(() => {
-        $mask.style.display = 'none';
-      }, 200);
+      $dlg.style.pointerEvents = 'none';
+      $mask.style.pointerEvents = 'none';
+      $dlg.style.display = 'none';
+      $mask.style.display = 'none';
       isOpen = false;
       // 解绑滚动阻止事件（避免影响其他区域）
       $msgs.removeEventListener('wheel', preventScrollBubble);
@@ -2799,13 +2919,7 @@
     $closeBtn.addEventListener('click', closeDialog);
     // 移除遮罩层点击关闭事件：$mask.addEventListener('click', closeDialog);
 
-    // 清空历史（自定义确认弹窗）
-    $clearBtn.addEventListener('click', () => {
-      showConfirm(
-        () => { clearHistory(); }, // 确认回调：清空历史
-        () => { /* 取消回调：无操作 */ }
-      );
-    });
+    // 已移除清空历史功能
 
     // 发送提问
     $sendBtn.addEventListener('click', send);
@@ -2821,7 +2935,7 @@
 
     // ESC 键关闭弹窗
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen && !$confirmDialog.classList.contains('show')) {
+      if (e.key === 'Escape' && isOpen) {
         closeDialog();
       }
     });
