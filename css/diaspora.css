@@ -1,6 +1,7 @@
 body,div,h1,h2,h3,h4,h5,p,ul,li {margin:0;padding:0;font-weight:normal;list-style:none;}
 html {-webkit-text-size-adjust:100%;}
 html,body {-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-font-smoothing:antialiased;background:#fff;}
+body.dark-mode, html.dark-mode {background:#121212;}
 body {font-family:'PingFang SC','Hiragino Sans GB','Microsoft Yahei','WenQuanYi Micro Hei',sans-serif;font-size:14px;position:relative;overflow-x:hidden;}
 body:before {background:grey;position:absolute;content:'';display:block;width:14px;height:14px;left:50%;top:50%;margin-left:-7px;margin-top:-7px;border-radius:50%;-webkit-border-radius:50%;-moz-border-radius:50%;-webkit-animation:loading 2s ease-out forwards infinite;-moz-animation:loading 2s ease-out forwards infinite;display:none;}
 body.loading:before {display:block;}
@@ -791,5 +792,5 @@ body:has(#mark) .navbar {
   opacity: 1 !important;
   animation: none !important;
 }
-html { scrollbar-gutter: stable both-edges; }   /* 现代浏览器预留滚动条空间，防抖动 */
+html { scrollbar-gutter: stable; }   /* 仅在滚动条侧预留空间，避免左侧留白 */
 .timeline-node.lazy-hide { display: none; }     /* 首屏即隐藏，防止闪现 */

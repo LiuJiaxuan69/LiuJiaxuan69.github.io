@@ -189,7 +189,7 @@
     </p>
 </div>
 
-  <div id="container" class="gradient">
+  <div id="container">
     
     <div id="screen">
         <div id="mark">
@@ -231,23 +231,18 @@ poll 示例...</p>
             
 
     </div>
+ 
       <div id="primary">
         
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" 
-       title="Linux IO 多路转接--Poll"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg10.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>八月 01, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" title="Linux IO 多路转接--Poll" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux IO 多路转接--Poll</a></h3>
-        
-        <p>
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/'">
+        <div class="post-meta">八月 01, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/08/01/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/poll/" title="Linux IO 多路转接--Poll" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux IO 多路转接--Poll</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 poll 函数
@@ -258,26 +253,106 @@ poll 示例代码（监控多个 FD）
 
 
 服务端实现
-...</p>
+tcp.hpp
+poll_ser...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BD%91%E7%BB%9C/" title="查看标签：网络" onclick="event.stopPropagation();">
+                        网络
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/IO/" title="查看标签：IO" onclick="event.stopPropagation();">
+                        IO
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" 
-       title="自定义协议 && 序列化与反序列化"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg10.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 31, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" title="自定义协议 &amp;&amp; 序列化与反序列化" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">自定义协议 &amp;&amp; 序列化与反序列化</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/'">
+        <div class="post-meta">七月 31, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/31/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/protocol/" title="自定义协议 &amp;&amp; 序列化与反序列化" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">自定义协议 &amp;&amp; 序列化与反序列化</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 网络通信中的自定义协议
@@ -288,26 +363,106 @@ poll 示例代码（监控多个 FD）
 
 自定义协议中的序列化和反序列化
 序列化的概念与作用
-反序列...</p>
+反序列化的概念与作用
+常见的序列化方式...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BD%91%E7%BB%9C/" title="查看标签：网络" onclick="event.stopPropagation();">
+                        网络
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/TCP/" title="查看标签：TCP" onclick="event.stopPropagation();">
+                        TCP
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/" 
-       title="Socket 套接字编程-TCP"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg11.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 29, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/" title="Socket 套接字编程-TCP" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Socket 套接字编程-TCP</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/'">
+        <div class="post-meta">七月 29, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/29/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_tcp/" title="Socket 套接字编程-TCP" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Socket 套接字编程-TCP</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 基础通信框架设计
@@ -321,26 +476,106 @@ tcp_server.hpp
 封装成简单的聊天服务
 
 
-...</p>
+
+接下来，我将实现一个基于 TC...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BD%91%E7%BB%9C/" title="查看标签：网络" onclick="event.stopPropagation();">
+                        网络
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/TCP/" title="查看标签：TCP" onclick="event.stopPropagation();">
+                        TCP
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/" 
-       title="Socket 套接字编程-UDP"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg2.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 28, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/" title="Socket 套接字编程-UDP" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Socket 套接字编程-UDP</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/'">
+        <div class="post-meta">七月 28, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/28/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BD%91%E7%BB%9C%E9%80%9A%E4%BF%A1/socket_udp/" title="Socket 套接字编程-UDP" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Socket 套接字编程-UDP</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 Socket 函数详解
@@ -351,26 +586,106 @@ TCP 服务器
 总结
 
 
-UDP 收发数据接口详...</p>
+UDP 收发数据接口详解
+1. recvfrom ——...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BD%91%E7%BB%9C/" title="查看标签：网络" onclick="event.stopPropagation();">
+                        网络
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/UDP/" title="查看标签：UDP" onclick="event.stopPropagation();">
+                        UDP
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/" 
-       title="Linux 线程池"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg9.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 27, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/" title="Linux 线程池" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程池</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/'">
+        <div class="post-meta">七月 27, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/27/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_pool/" title="Linux 线程池" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程池</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 传统线程池设计
@@ -383,26 +698,107 @@ UDP 收发数据接口详...</p>
 基于环形队列（信号量）的线程池
 代码实现
 一、设计思想
-二...</p>
+二、关键组件解析
+三、工作流程
+四...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%90%8C%E6%AD%A5/" title="查看标签：同步" onclick="event.stopPropagation();">
+                        同步
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/" 
-       title="Linux 线程信号量（POSIX）--优化多生产者-消费者框架"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg1.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 26, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/" title="Linux 线程信号量（POSIX）--优化多生产者-消费者框架" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/'">
+        <div class="post-meta">七月 26, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_sem/" title="Linux 线程信号量（POSIX）--优化多生产者-消费者框架" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程信号量（POSIX）--优化多生产者-消费者框架</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 POSIX线程信号量（Semaphore）
@@ -414,26 +810,107 @@ POSIX线程信号量（Semaphore）
 
 
 生产者-消费者问题
-1. 核心组件...</p>
+1. 核心组件解析
+2. 工作原理详解
+3. ...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%90%8C%E6%AD%A5/" title="查看标签：同步" onclick="event.stopPropagation();">
+                        同步
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/" 
-       title="Linux 线程同步"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg2.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 26, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/" title="Linux 线程同步" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程同步</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/'">
+        <div class="post-meta">七月 26, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/26/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_syn/" title="Linux 线程同步" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程同步</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 条件变量
@@ -447,26 +924,106 @@ POSIX线程信号量（Semaphore）
 
 
 条件变量函数
-pthread_cond_init 与 pthread_...</p>
+pthread_cond_init 与 pthread_cond_destroy
+pth...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%90%8C%E6%AD%A5/" title="查看标签：同步" onclick="event.stopPropagation();">
+                        同步
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/" 
-       title="Linux 线程互斥"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg5.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 25, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/" title="Linux 线程互斥" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程互斥</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/'">
+        <div class="post-meta">七月 25, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/25/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_mutex/" title="Linux 线程互斥" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程互斥</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 进程线程间的互斥相关概念详解
@@ -480,26 +1037,105 @@ pthread_cond_init 与 pthread_...</p>
 
 互斥锁 Mutex
 背景引入
-PTHREAD_MUTEX...</p>
+PTHREAD_MUTEX_INITIALIZER 静态初...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E4%BA%92%E6%96%A5/" title="查看标签：互斥" onclick="event.stopPropagation();">
+                        互斥
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" 
-       title="Linux 线程控制"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg9.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 24, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" title="Linux 线程控制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程控制</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/'">
+        <div class="post-meta">七月 24, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_control/" title="Linux 线程控制" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程控制</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 POSIX 线程库
@@ -511,26 +1147,109 @@ pthread_create 函数：线程创建
 参数说明
 返回值
 使用示例
-注意事项...</p>
+注意事项
+常见错误
+
+
+pthread_...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E6%8E%A7%E5%88%B6/" title="查看标签：控制" onclick="event.stopPropagation();">
+                        控制
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
 
-<div class="post">
-    <!-- 修改点1：主图链接添加强制跳转 -->
-    <a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" 
-       title="Linux 线程概念"
-       onclick="event.stopPropagation(); window.location.href=this.href; return false;">
-        <img src="/blog/img/bg2.jpg" class="cover" width="680" height="440">
-    </a>
-    
-    <div class="else" style="word-break: break-all;">
-        <p>七月 24, 2025</p>
-        
-        <!-- 修改点2：标题链接同步修改 -->
-        <h3><a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" title="Linux 线程概念" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程概念</a></h3>
-        
-        <p>
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/'">
+        <div class="post-meta">七月 24, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/07/24/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E7%BA%BF%E7%A8%8B/thread_concept/" title="Linux 线程概念" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Linux 线程概念</a>
+        </h3>
+        <p class="post-excerpt">
 
 
 线程的基本概念
@@ -545,9 +1264,96 @@ pthread_create 函数：线程创建
 
 线程的优势
 线程的缺点
-线程与进程的资源对比...</p>
+线程与进程的资源对比
+线程共享的资源
+线程独有的资源...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" title="查看分类：操作系统" onclick="event.stopPropagation();">
+                        操作系统
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/Linux/" title="查看分类：Linux" onclick="event.stopPropagation();">
+                        Linux
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E6%A6%82%E5%BF%B5/" title="查看标签：概念" onclick="event.stopPropagation();">
+                        概念
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BA%BF%E7%A8%8B/" title="查看标签：线程" onclick="event.stopPropagation();">
+                        线程
+                    </a>
+                
+            </div>
+        </div>
+    </div>
     </div>
 </div>
+
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
 
 
       </div>
@@ -559,83 +1365,7 @@ pthread_create 函数：线程创建
   
 
 
-      <!DOCTYPE html>
-      <html>
-
-      <head>
-        <style>
-          .gradient {
-            position: relative;
-            background: linear-gradient(-45deg,
-                rgba(208, 255, 182, 0.5),
-                rgba(105, 255, 225, 0.5),
-                rgba(173, 216, 230, 0.5),
-                rgba(109, 100, 237, 0.5));
-            background-size: 400% 400%;
-            animation: gradientBG 7s ease infinite alternate;
-            overflow: hidden;
-          }
-
-          /* 粒子光点样式 */
-          .gradient::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%),
-                rgba(255, 255, 255, 0.25) 0%,
-                transparent 25%);
-            transition: background 0.3s ease-out;
-            mix-blend-mode: overlay;
-            pointer-events: none;
-          }
-
-          @keyframes gradientBG {
-            0% {
-              background-position: 0% 50%;
-            }
-
-            70% {
-              background-position: 100% 50%;
-            }
-
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-
-          html {
-            scrollbar-gutter: stable both-edges;
-          }
-
-
-
-          /* 首屏即隐藏，防止闪现 */
-        </style>
-      </head>
-
-      <body>
-        <div class="gradient"></div>
-
-        <script>
-          // 全局监听鼠标位置（即使在浏览器外）
-          document.addEventListener('mousemove', (e) => {
-            document.documentElement.style.setProperty('--x', `${e.clientX}px`);
-            document.documentElement.style.setProperty('--y', `${e.clientY}px`);
-          });
-
-          // 鼠标离开视窗时复位到中心
-          document.addEventListener('mouseleave', () => {
-            document.documentElement.style.setProperty('--x', '50%');
-            document.documentElement.style.setProperty('--y', '50%');
-          });
-
-          // 初始化居中
-          document.documentElement.style.setProperty('--x', '50%');
-          document.documentElement.style.setProperty('--y', '50%');
-        </script>
-      </body>
-
-      </html>
+      
 </body>
 
 <script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>

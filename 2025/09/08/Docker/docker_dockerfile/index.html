@@ -188,15 +188,9 @@ RU,"/>
 
     <div id="loader"></div>
     <div id="single">
-  <!-- 背景图平滑过渡 -->
-  <div id="custom-bg" style="position: fixed;
-              top: 0;
-              left: 0;
-              width: 100vw;
-              height: 100vh;
-              background-size: cover;
-              background-position: center;">
-  </div>
+  <!-- 全屏背景层：覆盖最底层，防止左右露底 -->
+  <div class="page-bg-layer" aria-hidden="true"></div>
+  <!-- 背景图模块已移除 -->
 
   <!-- 内容区 -->
   <div id="top" style="display: block;">
@@ -224,7 +218,7 @@ RU,"/>
                         style="width: 100px; height: 100px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
                 </a>
                 <div class="github-name"
-                    style="margin-top: 10px; font-size: 18px; color: #333!important; font-weight: bold;">
+                    style="margin-top: 10px; font-size: 18px; font-weight: bold;">
                     LiuJiaxuan1024
                 </div>
                 <button class="github-follow-btn"
@@ -235,15 +229,14 @@ RU,"/>
                     <div>
                         <a href="https://github.com/LiuJiaxuan1024?tab=followers" target="_blank"
                             style="text-decoration: none; color: inherit;">
-                            <span id="github-followers"
-                                style="font-weight:bold; font-size:20px;color:#000!important;">--</span>
-                            <span style="font-size:20px;color:#666!important;">关注者</span>
+                            <span id="github-followers" style="font-weight:bold; font-size:20px;">--</span>
+                            <span style="font-size:20px;">关注者</span>
                         </a>
                     </div>
                     <div>
                         <a href="/blog/archives" style="text-decoration: none; color: inherit;">
-                            <span style="font-weight:bold; font-size:20px;color:#000!important;">74</span>
-                            <span style="font-size:20px;color:#666!important;">文章</span>
+                                <span style="font-weight:bold; font-size:20px;">74</span>
+                                <span style="font-size:20px;">文章</span>
                         </a>
                     </div>
                 </div>
@@ -251,22 +244,13 @@ RU,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/blog/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/blog/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/blog/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/blog/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/blog/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/blog/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li></ul>
+            <ul><li><a href="/blog/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/blog/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/blog/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a></li><li><a href="/blog/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/blog/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/blog/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li></ul>
         </div>
-        <div class='main' style="/* 基础样式 */
-    background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
-    
-    /* 毛玻璃关键效果 */
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    
-    /* 边缘增强效果 */
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    
-    /* 其他增强属性 */
-    border-radius: 12px; /* 可选圆角 */
-    position: relative; /* 确保堆叠上下文 */
+        <div class='main' style="
+    background: transparent;
+    border: 1px solid #000;
+    border-radius: 12px;
+    position: relative;
     z-index: 1;">
             <h1 class="title">Dockerfile详解</h1>
             <div class="stuff">
@@ -1607,13 +1591,67 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
         <!-- 右侧目录栏 -->
         <aside class="toc-sidebar">
             <div class="toc-header">
-                <h1 class="toc-title" style="color:#000!important;">目录</h1>
+                <h1 class="toc-title">目录</h1>
             </div>
         </aside>
     </div>
 
     <!-- ...existing code... -->
     <style>
+        /* 夜间模式文章页整体可读性增强 */
+        body.dark-mode .article,
+        html.dark-mode .article {
+            color: #e5e5e5;
+        }
+
+        body.dark-mode .article .title,
+        html.dark-mode .article .title {
+            color: #f0f0f0;
+        }
+
+        body.dark-mode .article a,
+        html.dark-mode .article a {
+            color: #93c5fd; /* 浅蓝，提高可读性 */
+        }
+
+        body.dark-mode .article a:hover,
+        html.dark-mode .article a:hover {
+            color: #60a5fa;
+        }
+
+        /* 夜间边框稍柔和，避免过度突兀 */
+        body.dark-mode .main,
+        body.dark-mode .follow-sidebar,
+        body.dark-mode .recommendations,
+        body.dark-mode .toc-sidebar,
+        html.dark-mode .main,
+        html.dark-mode .follow-sidebar,
+        html.dark-mode .recommendations,
+        html.dark-mode .toc-sidebar {
+            border-color: #d1d5db; /* 亮灰边框 */
+        }
+
+        /* 推荐项文本对比度提升 */
+        body.dark-mode .recommendations li a,
+        html.dark-mode .recommendations li a {
+            color: #e5e7eb;
+        }
+
+        body.dark-mode .recommendations h2,
+        html.dark-mode .recommendations h2 {
+            color: #e5e5e5;
+        }
+
+        /* 目录文字颜色提升对比 */
+        body.dark-mode .toc-sidebar a,
+        html.dark-mode .toc-sidebar a {
+            color: #e5e5e5;
+        }
+
+        body.dark-mode .toc-title,
+        html.dark-mode .toc-title {
+            color: #f0f0f0 !important;
+        }
         .recommendations li a,
         .recommendations li a:hover,
         .recommendations li a:focus,
@@ -1631,11 +1669,9 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
             max-height: calc(100% - 550px);
             z-index: 100;
             box-sizing: border-box;
-
-            background-color: rgba(232, 245, 233, 0.9);
-            /* 薄荷青 */
+            background: transparent;
+            border: 1px solid #000;
             border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, .06);
             padding: 14px 6px 12px;
             /* 原来只有 padding-top:60px，排版会怪 */
             overflow-y: auto;
@@ -1666,7 +1702,8 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
             border-radius: 8px;
             line-height: 1.5;
             font-size: 14px;
-            background: rgba(255, 255, 255, 0.55);
+            background: transparent;
+            border: 1px solid #000;
         }
 
         .recommendations li+li {
@@ -1726,7 +1763,8 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
             /* 660px + 396px/2 + 10px，396px为目录宽度 */
             width: 264px;
             /* 1320*0.15=198px，或你想要的宽度 */
-            background-color: rgba(237, 231, 246, 0.8);
+            background: transparent;
+            border: 1px solid #000;
             border-radius: 12px;
             padding-top: 60px;
             height: 350px;
@@ -1777,7 +1815,7 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
 
     <style>
         .dark-mode .main {
-            background-color: rgb(0, 0, 0, 0.3) !important;
+            background: transparent !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
@@ -1820,7 +1858,8 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
             width: 264px;
             /* 1320*0.15=198px，或你想要的宽度 */
             min-width: 160px;
-            background-color: rgb(185, 207, 214, 0.8);
+            background: transparent;
+            border: 1px solid #000;
             border-radius: 12px;
             padding: 10px;
             height: 70%;
@@ -2174,6 +2213,108 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
             margin: 1.5em 0;
         }
     </style>
+
+    <!-- 夜间模式覆盖：关注者与文章数量，以及目录文字颜色 -->
+    <style>
+        /* 日间模式：目录栏与正文引用竖线略深，降低刺眼度 */
+        .toc-sidebar,
+        .toc-sidebar * {
+            border-color: #bbb !important;
+        }
+        #post-content blockquote {
+            border-left: 3px solid #bbb !important;
+        }
+
+        /* 关注卡片：日间与夜间颜色（覆盖 a 的蓝色） */
+        .github-name { color: #333; }
+        .github-info a span:first-child { color: #000; }
+        .github-info a span:last-child { color: #666; }
+
+        body.dark-mode .github-name,
+        html.dark-mode .github-name { color: #f1f5f9 !important; }
+
+        body.dark-mode .github-info a span:first-child,
+        html.dark-mode .github-info a span:first-child { color: #f8fafc !important; }
+
+        body.dark-mode .github-info a span:last-child,
+        html.dark-mode .github-info a span:last-child { color: #e5e7eb !important; }
+
+        /* 覆盖内联颜色（包含 !important） */
+        body.dark-mode #github-followers,
+        html.dark-mode #github-followers {
+            color: #e5e7eb !important;
+        }
+
+        body.dark-mode .github-info span:last-child,
+        html.dark-mode .github-info span:last-child {
+            color: #e5e7eb !important;
+        }
+
+        /* 目录标题与链接在夜间提亮 */
+        body.dark-mode .toc-title,
+        html.dark-mode .toc-title {
+            color: #f0f0f0 !important;
+        }
+
+        body.dark-mode .toc-sidebar a,
+        html.dark-mode .toc-sidebar a {
+            color: #e5e5e5 !important;
+        }
+    </style>
+
+    <!-- TOC 点击效果：为目标标题添加弹性加粗脉冲，不做滚动动画 -->
+    <style>
+        @keyframes tocPulseBold {
+            0% { font-weight: 500; }
+            40% { font-weight: 800; }
+            70% { font-weight: 700; }
+            100% { font-weight: 600; }
+        }
+        .toc-pulse-bold {
+            animation: tocPulseBold 600ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        /* 夜间模式下标题颜色稍提亮以配合加粗效果 */
+        body.dark-mode .toc-pulse-bold,
+        html.dark-mode .toc-pulse-bold { color: #f3f4f6 !important; }
+    </style>
+
+    <script>
+        (function(){
+            const toc = document.querySelector('.toc-sidebar');
+            if(!toc) return;
+
+            const isHashLink = (el)=> el && el.tagName === 'A' && el.getAttribute('href') && el.getAttribute('href').startsWith('#');
+            const findTarget = (hash)=> {
+                try { return document.getElementById(decodeURIComponent(hash.replace('#',''))); } catch { return null; }
+            };
+
+            toc.addEventListener('click', function(e){
+                const a = e.target.closest('a');
+                if(!isHashLink(a)) return;
+                e.preventDefault();
+
+                const hash = a.getAttribute('href');
+                const target = findTarget(hash);
+                if(!target) { location.hash = hash; return; }
+
+                // 取消浏览器默认平滑/瞬时滚动动画，直接定位哈希
+                const prevBehavior = document.documentElement.style.scrollBehavior;
+                document.documentElement.style.scrollBehavior = 'auto';
+                location.hash = hash;
+                // 小延迟确保定位完成后再触发加粗脉冲
+                setTimeout(()=>{
+                    // 移除旧效果
+                    document.querySelectorAll('.toc-pulse-bold').forEach(el=> el.classList.remove('toc-pulse-bold'));
+                    // 触发新效果
+                    target.classList.add('toc-pulse-bold');
+                    // 动画结束后恢复字体权重（通过移除类）
+                    setTimeout(()=>{ target.classList.remove('toc-pulse-bold'); }, 700);
+                    // 恢复滚动行为设置
+                    document.documentElement.style.scrollBehavior = prevBehavior || '';
+                }, 50);
+            }, { passive: false });
+        })();
+    </script>
     </div>
 
     <!-- 返回顶部按钮 -->
@@ -2227,9 +2368,21 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
 </div>
 
 <style>
-  /* 背景图平滑过渡 */
-  #custom-bg {
-    transition: background-image 0.5s ease-in-out;
+  /* 背景图模块已移除 */
+
+  /* 全屏背景层（根因修复）：确保页面最底层被完全覆盖 */
+  .page-bg-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff; /* 亮色模式背景 */
+    z-index: 0;
+    pointer-events: none; /* 不阻塞交互 */
+  }
+  body.dark-mode .page-bg-layer, html.dark-mode .page-bg-layer {
+    background: #121212; /* 夜间深色非纯黑 */
   }
 
   /* 基础变量 */
@@ -2972,9 +3125,7 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
     color: var(--text-color);
   }
 
-  .dark-mode #custom-bg {
-    filter: brightness(0.6);
-  }
+  /* 背景图模块已移除 */
 
   .dark-mode .theme-toggle {
     background: rgba(255, 255, 255, 0.2);
@@ -3116,46 +3267,33 @@ rtt min/avg/max/mdev <span class="token operator">=</span> <span class="token nu
   .ok-btn:hover {
     background: var(--confirm-primary-hover);
   }
+
+  /* 夜间模式容器背景：确保整页非纯黑深色可见 */
+  body.dark-mode #single, html.dark-mode #single,
+  body.dark-mode .section, html.dark-mode .section {
+    background: #121212;
+  }
+
+  /* 移除 full-bleed 扩展，避免 100vw 带来的水平溢出与左侧露底 */
+
+  /* 亮色模式保持原有背景（透明/白），不覆盖全局 */
 </style>
 
 <script>
   (function () {
-    // 背景图平滑过渡
-    const bgContainer = document.getElementById('custom-bg');
-    const lightBg = '/blog/img/bg3.png';  // 日间模式背景（适配 root）
-    const darkBg = '/blog/img/bg9.jpg';  // 夜间模式背景（适配 root）
+    // 背景图模块已移除，仅保留主题切换逻辑
     const themeToggle = document.getElementById('theme-toggle');
     const htmlElement = document.documentElement;
 
-    // 预加载背景图
-    new Image().src = lightBg;
-    new Image().src = darkBg;
-
-    let universeCanvas = null;
-    let animationId = null;
-
-    // ================ 背景设置函数 ================
-    function setBackground(isDark) {
-      bgContainer.style.backgroundImage = `url('${isDark ? darkBg : lightBg}')`;
-      bgContainer.style.backgroundColor = 'transparent';
-    }
-
-    // ================ 主题切换逻辑 ================
-    function setDarkMode(enable) {
-      setBackground(enable);
-      localStorage.setItem('darkMode', enable);
-    }
-
+    // 初始化深色模式状态
     if (localStorage.getItem('darkMode') === 'true') {
       htmlElement.classList.add('dark-mode');
-      setDarkMode(true);
-    } else {
-      setDarkMode(false);
     }
 
+    // 切换并持久化
     themeToggle.addEventListener('click', () => {
       const isDarkMode = htmlElement.classList.toggle('dark-mode');
-      setDarkMode(isDarkMode);
+      localStorage.setItem('darkMode', isDarkMode);
     });
 
     // ================ 返回顶部按钮 ================
