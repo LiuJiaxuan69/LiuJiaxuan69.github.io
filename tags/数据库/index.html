@@ -164,7 +164,7 @@
   color: white;
   border-radius: 8px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+  background: linear-gradient(135deg, #FF6B6B, #FFA07A);
 }
 
 .tag-hero h1 {
@@ -197,7 +197,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #FFA07A;
+  background: #45B7D1;
   box-shadow: 0 0 0 3px white, 0 0 0 6px #98D8C8;
 }
 
@@ -351,18 +351,22 @@ Redis 集群的分片算法–哈希槽分区算法
         <div class="node-dot"></div>
         <div class="node-content">
           <time>2025/09/19</time>
-          <h3><a href="/blog/2025/09/19/Redis/Redis_dist_lock/">Redis 应用--分布式锁</a></h3>
+          <h3><a href="/blog/2025/09/19/Redis/Redis_cache/">Redis 应用--缓存</a></h3>
           <div class="post-excerpt">
 
 
-什么是分布式锁
-分布式锁的实现
-基础实现
-引入校验 ID
-引入过期时间
-引入看门狗(Watchdog)
-引入 Lua 脚本
-引入 RedLock 算...</div>
+什么是缓存
+使用 Redis 作为缓存
+缓存更新策略
+定期生成
+实时生成
+缓存（预热、穿透、雪崩、击穿）–重中之重
+
+
+
+
+
+在生产环境中，Redi...</div>
           
             <div class="post-cats">
               
@@ -381,22 +385,18 @@ Redis 集群的分片算法–哈希槽分区算法
         <div class="node-dot"></div>
         <div class="node-content">
           <time>2025/09/19</time>
-          <h3><a href="/blog/2025/09/19/Redis/Redis_cache/">Redis 应用--缓存</a></h3>
+          <h3><a href="/blog/2025/09/19/Redis/Redis_dist_lock/">Redis 应用--分布式锁</a></h3>
           <div class="post-excerpt">
 
 
-什么是缓存
-使用 Redis 作为缓存
-缓存更新策略
-定期生成
-实时生成
-缓存（预热、穿透、雪崩、击穿）–重中之重
-
-
-
-
-
-在生产环境中，Redi...</div>
+什么是分布式锁
+分布式锁的实现
+基础实现
+引入校验 ID
+引入过期时间
+引入看门狗(Watchdog)
+引入 Lua 脚本
+引入 RedLock 算...</div>
           
             <div class="post-cats">
               
@@ -953,19 +953,19 @@ Redis 命令行中的两个核心（最基础）的命令
           C++ (11)
         </a>
       
+        <a href="/blog/tags/%E6%A8%A1%E7%89%88%E5%85%83%E7%BC%96%E7%A8%8B/" class="related-tag" 
+           style="--tag-size: 24px">
+          模版元编程 (2)
+        </a>
+      
+        <a href="/blog/tags/%E7%BC%96%E8%AF%91%E6%9C%9F%E8%AE%A1%E7%AE%97/" class="related-tag" 
+           style="--tag-size: 26px">
+          编译期计算 (3)
+        </a>
+      
         <a href="/blog/tags/%E5%BC%82%E6%AD%A5%E7%BC%96%E7%A8%8B/" class="related-tag" 
            style="--tag-size: 22px">
           异步编程 (1)
-        </a>
-      
-        <a href="/blog/tags/%E5%B9%B6%E5%8F%91/" class="related-tag" 
-           style="--tag-size: 22px">
-          并发 (1)
-        </a>
-      
-        <a href="/blog/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" class="related-tag" 
-           style="--tag-size: 22px">
-          多线程 (1)
         </a>
       
     </div>

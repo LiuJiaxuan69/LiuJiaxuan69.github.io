@@ -725,6 +725,13 @@ pre .keyword,pre .javascript .function {color:#cc99cc;}
 }
 
 
+/* 首页隐藏导航栏：当首页顶部背景 #mark 存在时，强制隐藏导航栏 */
+body:has(#mark) .navbar {
+  transform: translateY(-100%) !important;
+  opacity: 0 !important;
+}
+
+
 
 /* 内容居中 */
 .navbar-container {
