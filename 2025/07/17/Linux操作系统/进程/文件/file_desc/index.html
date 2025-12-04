@@ -25,7 +25,7 @@ C语言文件操作回顾
 文件描述符,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
-    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="icon" href="/blog/img/favicon.png"> 
     
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 
@@ -67,9 +67,9 @@ C语言文件操作回顾
 标准文件描述符
 文件描述符,"/>
     
-<link rel="stylesheet" href="/css/diaspora.css">
+<link rel="stylesheet" href="/blog/css/diaspora.css">
 
-    <script>window.searchDbPath = "/search.xml";</script>
+    <script>window.searchDbPath = "/blog/search.xml";</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
@@ -93,14 +93,14 @@ C语言文件操作回顾
   ">
 
     <div class="navbar-container">
-        <a href="/" class="site-title">
+        <a href="/blog/" class="site-title">
             刘家炫的博客
         </a>
         <div class="nav-menu">
-            <a href="/">首页</a>
-            <a href="/archives/">归档</a>
-            <a href="/categories/">分类</a>
-            <a href="/tags/">标签</a>
+            <a href="/blog/">首页</a>
+            <a href="/blog/archives/">归档</a>
+            <a href="/blog/categories/">分类</a>
+            <a href="/blog/tags/">标签</a>
         </div>
     </div>
 </nav>
@@ -198,7 +198,7 @@ C语言文件操作回顾
   <!-- 内容区 -->
   <div id="top" style="display: block;">
     <div class="bar" style="width: 0;"></div>
-    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/blog/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
     <h3 class="subtitle">文件读写及文件描述符</h3>
     <div class="social">
@@ -238,7 +238,7 @@ C语言文件操作回顾
                         </a>
                     </div>
                     <div>
-                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                        <a href="/blog/archives" style="text-decoration: none; color: inherit;">
                             <span style="font-weight:bold; font-size:20px;color:#000!important;">74</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
@@ -248,7 +248,7 @@ C语言文件操作回顾
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/soft_hard_link/">Linux 文件软链接与硬链接</a></li><li><a href="/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/2025/07/16/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_wait/">Linux 进程等待</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/shared_memory/">Linux 进程间通信--system V 共享内存</a></li><li><a href="/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_buffer/">文件缓冲区</a></li><li><a href="/2025/07/20/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E9%80%9A%E4%BF%A1/pipe_communication/">Linux 进程间通信--匿名管道</a></li></ul>
+            <ul><li><a href="/blog/2025/07/18/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%96%87%E4%BB%B6/file_dup/">文件重定向</a></li><li><a href="/blog/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">Linux 进程地址空间第一讲</a></li><li><a href="/blog/2025/07/13/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_concept/">Linux 进程概念</a></li><li><a href="/blog/2025/07/17/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E6%8E%A7%E5%88%B6/process_replacement/">Linux 进程程序替换</a></li><li><a href="/blog/2025/07/19/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/a_so/">Linux 动态库和静态库</a></li><li><a href="/blog/2025/07/23/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/%E4%BF%A1%E5%8F%B7/signal_capture/">Linux 信号捕捉</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -273,7 +273,7 @@ C语言文件操作回顾
                     <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
                 </span>
                 
-  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/%E8%BF%9B%E7%A8%8B/" rel="tag">进程</a></li></ul>
 
 
             </div>
@@ -541,7 +541,7 @@ C语言文件操作回顾
 hello, linux<span class="token operator">!</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
 
 <h2><span id="文件描述符">文件描述符</span></h2><p>在 Linux 操作系统中，文件操作通过 open 函数等来实现，在 Linux 当中，操作系统对文件的管理同样遵循先描述再组织的方法，操作系统会维护一个文件结构体的双向链表，<br>而在进程结构体中同样有一个维护该进程的文件的结构体，这个结构体当中通过数组的方式维护一个个文件，而系统会将这些文件所对应的数组下标给用户使用，通过这些数组下标<br>就可以管理每一个文件，而这个数组下标就被称为文件描述符</p>
-<p><img src="/img/Linux/file_desc/fd.png" alt="fd"></p>
+<p><img src="/blog/img/Linux/file_desc/fd.png" alt="fd"></p>
 <p>这个图详细的表述了进程 PCB 中对文件的管理方式，每个进程的 PCB 中都会有一个 files_struct 结构体</p>
 <p>文件描述符中 0 表示标准输入文件，1 表示标准输出文件，2 表示标准错误文件，这是因为这三个外设在进程启动的时候就直接是打开的，因此每个文件在运行过程中默认<br>是有权利和这几个文件打交道的，因此，当我们在不关闭文件描述符的情况下通过 open 函数打开文件的时候默认获得的文件描述符是 3</p>
 <p>下面是对这三个默认文件描述符的介绍：</p>
@@ -853,7 +853,7 @@ total <span class="token number">32</span>
 -rwxr-xr-x <span class="token number">1</span> ljx ljx <span class="token number">16408</span> Jul <span class="token number">17</span> <span class="token number">22</span>:40 basic_io.o
 -rw-r--r-- <span class="token number">1</span> ljx ljx    <span class="token number">13</span> Jul <span class="token number">17</span> <span class="token number">22</span>:12 myfile
 -rw-rw-rw- <span class="token number">1</span> ljx ljx    <span class="token number">13</span> Jul <span class="token number">17</span> <span class="token number">22</span>:40 test.txt<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+<link rel="stylesheet" href="/blog/css/spoiler.css" type="text/css"><script src="/blog/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"
                         data-autoplay=" false">
@@ -863,15 +863,15 @@ total <span class="token number">32</span>
                         <ul id="audio-list" style="display:none">
                             
                                 
-                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        <li title="0" data-url="/blog/./music/StarryWinter.mp3"></li>
                                         
                                             
                                 
-                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        <li title="1" data-url="/blog/./music/三叶的主题音乐.mp3"></li>
                                         
                                             
                                 
-                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        <li title="2" data-url="/blog/./music/菊次郎的夏天.mp3"></li>
                                         
                                             
                         </ul>
@@ -885,8 +885,8 @@ total <span class="token number">32</span>
         data-ci="Ov23liAMVJGsSVpYEORo"
         data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
         data-r="blog-comments"
-        data-o="LiuJiaxuan69"
-        data-a="LiuJiaxuan69"
+        data-o="LiuJiaxuan1024"
+        data-a="LiuJiaxuan1024"
         data-d="false"
     >查看评论</div>
 
@@ -3134,17 +3134,17 @@ total <span class="token number">32</span>
 
 
 <script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
-<script src="/js/plugin.js"></script>
-<script src="/js/typed.js"></script>
-<script src="/js/diaspora.js"></script>
+<script src="/blog/js/plugin.js"></script>
+<script src="/blog/js/typed.js"></script>
+<script src="/blog/js/diaspora.js"></script>
 
 
-<link rel="stylesheet" href="/photoswipe/photoswipe.css">
-<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<link rel="stylesheet" href="/blog/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/blog/photoswipe/default-skin/default-skin.css">
 
 
-<script src="/photoswipe/photoswipe.min.js"></script>
-<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+<script src="/blog/photoswipe/photoswipe.min.js"></script>
+<script src="/blog/photoswipe/photoswipe-ui-default.min.js"></script>
 
 
 <!-- Root element of PhotoSwipe. Must have class pswp. -->

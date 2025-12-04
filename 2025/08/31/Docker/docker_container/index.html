@@ -27,7 +27,7 @@ docker start
 dock,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
-    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="icon" href="/blog/img/favicon.png"> 
     
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 
@@ -73,9 +73,9 @@ docker create
 docker start
 dock,"/>
     
-<link rel="stylesheet" href="/css/diaspora.css">
+<link rel="stylesheet" href="/blog/css/diaspora.css">
 
-    <script>window.searchDbPath = "/search.xml";</script>
+    <script>window.searchDbPath = "/blog/search.xml";</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
@@ -99,14 +99,14 @@ dock,"/>
   ">
 
     <div class="navbar-container">
-        <a href="/" class="site-title">
+        <a href="/blog/" class="site-title">
             刘家炫的博客
         </a>
         <div class="nav-menu">
-            <a href="/">首页</a>
-            <a href="/archives/">归档</a>
-            <a href="/categories/">分类</a>
-            <a href="/tags/">标签</a>
+            <a href="/blog/">首页</a>
+            <a href="/blog/archives/">归档</a>
+            <a href="/blog/categories/">分类</a>
+            <a href="/blog/tags/">标签</a>
         </div>
     </div>
 </nav>
@@ -204,7 +204,7 @@ dock,"/>
   <!-- 内容区 -->
   <div id="top" style="display: block;">
     <div class="bar" style="width: 0;"></div>
-    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/blog/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
     <h3 class="subtitle">Docker Container（容器）使用指南</h3>
     <div class="social">
@@ -244,7 +244,7 @@ dock,"/>
                         </a>
                     </div>
                     <div>
-                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                        <a href="/blog/archives" style="text-decoration: none; color: inherit;">
                             <span style="font-weight:bold; font-size:20px;color:#000!important;">74</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
@@ -254,7 +254,7 @@ dock,"/>
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li><li><a href="/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li></ul>
+            <ul><li><a href="/blog/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/blog/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/blog/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li><li><a href="/blog/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a></li><li><a href="/blog/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/blog/2025/09/02/Docker/docker_volume/">Docker Volume（存储卷）使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -279,7 +279,7 @@ dock,"/>
                     <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
                 </span>
                 
-  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a></li></ul>
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/%E5%AE%B9%E5%99%A8/" rel="tag">容器</a></li></ul>
 
 
             </div>
@@ -326,12 +326,12 @@ dock,"/>
 <!-- tocstop -->
 
 <h2><span id="什么是容器">什么是容器</span></h2><p>通俗地讲，容器是镜像的运行实体。镜像是静态的只读文件，而容器带有运行时需要的可写文件层，并且容器中的进程属于运行状态。即容器运行着真正的应用进程。容器有初建、运行、停止、暂停和删除五种状态。<br>虽然容器的本质是主机上运行的一个进程，但是容器有自己独立的命名空间隔离和资源限制。也就是说，在容器内部，无法看到主机上的进程、环境变量、网络等信息，这是容器与直接运行在主机上进程的本质区别。<br>容器是基于镜像创建的可运行实例，并且单独存在，一个镜像可以创建出多个容器。运行容器化环境时，实际上是在容器内部创建该文件系统的读写副本。这将添加一个容器层，该层允许修改镜像的整个副本。</p>
-<p><img src="/img/Docker/container/base.png" alt="base"></p>
+<p><img src="/blog/img/Docker/container/base.png" alt="base"></p>
 <h2><span id="为什么需要容器">为什么需要容器</span></h2><p>镜像是静态文件，是只读的，它并不能提供服务，就好比我有一个 <code>Linux</code> 的光盘，它里面有操作系统的所有文件，但我无法直接从光盘上运行这些文件。为了让这些文件发挥作用，我需要将它们加载到内存中并运行。这就是容器的作用，它为镜像提供了一个可运行的环境。</p>
 <h2><span id="容器的生命周期">容器的生命周期</span></h2><p>容器的生命周期指的是容器可能处于的不同状态，通常分为以下几类：</p>
 <p>1、created：容器已创建，但尚未启动。<br>2、running：容器正在运行中。<br>3、stopped：容器已停止运行。<br>4、paused：容器已暂停。<br>5、deleted：容器已被删除。</p>
 <p>各生命周期之间的转换关系如图所示：</p>
-<p><img src="/img/Docker/container/status.png" alt="status"></p>
+<p><img src="/blog/img/Docker/container/status.png" alt="status"></p>
 <p><strong>名词解释如下</strong>：</p>
 <ul>
 <li><strong><code>docker create</code></strong>：创建容器后，不立即启动运行，容器进入初建状态；</li>
@@ -2387,7 +2387,7 @@ a1b2c3d4e5f6   nginx:latest   <span class="token string">"/docker-entrypoint.…
 <li><strong>它的局限性</strong>：无法修改网络、存储等核心配置。</li>
 <li><strong>最佳实践</strong>：与监控系统结合，根据 metrics 指标动态调整资源配置，是实现容器化环境高效、稳定运行的高级技巧</li>
 </ul>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+<link rel="stylesheet" href="/blog/css/spoiler.css" type="text/css"><script src="/blog/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"
                         data-autoplay=" false">
@@ -2397,15 +2397,15 @@ a1b2c3d4e5f6   nginx:latest   <span class="token string">"/docker-entrypoint.…
                         <ul id="audio-list" style="display:none">
                             
                                 
-                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        <li title="0" data-url="/blog/./music/StarryWinter.mp3"></li>
                                         
                                             
                                 
-                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        <li title="1" data-url="/blog/./music/三叶的主题音乐.mp3"></li>
                                         
                                             
                                 
-                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        <li title="2" data-url="/blog/./music/菊次郎的夏天.mp3"></li>
                                         
                                             
                         </ul>
@@ -2419,8 +2419,8 @@ a1b2c3d4e5f6   nginx:latest   <span class="token string">"/docker-entrypoint.…
         data-ci="Ov23liAMVJGsSVpYEORo"
         data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
         data-r="blog-comments"
-        data-o="LiuJiaxuan69"
-        data-a="LiuJiaxuan69"
+        data-o="LiuJiaxuan1024"
+        data-a="LiuJiaxuan1024"
         data-d="false"
     >查看评论</div>
 
@@ -4668,17 +4668,17 @@ a1b2c3d4e5f6   nginx:latest   <span class="token string">"/docker-entrypoint.…
 
 
 <script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
-<script src="/js/plugin.js"></script>
-<script src="/js/typed.js"></script>
-<script src="/js/diaspora.js"></script>
+<script src="/blog/js/plugin.js"></script>
+<script src="/blog/js/typed.js"></script>
+<script src="/blog/js/diaspora.js"></script>
 
 
-<link rel="stylesheet" href="/photoswipe/photoswipe.css">
-<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<link rel="stylesheet" href="/blog/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/blog/photoswipe/default-skin/default-skin.css">
 
 
-<script src="/photoswipe/photoswipe.min.js"></script>
-<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+<script src="/blog/photoswipe/photoswipe.min.js"></script>
+<script src="/blog/photoswipe/photoswipe-ui-default.min.js"></script>
 
 
 <!-- Root element of PhotoSwipe. Must have class pswp. -->

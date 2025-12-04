@@ -26,7 +26,7 @@
 2. ,"> 
     <meta name="author" content="Jiaxuan Liu"> 
     <link rel="alternative" href="atom.xml" title="刘家炫的博客" type="application/atom+xml"> 
-    <link rel="icon" href="/img/favicon.png"> 
+    <link rel="icon" href="/blog/img/favicon.png"> 
     
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
 
@@ -70,9 +70,9 @@
 1. Volume（卷）
 2. ,"/>
     
-<link rel="stylesheet" href="/css/diaspora.css">
+<link rel="stylesheet" href="/blog/css/diaspora.css">
 
-    <script>window.searchDbPath = "/search.xml";</script>
+    <script>window.searchDbPath = "/blog/search.xml";</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
@@ -96,14 +96,14 @@
   ">
 
     <div class="navbar-container">
-        <a href="/" class="site-title">
+        <a href="/blog/" class="site-title">
             刘家炫的博客
         </a>
         <div class="nav-menu">
-            <a href="/">首页</a>
-            <a href="/archives/">归档</a>
-            <a href="/categories/">分类</a>
-            <a href="/tags/">标签</a>
+            <a href="/blog/">首页</a>
+            <a href="/blog/archives/">归档</a>
+            <a href="/blog/categories/">分类</a>
+            <a href="/blog/tags/">标签</a>
         </div>
     </div>
 </nav>
@@ -201,7 +201,7 @@
   <!-- 内容区 -->
   <div id="top" style="display: block;">
     <div class="bar" style="width: 0;"></div>
-    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/"></a>
+    <a class="iconfont icon-home image-icon" href="javascript:;" data-url="/blog/"></a>
     <div title="播放/暂停" class="iconfont icon-play"></div>
     <h3 class="subtitle">Docker Volume（存储卷）使用指南</h3>
     <div class="social">
@@ -241,7 +241,7 @@
                         </a>
                     </div>
                     <div>
-                        <a href="/archives" style="text-decoration: none; color: inherit;">
+                        <a href="/blog/archives" style="text-decoration: none; color: inherit;">
                             <span style="font-weight:bold; font-size:20px;color:#000!important;">74</span>
                             <span style="font-size:20px;color:#666!important;">文章</span>
                         </a>
@@ -251,7 +251,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/2025/08/22/Docker/docker_base/">Docker 前置知识-技术架构演进</a></li><li><a href="/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a></li><li><a href="/2025/08/31/Docker/docker_container/">Docker Container（容器）使用指南</a></li><li><a href="/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/2025/08/23/Docker/docker_key_tech/">Docker 底层关键技术-namespace &amp;&amp; cgroup</a></li></ul>
+            <ul><li><a href="/blog/2025/09/12/Docker/docker_cluster/">Docker 集群化部署</a></li><li><a href="/blog/2025/09/08/Docker/docker_dockerfile/">Dockerfile详解</a></li><li><a href="/blog/2025/08/30/Docker/docker_image/">Docker Image（镜像）使用指南</a></li><li><a href="/blog/2025/09/03/Docker/docker_network/">Docker Network（网络）使用指南</a></li><li><a href="/blog/2025/08/28/Docker/docker_use/">Docker 使用入门</a></li><li><a href="/blog/2025/09/05/Docker/docker_compose/">Docker Compose（容器编排）使用指南</a></li></ul>
         </div>
         <div class='main' style="/* 基础样式 */
     background-color: rgba(185, 207, 214, 0.8); /* 半透明颜色 */
@@ -276,7 +276,7 @@
                     <span id="leancloud_value_page_pv" style="margin-right: auto !important;"></span> 次阅读
                 </span>
                 
-  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/tags/%E5%AD%98%E5%82%A8%E5%8D%B7/" rel="tag">存储卷</a></li></ul>
+  <ul class="post-tags-list" itemprop="keywords"><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/Docker/" rel="tag">Docker</a></li><li class="post-tags-list-item"><a class="post-tags-list-link" href="/blog/tags/%E5%AD%98%E5%82%A8%E5%8D%B7/" rel="tag">存储卷</a></li></ul>
 
 
             </div>
@@ -399,7 +399,7 @@
 </li>
 </ul>
 <hr>
-<p><img src="/img/Docker/volume/compare.png" alt="compare"></p>
+<p><img src="/blog/img/Docker/volume/compare.png" alt="compare"></p>
 <hr>
 <p>下面是对三种存储方式的一个表格直观对比：</p>
 <table>
@@ -794,7 +794,7 @@ drwx-----x <span class="token number">3</span> root root <span class="token numb
 <span class="token builtin class-name">echo</span> <span class="token string">"Hello Volume"</span> <span class="token operator">></span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>然后通过浏览器访问 <code>http://宿主机IP:5566</code>，即可看到更新后的内容，证明宿主机和容器数据同步：</p>
-<p><img src="/img/Docker/volume/volume_url.png" alt="volume_url"></p>
+<p><img src="/blog/img/Docker/volume/volume_url.png" alt="volume_url"></p>
 <hr>
 <h4><span id="8-停止并删除容器">8. 停止并删除容器</span></h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop nginx1
 <span class="token function">docker</span> <span class="token function">rm</span> nginx1<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
@@ -841,7 +841,7 @@ drwx-----x <span class="token number">3</span> root root <span class="token numb
 <span class="token function">cat</span> index.html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
 
 <p>通过浏览器访问 <code>http://宿主机IP:5566</code>，可以看到页面内容已更新：</p>
-<p><img src="/img/Docker/volume/volume_v.png" alt="volume_v"></p>
+<p><img src="/blog/img/Docker/volume/volume_v.png" alt="volume_v"></p>
 <hr>
 <h4><span id="4-在容器中尝试修改文件">4. 在容器中尝试修改文件</span></h4><p>进入容器，尝试删除 <code>index.html</code>：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> <span class="token builtin class-name">exec</span> <span class="token parameter variable">-it</span> nginx2 <span class="token function">bash</span>
@@ -906,7 +906,7 @@ drwx-----x <span class="token number">3</span> root root <span class="token numb
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">Hello Volume - <span class="token function">mount</span><span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
 
 <p>此时浏览器访问 <code>http://宿主机IP:5566</code>，即可看到页面内容已更新：</p>
-<p><img src="/img/Docker/volume/volume_mount.png" alt="volume_mount"></p>
+<p><img src="/blog/img/Docker/volume/volume_mount.png" alt="volume_mount"></p>
 <hr>
 <h4><span id="5-清理释放空间">5. 清理释放空间</span></h4><p>实验完成后，可以停止并删除容器：</p>
 <pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token function">docker</span> stop nginx3
@@ -1163,7 +1163,7 @@ mysql <span class="token parameter variable">-u</span> root <span class="token p
 </li>
 </ol>
 <p>通过以上措施，可以在容器化环境中既保持MySQL的高性能和灵活性，又确保数据安全与可恢复性，从而满足生产环境对可靠性的要求。</p>
-<link rel="stylesheet" href="/css/spoiler.css" type="text/css"><script src="/js/spoiler.js" type="text/javascript" async></script>
+<link rel="stylesheet" href="/blog/css/spoiler.css" type="text/css"><script src="/blog/js/spoiler.js" type="text/javascript" async></script>
                     <!--[if lt IE 9]><script>document.createElement('audio');</script><![endif]-->
                     <audio id="audio" loop="1" preload="auto" controls="controls"
                         data-autoplay=" false">
@@ -1173,15 +1173,15 @@ mysql <span class="token parameter variable">-u</span> root <span class="token p
                         <ul id="audio-list" style="display:none">
                             
                                 
-                                        <li title="0" data-url="/./music/StarryWinter.mp3"></li>
+                                        <li title="0" data-url="/blog/./music/StarryWinter.mp3"></li>
                                         
                                             
                                 
-                                        <li title="1" data-url="/./music/三叶的主题音乐.mp3"></li>
+                                        <li title="1" data-url="/blog/./music/三叶的主题音乐.mp3"></li>
                                         
                                             
                                 
-                                        <li title="2" data-url="/./music/菊次郎的夏天.mp3"></li>
+                                        <li title="2" data-url="/blog/./music/菊次郎的夏天.mp3"></li>
                                         
                                             
                         </ul>
@@ -1195,8 +1195,8 @@ mysql <span class="token parameter variable">-u</span> root <span class="token p
         data-ci="Ov23liAMVJGsSVpYEORo"
         data-cs="bac5abf96cef1ba321ec7084197393d805bf8b88"
         data-r="blog-comments"
-        data-o="LiuJiaxuan69"
-        data-a="LiuJiaxuan69"
+        data-o="LiuJiaxuan1024"
+        data-a="LiuJiaxuan1024"
         data-d="false"
     >查看评论</div>
 
@@ -3444,17 +3444,17 @@ mysql <span class="token parameter variable">-u</span> root <span class="token p
 
 
 <script src="//lib.baomitu.com/jquery/1.8.3/jquery.min.js"></script>
-<script src="/js/plugin.js"></script>
-<script src="/js/typed.js"></script>
-<script src="/js/diaspora.js"></script>
+<script src="/blog/js/plugin.js"></script>
+<script src="/blog/js/typed.js"></script>
+<script src="/blog/js/diaspora.js"></script>
 
 
-<link rel="stylesheet" href="/photoswipe/photoswipe.css">
-<link rel="stylesheet" href="/photoswipe/default-skin/default-skin.css">
+<link rel="stylesheet" href="/blog/photoswipe/photoswipe.css">
+<link rel="stylesheet" href="/blog/photoswipe/default-skin/default-skin.css">
 
 
-<script src="/photoswipe/photoswipe.min.js"></script>
-<script src="/photoswipe/photoswipe-ui-default.min.js"></script>
+<script src="/blog/photoswipe/photoswipe.min.js"></script>
+<script src="/blog/photoswipe/photoswipe-ui-default.min.js"></script>
 
 
 <!-- Root element of PhotoSwipe. Must have class pswp. -->
