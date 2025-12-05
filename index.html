@@ -830,26 +830,28 @@ Redis 集群的分片算法–哈希槽分区算法
 <div class="post post-card">
     <div class="card-grid">
     <!-- 左侧：文章信息卡片 -->
-    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_cache/'">
+    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_dist_lock/'">
         <div class="post-meta">九月 19, 2025</div>
         <h3 class="post-title">
-            <a href="/blog/2025/09/19/Redis/Redis_cache/" title="Redis 应用--缓存" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--缓存</a>
+            <a href="/blog/2025/09/19/Redis/Redis_dist_lock/" title="Redis 应用--分布式锁" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--分布式锁</a>
         </h3>
         <p class="post-excerpt">
 
 
-什么是缓存
-使用 Redis 作为缓存
-缓存更新策略
-定期生成
-实时生成
-缓存（预热、穿透、雪崩、击穿）–重中之重
+什么是分布式锁
+分布式锁的实现
+基础实现
+引入校验 ID
+引入过期时间
+引入看门狗(Watchdog)
+引入 Lua 脚本
+引入 RedLock 算法
 
 
 
 
 
-在生产环境中，Redis 最常见的应用场景之一就是作为...</p>
+什么是分布式锁在分...</p>
     </div>
 
     <!-- 右侧：分类与标签（分两排） -->
@@ -884,8 +886,8 @@ Redis 集群的分片算法–哈希槽分区算法
                         数据库
                     </a>
                 
-                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BC%93%E5%AD%98/" title="查看标签：缓存" onclick="event.stopPropagation();">
-                        缓存
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" title="查看标签：分布式锁" onclick="event.stopPropagation();">
+                        分布式锁
                     </a>
                 
             </div>
@@ -950,28 +952,26 @@ Redis 集群的分片算法–哈希槽分区算法
 <div class="post post-card">
     <div class="card-grid">
     <!-- 左侧：文章信息卡片 -->
-    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_dist_lock/'">
+    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_cache/'">
         <div class="post-meta">九月 19, 2025</div>
         <h3 class="post-title">
-            <a href="/blog/2025/09/19/Redis/Redis_dist_lock/" title="Redis 应用--分布式锁" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--分布式锁</a>
+            <a href="/blog/2025/09/19/Redis/Redis_cache/" title="Redis 应用--缓存" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--缓存</a>
         </h3>
         <p class="post-excerpt">
 
 
-什么是分布式锁
-分布式锁的实现
-基础实现
-引入校验 ID
-引入过期时间
-引入看门狗(Watchdog)
-引入 Lua 脚本
-引入 RedLock 算法
+什么是缓存
+使用 Redis 作为缓存
+缓存更新策略
+定期生成
+实时生成
+缓存（预热、穿透、雪崩、击穿）–重中之重
 
 
 
 
 
-什么是分布式锁在分...</p>
+在生产环境中，Redis 最常见的应用场景之一就是作为...</p>
     </div>
 
     <!-- 右侧：分类与标签（分两排） -->
@@ -1006,8 +1006,8 @@ Redis 集群的分片算法–哈希槽分区算法
                         数据库
                     </a>
                 
-                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" title="查看标签：分布式锁" onclick="event.stopPropagation();">
-                        分布式锁
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BC%93%E5%AD%98/" title="查看标签：缓存" onclick="event.stopPropagation();">
+                        缓存
                     </a>
                 
             </div>

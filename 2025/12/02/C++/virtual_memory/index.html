@@ -229,7 +229,7 @@
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_string/">Redis C++ 客户端使用指南-String 篇</a></li><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/blog/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/blog/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/blog/2025/09/30/C++/async/">C++ 异步编程</a></li></ul>
+            <ul><li><a href="/blog/2025/08/14/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_func/">Redis C++ 客户端使用指南-基础指令篇</a></li><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_list/">Redis C++ 客户端使用指南-List 篇</a></li><li><a href="/blog/2025/09/30/C++/async/">C++ 异步编程</a></li><li><a href="/blog/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/blog/2025/10/07/C++/template/">C++ 中的模版元编程</a></li></ul>
         </div>
         <div class='main' style="
     background: transparent;
@@ -276,7 +276,7 @@
 <p>在现代 C++ 开发中，理解虚拟内存的地址分布对于优化程序性能和调试内存相关问题至关重要。本文将深入探讨虚拟内存的基本概念、地址分布以及各个区域的用途和特点。</p>
 <p>首先我放一张典型的 Linux 64 位进程虚拟内存布局图，方便大家理解：</p>
 <p><img src="/blog/img/C++/virtual_mem/virtual_mem.png" alt="virtual_memery"></p>
-<h2><span id="什么是虚拟内存">什么是虚拟内存？</span></h2><p>虚拟内存是一种内存管理技术，它使得每个进程都拥有一个独立的地址空间。操作系统通过将虚拟地址映射到物理内存地址，实现了内存的抽象化。这种机制允许程序使用比实际物理内存更大的内存空间，并且提高了内存的利用效率，有关进程地址空间的介绍，我在之前的文章中讲过，详细可见：<a href="https://liujiaxuan1024.github.io/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">进程地址空间</a></p>
+<h2><span id="什么是虚拟内存">什么是虚拟内存？</span></h2><p>虚拟内存是一种内存管理技术，它使得每个进程都拥有一个独立的地址空间。操作系统通过将虚拟地址映射到物理内存地址，实现了内存的抽象化。这种机制允许程序使用比实际物理内存更大的内存空间，并且提高了内存的利用效率，有关进程地址空间的介绍，我在之前的文章中讲过，详细可见：<a href="https://liujiaxuan1024.github.io/blog/2025/07/15/Linux%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/%E8%BF%9B%E7%A8%8B/process_add1/">进程地址空间</a></p>
 <h2><span id="虚拟内存的地址分布">虚拟内存的地址分布</span></h2><p>现代操作系统（如 Linux）在每个进程中都采用 <strong>虚拟内存（Virtual Memory）</strong> 的方式来组织地址空间。虚拟地址空间逻辑上是连续的，但实际映射到物理内存、磁盘或文件时会经过内核调度与分页管理。下面从地址高低顺序出发，对典型的 Linux 64 位进程地址空间结构逐一说明。</p>
 <h3><span id="1-栈stack">1. 栈（Stack）</span></h3><p>栈位于虚拟内存的高地址区域，并且 <strong>向下增长</strong>。<br>主要用于存放：</p>
 <ul>
