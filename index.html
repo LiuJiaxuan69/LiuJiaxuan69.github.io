@@ -830,6 +830,126 @@ Redis 集群的分片算法–哈希槽分区算法
 <div class="post post-card">
     <div class="card-grid">
     <!-- 左侧：文章信息卡片 -->
+    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_cache/'">
+        <div class="post-meta">九月 19, 2025</div>
+        <h3 class="post-title">
+            <a href="/blog/2025/09/19/Redis/Redis_cache/" title="Redis 应用--缓存" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--缓存</a>
+        </h3>
+        <p class="post-excerpt">
+
+
+什么是缓存
+使用 Redis 作为缓存
+缓存更新策略
+定期生成
+实时生成
+缓存（预热、穿透、雪崩、击穿）–重中之重
+
+
+
+
+
+在生产环境中，Redis 最常见的应用场景之一就是作为...</p>
+    </div>
+
+    <!-- 右侧：分类与标签（分两排） -->
+    <div class="post-right">
+        <div class="tag-cloud-cover" aria-label="分类与标签">
+            <div class="cloud-row cloud-row-cats">
+                <span class="cloud-title">分类</span>
+                
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/" title="查看分类：技术" onclick="event.stopPropagation();">
+                        技术
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/" title="查看分类：非关系型数据库" onclick="event.stopPropagation();">
+                        非关系型数据库
+                    </a>
+                
+                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/%E5%90%8E%E7%AB%AF%E5%B7%A5%E5%85%B7/" title="查看分类：后端工具" onclick="event.stopPropagation();">
+                        后端工具
+                    </a>
+                
+            </div>
+            <div class="cloud-row cloud-row-tags">
+                <span class="cloud-title">标签</span>
+                
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/Redis/" title="查看标签：Redis" onclick="event.stopPropagation();">
+                        Redis
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" title="查看标签：数据库" onclick="event.stopPropagation();">
+                        数据库
+                    </a>
+                
+                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BC%93%E5%AD%98/" title="查看标签：缓存" onclick="event.stopPropagation();">
+                        缓存
+                    </a>
+                
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<style>
+    /* 标签词云封面样式（简约、无图片） */
+    /* 两列布局整体样式 */
+        /* 单一卡片：内部两列，中间分隔线 */
+        .post-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fff;
+            padding: 0;
+            max-width: 980px;
+            margin: 40px auto;
+            box-shadow: 0 6px 18px rgba(0,0,0,.05);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr; /* 左窄右宽 */
+            align-items: stretch;
+        }
+        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
+
+    .post-left,
+    .post-right { padding: 18px 20px; }
+    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
+    .post-left:hover { transform: translateY(-2px); }
+    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
+    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
+
+        /* 去除重叠，使用分隔线增强左右区块关系 */
+
+    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
+    .post-title a { color: #0f172a; text-decoration: none; }
+    .post-title a:hover { color: #2563eb; }
+    .post-excerpt { color: #374151; margin-top: 8px; }
+
+    /* 右侧词云卡片：两排显示 */
+    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
+    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
+    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
+    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
+    .cloud-chip:hover { background:#eef2f7; }
+    .cloud-empty { color:#9ca3af; }
+
+    /* 夜间模式适配 */
+    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+    html.dark-mode .post-right { border-left-color:#374151; }
+    html.dark-mode .cloud-title { color:#9ca3af; }
+    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
+    html.dark-mode .cloud-chip:hover { background:#323c4a; }
+    html.dark-mode .cloud-empty { color:#9ca3af; }
+</style>
+
+
+<div class="post post-card">
+    <div class="card-grid">
+    <!-- 左侧：文章信息卡片 -->
     <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_dist_lock/'">
         <div class="post-meta">九月 19, 2025</div>
         <h3 class="post-title">
@@ -1010,126 +1130,6 @@ Redis Sentinel 高可用集群部署与实践
                 
                     <a class="cloud-chip cloud-tag" href="/blog/tags/%E5%93%A8%E5%85%B5/" title="查看标签：哨兵" onclick="event.stopPropagation();">
                         哨兵
-                    </a>
-                
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
-
-<style>
-    /* 标签词云封面样式（简约、无图片） */
-    /* 两列布局整体样式 */
-        /* 单一卡片：内部两列，中间分隔线 */
-        .post-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            background: #fff;
-            padding: 0;
-            max-width: 980px;
-            margin: 40px auto;
-            box-shadow: 0 6px 18px rgba(0,0,0,.05);
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: 320px 1fr; /* 左窄右宽 */
-            align-items: stretch;
-        }
-        @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
-
-    .post-left,
-    .post-right { padding: 18px 20px; }
-    .post-left { cursor: pointer; transition: transform .2s ease; min-height: 220px; }
-    .post-left:hover { transform: translateY(-2px); }
-    .post-right { min-height: 180px; border-left: 1px solid #e5e7eb; }
-    @media (max-width: 900px) { .post-right { border-left: none; border-top: 1px solid #e5e7eb; } }
-
-        /* 去除重叠，使用分隔线增强左右区块关系 */
-
-    .post-meta { color: #6b7280; font-size: 13px; margin-bottom: 6px; }
-    .post-title a { color: #0f172a; text-decoration: none; }
-    .post-title a:hover { color: #2563eb; }
-    .post-excerpt { color: #374151; margin-top: 8px; }
-
-    /* 右侧词云卡片：两排显示 */
-    .tag-cloud-cover { display: grid; grid-template-columns: 1fr; row-gap: 12px; }
-    .cloud-title { color:#6b7280; font-size: 13px; margin-right: 6px; }
-    .cloud-row { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; }
-    .cloud-chip { color:#111827; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; line-height:1; text-decoration:none; }
-    .cloud-chip:hover { background:#eef2f7; }
-    .cloud-empty { color:#9ca3af; }
-
-    /* 夜间模式适配 */
-    html.dark-mode .post-card { background:#1f2937; border-color:#374151; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
-    html.dark-mode .post-right { border-left-color:#374151; }
-    html.dark-mode .cloud-title { color:#9ca3af; }
-    html.dark-mode .cloud-chip { color:#e5e7eb; border-color:#4b5563; background:#2d3748; }
-    html.dark-mode .cloud-chip:hover { background:#323c4a; }
-    html.dark-mode .cloud-empty { color:#9ca3af; }
-</style>
-
-
-<div class="post post-card">
-    <div class="card-grid">
-    <!-- 左侧：文章信息卡片 -->
-    <div class="post-left" onclick="window.location.href='/blog/2025/09/19/Redis/Redis_cache/'">
-        <div class="post-meta">九月 19, 2025</div>
-        <h3 class="post-title">
-            <a href="/blog/2025/09/19/Redis/Redis_cache/" title="Redis 应用--缓存" class="posttitle" onclick="event.stopPropagation(); window.location.href&#x3D;this.href; return false;">Redis 应用--缓存</a>
-        </h3>
-        <p class="post-excerpt">
-
-
-什么是缓存
-使用 Redis 作为缓存
-缓存更新策略
-定期生成
-实时生成
-缓存（预热、穿透、雪崩、击穿）–重中之重
-
-
-
-
-
-在生产环境中，Redis 最常见的应用场景之一就是作为...</p>
-    </div>
-
-    <!-- 右侧：分类与标签（分两排） -->
-    <div class="post-right">
-        <div class="tag-cloud-cover" aria-label="分类与标签">
-            <div class="cloud-row cloud-row-cats">
-                <span class="cloud-title">分类</span>
-                
-                
-                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/" title="查看分类：技术" onclick="event.stopPropagation();">
-                        技术
-                    </a>
-                
-                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/" title="查看分类：非关系型数据库" onclick="event.stopPropagation();">
-                        非关系型数据库
-                    </a>
-                
-                    <a class="cloud-chip cloud-cat" href="/blog/categories/%E6%8A%80%E6%9C%AF/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/%E5%90%8E%E7%AB%AF%E5%B7%A5%E5%85%B7/" title="查看分类：后端工具" onclick="event.stopPropagation();">
-                        后端工具
-                    </a>
-                
-            </div>
-            <div class="cloud-row cloud-row-tags">
-                <span class="cloud-title">标签</span>
-                
-                
-                    <a class="cloud-chip cloud-tag" href="/blog/tags/Redis/" title="查看标签：Redis" onclick="event.stopPropagation();">
-                        Redis
-                    </a>
-                
-                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" title="查看标签：数据库" onclick="event.stopPropagation();">
-                        数据库
-                    </a>
-                
-                    <a class="cloud-chip cloud-tag" href="/blog/tags/%E7%BC%93%E5%AD%98/" title="查看标签：缓存" onclick="event.stopPropagation();">
-                        缓存
                     </a>
                 
             </div>

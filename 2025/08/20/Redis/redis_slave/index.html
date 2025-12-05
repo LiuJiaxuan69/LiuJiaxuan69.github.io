@@ -244,7 +244,7 @@ slaveof
         </div>
         <div class="recommendations">
             <h2>相关推荐</h2>
-            <ul><li><a href="/blog/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_hash/">Redis C++ 客户端使用指南-Hash 篇</a></li><li><a href="/blog/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li><li><a href="/blog/2025/08/15/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_set/">Redis C++ 客户端使用指南-Set 篇</a></li><li><a href="/blog/2025/09/19/Redis/redis_sentinel/">Redis 哨兵机制</a></li><li><a href="/blog/2025/08/16/Redis/C++%E5%AE%A2%E6%88%B7%E7%AB%AF/redis_cpp_zset/">Redis C++ 客户端使用指南-Zset 篇</a></li><li><a href="/blog/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li></ul>
+            <ul><li><a href="/blog/2025/07/07/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/String/">Redis 常见数据类型-String 类型</a></li><li><a href="/blog/2025/06/19/Redis/redis_single_thread_model/">关于 Redis 单线程模型的探讨</a></li><li><a href="/blog/2025/09/19/Redis/redis_sentinel/">Redis 哨兵机制</a></li><li><a href="/blog/2025/07/09/Redis/%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B/List/">Redis 常见数据类型-List 类型</a></li><li><a href="/blog/2025/06/16/Redis/redis_command_line_user_guide/">Redis 命令行使用指南</a></li><li><a href="/blog/2025/09/20/Redis/redis_cluster/">Redis 集群</a></li></ul>
         </div>
         <div class='main' style="
     background: transparent;
@@ -1297,6 +1297,18 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
             background: rgba(13, 148, 136, .06);
             border-radius: 6px;
         }
+        /* 夜间模式下，提升推荐区 hover 的优先级，避免被全局 .article a:hover(蓝色) 覆盖 */
+        body.dark-mode .article .recommendations li a:hover,
+        body.dark-mode .article .recommendations li a:focus,
+        body.dark-mode .article .recommendations li a:active,
+        body.dark-mode .article .recommendations li a:visited:hover,
+        html.dark-mode .article .recommendations li a:hover,
+        html.dark-mode .article .recommendations li a:focus,
+        html.dark-mode .article .recommendations li a:active,
+        html.dark-mode .article .recommendations li a:visited:hover {
+            color: #0d9488 !important;
+            background: rgba(13, 148, 136, .10) !important;
+        }
     </style>
     <!-- ...existing code... -->
     <style>
@@ -2119,9 +2131,9 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     <button id="ai-fab" title="AI 问答" class="ai-fab">AI</button>
 </div>
 
-<!-- AI 弹窗容器 -->
-<div id="ai-mask" class="ai-mask"></div>
-<div id="ai-dialog" class="ai-dialog" aria-modal="true" role="dialog">
+<!-- AI 弹窗容器（修复：默认添加基础样式，确保DOM存在） -->
+<div id="ai-mask" class="ai-mask" style="display: none; pointer-events: none;"></div>
+<div id="ai-dialog" class="ai-dialog" aria-modal="true" role="dialog" style="display: none; pointer-events: none; z-index: 9999;">
   <!-- 弹窗头部 -->
   <div class="ai-head">
     <span>AI 问答（基于本文）</span>
@@ -2190,6 +2202,11 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     --ai-placeholder-dark: #9ca3af; /* 深色模式占位符颜色 */
     --ai-scrollbar-thumb-light: #ddd;
     --ai-scrollbar-thumb-dark: #4b5563; /* 深色模式滚动条 */
+    /* AI按钮悬浮变量 */
+    --ai-fab-size: 56px;
+    --ai-fab-hover-size: 62px; /* 悬浮时放大6px */
+    --ai-fab-font-size: 20px;
+    --ai-fab-hover-font-size: 24px; /* 悬浮时文字放大 */
   }
 
   /* 返回顶部按钮样式 */
@@ -2284,35 +2301,78 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     height: 24px;
   }
 
-  /* AI 悬浮按钮样式（简约无背景风格） */
+  /* AI 悬浮按钮样式（新增悬浮放大交互） */
   .ai-fab {
     position: fixed;
     right: var(--back-to-top-margin);
     bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 12px); /* 在返回顶部上方，间距12px */
-    width: var(--back-to-top-size);
-    height: var(--back-to-top-size);
+    width: var(--ai-fab-size);
+    height: var(--ai-fab-size);
     border-radius: 50%;
     border: 1px solid #e5e7eb;
     background: rgba(255, 255, 255, 0.75);
     color: #0f172a;
-    font-size: 20px;
+    font-size: var(--ai-fab-font-size);
     font-weight: 700;
     letter-spacing: 0.5px;
     box-shadow: 0 6px 18px rgba(0,0,0,.06);
     cursor: pointer;
     z-index: 999;
-    transition: var(--back-to-top-transition);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* 流畅的过渡动画 */
     display: flex;
     align-items: center;
     justify-content: center;
+    /* 防止文字溢出 */
+    overflow: hidden;
+    white-space: nowrap;
+    /* 强制居中 */
+    line-height: 1;
   }
 
+  /* AI按钮悬浮效果（核心：大小+文字同时放大） */
+  .ai-fab:hover {
+    width: var(--ai-fab-hover-size);
+    height: var(--ai-fab-hover-size);
+    font-size: var(--ai-fab-hover-font-size);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 22px rgba(0,0,0,.12);
+    /* 轻微上浮，增强交互感 */
+    transform: translateY(-3px);
+  }
+
+  /* 深色模式下AI按钮悬浮效果 */
+  .dark-mode .ai-fab {
+    border-color: #374151;
+    background: rgba(31, 41, 55, 0.85);
+    color: #e5e7eb;
+    box-shadow: 0 6px 18px rgba(0,0,0,.25);
+  }
+  .dark-mode .ai-fab:hover {
+    background: rgba(31, 41, 55, 0.95);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    /* 深色模式悬浮时保持放大效果 */
+    width: var(--ai-fab-hover-size);
+    height: var(--ai-fab-hover-size);
+    font-size: var(--ai-fab-hover-font-size);
+  }
+
+  /* AI 遮罩层样式（修复：默认隐藏，打开时仅作为背景不拦截交互） */
+  .ai-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent; /* 透明遮罩，不遮挡内容 */
+    z-index: 9998;
+    transition: all 0.2s ease;
+  }
+
+  /* AI 对话框核心样式（修复：确保DOM有实体，可交互） */
   .ai-dialog {
-    display: none;
     position: fixed;
     right: var(--back-to-top-margin);
     bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + 72px); /* 在AI按钮上方 */
-    /* 关键修改2：缩小对话框宽度（原360px → 340px，缩小20px，约半个字宽度） */
     width: 340px;
     max-width: 92vw;
     height: 440px;
@@ -2327,35 +2387,26 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     transform: translateY(10px);
     opacity: 0;
     color: var(--ai-text-light); /* 浅色模式文字 */
-    pointer-events: auto; /* 确保弹窗自身可交互 */
+    pointer-events: none; /* 默认不可交互 */
+    /* 强制保证盒子模型完整 */
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
-  /* 深色模式适配：悬浮按钮与弹窗主体 */
-  .dark-mode .ai-fab {
-    border-color: #374151;
-    background: rgba(31, 41, 55, 0.85);
-    color: #e5e7eb;
-    box-shadow: 0 6px 18px rgba(0,0,0,.25);
-  }
-  .dark-mode .ai-fab:hover {
-    background: rgba(31, 41, 55, 0.95);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
-    font-size: 22px;
+  /* AI 对话框显示状态（核心修复：恢复交互能力） */
+  .ai-dialog.show {
+    display: flex !important;
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto !important; /* 打开时可交互 */
   }
 
   /* 深色模式弹窗主体 */
   .dark-mode .ai-dialog {
-    background: var(--ai-bg-dark);
-    border-color: var(--ai-head-border-dark);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3);
-    color: var(--ai-text-dark);
-  }
-
-  .ai-dialog.show {
-    display: flex;
-    transform: translateY(0);
-    opacity: 1;
-    pointer-events: auto; /* 打开时可交互 */
+    background: var(--ai-bg-dark) !important;
+    border-color: var(--ai-head-border-dark) !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3) !important;
+    color: var(--ai-text-dark) !important;
   }
 
   .ai-head {
@@ -2366,14 +2417,17 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     border-bottom: 1px solid var(--ai-head-border-light);
     font-weight: 600;
     font-size: 15px;
+    /* 强制头部样式 */
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   /* 深色模式头部边框 */
   .dark-mode .ai-head {
-    border-bottom-color: var(--ai-head-border-dark);
+    border-bottom-color: var(--ai-head-border-dark) !important;
   }
 
-  /* 清空历史按钮样式 */
+  /* 清空历史按钮样式（保留但隐藏，如需启用可取消注释） */
   .ai-clear {
     border: none;
     background: transparent;
@@ -2388,12 +2442,13 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     justify-content: center;
     transition: background-color 0.2s;
     margin-right: 8px;
+    display: none; /* 隐藏 */
   }
 
   /* 深色模式按钮颜色 */
   .dark-mode .ai-clear,
   .dark-mode .ai-close {
-    color: #9ca3af;
+    color: #9ca3af !important;
   }
 
   .ai-clear:hover {
@@ -2403,8 +2458,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
 
   .dark-mode .ai-clear:hover,
   .dark-mode .ai-close:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #fff;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
   }
 
   .ai-close {
@@ -2420,6 +2475,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
+    /* 强制按钮可点击 */
+    pointer-events: auto;
   }
 
   .ai-close:hover {
@@ -2433,11 +2490,14 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     padding: 12px;
     line-height: 1.6;
     font-size: 14px;
+    /* 强制消息区样式 */
+    box-sizing: border-box;
+    background: inherit;
   }
 
   /* 深色模式滚动条 */
   .dark-mode .ai-msgs::-webkit-scrollbar-thumb {
-    background: var(--ai-scrollbar-thumb-dark);
+    background: var(--ai-scrollbar-thumb-dark) !important;
   }
 
   .ai-msgs::-webkit-scrollbar {
@@ -2462,6 +2522,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     border-radius: 10px;
     word-break: break-word;
     font-size: 14px;
+    box-sizing: border-box;
   }
 
   .ai-msg.user {
@@ -2478,13 +2539,13 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
 
   /* 深色模式消息气泡 */
   .dark-mode .ai-msg.user {
-    background: var(--ai-msg-user-dark);
-    color: #d1fae5; /* 深色模式用户消息文字 */
+    background: var(--ai-msg-user-dark) !important;
+    color: #d1fae5 !important; /* 深色模式用户消息文字 */
   }
 
   .dark-mode .ai-msg.ai {
-    background: var(--ai-msg-ai-dark);
-    color: var(--ai-text-dark);
+    background: var(--ai-msg-ai-dark) !important;
+    color: var(--ai-text-dark) !important;
   }
 
   /* AI 加载中提示样式 - 深色模式适配 */
@@ -2496,7 +2557,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-loading {
-    color: #6b7280;
+    color: #6b7280 !important;
   }
 
   /* 加载动画（三个点依次闪烁） */
@@ -2519,11 +2580,14 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     gap: 8px;
     padding: 10px;
     border-top: 1px solid var(--ai-head-border-light);
+    /* 强制输入区样式 */
+    box-sizing: border-box;
+    flex-shrink: 0;
   }
 
   /* 深色模式输入区边框 */
   .dark-mode .ai-input {
-    border-top-color: var(--ai-head-border-dark);
+    border-top-color: var(--ai-head-border-dark) !important;
   }
 
   #ai-q {
@@ -2536,13 +2600,16 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     transition: border-color 0.2s, background-color 0.2s;
     background: var(--ai-input-bg-light);
     color: var(--ai-text-light);
+    /* 强制输入框可交互 */
+    pointer-events: auto;
+    box-sizing: border-box;
   }
 
   /* 深色模式输入框 */
   .dark-mode #ai-q {
-    border-color: var(--ai-input-border-dark);
-    background: var(--ai-input-bg-dark);
-    color: var(--ai-text-dark);
+    border-color: var(--ai-input-border-dark) !important;
+    background: var(--ai-input-bg-dark) !important;
+    color: var(--ai-text-dark) !important;
   }
 
   /* 输入框占位符样式 - 深色模式适配 */
@@ -2551,30 +2618,30 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode #ai-q::placeholder {
-    color: var(--ai-placeholder-dark);
+    color: var(--ai-placeholder-dark) !important;
   }
 
   /* 输入框禁用状态样式 */
   #ai-q:disabled {
-    background-color: #f9fafb;
-    color: #9ca3af;
+    background-color: #f9fafb !important;
+    color: #9ca3af !important;
     cursor: not-allowed;
-    border-color: #e5e7eb;
+    border-color: #e5e7eb !important;
   }
 
   .dark-mode #ai-q:disabled {
-    background-color: #2d3748;
-    color: #6b7280;
-    border-color: #4b5563;
+    background-color: #2d3748 !important;
+    color: #6b7280 !important;
+    border-color: #4b5563 !important;
   }
 
   #ai-q:focus {
-    border-color: #0d9488;
-    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1);
+    border-color: #0d9488 !important;
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1) !important;
   }
 
   .dark-mode #ai-q:focus {
-    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3);
+    box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.3) !important;
   }
 
   .ai-send {
@@ -2586,10 +2653,12 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.2s;
+    /* 强制按钮可交互 */
+    pointer-events: auto;
   }
 
   .ai-send:hover:not(:disabled) {
-    background: #0f766e;
+    background: #0f766e !important;
   }
 
   .ai-send:disabled {
@@ -2626,8 +2695,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg code {
-    background: #1f2937;
-    color: #f8fafc;
+    background: #1f2937 !important;
+    color: #f8fafc !important;
   }
 
   .ai-msg pre {
@@ -2639,12 +2708,12 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg pre {
-    background: #1f2937;
-    border-color: #374151;
+    background: #1f2937 !important;
+    border-color: #374151 !important;
   }
 
   .dark-mode .ai-msg pre code {
-    background: transparent;
+    background: transparent !important;
   }
 
   .ai-msg blockquote {
@@ -2655,8 +2724,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg blockquote {
-    border-left-color: #4b5563;
-    color: #9ca3af;
+    border-left-color: #4b5563 !important;
+    color: #9ca3af !important;
   }
 
   .ai-msg table {
@@ -2668,7 +2737,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg table {
-    border-color: #374151;
+    border-color: #374151 !important;
   }
 
   .ai-msg th,
@@ -2680,7 +2749,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
 
   .dark-mode .ai-msg th,
   .dark-mode .ai-msg td {
-    border-color: #374151;
+    border-color: #374151 !important;
   }
 
   .ai-msg th {
@@ -2689,8 +2758,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg th {
-    background: #2d3748;
-    color: #f9fafb;
+    background: #2d3748 !important;
+    color: #f9fafb !important;
   }
 
   .ai-msg tr:nth-child(even) {
@@ -2698,7 +2767,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .ai-msg tr:nth-child(even) {
-    background: #2d3748;
+    background: #2d3748 !important;
   }
 
   /* 小屏幕适配 */
@@ -2706,6 +2775,11 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     :root {
       --back-to-top-size: 48px;
       --back-to-top-margin: 16px;
+      /* 小屏幕AI按钮尺寸调整 */
+      --ai-fab-size: 48px;
+      --ai-fab-hover-size: 54px;
+      --ai-fab-font-size: 18px;
+      --ai-fab-hover-font-size: 22px;
     }
 
     .back-to-top-icon {
@@ -2730,8 +2804,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     .ai-dialog {
       bottom: calc(var(--back-to-top-margin) + var(--back-to-top-size) + var(--back-to-top-size) + 24px);
       height: 380px;
-      /* 小屏幕保持原有宽度比例，不额外缩小 */
-      width: 92vw;
+      width: 92vw !important;
     }
   }
 
@@ -2775,8 +2848,6 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   /* 评论区样式 */
-  }
-
   .gt-container .gt-comment-content {
     border-radius: 10px;
   }
@@ -2914,8 +2985,8 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
 
   /* 暗色模式适配 */
   .dark-mode .custom-confirm {
-    background: #1f2937;
-    color: #e5e7eb;
+    background: #1f2937 !important;
+    color: #e5e7eb !important;
   }
 
   .custom-confirm-icon {
@@ -2931,7 +3002,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .custom-confirm-title {
-    color: #f9fafb;
+    color: #f9fafb !important;
   }
 
   .custom-confirm-desc {
@@ -2942,7 +3013,7 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .custom-confirm-desc {
-    color: #d1d5db;
+    color: #d1d5db !important;
   }
 
   .custom-confirm-btns {
@@ -2967,16 +3038,16 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .dark-mode .cancel-btn {
-    background: #374151;
-    color: #e5e7eb;
+    background: #374151 !important;
+    color: #e5e7eb !important;
   }
 
   .cancel-btn:hover {
-    background: #e5e7eb;
+    background: #e5e7eb !important;
   }
 
   .dark-mode .cancel-btn:hover {
-    background: #4b5563;
+    background: #4b5563 !important;
   }
 
   .ok-btn {
@@ -2985,13 +3056,13 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
   }
 
   .ok-btn:hover {
-    background: var(--confirm-primary-hover);
+    background: var(--confirm-primary-hover) !important;
   }
 
   /* 夜间模式容器背景：确保整页非纯黑深色可见 */
   body.dark-mode #single, html.dark-mode #single,
   body.dark-mode .section, html.dark-mode .section {
-    background: #121212;
+    background: #121212 !important;
   }
 
   /* 移除 full-bleed 扩展，避免 100vw 带来的水平溢出与左侧露底 */
@@ -3014,6 +3085,10 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     themeToggle.addEventListener('click', () => {
       const isDarkMode = htmlElement.classList.toggle('dark-mode');
       localStorage.setItem('darkMode', isDarkMode);
+      // 同步更新AI弹窗样式
+      if (window.updateAIDialogStyle) {
+        window.updateAIDialogStyle();
+      }
     });
 
     // ================ 返回顶部按钮 ================
@@ -3277,23 +3352,24 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     const $q = document.getElementById('ai-q');
     const $sendBtn = document.getElementById('ai-send');
 
-    // 自定义确认弹窗元素
-    // 已移除清空历史与确认弹窗相关功能
-
     let isOpen = false;
-        // 初始化：确保首次进入页面时完全隐藏并不可交互，避免遮挡
-        if ($dlg) {
-          $dlg.classList.remove('show');
-          $dlg.style.display = 'none';
-          $dlg.style.pointerEvents = 'none';
-        }
-        if ($mask) {
-          $mask.style.display = 'none';
-          $mask.style.pointerEvents = 'none';
-        }
-
-    // 已移除清空历史确认弹窗
     let isAiResponding = false; // 标记AI是否正在回复
+
+    // 全局方法：更新AI弹窗样式（供主题切换调用）
+    window.updateAIDialogStyle = function() {
+      if (!$dlg) return;
+      const isDark = document.documentElement.classList.contains('dark-mode');
+      // 强制同步样式
+      $dlg.style.background = isDark 
+        ? getComputedStyle(document.documentElement).getPropertyValue('--ai-bg-dark') || '#1f2937'
+        : getComputedStyle(document.documentElement).getPropertyValue('--ai-bg-light') || '#ffffff';
+      $dlg.style.borderColor = isDark
+        ? getComputedStyle(document.documentElement).getPropertyValue('--ai-head-border-dark') || 'rgba(255,255,255,0.1)'
+        : getComputedStyle(document.documentElement).getPropertyValue('--ai-head-border-light') || 'rgba(0,0,0,0.08)';
+      $dlg.style.color = isDark
+        ? getComputedStyle(document.documentElement).getPropertyValue('--ai-text-dark') || '#e5e7eb'
+        : getComputedStyle(document.documentElement).getPropertyValue('--ai-text-light') || '#374151';
+    };
 
     // ================ 关键修复：阻止滚动事件冒泡（仅保留消息区内部滚动） ================
     function preventScrollBubble(e) {
@@ -3306,8 +3382,6 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
         e.preventDefault(); // 滚动到边界时，阻止默认滚动行为
       }
     }
-
-    // 自定义确认弹窗相关功能已移除
 
     // ================ 控制输入框和发送功能的启用/禁用 ================
     /**
@@ -3362,8 +3436,6 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
       history.push({ role, content });
       saveHistoryToStorage(history);
     }
-
-    // 清空历史功能已移除
 
     /**
      * 渲染历史对话到页面
@@ -3425,30 +3497,47 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     // ================ 弹窗控制 ================
     // 打开 AI 窗口（同时渲染历史对话 + 绑定滚动阻止）
     function openDialog() {
+      // 显示遮罩（透明，不拦截）
       $mask.style.display = 'block';
-      $mask.style.pointerEvents = 'none'; // 遮罩透明且不拦截
-      $dlg.style.display = 'flex'; // 明确显示
+      $mask.style.pointerEvents = 'none';
+      
+      // 核心修复：显示弹窗并启用交互
       $dlg.classList.add('show');
-      renderHistory(); // 打开时渲染历史对话
+      $dlg.style.display = 'flex';
+      $dlg.style.pointerEvents = 'auto';
+      
+      // 强制同步样式
+      window.updateAIDialogStyle();
+      
+      // 渲染历史对话
+      renderHistory();
+      
+      // 聚焦输入框
       $q.focus();
+      
+      // 标记为打开状态
       isOpen = true;
+      
       // 绑定滚动阻止事件（只在弹窗打开时绑定）
       $msgs.addEventListener('wheel', preventScrollBubble);
+      
       // 打开时启用发送功能
       setSendEnabled(true);
-      // 初始化夜间模式样式（确保打开时样式正确）
-      updateDarkMode();
     }
 
     // 关闭 AI 窗口（解绑滚动阻止）
     function closeDialog() {
-      // 立即移除显示与交互，避免透明层遮挡任何内容
+      // 隐藏弹窗并禁用交互
       $dlg.classList.remove('show');
-      $dlg.style.pointerEvents = 'none';
-      $mask.style.pointerEvents = 'none';
       $dlg.style.display = 'none';
+      $dlg.style.pointerEvents = 'none';
+      
+      // 隐藏遮罩
       $mask.style.display = 'none';
+      
+      // 标记为关闭状态
       isOpen = false;
+      
       // 解绑滚动阻止事件（避免影响其他区域）
       $msgs.removeEventListener('wheel', preventScrollBubble);
     }
@@ -3577,16 +3666,19 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
     }
 
     // ================ 事件绑定 ================
+    // 初始化：确保弹窗默认不可见且不可交互
+    $dlg.style.display = 'none';
+    $dlg.style.pointerEvents = 'none';
+    $mask.style.display = 'none';
+    $mask.style.pointerEvents = 'none';
+
     // 打开/关闭弹窗
     $fab.addEventListener('click', () => {
       isOpen ? closeDialog() : openDialog();
     });
 
-    // 关键修改3：仅保留关闭按钮关闭弹窗，移除遮罩层点击关闭
+    // 关闭按钮关闭弹窗
     $closeBtn.addEventListener('click', closeDialog);
-    // 移除遮罩层点击关闭事件：$mask.addEventListener('click', closeDialog);
-
-    // 已移除清空历史功能
 
     // 发送提问
     $sendBtn.addEventListener('click', send);
@@ -3607,23 +3699,11 @@ repl_backlog_histlen:1048576    <span class="token comment"># 当前缓冲区中
       }
     });
 
-    // 初始化暗色模式（完善样式同步）
-    const updateDarkMode = () => {
-      const isDark = document.documentElement.classList.contains('dark-mode');
-      // 弹窗主体样式已通过CSS变量适配，此处无需重复设置
-      // 确保输入框、按钮等元素样式同步
-      $q.style.backgroundColor = isDark ? 'var(--ai-input-bg-dark)' : 'var(--ai-input-bg-light)';
-      $q.style.borderColor = isDark ? 'var(--ai-input-border-dark)' : 'var(--ai-input-border-light)';
-      $q.style.color = isDark ? 'var(--ai-text-dark)' : 'var(--ai-text-light)';
-    };
-    updateDarkMode();
-    window.addEventListener('resize', updateDarkMode);
-
-    // 监听暗色模式切换，实时同步样式
-    document.getElementById('theme-toggle').addEventListener('click', () => {
-      // 延迟执行，确保dark-mode类已切换
-      setTimeout(updateDarkMode, 10);
-    });
+    // 初始化暗色模式样式
+    window.updateAIDialogStyle();
+    
+    // 监听窗口大小变化，同步样式
+    window.addEventListener('resize', window.updateAIDialogStyle);
 
     // 工具函数：HTML转义
     function escapeHtml(unsafe) {
